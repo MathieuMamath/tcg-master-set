@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.6](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.5...v0.1.6) (2026-10-31)
+
+### Features
+
+* **city:** add a small town and a door out of the bedroom ([#6](https://github.com/MathieuMamath/tcg-master-set/issues/6)) ([5f5e35a](https://github.com/MathieuMamath/tcg-master-set/commit/5f5e35a1a755efca7f810c11f3294ad6e995afcf))
+
 ## [0.1.5](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.4...v0.1.5) (2026-10-31)
 
 ### Features
