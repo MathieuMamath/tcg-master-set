@@ -1,10 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import { buyBooster, STARTING_WALLET } from '@/game/shop-dialogue';
+import { BoosterOpening, type Opening } from './booster-opening';
 import { Joystick } from './joystick';
 import type { MovementInput } from './scene';
 import { ShopDialog } from './shop-dialog';
@@ -20,8 +21,11 @@ export function Game() {
   const [canTalk, setCanTalk] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
   const [wallet, setWallet] = useState(STARTING_WALLET);
-  const interaction = useRef({ canTalk, isTalking });
-  interaction.current = { canTalk, isTalking };
+  const [opening, setOpening] = useState<Opening | null>(null);
+  const locale = useLocale();
+  const tBooster = useTranslations('Booster');
+  const interaction = useRef({ canTalk, isTalking, isOpening: false });
+  interaction.current = { canTalk, isTalking, isOpening: opening !== null };
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -34,8 +38,8 @@ export function Game() {
       update();
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      // While talking, the keys belong to the dialog.
-      if (interaction.current.isTalking) {
+      // While a dialog is open, the keys belong to it.
+      if (interaction.current.isTalking || interaction.current.isOpening) {
         return;
       }
       if (event.code === TALK_KEY && interaction.current.canTalk) {
@@ -71,6 +75,25 @@ export function Game() {
     setIsTalking(true);
   };
 
+  // The booster only leaves the wallet once the server has drawn its cards.
+  const openBooster = async () => {
+    input.current.keyboard = STILL;
+    input.current.joystick = STILL;
+    setOpening({ status: 'loading' });
+
+    try {
+      const response = await fetch(`/api/boosters/open?locale=${locale}`, { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { setName, cards } = await response.json();
+      setWallet((current) => ({ ...current, boosters: current.boosters - 1 }));
+      setOpening({ status: 'ready', setName, cards });
+    } catch {
+      setOpening({ status: 'error' });
+    }
+  };
+
   return (
     <div className="absolute inset-0">
       <Scene
@@ -87,13 +110,19 @@ export function Game() {
           />
           {t('coins', { count: wallet.coins })}
         </p>
-        <p className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2">
+        <button
+          type="button"
+          disabled={wallet.boosters === 0}
+          aria-label={`${t('boosters', { count: wallet.boosters })}. ${tBooster('title')}`}
+          onClick={openBooster}
+          className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent"
+        >
           <span
             aria-hidden="true"
             className="h-4 w-3 rounded-xs border-2 border-ui-ink bg-[#7b5ea7]"
           />
           {t('boosters', { count: wallet.boosters })}
-        </p>
+        </button>
       </div>
       {canTalk && !isTalking && (
         <button
@@ -118,6 +147,9 @@ export function Game() {
             }}
           />
         </>
+      )}
+      {opening && (
+        <BoosterOpening opening={opening} onRetry={openBooster} onClose={() => setOpening(null)} />
       )}
       {isTalking && (
         <ShopDialog

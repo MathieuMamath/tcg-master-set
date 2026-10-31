@@ -20,6 +20,21 @@
     "buy": "Acheter un booster ({price} pièces)",
     "leave": "Au revoir"
   },
+  "Booster": {
+    "title": "Ouvrir un booster",
+    "loading": "Préparation de ton booster...",
+    "tearHint": "Fais glisser en haut du paquet pour le découper",
+    "tearKeyboard": "Découper le paquet",
+    "readyToReveal": "Tes cartes t'attendent !",
+    "reveal": "Révéler la carte suivante",
+    "seeAll": "Voir toutes tes cartes",
+    "progress": "{current} / {total}",
+    "summaryTitle": "Tes nouvelles cartes",
+    "done": "Terminé",
+    "error": "Le booster n'a pas pu être ouvert. Il est toujours dans ton sac.",
+    "retry": "Réessayer",
+    "back": "Retour"
+  },
   "LocaleSwitcher": {
     "label": "Langue"
   }
