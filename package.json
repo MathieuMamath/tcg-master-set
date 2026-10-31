@@ -7,21 +7,40 @@
   "engines": {
     "node": ">=26.0.0"
   },
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@10.34.9",
   "scripts": {
     "prepare": "lefthook install",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "release": "commit-and-tag-version"
+    "release": "commit-and-tag-version",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
-      "lefthook"
+      "lefthook",
+      "sharp",
+      "unrs-resolver"
     ]
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.6",
+    "@tailwindcss/turbopack": "^4.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "commit-and-tag-version": "^13.3.0",
-    "lefthook": "^2.2.2"
+    "lefthook": "^2.2.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "~19.3.1",
+    "react-dom": "~19.3.1"
   }
 }

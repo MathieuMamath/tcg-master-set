@@ -25,7 +25,7 @@ Work through the steps in order. If a step fails, **stop, report it plainly, and
 ## 2. Quality gate
 
 ```bash
-pnpm lint
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 **This is the only place the gate is defined.** `.github/workflows/ci.yml` and `lefthook.yml` mirror it: a check added here must be added there too.
