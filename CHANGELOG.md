@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.7](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.6...v0.1.7) (2026-10-31)
+
+### Features
+
+* **shop:** add the shop interior and a shopkeeper ([#7](https://github.com/MathieuMamath/tcg-master-set/issues/7)) ([05d6a0e](https://github.com/MathieuMamath/tcg-master-set/commit/05d6a0e01e0cad9e73a0c9351bf3acc5770558cd))
+
 ## [0.1.6](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.5...v0.1.6) (2026-10-31)
 
 ### Features
