@@ -18,6 +18,6 @@ test('the home page shows the game title', () => {
 });
 
 test('the home page follows the selected language', () => {
-  expect(renderHome('en', en)).toContain(en.Home.tagline);
-  expect(renderHome('fr', fr)).toContain(fr.Home.tagline);
+  expect(renderHome('en', en)).toContain(en.Game.keyboardHint);
+  expect(renderHome('fr', fr)).toContain(fr.Game.keyboardHint);
 });

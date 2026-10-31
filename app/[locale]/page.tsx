@@ -1,12 +1,13 @@
 import { useTranslations } from 'next-intl';
+import { Game } from '@/components/game/game';
 
 export default function HomePage() {
   const t = useTranslations('Home');
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-2 p-4 text-center">
-      <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
-      <p>{t('tagline')}</p>
+    <main className="relative flex-1">
+      <h1 className="sr-only">{t('title')}</h1>
+      <Game />
     </main>
   );
 }

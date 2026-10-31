@@ -28,4 +28,4 @@ pnpm dev
 
 This is an unofficial, non-commercial fan project. It isn't produced, endorsed, supported by or affiliated with Nintendo, Creatures, GAME FREAK or The Pokémon Company, who own their respective names and artwork.
 
-This repository contains no card data or card images. To report a rights issue, please [open an issue](https://github.com/MathieuMamath/tcg-master-set/issues).
+This repository contains no card data or card images. The character model comes from [Kenney](https://kenney.nl/assets/mini-characters), under the CC0 license. To report a rights issue, please [open an issue](https://github.com/MathieuMamath/tcg-master-set/issues).
