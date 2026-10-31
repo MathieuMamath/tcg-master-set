@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.5](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.4...v0.1.5) (2026-10-31)
+
+### Features
+
+* **city:** add the geek bedroom with collisions ([#5](https://github.com/MathieuMamath/tcg-master-set/issues/5)) ([7000434](https://github.com/MathieuMamath/tcg-master-set/commit/70004344f66fcc6e05f54a0fe75ef9cefd65be6e))
+
 ## [0.1.4](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.3...v0.1.4) (2026-10-31)
 
 ### Features
