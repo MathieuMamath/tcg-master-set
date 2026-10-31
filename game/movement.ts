@@ -14,6 +14,9 @@ export const STILL: Direction = { x: 0, z: 0 };
 const WALK_SPEED = 1.6;
 const TURN_SPEED = 12;
 const MIN_INPUT = 0.1;
+const FULL_VIEW_ASPECT_RATIO = 0.9;
+const MAX_CAMERA_DISTANCE_FACTOR = 1.35;
+const NARROW_FOCUS_RADIUS = 1;
 
 // Physical key positions: KeyW is the Z key on an AZERTY keyboard.
 const KEY_DIRECTIONS: Record<string, Direction> = {
@@ -77,6 +80,17 @@ export function followFocus(focus: FocusPoint, character: FocusPoint, radius: nu
 
   const excess = (distance - radius) / distance;
   return { x: focus.x + offsetX * excess, z: focus.z + offsetZ * excess };
+}
+
+// Narrow screens pull the camera back to show more of the scene, up to a limit where the
+// character would become too small. Below it, the camera follows the character instead.
+export function cameraDistanceFactor(aspectRatio: number): number {
+  return Math.min(Math.max(FULL_VIEW_ASPECT_RATIO / aspectRatio, 1), MAX_CAMERA_DISTANCE_FACTOR);
+}
+
+// When the whole scene fits on screen, the camera has no reason to move at all.
+export function cameraFocusRadius(aspectRatio: number): number {
+  return aspectRatio >= FULL_VIEW_ASPECT_RATIO ? Number.POSITIVE_INFINITY : NARROW_FOCUS_RADIUS;
 }
 
 function clampLength(direction: Direction): Direction {

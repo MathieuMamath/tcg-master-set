@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
   type CharacterState,
+  cameraDistanceFactor,
+  cameraFocusRadius,
   followFocus,
   isMovementKey,
   joystickDirection,
@@ -88,6 +90,33 @@ describe('stepCharacter', () => {
     const turned = stepCharacter(nearlyBehind, { x: -0.01, z: -1 }, 0.001);
 
     expect(turned.heading).toBeGreaterThan(nearlyBehind.heading);
+  });
+});
+
+describe('cameraDistanceFactor', () => {
+  test('keeps the normal distance on wide screens', () => {
+    expect(cameraDistanceFactor(16 / 9)).toBe(1);
+  });
+
+  test('pulls back on narrower screens', () => {
+    expect(cameraDistanceFactor(0.75)).toBeCloseTo(1.2);
+  });
+
+  test('stops pulling back on very narrow screens', () => {
+    expect(cameraDistanceFactor(0.3)).toBe(1.35);
+  });
+});
+
+describe('cameraFocusRadius', () => {
+  test('never moves the camera when the scene fits on screen', () => {
+    const focus = { x: 0, z: 0 };
+    const radius = cameraFocusRadius(16 / 9);
+
+    expect(followFocus(focus, { x: 100, z: 100 }, radius)).toBe(focus);
+  });
+
+  test('follows the character on narrow screens', () => {
+    expect(cameraFocusRadius(0.5)).toBe(1);
   });
 });
 
