@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.3](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.2...v0.1.3) (2026-10-31)
+
+### Features
+
+* add the database layer and English and French routing ([#3](https://github.com/MathieuMamath/tcg-master-set/issues/3)) ([08a9aec](https://github.com/MathieuMamath/tcg-master-set/commit/08a9aecef9f4a0ca316fa0e9ef1ece45621a590a))
+
 ## [0.1.2](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.1...v0.1.2) (2026-10-31)
 
 ### Features
