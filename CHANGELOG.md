@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.10](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.9...v0.1.10) (2026-10-31)
+
+### Features
+
+* **boosters:** open a booster and reveal its cards ([#10](https://github.com/MathieuMamath/tcg-master-set/issues/10)) ([79420bd](https://github.com/MathieuMamath/tcg-master-set/commit/79420bd688f979b5c34692777bf35d2c0c3f9b77))
+
 ## [0.1.9](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.8...v0.1.9) (2026-10-31)
 
 ### Features
