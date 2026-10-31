@@ -7,7 +7,18 @@
   },
   "Game": {
     "keyboardHint": "Use the arrow keys or WASD to move.",
-    "webglUnavailable": "This game needs WebGL, which your browser doesn't support or has turned off."
+    "webglUnavailable": "This game needs WebGL, which your browser doesn't support or has turned off.",
+    "coins": "{count, plural, one {# coin} other {# coins}}",
+    "boosters": "{count, plural, one {# booster} other {# boosters}}",
+    "talk": "Talk"
+  },
+  "Shopkeeper": {
+    "name": "Shopkeeper",
+    "greeting": "Hello! Would you like a booster pack?",
+    "thanks": "Thank you, and good luck with your cards!",
+    "notEnoughCoins": "Sorry, you don't have enough coins.",
+    "buy": "Buy a booster ({price} coins)",
+    "leave": "Goodbye"
   },
   "LocaleSwitcher": {
     "label": "Language"

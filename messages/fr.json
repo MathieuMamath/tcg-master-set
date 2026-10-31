@@ -7,7 +7,18 @@
   },
   "Game": {
     "keyboardHint": "Utilise les flèches ou ZQSD pour te déplacer.",
-    "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé."
+    "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé.",
+    "coins": "{count, plural, one {# pièce} other {# pièces}}",
+    "boosters": "{count, plural, one {# booster} other {# boosters}}",
+    "talk": "Parler"
+  },
+  "Shopkeeper": {
+    "name": "Vendeuse",
+    "greeting": "Bonjour ! Tu veux un booster ?",
+    "thanks": "Merci, et bonne chance pour tes cartes !",
+    "notEnoughCoins": "Désolée, il te manque des pièces.",
+    "buy": "Acheter un booster ({price} pièces)",
+    "leave": "Au revoir"
   },
   "LocaleSwitcher": {
     "label": "Langue"

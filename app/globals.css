@@ -1,11 +1,22 @@
 @import "tailwindcss";
+@import "@fontsource-variable/fredoka";
 
 :root {
+  /* The game's interface keeps one palette, whatever the system theme. */
+  --ui-ink: #2b2340;
+  --ui-paper: #fff6e0;
+  --ui-accent: #ffc83d;
+  --ui-accent-dark: #c9711a;
   --background: #ffffff;
   --foreground: #171717;
 }
 
 @theme inline {
+  --color-ui-ink: var(--ui-ink);
+  --color-ui-paper: var(--ui-paper);
+  --color-ui-accent: var(--ui-accent);
+  --color-ui-accent-dark: var(--ui-accent-dark);
+  --font-game: "Fredoka Variable", ui-rounded, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -23,4 +34,43 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes ui-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem) scale(0.96);
+  }
+}
+
+@keyframes ui-nudge {
+  50% {
+    transform: translateX(0.2rem);
+  }
+}
+
+@keyframes ui-bob {
+  50% {
+    transform: translateY(-0.2rem);
+  }
+}
+
+.ui-pop-in {
+  animation: ui-pop-in 180ms ease-out;
+}
+
+.ui-nudge {
+  animation: ui-nudge 700ms ease-in-out infinite;
+}
+
+.ui-bob {
+  animation: ui-bob 1200ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-pop-in,
+  .ui-nudge,
+  .ui-bob {
+    animation: none;
+  }
 }

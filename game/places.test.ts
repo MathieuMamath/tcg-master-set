@@ -14,6 +14,7 @@ import {
   isInside,
   MODEL_NAMES,
   NPC_MODELS,
+  npcInReach,
   obstaclesOf,
   type Place,
   stepInPlace,
@@ -187,6 +188,17 @@ describe('the shop', () => {
 
     expect(state.x).toBe(SHOPKEEPER_POSITION.x);
     expect(state.z).toBeGreaterThan(-0.8);
+  });
+
+  test('walking up to the counter brings the shopkeeper within reach', () => {
+    const start = standingAt({ x: SHOPKEEPER_POSITION.x, z: 0.5 });
+
+    expect(npcInReach(SHOP, start)).toBeUndefined();
+    expect(npcInReach(SHOP, walk(SHOP, start, { x: 0, z: -1 }, 360))).toBeDefined();
+  });
+
+  test('nobody is within reach at the shop door', () => {
+    expect(npcInReach(SHOP, SHOP_FROM_TOWN)).toBeUndefined();
   });
 
   test('the shopkeeper blocks movement', () => {

@@ -73,7 +73,12 @@ export type Exit = {
 // An arrow on the ground. With no turn it points away from the camera.
 export type ExitMarker = Position & { quarterTurns: number };
 
-export type Npc = Position & { model: NpcModel; heading: number };
+export type Npc = Position & {
+  model: NpcModel;
+  heading: number;
+  // Where the player has to stand to talk to this NPC.
+  talkArea: Rect;
+};
 
 export type Place = {
   id: PlaceId;
@@ -138,6 +143,10 @@ export function stepInPlace(
 
 export function exitAt(place: Place, position: Position): Exit | undefined {
   return place.exits.find(({ area }) => isInside(position, area));
+}
+
+export function npcInReach(place: Place, position: Position): Npc | undefined {
+  return place.npcs.find(({ talkArea }) => isInside(position, talkArea));
 }
 
 export function isInside(position: Position, area: Rect): boolean {

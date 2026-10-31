@@ -67,6 +67,21 @@ export function stepCharacter(
   };
 }
 
+// Turns on the spot, for when something else has the character's attention.
+export function faceTowards(
+  state: CharacterState,
+  target: { x: number; z: number },
+  delta: number,
+): CharacterState {
+  const heading = Math.atan2(target.x - state.x, target.z - state.z);
+
+  return {
+    ...state,
+    heading: turnTowards(state.heading, heading, TURN_SPEED * delta),
+    isMoving: false,
+  };
+}
+
 // The camera holds still while the character stays near its focus, so walking is visible
 // even with nothing else in the scene to compare against.
 export function followFocus(focus: FocusPoint, character: FocusPoint, radius: number): FocusPoint {
