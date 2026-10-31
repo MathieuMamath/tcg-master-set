@@ -1,0 +1,12 @@
+{
+  "Metadata": {
+    "description": "A cozy single-player 3D game about completing master set binders."
+  },
+  "Home": {
+    "title": "TCG Master Set",
+    "tagline": "Your collection starts here."
+  },
+  "LocaleSwitcher": {
+    "label": "Language"
+  }
+}

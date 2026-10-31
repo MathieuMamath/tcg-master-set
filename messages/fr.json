@@ -1,0 +1,12 @@
+{
+  "Metadata": {
+    "description": "Un petit jeu solo en 3D pour compléter ses classeurs de master set."
+  },
+  "Home": {
+    "title": "TCG Master Set",
+    "tagline": "Ta collection commence ici."
+  },
+  "LocaleSwitcher": {
+    "label": "Langue"
+  }
+}

@@ -40,6 +40,18 @@ Work reaches `main` through a squashed PR, never a direct push. Lefthook refuses
 | `pnpm typecheck` | Check types |
 | `pnpm test` | Run the unit tests |
 | `pnpm build` | Build for production |
+| `pnpm db:up` / `pnpm db:down` | Start or stop the local PostgreSQL on port 5433 |
+| `pnpm db:generate` | Create a migration from `db/schema` |
+| `pnpm db:migrate` | Apply the migrations |
+| `pnpm db:reset` | **Delete the local data**, then recreate the database |
+
+## Data
+
+The schema lives in `db/schema`, and every change goes through a migration in `db/migrations`. Call `getDb()` from `db/client.ts` on the server only. Add a table with the feature that needs it.
+
+## Languages
+
+Text lives in `messages/en.json` and `messages/fr.json`, which must define the same keys. A test enforces this. URLs carry the language, such as `/en` and `/fr`.
 
 ## Next.js
 
