@@ -11,6 +11,7 @@ import {
   CHARACTER_RADIUS,
   exitAt,
   footprintOf,
+  interactionAt,
   isInside,
   MODEL_NAMES,
   NPC_MODELS,
@@ -134,6 +135,13 @@ describe('the bedroom', () => {
     expect(stepInPlace(BEDROOM, start, STILL, FRAME)).toEqual(start);
   });
 
+  test('the bookcases open the binder, from the floor in front of them', () => {
+    const start = standingAt({ x: 1.3, z: 0 });
+
+    expect(interactionAt(BEDROOM, start)).toBeNull();
+    expect(interactionAt(BEDROOM, walk(BEDROOM, start, { x: 0, z: -1 }, 360))).toBe('binder');
+  });
+
   test('walking through the door leads to the town', () => {
     const exit = exitReachedWalking(BEDROOM, standingAt(BEDROOM_FROM_TOWN), { x: -1, z: 0 });
 
@@ -199,6 +207,10 @@ describe('the shop', () => {
 
   test('nobody is within reach at the shop door', () => {
     expect(npcInReach(SHOP, SHOP_FROM_TOWN)).toBeUndefined();
+  });
+
+  test('the counter offers a conversation rather than the binder', () => {
+    expect(interactionAt(SHOP, { x: 0.2, z: -0.5 })).toBe('talk');
   });
 
   test('the shopkeeper blocks movement', () => {

@@ -27,6 +27,8 @@ import {
   type Arrival,
   type Exit,
   exitAt,
+  type Interaction,
+  interactionAt,
   npcInReach,
   type Place as PlaceData,
   stepInPlace,
@@ -59,17 +61,24 @@ type CharacterProps = InputProps & {
   place: PlaceData;
   arrival: Arrival;
   onExit: (exit: Exit) => void;
-  onCanTalkChange: (canTalk: boolean) => void;
+  onInteractionChange: (interaction: Interaction | null) => void;
   isTalking: boolean;
 };
 
-function Character({ input, place, arrival, onExit, onCanTalkChange, isTalking }: CharacterProps) {
+function Character({
+  input,
+  place,
+  arrival,
+  onExit,
+  onInteractionChange,
+  isTalking,
+}: CharacterProps) {
   const gltf = useLoader(GLTFLoader, CHARACTER_MODEL);
   const root = useRef<Group>(null);
   const state = useRef<CharacterState>({ ...arrival, isMoving: false });
   const focus = useRef<FocusPoint>(place.cameraStart);
   const hasLeft = useRef(false);
-  const canTalk = useRef(false);
+  const interaction = useRef<Interaction | null>(null);
   const closeUp = useRef(0);
   const camera = useThree((three) => three.camera);
   const viewport = useThree((three) => three.viewport);
@@ -96,7 +105,7 @@ function Character({ input, place, arrival, onExit, onCanTalkChange, isTalking }
     };
   }, [idle, mixer]);
 
-  useEffect(() => () => onCanTalkChange(false), [onCanTalkChange]);
+  useEffect(() => () => onInteractionChange(null), [onInteractionChange]);
 
   useFrame((_, frameSeconds) => {
     const delta = Math.min(frameSeconds, MAX_FRAME_SECONDS);
@@ -118,10 +127,10 @@ function Character({ input, place, arrival, onExit, onCanTalkChange, isTalking }
       onExit(exit);
     }
 
-    const isInReach = npcInReach(place, state.current) !== undefined;
-    if (isInReach !== canTalk.current) {
-      canTalk.current = isInReach;
-      onCanTalkChange(isInReach);
+    const available = interactionAt(place, state.current);
+    if (available !== interaction.current) {
+      interaction.current = available;
+      onInteractionChange(available);
     }
 
     if (isMoving !== wasMoving) {
@@ -162,11 +171,11 @@ function Character({ input, place, arrival, onExit, onCanTalkChange, isTalking }
 
 type SceneProps = InputProps & {
   webglUnavailable: string;
-  onCanTalkChange: (canTalk: boolean) => void;
+  onInteractionChange: (interaction: Interaction | null) => void;
   isTalking: boolean;
 };
 
-export function Scene({ input, webglUnavailable, onCanTalkChange, isTalking }: SceneProps) {
+export function Scene({ input, webglUnavailable, onInteractionChange, isTalking }: SceneProps) {
   const [visit, setVisit] = useState({ number: 0, place: BEDROOM, arrival: BEDROOM_START });
   const [isFading, setIsFading] = useState(false);
   const fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -213,7 +222,7 @@ export function Scene({ input, webglUnavailable, onCanTalkChange, isTalking }: S
               place={visit.place}
               arrival={visit.arrival}
               onExit={leaveThrough}
-              onCanTalkChange={onCanTalkChange}
+              onInteractionChange={onInteractionChange}
               isTalking={isTalking}
             />
           </group>

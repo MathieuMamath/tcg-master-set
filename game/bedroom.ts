@@ -39,6 +39,8 @@ export const BEDROOM: Place = {
   exits: [roomDoorExit('town', { x: -3.5, z: -0.35, heading: 0 })],
   exitMarkers: [ROOM_DOOR_MARKER],
   npcs: [],
+  // The floor in front of the bookcases.
+  binderArea: { minX: 0.6, maxX: 2.1, minZ: -1.9, maxZ: -1.2 },
   groundHeight: FLOOR_HEIGHT,
   cameraStart: { x: 0, z: 0 },
   fitsOnScreen: true,

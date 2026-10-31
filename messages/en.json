@@ -10,7 +10,9 @@
     "webglUnavailable": "This game needs WebGL, which your browser doesn't support or has turned off.",
     "coins": "{count, plural, one {# coin} other {# coins}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
-    "talk": "Talk"
+    "talk": "Talk",
+    "binder": "Open the binder",
+    "binderButton": "Binder"
   },
   "Shopkeeper": {
     "name": "Shopkeeper",
@@ -34,6 +36,27 @@
     "error": "The booster couldn't be opened. It's still in your bag.",
     "retry": "Try again",
     "back": "Back"
+  },
+  "Binder": {
+    "title": "Binder",
+    "loading": "Getting your binder...",
+    "error": "The binder couldn't be loaded.",
+    "retry": "Try again",
+    "close": "Close",
+    "progress": "{owned} / {total} cards collected",
+    "page": "Page {current} / {total}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "emptySlot": "Not collected yet",
+    "viewCard": "{name}, {count, plural, one {# copy} other {# copies}}",
+    "copies": "{count, plural, one {# copy} other {# copies}}",
+    "backToPage": "Back to the page",
+    "variants": {
+      "holo": "Holo",
+      "reverse": "Reverse",
+      "firstEdition": "1st ed.",
+      "wPromo": "Promo"
+    }
   },
   "LocaleSwitcher": {
     "label": "Language"

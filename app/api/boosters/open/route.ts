@@ -1,9 +1,8 @@
 import { hasLocale } from 'next-intl';
 import { loadBoosterPool, loadOpenedCards } from '@/cards/booster-pool';
+import { ACTIVE_SET_ID } from '@/cards/tcgdex';
 import { drawBooster } from '@/game/booster';
 import { routing } from '@/i18n/routing';
-
-const BOOSTER_SET_ID = 'swsh3';
 
 export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -14,11 +13,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const drawn = drawBooster(await loadBoosterPool(BOOSTER_SET_ID));
+    const drawn = drawBooster(await loadBoosterPool(ACTIVE_SET_ID));
     if (!drawn) {
       return Response.json({ error: 'catalogue-unavailable' }, { status: 503 });
     }
-    return Response.json(await loadOpenedCards(drawn, BOOSTER_SET_ID, locale));
+    return Response.json(await loadOpenedCards(drawn, ACTIVE_SET_ID, locale));
   } catch (error) {
     // Logged as text: the full error object carries the database client's internals.
     console.error(

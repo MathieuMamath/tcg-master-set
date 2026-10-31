@@ -3,9 +3,13 @@
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { addToCollection, type Collection } from '@/game/binder';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import { buyBooster, STARTING_WALLET } from '@/game/shop-dialogue';
+import type { Interaction } from '@/game/world';
+import { BinderView } from './binder-view';
 import { BoosterOpening, type Opening } from './booster-opening';
+import { loadCollection, saveCollection } from './collection-storage';
 import { Joystick } from './joystick';
 import type { MovementInput } from './scene';
 import { ShopDialog } from './shop-dialog';
@@ -13,19 +17,26 @@ import { ShopDialog } from './shop-dialog';
 // Three.js needs the browser, and this keeps it out of the bundle of every other screen.
 const Scene = dynamic(() => import('./scene').then((module) => module.Scene), { ssr: false });
 
-const TALK_KEY = 'KeyE';
+const INTERACT_KEY = 'KeyE';
 
 export function Game() {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL });
-  const [canTalk, setCanTalk] = useState(false);
+  const [interaction, setInteraction] = useState<Interaction | null>(null);
   const [isTalking, setIsTalking] = useState(false);
   const [wallet, setWallet] = useState(STARTING_WALLET);
   const [opening, setOpening] = useState<Opening | null>(null);
+  const [isBinderOpen, setIsBinderOpen] = useState(false);
+  const [collection, setCollection] = useState<Collection>({});
   const locale = useLocale();
   const tBooster = useTranslations('Booster');
-  const interaction = useRef({ canTalk, isTalking, isOpening: false });
-  interaction.current = { canTalk, isTalking, isOpening: opening !== null };
+  const isDialogOpen = isTalking || isBinderOpen || opening !== null;
+  const controls = useRef({ interaction, isDialogOpen });
+  controls.current = { interaction, isDialogOpen };
+
+  useEffect(() => {
+    setCollection(loadCollection());
+  }, []);
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -39,13 +50,17 @@ export function Game() {
     };
     const onKeyDown = (event: KeyboardEvent) => {
       // While a dialog is open, the keys belong to it.
-      if (interaction.current.isTalking || interaction.current.isOpening) {
+      if (controls.current.isDialogOpen) {
         return;
       }
-      if (event.code === TALK_KEY && interaction.current.canTalk) {
+      if (event.code === INTERACT_KEY && controls.current.interaction) {
         event.preventDefault();
         releaseKeys();
-        setIsTalking(true);
+        if (controls.current.interaction === 'talk') {
+          setIsTalking(true);
+        } else {
+          setIsBinderOpen(true);
+        }
       } else if (isMovementKey(event.code)) {
         event.preventDefault();
         pressedKeys.add(event.code);
@@ -69,16 +84,28 @@ export function Game() {
     };
   }, []);
 
-  const startTalking = () => {
+  const stopWalking = () => {
     input.current.keyboard = STILL;
     input.current.joystick = STILL;
-    setIsTalking(true);
+  };
+
+  const interact = () => {
+    stopWalking();
+    if (interaction === 'talk') {
+      setIsTalking(true);
+    } else {
+      setIsBinderOpen(true);
+    }
+  };
+
+  const openBinder = () => {
+    stopWalking();
+    setIsBinderOpen(true);
   };
 
   // The booster only leaves the wallet once the server has drawn its cards.
   const openBooster = async () => {
-    input.current.keyboard = STILL;
-    input.current.joystick = STILL;
+    stopWalking();
     setOpening({ status: 'loading' });
 
     try {
@@ -88,6 +115,10 @@ export function Game() {
       }
       const { setName, cards } = await response.json();
       setWallet((current) => ({ ...current, boosters: current.boosters - 1 }));
+      // Saved right away, since the draw is final even if the player closes the page now.
+      const updated = addToCollection(loadCollection(), cards);
+      saveCollection(updated);
+      setCollection(updated);
       setOpening({ status: 'ready', setName, cards });
     } catch {
       setOpening({ status: 'error' });
@@ -99,10 +130,10 @@ export function Game() {
       <Scene
         input={input}
         webglUnavailable={t('webglUnavailable')}
-        onCanTalkChange={setCanTalk}
+        onInteractionChange={setInteraction}
         isTalking={isTalking}
       />
-      <div className="absolute top-0 left-4 flex gap-2 font-game text-sm font-semibold text-ui-ink">
+      <div className="absolute top-0 left-4 flex flex-wrap gap-2 font-game text-sm font-semibold text-ui-ink">
         <p className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-1.5">
           <span
             aria-hidden="true"
@@ -123,17 +154,28 @@ export function Game() {
           />
           {t('boosters', { count: wallet.boosters })}
         </button>
-      </div>
-      {canTalk && !isTalking && (
         <button
           type="button"
-          onClick={startTalking}
+          onClick={openBinder}
+          className="flex cursor-pointer items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2"
+        >
+          <span
+            aria-hidden="true"
+            className="h-4 w-3.5 rounded-xs border-2 border-l-4 border-ui-ink bg-[#2e86ab]"
+          />
+          {t('binderButton')}
+        </button>
+      </div>
+      {interaction && !isDialogOpen && (
+        <button
+          type="button"
+          onClick={interact}
           className="ui-bob absolute inset-x-0 bottom-16 mx-auto flex w-fit cursor-pointer items-center gap-2 rounded-full border-4 border-ui-ink bg-ui-paper py-1 pr-4 pl-1.5 font-game text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
         >
           <kbd className="rounded-full border-3 border-ui-ink bg-ui-accent px-2 font-game text-sm pointer-coarse:hidden">
             E
           </kbd>
-          {t('talk')}
+          {t(interaction)}
         </button>
       )}
       {!isTalking && (
@@ -147,6 +189,9 @@ export function Game() {
             }}
           />
         </>
+      )}
+      {isBinderOpen && (
+        <BinderView collection={collection} onClose={() => setIsBinderOpen(false)} />
       )}
       {opening && (
         <BoosterOpening opening={opening} onRetry={openBooster} onClose={() => setOpening(null)} />
