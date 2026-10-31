@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.4](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.3...v0.1.4) (2026-10-31)
+
+### Features
+
+* **city:** let the character walk in an empty scene ([#4](https://github.com/MathieuMamath/tcg-master-set/issues/4)) ([6014678](https://github.com/MathieuMamath/tcg-master-set/commit/60146786d1f02788de53274f40dfa7574f2bc5ff))
+
 ## [0.1.3](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.2...v0.1.3) (2026-10-31)
 
 ### Features
