@@ -21,6 +21,7 @@ pnpm install
 cp .env.example .env.local
 pnpm db:up
 pnpm db:migrate
+pnpm cards:import swsh3
 pnpm dev
 ```
 

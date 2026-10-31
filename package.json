@@ -24,7 +24,8 @@
     "db:reset": "docker compose down -v && pnpm db:up && pnpm db:migrate",
     "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
     "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
-    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
+    "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
+    "cards:import": "dotenv -e .env.local -- tsx scripts/import-cards.ts"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
@@ -49,6 +50,7 @@
     "drizzle-kit": "^0.31.11",
     "lefthook": "^2.2.2",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   },
