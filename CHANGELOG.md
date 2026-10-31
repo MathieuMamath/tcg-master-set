@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.11](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.10...v0.1.11) (2026-10-31)
+
+### Features
+
+* **binder:** keep opened cards in a master set binder ([#11](https://github.com/MathieuMamath/tcg-master-set/issues/11)) ([4fe8a22](https://github.com/MathieuMamath/tcg-master-set/commit/4fe8a22e251885e0f42a7fa23f228010bb6d5b11))
+
 ## [0.1.10](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.9...v0.1.10) (2026-10-31)
 
 ### Features
