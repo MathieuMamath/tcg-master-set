@@ -34,5 +34,15 @@ Work reaches `main` through a squashed PR, never a direct push. Lefthook refuses
 | Command | Purpose |
 |---|---|
 | `pnpm install` | Install dependencies and the Git hooks |
-| `pnpm lint` | Check lint and formatting, the quality gate today |
+| `pnpm dev` | Start the development server |
+| `pnpm lint` | Check lint and formatting |
 | `pnpm format` | Apply lint and formatting fixes |
+| `pnpm typecheck` | Check types |
+| `pnpm test` | Run the unit tests |
+| `pnpm build` | Build for production |
+
+## Next.js
+
+Read [`AGENTS.md`](AGENTS.md) before writing Next.js code. `next dev` maintains that file, so leave its block as it is.
+
+Cache Components stays off until a feature needs it: player data must never be served from a cache.

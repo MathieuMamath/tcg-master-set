@@ -24,3 +24,9 @@ pre-push:
         fi
     2_lint:
       run: pnpm lint
+    3_typecheck:
+      run: pnpm typecheck
+    4_test:
+      run: pnpm test
+    5_build:
+      run: pnpm build

@@ -14,9 +14,11 @@ Next.js, Three.js and PostgreSQL, self-hosted. The game is available in English 
 
 Work reaches `main` through squashed pull requests with [Conventional Commit](https://www.conventionalcommits.org/) titles. Each merge automatically produces a version tag, a changelog entry and a GitHub Release. The details are in [`CLAUDE.md`](CLAUDE.md).
 
+You need Node.js 26, and pnpm 10 or later.
+
 ```bash
 pnpm install
-pnpm lint
+pnpm dev
 ```
 
 ## Legal notice

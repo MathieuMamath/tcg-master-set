@@ -52,6 +52,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
 
   # Bumps package.json, regenerates CHANGELOG.md, tags, and publishes a GitHub Release.
   # A push made with GITHUB_TOKEN does not start this workflow again, so there is no loop.
