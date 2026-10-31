@@ -44,10 +44,17 @@ Work reaches `main` through a squashed PR, never a direct push. Lefthook refuses
 | `pnpm db:generate` | Create a migration from `db/schema` |
 | `pnpm db:migrate` | Apply the migrations |
 | `pnpm db:reset` | **Delete the local data**, then recreate the database |
+| `pnpm cards:import <set id>` | Copy a card set from TCGdex into the database |
 
 ## Data
 
 The schema lives in `db/schema`, and every change goes through a migration in `db/migrations`. Call `getDb()` from `db/client.ts` on the server only. Add a table with the feature that needs it.
+
+## Cards
+
+The card catalogue comes from [TCGdex](https://tcgdex.dev/) and only lives in the database, never in the repository. Tests use placeholder data. `pnpm cards:import` copies a set in one transaction and can run again safely. Card images stay hosted by TCGdex.
+
+A card's `rarity` column is in English, because game rules compare it. Translated rarities are for display only.
 
 ## Languages
 
