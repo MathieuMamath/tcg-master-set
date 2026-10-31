@@ -1,5 +1,6 @@
 import { BEDROOM_FROM_TOWN } from './bedroom';
 import type { Rect } from './collision';
+import { SHOP_FROM_TOWN } from './shop';
 import type { Place, PlaceItem } from './world';
 
 const TILE_SIZE = 3;
@@ -8,6 +9,7 @@ const HALF_LENGTH = 7.5;
 
 const HOUSE_X = -3.5;
 const SHOP_X = 3.5;
+const SHOP_DOOR_X = 2.9;
 const BUILDINGS_Z = -3;
 
 // Stops the character from walking behind the buildings, out of sight.
@@ -53,8 +55,17 @@ export const TOWN: Place = {
       to: 'bedroom',
       arrival: BEDROOM_FROM_TOWN,
     },
+    {
+      area: { minX: SHOP_DOOR_X - 0.45, maxX: SHOP_DOOR_X + 0.45, minZ: -1.4, maxZ: -1.05 },
+      to: 'shop',
+      arrival: SHOP_FROM_TOWN,
+    },
   ],
-  exitMarkers: [{ x: HOUSE_X, z: -1.2, quarterTurns: 0 }],
+  exitMarkers: [
+    { x: HOUSE_X, z: -1.2, quarterTurns: 0 },
+    { x: SHOP_DOOR_X, z: -1.2, quarterTurns: 0 },
+  ],
+  npcs: [],
   groundHeight: GROUND_HEIGHT,
   cameraStart: { x: HOUSE_X, z: -0.35 },
   fitsOnScreen: false,

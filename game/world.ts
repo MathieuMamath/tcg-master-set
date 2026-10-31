@@ -3,6 +3,8 @@ import { type CharacterState, type Direction, stepCharacter } from './movement';
 
 export const CHARACTER_RADIUS = 0.25;
 
+const NPC_RADIUS = 0.25;
+
 const FURNITURE_SCALE = 1.5;
 const TOWN_SCALE = 3;
 
@@ -19,10 +21,13 @@ const FOOTPRINTS = {
   'furniture/computerScreen': [0.393, 0.104],
   'furniture/desk': [0.734, 0.392],
   'furniture/floorFull': [1, 1],
+  'furniture/kitchenBar': [0.43, 0.21],
   'furniture/lampRoundFloor': [0.152, 0.176],
   'furniture/pottedPlant': [0.212, 0.242],
   'furniture/rugRectangle': [1.57, 0.92],
+  'furniture/rugSquare': [0.904, 0.92],
   'furniture/speaker': [0.148, 0.148],
+  'furniture/tableCoffeeSquare': [0.4, 0.4],
   'furniture/wall': [1, 0.05],
   'furniture/wallDoorway': [1, 0.09],
   'furniture/wallWindow': [1, 0.09],
@@ -41,7 +46,11 @@ export type ModelName = keyof typeof FOOTPRINTS;
 
 export const MODEL_NAMES = Object.keys(FOOTPRINTS) as ModelName[];
 
-export type PlaceId = 'bedroom' | 'town';
+export const NPC_MODELS = ['character-female-b'] as const;
+
+export type NpcModel = (typeof NPC_MODELS)[number];
+
+export type PlaceId = 'bedroom' | 'town' | 'shop';
 
 export type PlaceItem = {
   model: ModelName;
@@ -64,12 +73,15 @@ export type Exit = {
 // An arrow on the ground. With no turn it points away from the camera.
 export type ExitMarker = Position & { quarterTurns: number };
 
+export type Npc = Position & { model: NpcModel; heading: number };
+
 export type Place = {
   id: PlaceId;
   items: readonly PlaceItem[];
   bounds: Rect;
   exits: readonly Exit[];
   exitMarkers: readonly ExitMarker[];
+  npcs: readonly Npc[];
   groundHeight: number;
   cameraStart: Position;
   fitsOnScreen: boolean;
@@ -95,7 +107,15 @@ export function footprintOf(item: PlaceItem): Rect {
 }
 
 export function obstaclesOf(place: Place): Rect[] {
-  return place.items.filter((item) => item.blocksMovement).map(footprintOf);
+  const furniture = place.items.filter((item) => item.blocksMovement).map(footprintOf);
+  const npcs = place.npcs.map(({ x, z }) => ({
+    minX: x - NPC_RADIUS,
+    maxX: x + NPC_RADIUS,
+    minZ: z - NPC_RADIUS,
+    maxZ: z + NPC_RADIUS,
+  }));
+
+  return [...furniture, ...npcs];
 }
 
 export function stepInPlace(

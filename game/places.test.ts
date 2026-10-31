@@ -5,6 +5,7 @@ import { BEDROOM, BEDROOM_FROM_TOWN, BEDROOM_START } from './bedroom';
 import { isBlocked } from './collision';
 import { type CharacterState, STILL } from './movement';
 import { PLACES } from './places';
+import { SHOP, SHOP_FROM_TOWN, SHOPKEEPER_POSITION } from './shop';
 import { TOWN } from './town';
 import {
   CHARACTER_RADIUS,
@@ -12,6 +13,7 @@ import {
   footprintOf,
   isInside,
   MODEL_NAMES,
+  NPC_MODELS,
   obstaclesOf,
   type Place,
   stepInPlace,
@@ -56,6 +58,12 @@ function exitReachedWalking(
 describe('every model', () => {
   test.each(MODEL_NAMES)('%s has a file', (model) => {
     expect(existsSync(join(process.cwd(), 'public/models', `${model}.glb`))).toBe(true);
+  });
+});
+
+describe('every NPC model', () => {
+  test.each(NPC_MODELS)('%s has a file', (model) => {
+    expect(existsSync(join(process.cwd(), 'public/models/characters', `${model}.glb`))).toBe(true);
   });
 });
 
@@ -147,11 +155,15 @@ describe('the town', () => {
     expect(state.x).toBeGreaterThan(3.5);
   });
 
-  test('the shop has no exit yet', () => {
-    const inFrontOfShop = standingAt({ x: 3.5, z: 0 });
-    const state = walk(TOWN, inFrontOfShop, { x: 0, z: -1 }, 300);
+  test('walking up to the shop door leads inside', () => {
+    const exit = exitReachedWalking(TOWN, standingAt({ x: 2.9, z: 0 }), { x: 0, z: -1 });
 
-    expect(state.x).toBe(3.5);
+    expect(exit?.to).toBe('shop');
+  });
+
+  test('the wall beside the shop door leads nowhere', () => {
+    const state = walk(TOWN, standingAt({ x: 4.2, z: 0 }), { x: 0, z: -1 }, 300);
+
     expect(exitAt(TOWN, state)).toBeUndefined();
   });
 
@@ -159,5 +171,30 @@ describe('the town', () => {
     const state = walk(TOWN, standingAt(arrival), { x: 0, z: 1 }, 300);
 
     expect(state.z).toBeGreaterThan(2);
+  });
+});
+
+describe('the shop', () => {
+  test('walking through the door leads back to the town', () => {
+    const exit = exitReachedWalking(SHOP, standingAt(SHOP_FROM_TOWN), { x: -1, z: 0 });
+
+    expect(exit?.to).toBe('town');
+  });
+
+  test('the counter stops a walk towards the shopkeeper', () => {
+    const start = standingAt({ x: SHOPKEEPER_POSITION.x, z: 0.2 });
+    const state = walk(SHOP, start, { x: 0, z: -1 }, 360);
+
+    expect(state.x).toBe(SHOPKEEPER_POSITION.x);
+    expect(state.z).toBeGreaterThan(-0.8);
+  });
+
+  test('the shopkeeper blocks movement', () => {
+    expect(isBlocked(SHOPKEEPER_POSITION, obstaclesOf(SHOP), 0)).toBe(true);
+  });
+
+  test('the shopkeeper stands behind the counter and within the room', () => {
+    expect(SHOPKEEPER_POSITION.z).toBeLessThan(-1.05);
+    expect(isInside(SHOPKEEPER_POSITION, SHOP.bounds)).toBe(true);
   });
 });

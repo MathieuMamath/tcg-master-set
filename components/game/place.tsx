@@ -1,14 +1,31 @@
 'use client';
 
 import { useFrame, useLoader } from '@react-three/fiber';
-import { useMemo, useRef } from 'react';
-import { Box3, type Group, type Mesh, Object3D, Vector3 } from 'three';
+import { useEffect, useMemo, useRef } from 'react';
+import {
+  AnimationClip,
+  AnimationMixer,
+  Box3,
+  type Group,
+  type Mesh,
+  Object3D,
+  Vector3,
+} from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DESK_TOP } from '@/game/bedroom';
+import {
+  SHOP_BOOKCASE_Z,
+  SHOP_BOOKCASES,
+  SHOP_COUNTER_STACK,
+  SHOP_DISPLAY_TABLE_TOP,
+  SHOP_DISPLAY_TABLES,
+} from '@/game/shop';
 import {
   type ExitMarker as ExitMarkerData,
   MODEL_NAMES,
   modelScale,
+  NPC_MODELS,
+  type Npc as NpcData,
   type Place as PlaceData,
   type PlaceItem,
 } from '@/game/world';
@@ -27,9 +44,16 @@ function modelUrl(model: PlaceItem['model']): string {
   return `/models/${model}.glb`;
 }
 
+function npcUrl(model: NpcData['model']): string {
+  return `/models/characters/${model}.glb`;
+}
+
 // Loaded ahead of time, so walking through a door never waits for the next place.
 for (const model of MODEL_NAMES) {
   useLoader.preload(GLTFLoader, modelUrl(model));
+}
+for (const model of NPC_MODELS) {
+  useLoader.preload(GLTFLoader, npcUrl(model));
 }
 
 // Models have different origins, so each is centred on its footprint and rests on height 0.
@@ -164,6 +188,92 @@ function Poster({ x, color, accent }: { x: number; color: string; accent: string
   );
 }
 
+const SHOP_BOX_COLORS = ['#7b5ea7', '#2e86ab', '#e4572e', '#3bb273', '#f3a712'];
+
+// Rows of plain sealed boxes on the shelves, in plain colours.
+function ShopShelves() {
+  return SHOP_BOOKCASES.flatMap((bookcaseX, bookcase) =>
+    SHELF_HEIGHTS.flatMap((shelfHeight, shelf) =>
+      [-1, 0, 1].map((slot) => (
+        <mesh
+          key={`${bookcaseX}-${shelfHeight}-${slot}`}
+          castShadow
+          position={[bookcaseX + slot * 0.16, shelfHeight + 0.11, SHOP_BOOKCASE_Z]}
+        >
+          <boxGeometry args={[0.14, 0.22, 0.2]} />
+          <meshStandardMaterial
+            color={SHOP_BOX_COLORS[(bookcase + shelf * 2 + slot + 1) % SHOP_BOX_COLORS.length]}
+          />
+        </mesh>
+      )),
+    ),
+  );
+}
+
+function BoxStack({ x, z, height }: { x: number; z: number; height: number }) {
+  return SHOP_BOX_COLORS.slice(0, 3).map((color, level) => (
+    <mesh
+      key={color}
+      castShadow
+      position={[x, height + 0.045 + level * 0.09, z]}
+      rotation={[0, level * 0.3, 0]}
+    >
+      <boxGeometry args={[0.2, 0.09, 0.14]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  ));
+}
+
+function ShopDecoration() {
+  return (
+    <>
+      <ShopShelves />
+      <BoxStack {...SHOP_COUNTER_STACK} />
+      {SHOP_DISPLAY_TABLES.map(({ x, z }) => (
+        <BoxStack key={`${x}-${z}`} x={x} z={z} height={SHOP_DISPLAY_TABLE_TOP} />
+      ))}
+      <Poster x={-1.5} color="#3bb273" accent="#fcfcfc" />
+      <Poster x={1.45} color="#f3a712" accent="#26547c" />
+    </>
+  );
+}
+
+function Npc({
+  npc: { model, x, z, heading },
+  groundHeight,
+}: {
+  npc: NpcData;
+  groundHeight: number;
+}) {
+  const gltf = useLoader(GLTFLoader, npcUrl(model));
+
+  const mixer = useMemo(() => {
+    gltf.scene.traverse((node) => {
+      node.castShadow = (node as Mesh).isMesh === true;
+    });
+    return new AnimationMixer(gltf.scene);
+  }, [gltf]);
+
+  useEffect(() => {
+    const clip = AnimationClip.findByName(gltf.animations, 'idle');
+    if (!clip) {
+      throw new Error(`Animation "idle" is missing from ${model}`);
+    }
+    mixer.clipAction(clip).play();
+    return () => {
+      mixer.stopAllAction();
+    };
+  }, [gltf, mixer, model]);
+
+  useFrame((_, delta) => {
+    mixer.update(delta);
+  });
+
+  return (
+    <primitive object={gltf.scene} position={[x, groundHeight, z]} rotation={[0, heading, 0]} />
+  );
+}
+
 function BedroomDecoration() {
   return (
     <>
@@ -192,7 +302,11 @@ export function Place({ place }: { place: PlaceData }) {
           groundHeight={place.groundHeight}
         />
       ))}
+      {place.npcs.map((npc) => (
+        <Npc key={npc.model} npc={npc} groundHeight={place.groundHeight} />
+      ))}
       {place.id === 'bedroom' && <BedroomDecoration />}
+      {place.id === 'shop' && <ShopDecoration />}
     </>
   );
 }
