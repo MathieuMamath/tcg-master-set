@@ -3,6 +3,7 @@ import {
   type CharacterState,
   cameraDistanceFactor,
   cameraFocusRadius,
+  faceTowards,
   followFocus,
   isMovementKey,
   joystickDirection,
@@ -90,6 +91,16 @@ describe('stepCharacter', () => {
     const turned = stepCharacter(nearlyBehind, { x: -0.01, z: -1 }, 0.001);
 
     expect(turned.heading).toBeGreaterThan(nearlyBehind.heading);
+  });
+});
+
+describe('faceTowards', () => {
+  test('turns to look at the target without moving', () => {
+    const turned = faceTowards(START, { x: 5, z: 0 }, 1);
+
+    expect(turned.heading).toBeCloseTo(Math.PI / 2);
+    expect(turned.x).toBe(START.x);
+    expect(turned.isMoving).toBe(false);
   });
 });
 

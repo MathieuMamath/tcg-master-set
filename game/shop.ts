@@ -67,7 +67,15 @@ export const SHOP: Place = {
   bounds: ROOM_BOUNDS,
   exits: [roomDoorExit('town', { x: 2.9, z: -0.35, heading: 0 })],
   exitMarkers: [ROOM_DOOR_MARKER],
-  npcs: [{ model: 'character-female-b', ...SHOPKEEPER_POSITION, heading: 0 }],
+  npcs: [
+    {
+      model: 'character-female-b',
+      ...SHOPKEEPER_POSITION,
+      heading: 0,
+      // The floor just in front of the counter.
+      talkArea: { minX: -1.1, maxX: 1.5, minZ: -0.85, maxZ: -0.2 },
+    },
+  ],
   groundHeight: ROOM_FLOOR_HEIGHT,
   cameraStart: { x: 0, z: 0 },
   fitsOnScreen: true,

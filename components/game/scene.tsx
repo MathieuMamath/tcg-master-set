@@ -2,7 +2,14 @@
 
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { type RefObject, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { type AnimationAction, AnimationClip, AnimationMixer, type Group, type Mesh } from 'three';
+import {
+  type AnimationAction,
+  AnimationClip,
+  AnimationMixer,
+  type Group,
+  MathUtils,
+  type Mesh,
+} from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { BEDROOM, BEDROOM_START } from '@/game/bedroom';
 import {
@@ -11,6 +18,7 @@ import {
   cameraFocusRadius,
   type Direction,
   type FocusPoint,
+  faceTowards,
   followFocus,
   STILL,
 } from '@/game/movement';
@@ -19,6 +27,7 @@ import {
   type Arrival,
   type Exit,
   exitAt,
+  npcInReach,
   type Place as PlaceData,
   stepInPlace,
 } from '@/game/world';
@@ -37,6 +46,10 @@ const ANIMATION_FADE_SECONDS = 0.15;
 const PLACE_FADE_MILLISECONDS = 300;
 // A long pause in the tab must not teleport the character.
 const MAX_FRAME_SECONDS = 0.1;
+// During a conversation the camera moves closer, framing the two characters above the dialog.
+const TALK_CAMERA_DISTANCE = 0.6;
+const TALK_FOCUS_TOWARDS_CAMERA = 0.75;
+const TALK_CAMERA_SPEED = 4;
 
 type InputProps = {
   input: RefObject<MovementInput>;
@@ -46,14 +59,18 @@ type CharacterProps = InputProps & {
   place: PlaceData;
   arrival: Arrival;
   onExit: (exit: Exit) => void;
+  onCanTalkChange: (canTalk: boolean) => void;
+  isTalking: boolean;
 };
 
-function Character({ input, place, arrival, onExit }: CharacterProps) {
+function Character({ input, place, arrival, onExit, onCanTalkChange, isTalking }: CharacterProps) {
   const gltf = useLoader(GLTFLoader, CHARACTER_MODEL);
   const root = useRef<Group>(null);
   const state = useRef<CharacterState>({ ...arrival, isMoving: false });
   const focus = useRef<FocusPoint>(place.cameraStart);
   const hasLeft = useRef(false);
+  const canTalk = useRef(false);
+  const closeUp = useRef(0);
   const camera = useThree((three) => three.camera);
   const viewport = useThree((three) => three.viewport);
 
@@ -79,6 +96,8 @@ function Character({ input, place, arrival, onExit }: CharacterProps) {
     };
   }, [idle, mixer]);
 
+  useEffect(() => () => onCanTalkChange(false), [onCanTalkChange]);
+
   useFrame((_, frameSeconds) => {
     const delta = Math.min(frameSeconds, MAX_FRAME_SECONDS);
     const { keyboard, joystick } = input.current;
@@ -86,13 +105,23 @@ function Character({ input, place, arrival, onExit }: CharacterProps) {
     const direction = hasLeft.current ? STILL : pushed;
     const wasMoving = state.current.isMoving;
 
-    state.current = stepInPlace(place, state.current, direction, delta);
+    const npc = npcInReach(place, state.current);
+    state.current =
+      isTalking && npc
+        ? faceTowards(state.current, npc, delta)
+        : stepInPlace(place, state.current, direction, delta);
     const { x, z, heading, isMoving } = state.current;
 
     const exit = exitAt(place, state.current);
     if (exit && !hasLeft.current) {
       hasLeft.current = true;
       onExit(exit);
+    }
+
+    const isInReach = npcInReach(place, state.current) !== undefined;
+    if (isInReach !== canTalk.current) {
+      canTalk.current = isInReach;
+      onCanTalkChange(isInReach);
     }
 
     if (isMoving !== wasMoving) {
@@ -111,12 +140,21 @@ function Character({ input, place, arrival, onExit }: CharacterProps) {
       cameraFocusRadius(viewport.aspect, place.fitsOnScreen),
     );
     const distance = cameraDistanceFactor(viewport.aspect);
-    camera.position.set(
-      focus.current.x + CAMERA_OFFSET.x * distance,
-      CAMERA_OFFSET.y * distance,
-      focus.current.z + CAMERA_OFFSET.z * distance,
+    closeUp.current = MathUtils.damp(closeUp.current, isTalking ? 1 : 0, TALK_CAMERA_SPEED, delta);
+    const talkFocus = npc ?? focus.current;
+    const lookX = MathUtils.lerp(focus.current.x, (talkFocus.x + x) / 2, closeUp.current);
+    const lookZ = MathUtils.lerp(
+      focus.current.z,
+      (talkFocus.z + z) / 2 + TALK_FOCUS_TOWARDS_CAMERA,
+      closeUp.current,
     );
-    camera.lookAt(focus.current.x, CAMERA_LOOK_HEIGHT, focus.current.z);
+    const zoom = distance * MathUtils.lerp(1, TALK_CAMERA_DISTANCE, closeUp.current);
+    camera.position.set(
+      lookX + CAMERA_OFFSET.x * zoom,
+      CAMERA_OFFSET.y * zoom,
+      lookZ + CAMERA_OFFSET.z * zoom,
+    );
+    camera.lookAt(lookX, CAMERA_LOOK_HEIGHT, lookZ);
   });
 
   return <primitive ref={root} object={gltf.scene} />;
@@ -124,9 +162,11 @@ function Character({ input, place, arrival, onExit }: CharacterProps) {
 
 type SceneProps = InputProps & {
   webglUnavailable: string;
+  onCanTalkChange: (canTalk: boolean) => void;
+  isTalking: boolean;
 };
 
-export function Scene({ input, webglUnavailable }: SceneProps) {
+export function Scene({ input, webglUnavailable, onCanTalkChange, isTalking }: SceneProps) {
   const [visit, setVisit] = useState({ number: 0, place: BEDROOM, arrival: BEDROOM_START });
   const [isFading, setIsFading] = useState(false);
   const fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -173,6 +213,8 @@ export function Scene({ input, webglUnavailable }: SceneProps) {
               place={visit.place}
               arrival={visit.arrival}
               onExit={leaveThrough}
+              onCanTalkChange={onCanTalkChange}
+              isTalking={isTalking}
             />
           </group>
         </Suspense>
