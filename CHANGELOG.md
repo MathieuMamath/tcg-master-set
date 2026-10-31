@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.9](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.8...v0.1.9) (2026-10-31)
+
+### Features
+
+* **cards:** import the card catalogue from TCGdex ([#9](https://github.com/MathieuMamath/tcg-master-set/issues/9)) ([0667b63](https://github.com/MathieuMamath/tcg-master-set/commit/0667b6360c0f61080f465d490f499fe28e312bde))
+
 ## [0.1.8](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.7...v0.1.8) (2026-10-31)
 
 ### Features
