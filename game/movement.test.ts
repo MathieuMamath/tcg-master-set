@@ -110,13 +110,17 @@ describe('cameraDistanceFactor', () => {
 describe('cameraFocusRadius', () => {
   test('never moves the camera when the scene fits on screen', () => {
     const focus = { x: 0, z: 0 };
-    const radius = cameraFocusRadius(16 / 9);
+    const radius = cameraFocusRadius(16 / 9, true);
 
     expect(followFocus(focus, { x: 100, z: 100 }, radius)).toBe(focus);
   });
 
   test('follows the character on narrow screens', () => {
-    expect(cameraFocusRadius(0.5)).toBe(1);
+    expect(cameraFocusRadius(0.5, true)).toBe(1);
+  });
+
+  test('follows the character when the scene is too large for any screen', () => {
+    expect(cameraFocusRadius(16 / 9, false)).toBe(1);
   });
 });
 
