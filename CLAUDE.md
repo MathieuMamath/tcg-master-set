@@ -12,7 +12,7 @@
 
 - **Never commit card data or card images**, nor any other third-party asset whose license allows no redistribution. They are imported at runtime or deploy time from outside the repository. The repository runs on placeholder cards.
 - **Keep the product name, domain, logos and repository metadata generic**, without third-party trademarks.
-- **The server decides.** Booster draws, balances, resale and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. The one temporary exception is the wallet in `game/shop-dialogue.ts`, which lives in the browser for one visit until player accounts exist.
+- **The server decides.** Booster draws, balances, resale and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. The one temporary exception is the wallet in `game/shop-dialogue.ts`, which lives in the browser for one visit until player accounts exist. Boosters are drawn on the server, but it can't check who owns one until then, and opened cards aren't kept yet.
 - **No real money**: no payments, donations or ads.
 - **Single-player only.**
 

@@ -55,6 +55,36 @@ body {
   }
 }
 
+@keyframes ui-card-flip {
+  from {
+    opacity: 0.4;
+    transform: rotateY(90deg) scale(0.92);
+  }
+}
+
+@keyframes ui-shine {
+  from {
+    background-position: 130% 0;
+  }
+  to {
+    background-position: -30% 0;
+  }
+}
+
+.ui-card-flip {
+  animation: ui-card-flip 280ms ease-out;
+}
+
+.ui-card-special {
+  box-shadow: 0 0 2.5rem 0.4rem var(--ui-accent);
+}
+
+.ui-shine {
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 45%) 50%, transparent 65%);
+  background-size: 250% 100%;
+  animation: ui-shine 2600ms linear infinite;
+}
+
 .ui-pop-in {
   animation: ui-pop-in 180ms ease-out;
 }
@@ -68,6 +98,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ui-card-flip,
+  .ui-shine,
   .ui-pop-in,
   .ui-nudge,
   .ui-bob {
