@@ -1,0 +1,25 @@
+# Local development database. Start it with `pnpm db:up`.
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: tcg-master-set-postgres
+    ports:
+      # Port 5433 leaves 5432 free for other local projects. Bound to localhost only.
+      - '127.0.0.1:5433:5432'
+    environment:
+      POSTGRES_USER: tcg
+      POSTGRES_PASSWORD: dev_only_password
+      POSTGRES_DB: tcg_master_set_dev
+    volumes:
+      # PostgreSQL 18 images keep their data in a versioned folder under this path.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U tcg -d tcg_master_set_dev']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  pgdata:
+    name: tcg-master-set-pgdata
