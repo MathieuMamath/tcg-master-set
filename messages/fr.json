@@ -10,7 +10,9 @@
     "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé.",
     "coins": "{count, plural, one {# pièce} other {# pièces}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
-    "talk": "Parler"
+    "talk": "Parler",
+    "binder": "Ouvrir le classeur",
+    "binderButton": "Classeur"
   },
   "Shopkeeper": {
     "name": "Vendeuse",
@@ -34,6 +36,27 @@
     "error": "Le booster n'a pas pu être ouvert. Il est toujours dans ton sac.",
     "retry": "Réessayer",
     "back": "Retour"
+  },
+  "Binder": {
+    "title": "Classeur",
+    "loading": "Préparation de ton classeur...",
+    "error": "Le classeur n'a pas pu être chargé.",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "progress": "{owned} / {total} cartes collectées",
+    "page": "Page {current} / {total}",
+    "previousPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "emptySlot": "Pas encore collectée",
+    "viewCard": "{name}, {count, plural, one {# exemplaire} other {# exemplaires}}",
+    "copies": "{count, plural, one {# exemplaire} other {# exemplaires}}",
+    "backToPage": "Retour à la page",
+    "variants": {
+      "holo": "Holo",
+      "reverse": "Reverse",
+      "firstEdition": "1re éd.",
+      "wPromo": "Promo"
+    }
   },
   "LocaleSwitcher": {
     "label": "Langue"

@@ -87,6 +87,7 @@ export type Place = {
   exits: readonly Exit[];
   exitMarkers: readonly ExitMarker[];
   npcs: readonly Npc[];
+  binderArea?: Rect;
   groundHeight: number;
   cameraStart: Position;
   fitsOnScreen: boolean;
@@ -147,6 +148,15 @@ export function exitAt(place: Place, position: Position): Exit | undefined {
 
 export function npcInReach(place: Place, position: Position): Npc | undefined {
   return place.npcs.find(({ talkArea }) => isInside(position, talkArea));
+}
+
+export type Interaction = 'talk' | 'binder';
+
+export function interactionAt(place: Place, position: Position): Interaction | null {
+  if (npcInReach(place, position)) {
+    return 'talk';
+  }
+  return place.binderArea && isInside(position, place.binderArea) ? 'binder' : null;
 }
 
 export function isInside(position: Position, area: Rect): boolean {

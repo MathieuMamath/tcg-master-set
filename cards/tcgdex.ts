@@ -1,3 +1,6 @@
+// The only set the game plays with for now.
+export const ACTIVE_SET_ID = 'swsh3';
+
 export const CARD_LOCALES = ['en', 'fr'] as const;
 
 export type CardLocale = (typeof CARD_LOCALES)[number];
