@@ -1,0 +1,121 @@
+name: CI
+
+# Runs the quality gate on every pull request and on main, then cuts a release after a merge.
+# The gate is defined in .claude/commands/open-pr.md: a check added there must be added here.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push supersedes the run in flight, except on main: cancelling a release between its
+# tag and its push would leave an orphan tag that makes every later release fail.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title:
+    name: PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      # The title becomes the squash commit, so it drives the changelog and the version bump.
+      - name: Check the title is a Conventional Commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|balance|content|fix|perf|docs|refactor|revert|chore|test|style|ci|build)(\([a-z0-9-]+\))?!?: .+'
+          if ! printf '%s' "$TITLE" | grep -Eq "$pattern"; then
+            echo "::error::Not a Conventional Commit: $TITLE"
+            exit 1
+          fi
+
+  gate:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # No version here: the action reads `packageManager` from package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  # Bumps package.json, regenerates CHANGELOG.md, tags, and publishes a GitHub Release.
+  # A push made with GITHUB_TOKEN does not start this workflow again, so there is no loop.
+  release:
+    name: Release
+    needs: gate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # commit-and-tag-version computes the bump from the commits since the last tag.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version, changelog and tag
+        id: release
+        run: |
+          set -eu
+          # A queued run may be behind main by the time it starts.
+          git fetch --force --tags origin main
+          git reset --hard origin/main
+
+          last_tag=$(git describe --tags --match 'v*' --abbrev=0)
+          if [ -z "$(git log "$last_tag..HEAD" --format=%h)" ]; then
+            echo "Nothing since $last_tag: no release."
+            echo "released=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          pnpm exec commit-and-tag-version --no-verify
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "released=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push commit and tag
+        if: steps.release.outputs.released == 'true'
+        # --atomic: if the branch is rejected, the tag is not pushed either.
+        run: git push --atomic --follow-tags --no-verify origin HEAD:main
+
+      - name: Publish GitHub Release
+        if: steps.release.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          version="${{ steps.release.outputs.version }}"
+          # The newest CHANGELOG.md section.
+          notes=$(awk '/^## /{c++} c==1' CHANGELOG.md)
+          gh release create "v${version}" --title "v${version}" --notes "${notes:-Release v${version}}"

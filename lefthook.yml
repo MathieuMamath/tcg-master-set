@@ -1,0 +1,26 @@
+# Git hooks. Fast feedback before CI, which remains the real gate.
+# Installed by the `prepare` script in package.json.
+
+pre-commit:
+  commands:
+    biome:
+      glob: '*.{ts,tsx,css,json,jsonc}'
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+    gitleaks:
+      run: gitleaks protect --staged --no-banner --redact
+
+pre-push:
+  # Stop at the first failure. Mirrors the gate in .claude/commands/open-pr.md.
+  piped: true
+  commands:
+    # GitHub cannot require a PR here: the release job has to push its commit to main, and a
+    # personal repository cannot exempt GITHUB_TOKEN from that rule. So the guard lives here.
+    1_no_direct_push_to_main:
+      run: |
+        if [ "$(git branch --show-current)" = "main" ]; then
+          echo "Work reaches main through a pull request: create a branch, then run /open-pr."
+          exit 1
+        fi
+    2_lint:
+      run: pnpm lint

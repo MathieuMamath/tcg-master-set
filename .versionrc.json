@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/conventional-changelog-config.json",
+  "header": "# Changelog\n\nEvery release of TCG Master Set, derived automatically from [Conventional Commits](https://www.conventionalcommits.org/) on each merge to `main`.\n\nWhile the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.\n",
+  "types": [
+    { "type": "feat", "section": "Features" },
+    { "type": "balance", "section": "Balance" },
+    { "type": "content", "section": "Content" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "perf", "section": "Performance" },
+    { "type": "docs", "section": "Documentation" },
+    { "type": "refactor", "section": "Refactoring" },
+    { "type": "revert", "section": "Reverts" },
+    { "type": "chore", "hidden": true },
+    { "type": "test", "hidden": true },
+    { "type": "style", "hidden": true },
+    { "type": "ci", "hidden": true },
+    { "type": "build", "hidden": true }
+  ],
+  "releaseCommitMessageFormat": "chore(release): {{currentTag}}"
+}

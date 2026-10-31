@@ -1,0 +1,27 @@
+{
+  "name": "tcg-master-set",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A cozy single-player 3D game about opening booster packs and completing master set binders.",
+  "repository": "github:MathieuMamath/tcg-master-set",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "prepare": "lefthook install",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "release": "commit-and-tag-version"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "lefthook"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.6",
+    "commit-and-tag-version": "^13.3.0",
+    "lefthook": "^2.2.2"
+  }
+}

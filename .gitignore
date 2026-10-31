@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Next.js and builds
+.next/
+out/
+build/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Tests
+coverage/
+playwright-report/
+test-results/
+
+# Environment files: never commit secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+
+# Per-machine Claude Code state
+.claude/settings.local.json
+
+# Local scratch space. Card data and images must never be committed, see CLAUDE.md.
+tmp/
