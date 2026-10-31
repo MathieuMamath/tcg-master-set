@@ -53,6 +53,12 @@ The schema lives in `db/schema`, and every change goes through a migration in `d
 
 Text lives in `messages/en.json` and `messages/fr.json`, which must define the same keys. A test enforces this. URLs carry the language, such as `/en` and `/fr`.
 
+## Game code
+
+Game rules live in `game/` as plain tested functions, without React or Three.js. `components/game/` displays them, and the 3D scene loads only in the browser.
+
+3D models live in `public/models/`, with their license next to them. Only commit the files the game uses.
+
 ## Next.js
 
 Read [`AGENTS.md`](AGENTS.md) before writing Next.js code. `next dev` maintains that file, so leave its block as it is.

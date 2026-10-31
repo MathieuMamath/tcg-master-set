@@ -3,8 +3,11 @@
     "description": "Un petit jeu solo en 3D pour compléter ses classeurs de master set."
   },
   "Home": {
-    "title": "TCG Master Set",
-    "tagline": "Ta collection commence ici."
+    "title": "TCG Master Set"
+  },
+  "Game": {
+    "keyboardHint": "Utilise les flèches ou ZQSD pour te déplacer.",
+    "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé."
   },
   "LocaleSwitcher": {
     "label": "Langue"
