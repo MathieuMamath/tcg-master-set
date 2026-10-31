@@ -5,7 +5,7 @@
   "description": "A cozy single-player 3D game about opening booster packs and completing master set binders.",
   "repository": "github:MathieuMamath/tcg-master-set",
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   },
   "packageManager": "pnpm@10.0.0",
   "scripts": {
