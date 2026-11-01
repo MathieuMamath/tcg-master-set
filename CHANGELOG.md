@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.12](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.11...v0.1.12) (2026-11-01)
+
+### Features
+
+* **accounts:** require an account to play ([#12](https://github.com/MathieuMamath/tcg-master-set/issues/12)) ([2d47002](https://github.com/MathieuMamath/tcg-master-set/commit/2d4700271106100c6d11adbbf06378a412353b4c))
+
 ## [0.1.11](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.10...v0.1.11) (2026-10-31)
 
 ### Features
