@@ -15,6 +15,10 @@ const PACK_THEMES: Record<SetId, { background: string; crimp: string }> = {
   },
 };
 
+export function packBackground(setId: SetId) {
+  return PACK_THEMES[setId].background;
+}
+
 // For the element around the pack, so that its top edge gets the same colour as the rest.
 export function packCrimpStyle(setId: SetId) {
   return { '--pack-crimp': PACK_THEMES[setId].crimp } as CSSProperties;
@@ -32,7 +36,7 @@ export function PackBody({
 }) {
   return (
     <span
-      style={{ background: PACK_THEMES[setId].background }}
+      style={{ background: packBackground(setId) }}
       className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]"
     >
       <span className="absolute inset-x-3 top-[13%] bottom-[7%] flex items-center justify-center">
