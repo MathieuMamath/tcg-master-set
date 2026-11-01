@@ -6,6 +6,7 @@ import {
   type BinderCard,
   type BinderSlot,
   binderSlots,
+  bindersToChoose,
   type Collection,
   ownedInSet,
   ownedSlotCount,
@@ -258,6 +259,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
   const setId = chosenSet?.id;
   const isBinderChosen = chosenSet !== null;
   const isWide = useWideScreen();
+  const binders = bindersToChoose(sets, collection);
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -361,16 +363,20 @@ export function BinderView({ sets, collection, onClose }: Props) {
             <h2 className="text-center text-2xl font-semibold text-ui-paper">
               {sets.length > 0 ? t('chooseBinder') : t('error')}
             </h2>
+            {sets.length > 0 && binders.every(({ owned }) => owned === 0) && (
+              <p className="text-center text-ui-paper/80">{t('noCardsYet')}</p>
+            )}
             <div className="flex w-full flex-wrap justify-center gap-5">
-              {sets.map((set) => (
+              {binders.map(({ owned, ...set }) => (
                 <button
                   key={set.id}
                   type="button"
-                  aria-label={`${set.name}. ${t('progress', { owned: ownedInSet(collection, set.id), total: set.slotTotal })}`}
+                  disabled={owned === 0}
+                  aria-label={`${set.name}. ${t('progress', { owned, total: set.slotTotal })}`}
                   onClick={() => choose(set)}
-                  className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,11rem)] cursor-pointer rounded-xl outline-offset-4 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
+                  className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,11rem)] rounded-xl outline-offset-4 transition-transform enabled:cursor-pointer enabled:hover:-translate-y-1 enabled:focus-visible:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-45 disabled:grayscale"
                 >
-                  <BinderCover set={set} owned={ownedInSet(collection, set.id)} />
+                  <BinderCover set={set} owned={owned} />
                 </button>
               ))}
             </div>

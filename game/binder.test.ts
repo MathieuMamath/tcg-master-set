@@ -3,6 +3,7 @@ import {
   addToCollection,
   type BinderCard,
   binderSlots,
+  bindersToChoose,
   clampPage,
   ownedInSet,
   ownedSlotCount,
@@ -158,5 +159,37 @@ describe('ownedInSet', () => {
     expect(ownedInSet(collection, 'set-a')).toBe(2);
     expect(ownedInSet(collection, 'set-b')).toBe(1);
     expect(ownedInSet(collection, 'set-c')).toBe(0);
+  });
+});
+
+describe('bindersToChoose', () => {
+  const SETS = [
+    { id: 'old-empty', releaseDate: '2020-01-01' },
+    { id: 'new-empty', releaseDate: '2026-01-01' },
+    { id: 'old-owned', releaseDate: '2021-01-01' },
+    { id: 'new-owned', releaseDate: '2025-01-01' },
+  ];
+  const COLLECTION = { 'old-owned-1:normal': 1, 'new-owned-1:normal': 2, 'new-owned-2:holo': 1 };
+
+  test('puts the binders with cards first, then goes from newest to oldest', () => {
+    expect(bindersToChoose(SETS, COLLECTION).map(({ id }) => id)).toEqual([
+      'new-owned',
+      'old-owned',
+      'new-empty',
+      'old-empty',
+    ]);
+  });
+
+  test('counts what the player owns in each', () => {
+    expect(bindersToChoose(SETS, COLLECTION).map(({ owned }) => owned)).toEqual([2, 1, 0, 0]);
+  });
+
+  test('goes from newest to oldest when nothing is owned yet', () => {
+    expect(bindersToChoose(SETS, {}).map(({ id }) => id)).toEqual([
+      'new-empty',
+      'new-owned',
+      'old-owned',
+      'old-empty',
+    ]);
   });
 });

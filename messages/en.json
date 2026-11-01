@@ -60,6 +60,7 @@
     "close": "Close",
     "closeBinder": "Close the binder",
     "chooseBinder": "Which binder do you want to open?",
+    "noCardsYet": "Open a booster to start your first binder.",
     "progress": "{owned} / {total} cards collected",
     "page": "Page {current} / {total}",
     "pages": "Pages {first}-{last} / {total}",

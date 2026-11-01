@@ -60,6 +60,7 @@
     "close": "Fermer",
     "closeBinder": "Fermer le classeur",
     "chooseBinder": "Quel classeur veux-tu ouvrir ?",
+    "noCardsYet": "Ouvre un booster pour commencer ton premier classeur.",
     "progress": "{owned} / {total} cartes collectées",
     "page": "Page {current} / {total}",
     "pages": "Pages {first}-{last} / {total}",
