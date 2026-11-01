@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from 'react';
 import type { OpenedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/booster';
+import { CardBack } from './card-back';
 import { SetLogo } from './set-logo';
 
 const TEAR_ANIMATION_MILLISECONDS = 450;
@@ -12,16 +13,6 @@ export type Opening =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'ready'; setName: string; logoUrl: string | null; cards: OpenedCard[] };
-
-function CardBack() {
-  return (
-    <div className="flex size-full items-center justify-center rounded-[4.5%/3.2%] border-8 border-ui-paper bg-ui-ink">
-      <div className="flex aspect-square w-3/5 rotate-45 items-center justify-center rounded-2xl border-4 border-ui-accent">
-        <div className="size-1/2 rounded-full bg-ui-accent" />
-      </div>
-    </div>
-  );
-}
 
 function CardFace({ card, quality }: { card: OpenedCard; quality: 'high' | 'low' }) {
   if (!card.imageUrl) {
