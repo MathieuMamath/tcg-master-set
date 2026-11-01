@@ -1,6 +1,6 @@
 {
   "name": "tcg-master-set",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "private": true,
   "description": "A cozy single-player 3D game about opening booster packs and completing master set binders.",
   "repository": "github:MathieuMamath/tcg-master-set",

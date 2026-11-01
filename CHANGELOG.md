@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.24](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.23...v0.1.24) (2026-11-01)
+
+### Features
+
+* **db:** keep coins, boosters and the collection in the database ([#24](https://github.com/MathieuMamath/tcg-master-set/issues/24)) ([82b8cf4](https://github.com/MathieuMamath/tcg-master-set/commit/82b8cf461d1f91e2619b3b643113b8cfcdee3429))
+
 ## [0.1.23](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.22...v0.1.23) (2026-11-01)
 
 ### Features
