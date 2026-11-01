@@ -1,7 +1,7 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
 import { loadBoosterPool, loadOpenedCards } from '@/cards/booster-pool';
-import { drawBooster } from '@/game/booster';
+import { openBooster } from '@/game/booster';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
@@ -11,7 +11,7 @@ vi.mock('@/cards/booster-pool', () => ({
 }));
 vi.mock('@/game/booster', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/game/booster')>()),
-  drawBooster: vi.fn(),
+  openBooster: vi.fn(),
 }));
 
 function open(locale: string, set = 'swsh3') {
@@ -31,13 +31,13 @@ beforeEach(() => {
 test('returns the drawn cards in the requested language', async () => {
   const drawn = [{ cardId: 'card-1', variant: 'normal' }];
   const opened = { setName: 'Placeholder', logoUrl: 'https://test.invalid/logo', cards: [] };
-  vi.mocked(drawBooster).mockReturnValue(drawn);
+  vi.mocked(openBooster).mockReturnValue({ cards: drawn, isGodPack: true });
   vi.mocked(loadOpenedCards).mockResolvedValue(opened);
 
   const response = await open('fr', '30th');
 
   expect(response.status).toBe(200);
-  expect(await response.json()).toEqual(opened);
+  expect(await response.json()).toEqual({ ...opened, isGodPack: true });
   expect(loadOpenedCards).toHaveBeenCalledWith(drawn, '30th', 'fr');
 });
 
@@ -56,7 +56,7 @@ test('rejects a set the game does not play with', async () => {
 });
 
 test('reports an empty catalogue as unavailable', async () => {
-  vi.mocked(drawBooster).mockReturnValue(null);
+  vi.mocked(openBooster).mockReturnValue(null);
 
   expect((await open('en')).status).toBe(503);
 });

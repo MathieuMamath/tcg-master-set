@@ -6,6 +6,7 @@ import type { OpenedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/booster';
 import type { SetId } from '@/game/card-sets';
 import { CardBack } from './card-back';
+import { CardPicture } from './card-picture';
 import { PackBody, packCrimpStyle } from './pack-art';
 import { TiltCard } from './tilt-card';
 
@@ -14,31 +15,17 @@ const TEAR_ANIMATION_MILLISECONDS = 450;
 export type Opening = { setId: SetId } & (
   | { status: 'loading' }
   | { status: 'error' }
-  | { status: 'ready'; setName: string; logoUrl: string | null; cards: OpenedCard[] }
+  | {
+      status: 'ready';
+      setName: string;
+      logoUrl: string | null;
+      cards: OpenedCard[];
+      isGodPack: boolean;
+    }
 );
 
 function isSpecial(card: OpenedCard) {
   return card.variant !== 'normal';
-}
-
-function CardFace({ card, quality }: { card: OpenedCard; quality: 'high' | 'low' }) {
-  if (!card.imageUrl) {
-    return (
-      <div className="flex size-full items-center justify-center rounded-[4.5%/3.2%] border-8 border-ui-accent bg-ui-paper p-2 text-center text-ui-ink">
-        {card.name}
-      </div>
-    );
-  }
-  return (
-    // The images come from the card catalogue's own server, in its optimised sizes.
-    // biome-ignore lint/performance/noImgElement: next/image would only proxy them again.
-    <img
-      src={`${card.imageUrl}/${quality}.webp`}
-      alt={card.name}
-      draggable={false}
-      className="size-full rounded-[4.5%/3.2%] object-cover"
-    />
-  );
 }
 
 function SealedPack({
@@ -140,7 +127,25 @@ function SealedPack({
   );
 }
 
-function Reveal({ cards, onFinished }: { cards: OpenedCard[]; onFinished: () => void }) {
+function GodPackBanner() {
+  const t = useTranslations('Booster');
+
+  return (
+    <p className="ui-god-pack-banner rounded-full border-4 border-ui-ink bg-ui-accent px-5 py-0.5 text-2xl font-bold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]">
+      {t('godPack')}
+    </p>
+  );
+}
+
+function Reveal({
+  cards,
+  isGodPack,
+  onFinished,
+}: {
+  cards: OpenedCard[];
+  isGodPack: boolean;
+  onFinished: () => void;
+}) {
   const t = useTranslations('Booster');
   const [revealed, setRevealed] = useState(0);
   const button = useRef<HTMLButtonElement>(null);
@@ -158,14 +163,23 @@ function Reveal({ cards, onFinished }: { cards: OpenedCard[]; onFinished: () => 
   }, [cards]);
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-3">
+    <div className="relative flex h-full w-full flex-col items-center justify-center gap-3">
+      {isGodPack && <GodPackBanner />}
       <p aria-live="polite" className="text-lg font-semibold text-ui-paper">
         {current ? current.name : t('readyToReveal')}
       </p>
-      <div className="aspect-[5/7] w-[min(100%,44vh,21.4rem)] [perspective:60rem]">
+      <div
+        className={`aspect-[5/7] w-[min(100%,44vh,21.4rem)] [perspective:60rem] ${
+          isGodPack ? '[@media(max-height:30rem)]:w-[34vh]' : ''
+        }`}
+      >
         <div key={revealed} className="ui-card-flip size-full">
           <TiltCard isSpecial={current !== null && isSpecial(current)}>
-            {current ? <CardFace card={current} quality="high" /> : <CardBack />}
+            {current ? (
+              <CardPicture name={current.name} imageUrl={current.imageUrl} quality="high" />
+            ) : (
+              <CardBack />
+            )}
           </TiltCard>
         </div>
       </div>
@@ -210,7 +224,7 @@ function EnlargedCard({ card, onClose }: { card: OpenedCard; onClose: () => void
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
       <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
         <TiltCard isSpecial={isSpecial(card)}>
-          <CardFace card={card} quality="high" />
+          <CardPicture name={card.name} imageUrl={card.imageUrl} quality="high" />
         </TiltCard>
       </div>
       <p className="text-center text-lg font-semibold text-ui-paper">
@@ -229,12 +243,21 @@ function EnlargedCard({ card, onClose }: { card: OpenedCard; onClose: () => void
   );
 }
 
-function Summary({ cards, onClose }: { cards: OpenedCard[]; onClose: () => void }) {
+function Summary({
+  cards,
+  isGodPack,
+  onClose,
+}: {
+  cards: OpenedCard[];
+  isGodPack: boolean;
+  onClose: () => void;
+}) {
   const t = useTranslations('Booster');
   const [enlarged, setEnlarged] = useState<OpenedCard | null>(null);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4">
+    <div className="relative flex h-full flex-col items-center justify-center gap-4">
+      {isGodPack && <GodPackBanner />}
       <h2 className="text-2xl font-semibold text-ui-paper">{t('summaryTitle')}</h2>
       <ul className="grid w-full max-w-3xl grid-cols-5 gap-1.5 sm:gap-2">
         {cards.map((card) => (
@@ -247,7 +270,7 @@ function Summary({ cards, onClose }: { cards: OpenedCard[]; onClose: () => void 
                 isSpecial(card) ? 'shadow-[0_0_0.9rem_0.15rem_var(--ui-accent)]' : ''
               }`}
             >
-              <CardFace card={card} quality="low" />
+              <CardPicture name={card.name} imageUrl={card.imageUrl} quality="low" />
               {isSpecial(card) && (
                 <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
               )}
@@ -325,6 +348,12 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
       )}
       {opening.status === 'ready' && (
         <div className="flex h-full items-center justify-center">
+          {opening.isGodPack && step !== 'pack' && (
+            <div
+              aria-hidden="true"
+              className="ui-god-pack-glow pointer-events-none fixed inset-0"
+            />
+          )}
           {step === 'pack' && (
             <SealedPack
               setId={opening.setId}
@@ -334,9 +363,15 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
             />
           )}
           {step === 'reveal' && (
-            <Reveal cards={opening.cards} onFinished={() => setStep('summary')} />
+            <Reveal
+              cards={opening.cards}
+              isGodPack={opening.isGodPack}
+              onFinished={() => setStep('summary')}
+            />
           )}
-          {step === 'summary' && <Summary cards={opening.cards} onClose={onClose} />}
+          {step === 'summary' && (
+            <Summary cards={opening.cards} isGodPack={opening.isGodPack} onClose={onClose} />
+          )}
         </div>
       )}
     </dialog>
