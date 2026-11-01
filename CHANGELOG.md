@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.21](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.20...v0.1.21) (2026-11-01)
+
+### Balance
+
+* **shop:** raise the starting coins to 1000 ([#21](https://github.com/MathieuMamath/tcg-master-set/issues/21)) ([b1566f4](https://github.com/MathieuMamath/tcg-master-set/commit/b1566f433c875ddc3464a1cb07d5dda6c5147ba5))
+
 ## [0.1.20](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.19...v0.1.20) (2026-11-01)
 
 ### Content
