@@ -87,6 +87,25 @@ body {
   animation: ui-shine 2600ms linear infinite;
 }
 
+@keyframes ui-binder-open {
+  to {
+    opacity: 0;
+    transform: rotateY(-115deg);
+  }
+}
+
+@keyframes ui-binder-move {
+  from {
+    transform: translateX(calc(-50% - 0.25rem)) scale(0.7);
+  }
+}
+
+@keyframes ui-binder-turn {
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+
 @keyframes ui-god-pack-glow {
   from {
     opacity: 1;
@@ -103,6 +122,18 @@ body {
   to {
     transform: scale(1.08);
   }
+}
+
+.ui-binder-open {
+  animation: ui-binder-open 650ms ease-in forwards;
+}
+
+.ui-binder-move {
+  animation: ui-binder-move 450ms ease-out;
+}
+
+.ui-binder-turn {
+  animation: ui-binder-turn 750ms ease-in-out 450ms forwards;
 }
 
 .ui-god-pack-glow {
@@ -133,6 +164,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ui-binder-open,
+  .ui-binder-move,
+  .ui-binder-turn,
   .ui-card-flip,
   .ui-shine,
   .ui-god-pack-glow,

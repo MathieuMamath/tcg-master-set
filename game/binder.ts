@@ -60,8 +60,31 @@ export function clampPage(page: number, slotTotal: number): number {
   return Math.min(Math.max(page, 0), pageCount(slotTotal) - 1);
 }
 
+// The pages on show when the binder displays this many at once, side by side.
+export function pagesShown(page: number, slotTotal: number, pagesAtOnce: number): number[] {
+  const first = page - (page % pagesAtOnce);
+  return Array.from({ length: pagesAtOnce }, (_, index) => first + index).filter(
+    (shown) => shown < pageCount(slotTotal),
+  );
+}
+
+export function turnPage(
+  page: number,
+  direction: -1 | 1,
+  slotTotal: number,
+  pagesAtOnce: number,
+): number {
+  const [first] = pagesShown(page, slotTotal, pagesAtOnce);
+  return clampPage(first + direction * pagesAtOnce, slotTotal);
+}
+
 export function ownedSlotCount(slots: readonly BinderSlot[], collection: Collection): number {
   return slots.filter(({ key }) => (collection[key] ?? 0) > 0).length;
+}
+
+// Card ids start with their set's id, and the collection only stores what the player owns.
+export function ownedInSet(collection: Collection, setId: string): number {
+  return Object.keys(collection).filter((key) => key.startsWith(`${setId}-`)).length;
 }
 
 export function addToCollection(

@@ -4,12 +4,15 @@ import {
   type BinderCard,
   binderSlots,
   clampPage,
+  ownedInSet,
   ownedSlotCount,
   pageCount,
+  pagesShown,
   parseCollection,
   SLOTS_PER_PAGE,
   slotKey,
   slotsOnPage,
+  turnPage,
 } from './binder';
 
 function card(localId: string, variants: string[]): BinderCard {
@@ -117,5 +120,43 @@ describe('parseCollection', () => {
     const stored = JSON.stringify({ good: 2, zero: 0, negative: -1, text: 'many', half: 1.5 });
 
     expect(parseCollection(stored)).toEqual({ good: 2 });
+  });
+});
+
+describe('pages side by side', () => {
+  const FIVE_PAGES = SLOTS_PER_PAGE * 5;
+
+  test('shows one page at a time on a narrow screen', () => {
+    expect(pagesShown(3, FIVE_PAGES, 1)).toEqual([3]);
+  });
+
+  test('shows the pair a page belongs to on a wide screen', () => {
+    expect(pagesShown(0, FIVE_PAGES, 2)).toEqual([0, 1]);
+    expect(pagesShown(3, FIVE_PAGES, 2)).toEqual([2, 3]);
+  });
+
+  test('leaves the last page alone when the total is odd', () => {
+    expect(pagesShown(4, FIVE_PAGES, 2)).toEqual([4]);
+  });
+
+  test('turns one page or a whole pair', () => {
+    expect(turnPage(1, 1, FIVE_PAGES, 1)).toBe(2);
+    expect(turnPage(0, 1, FIVE_PAGES, 2)).toBe(2);
+    expect(turnPage(3, -1, FIVE_PAGES, 2)).toBe(0);
+  });
+
+  test('stays within the binder', () => {
+    expect(turnPage(0, -1, FIVE_PAGES, 2)).toBe(0);
+    expect(turnPage(4, 1, FIVE_PAGES, 2)).toBe(4);
+  });
+});
+
+describe('ownedInSet', () => {
+  test('counts the versions owned in that set only, however many copies', () => {
+    const collection = { 'set-a-1:normal': 3, 'set-a-1:reverse': 1, 'set-b-1:normal': 1 };
+
+    expect(ownedInSet(collection, 'set-a')).toBe(2);
+    expect(ownedInSet(collection, 'set-b')).toBe(1);
+    expect(ownedInSet(collection, 'set-c')).toBe(0);
   });
 });
