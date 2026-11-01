@@ -10,14 +10,24 @@
     "webglUnavailable": "This game needs WebGL, which your browser doesn't support or has turned off.",
     "coins": "{count, plural, one {# coin} other {# coins}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
-    "talk": "Talk",
     "binder": "Open the binder",
     "binderButton": "Binder",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "latest": "Talk (new releases)",
+    "thisYear": "Talk (this year)",
+    "older": "Talk (earlier sets)"
   },
   "Shopkeeper": {
-    "name": "Shopkeeper",
-    "greeting": "Hello! Would you like a booster pack?",
+    "names": {
+      "latest": "New releases",
+      "thisYear": "This year",
+      "older": "Earlier sets"
+    },
+    "greetings": {
+      "latest": "Hello! Here are our three newest sets.",
+      "thisYear": "Hello! I have the other sets from this year.",
+      "older": "Hello! I keep all the earlier sets."
+    },
     "thanks": "Thank you, and good luck with your cards!",
     "notEnoughCoins": "Sorry, you don't have enough coins.",
     "buy": "Buy a {set} booster ({price} coins)",

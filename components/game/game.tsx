@@ -12,7 +12,9 @@ import {
   boosterCount,
   buyBooster,
   removeBooster,
+  type ShopkeeperStock,
   STARTING_WALLET,
+  setsSoldBy,
   totalBoosters,
 } from '@/game/shop-dialogue';
 import type { Interaction } from '@/game/world';
@@ -33,7 +35,8 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
-  const [isTalking, setIsTalking] = useState(false);
+  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | null>(null);
+  const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(STARTING_WALLET);
   const [opening, setOpening] = useState<Opening | null>(null);
   const [isBinderOpen, setIsBinderOpen] = useState(false);
@@ -41,6 +44,7 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
   const [collection, setCollection] = useState<Collection>({});
   const locale = useLocale();
   const tBooster = useTranslations('Booster');
+  const tShopkeeper = useTranslations('Shopkeeper');
   const isDialogOpen = isTalking || isBinderOpen || isBagOpen || opening !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
@@ -71,10 +75,10 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
       if (event.code === INTERACT_KEY && controls.current.interaction) {
         event.preventDefault();
         releaseKeys();
-        if (controls.current.interaction === 'talk') {
-          setIsTalking(true);
-        } else {
+        if (controls.current.interaction === 'binder') {
           setIsBinderOpen(true);
+        } else {
+          setTalkingTo(controls.current.interaction);
         }
       } else if (isMovementKey(event.code)) {
         event.preventDefault();
@@ -106,10 +110,10 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
 
   const interact = () => {
     stopWalking();
-    if (interaction === 'talk') {
-      setIsTalking(true);
-    } else {
+    if (interaction === 'binder') {
       setIsBinderOpen(true);
+    } else if (interaction) {
+      setTalkingTo(interaction);
     }
   };
 
@@ -161,6 +165,11 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
         webglUnavailable={t('webglUnavailable')}
         onInteractionChange={setInteraction}
         isTalking={isTalking}
+        shopSigns={{
+          latest: tShopkeeper('names.latest'),
+          thisYear: tShopkeeper('names.thisYear'),
+          older: tShopkeeper('names.older'),
+        }}
       />
       <div className="absolute inset-x-4 top-0 flex flex-wrap items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
         <div className="flex flex-wrap gap-2">
@@ -248,15 +257,16 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
           onClose={() => setIsBagOpen(false)}
         />
       )}
-      {isTalking && (
+      {talkingTo && (
         <ShopDialog
-          sets={sets}
+          stock={talkingTo}
+          sets={setsSoldBy(talkingTo, sets, new Date().getFullYear())}
           onBuy={(setId) => {
             const result = buyBooster(wallet, setId);
             setWallet(result.wallet);
             return result.line;
           }}
-          onClose={() => setIsTalking(false)}
+          onClose={() => setTalkingTo(null)}
         />
       )}
     </div>

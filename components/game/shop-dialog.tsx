@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import type { PlayableSet, SetId } from '@/game/card-sets';
-import { BOOSTER_PRICE, type ShopkeeperLine } from '@/game/shop-dialogue';
+import { BOOSTER_PRICE, type ShopkeeperLine, type ShopkeeperStock } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 
 const CHOICE_CLASS =
@@ -56,13 +56,14 @@ function TypedLine({ text }: { text: string }) {
 }
 
 type Props = {
+  stock: ShopkeeperStock;
   sets: readonly PlayableSet[];
   onBuy: (setId: SetId) => ShopkeeperLine;
   onClose: () => void;
 };
 
 // Mounted only while talking, so every conversation starts with a greeting.
-export function ShopDialog({ sets, onBuy, onClose }: Props) {
+export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
   const t = useTranslations('Shopkeeper');
   const dialog = useRef<HTMLDialogElement>(null);
   const [speech, setSpeech] = useState<{ line: ShopkeeperLine; turn: number }>({
@@ -98,10 +99,13 @@ export function ShopDialog({ sets, onBuy, onClose }: Props) {
         id="shopkeeper-name"
         className="relative z-10 ml-5 w-fit -rotate-1 rounded-lg border-4 border-ui-ink bg-ui-accent px-4 py-0.5 text-lg font-semibold"
       >
-        {t('name')}
+        {t(`names.${stock}`)}
       </h2>
       <div className="-mt-3 rounded-2xl border-4 border-ui-ink bg-ui-paper px-5 pt-6 pb-3 shadow-[0_6px_0_var(--ui-ink)]">
-        <TypedLine key={speech.turn} text={t(speech.line)} />
+        <TypedLine
+          key={speech.turn}
+          text={speech.line === 'greeting' ? t(`greetings.${stock}`) : t(speech.line)}
+        />
         <form method="dialog" className="mt-2 border-ui-ink/20 border-t-2 pt-2">
           <div className="max-h-[35dvh] overflow-y-auto">
             {sets.map(({ id, name }) => (

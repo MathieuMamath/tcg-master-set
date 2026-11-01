@@ -195,7 +195,7 @@ describe('the shop', () => {
     const state = walk(SHOP, start, { x: 0, z: -1 }, 360);
 
     expect(state.x).toBe(SHOPKEEPER_POSITION.x);
-    expect(state.z).toBeGreaterThan(-0.8);
+    expect(state.z).toBeGreaterThan(-1.4);
   });
 
   test('walking up to the counter brings the shopkeeper within reach', () => {
@@ -209,8 +209,14 @@ describe('the shop', () => {
     expect(npcInReach(SHOP, SHOP_FROM_TOWN)).toBeUndefined();
   });
 
-  test('the counter offers a conversation rather than the binder', () => {
-    expect(interactionAt(SHOP, { x: 0.2, z: -0.5 })).toBe('talk');
+  test('each counter offers a conversation with its own shopkeeper', () => {
+    expect(interactionAt(SHOP, { x: -2.4, z: -1 })).toBe('latest');
+    expect(interactionAt(SHOP, { x: 0, z: -1 })).toBe('thisYear');
+    expect(interactionAt(SHOP, { x: 2.4, z: -1 })).toBe('older');
+  });
+
+  test('the space between two counters offers nothing', () => {
+    expect(interactionAt(SHOP, { x: 1.2, z: -1 })).toBeNull();
   });
 
   test('the shopkeeper blocks movement', () => {
@@ -218,7 +224,7 @@ describe('the shop', () => {
   });
 
   test('the shopkeeper stands behind the counter and within the room', () => {
-    expect(SHOPKEEPER_POSITION.z).toBeLessThan(-1.05);
+    expect(SHOPKEEPER_POSITION.z).toBeLessThan(-1.7);
     expect(isInside(SHOPKEEPER_POSITION, SHOP.bounds)).toBe(true);
   });
 });

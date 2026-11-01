@@ -1,5 +1,6 @@
 import { moveWithCollisions, type Position, type Rect } from './collision';
 import { type CharacterState, type Direction, stepCharacter } from './movement';
+import type { ShopkeeperStock } from './shop-dialogue';
 
 export const CHARACTER_RADIUS = 0.25;
 
@@ -46,7 +47,7 @@ export type ModelName = keyof typeof FOOTPRINTS;
 
 export const MODEL_NAMES = Object.keys(FOOTPRINTS) as ModelName[];
 
-export const NPC_MODELS = ['character-female-b'] as const;
+export const NPC_MODELS = ['character-female-b', 'character-male-c', 'character-female-d'] as const;
 
 export type NpcModel = (typeof NPC_MODELS)[number];
 
@@ -60,6 +61,8 @@ export type PlaceItem = {
   quarterTurns?: number;
   sizeFactor?: number;
   blocksMovement?: boolean;
+  // Paints the whole model, for rooms with a look of their own.
+  color?: string;
 };
 
 export type Arrival = Position & { heading: number };
@@ -75,6 +78,8 @@ export type ExitMarker = Position & { quarterTurns: number };
 
 export type Npc = Position & {
   model: NpcModel;
+  // What this NPC sells.
+  stock: ShopkeeperStock;
   heading: number;
   // Where the player has to stand to talk to this NPC.
   talkArea: Rect;
@@ -150,11 +155,12 @@ export function npcInReach(place: Place, position: Position): Npc | undefined {
   return place.npcs.find(({ talkArea }) => isInside(position, talkArea));
 }
 
-export type Interaction = 'talk' | 'binder';
+export type Interaction = ShopkeeperStock | 'binder';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
-  if (npcInReach(place, position)) {
-    return 'talk';
+  const npc = npcInReach(place, position);
+  if (npc) {
+    return npc.stock;
   }
   return place.binderArea && isInside(position, place.binderArea) ? 'binder' : null;
 }

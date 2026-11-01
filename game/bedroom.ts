@@ -1,18 +1,12 @@
-import {
-  ARRIVAL_THROUGH_ROOM_DOOR,
-  ROOM_BOUNDS,
-  ROOM_DOOR_MARKER,
-  ROOM_FLOOR_HEIGHT,
-  ROOM_SHELL,
-  roomDoorExit,
-} from './room-shell';
+import { buildRoom, ROOM_FLOOR_HEIGHT } from './room-shell';
 import type { Arrival, Place, PlaceItem } from './world';
 
+const ROOM = buildRoom(3, 3);
 const FLOOR_HEIGHT = ROOM_FLOOR_HEIGHT;
 export const DESK_TOP = FLOOR_HEIGHT + 0.384 * 1.5;
 
 export const BEDROOM_START: Arrival = { x: 0.4, z: 0.7, heading: 0 };
-export const BEDROOM_FROM_TOWN: Arrival = ARRIVAL_THROUGH_ROOM_DOOR;
+export const BEDROOM_FROM_TOWN: Arrival = ROOM.arrival;
 
 const FURNITURE: PlaceItem[] = [
   { model: 'furniture/rugRectangle', x: 0.4, z: 0.5 },
@@ -34,10 +28,10 @@ const FURNITURE: PlaceItem[] = [
 
 export const BEDROOM: Place = {
   id: 'bedroom',
-  items: [...ROOM_SHELL, ...FURNITURE],
-  bounds: ROOM_BOUNDS,
-  exits: [roomDoorExit('town', { x: -3.5, z: -0.35, heading: 0 })],
-  exitMarkers: [ROOM_DOOR_MARKER],
+  items: [...ROOM.items, ...FURNITURE],
+  bounds: ROOM.bounds,
+  exits: [ROOM.doorExit('town', { x: -3.5, z: -0.35, heading: 0 })],
+  exitMarkers: [ROOM.doorMarker],
   npcs: [],
   // The floor in front of the bookcases.
   binderArea: { minX: 0.6, maxX: 2.1, minZ: -1.9, maxZ: -1.2 },

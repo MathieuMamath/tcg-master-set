@@ -1,6 +1,6 @@
 import { and, count, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
-import { cardSetTranslations, cards, cardVariants } from '@/db/schema';
+import { cardSets, cardSetTranslations, cards, cardVariants } from '@/db/schema';
 import { isPlayableSet, PLAYABLE_SET_IDS, type PlayableSet } from '@/game/card-sets';
 
 // Only the sets that have been imported, so that the game never offers an empty one.
@@ -17,8 +17,10 @@ export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {
       id: cardSetTranslations.setId,
       name: cardSetTranslations.name,
       logoUrl: cardSetTranslations.logoUrl,
+      releaseDate: cardSets.releaseDate,
     })
     .from(cardSetTranslations)
+    .innerJoin(cardSets, eq(cardSets.id, cardSetTranslations.setId))
     .where(
       and(
         eq(cardSetTranslations.locale, locale),
@@ -34,6 +36,7 @@ export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {
             id: row.id,
             name: row.name,
             logoUrl: row.logoUrl,
+            releaseDate: row.releaseDate,
             slotTotal: slotTotals.find((total) => total.id === id)?.slotTotal ?? 0,
           },
         ]
