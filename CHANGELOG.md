@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.28](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.27...v0.1.28) (2026-11-01)
+
+### Features
+
+* **boosters:** show a golden "new" on cards the player doesn't own yet ([#28](https://github.com/MathieuMamath/tcg-master-set/issues/28)) ([12e2bc7](https://github.com/MathieuMamath/tcg-master-set/commit/12e2bc70085c21211593341f829e690724c783f5))
+
 ## [0.1.27](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.26...v0.1.27) (2026-11-01)
 
 ### Features
