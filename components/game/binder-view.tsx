@@ -13,6 +13,7 @@ import {
   slotsOnPage,
 } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
+import { CardPicture } from './card-picture';
 import { TiltCard } from './tilt-card';
 
 const POCKET_CLASS = 'relative aspect-[5/7] rounded-[4.5%/3.2%]';
@@ -20,35 +21,6 @@ const NAV_BUTTON_CLASS =
   'cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-4 py-1 font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)] disabled:cursor-default disabled:opacity-40';
 
 type Catalogue = { setName: string; cards: BinderCard[] };
-
-function CardImage({
-  card,
-  quality,
-  className,
-}: {
-  card: BinderCard;
-  quality: 'high' | 'low';
-  className: string;
-}) {
-  if (!card.imageUrl) {
-    return (
-      <span className={`flex items-center justify-center p-1 text-xs ${className}`}>
-        {card.name}
-      </span>
-    );
-  }
-  return (
-    // The images come from the card catalogue's own server, in its optimised sizes.
-    // biome-ignore lint/performance/noImgElement: next/image would only proxy them again.
-    <img
-      src={`${card.imageUrl}/${quality}.webp`}
-      alt={card.name}
-      draggable={false}
-      loading="lazy"
-      className={className}
-    />
-  );
-}
 
 function VariantTag({ variant }: { variant: string }) {
   const t = useTranslations('Binder.variants');
@@ -87,13 +59,9 @@ function Pocket({ slot, count, onOpen }: { slot: BinderSlot; count: number; onOp
       type="button"
       onClick={onOpen}
       aria-label={t('viewCard', { name: slot.card.name, count })}
-      className={`${POCKET_CLASS} cursor-pointer outline-offset-2`}
+      className={`${POCKET_CLASS} block w-full cursor-pointer outline-offset-2`}
     >
-      <CardImage
-        card={slot.card}
-        quality="low"
-        className="size-full rounded-[4.5%/3.2%] bg-ui-paper object-cover"
-      />
+      <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="low" />
       <VariantTag variant={slot.variant} />
       {count > 1 && (
         <span className="absolute -top-1 -right-1 rounded-full border-2 border-ui-ink bg-ui-paper px-1.5 text-xs font-semibold text-ui-ink">
@@ -137,11 +105,7 @@ function CardDetail({
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
       <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
         <TiltCard isSpecial={slot.variant !== 'normal'}>
-          <CardImage
-            card={slot.card}
-            quality="high"
-            className="size-full rounded-[4.5%/3.2%] object-cover"
-          />
+          <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="high" />
         </TiltCard>
       </div>
       <p className="text-center text-lg font-semibold text-ui-paper">

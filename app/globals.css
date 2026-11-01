@@ -87,6 +87,33 @@ body {
   animation: ui-shine 2600ms linear infinite;
 }
 
+@keyframes ui-god-pack-glow {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+
+@keyframes ui-god-pack-banner {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.ui-god-pack-glow {
+  background: radial-gradient(circle at 50% 45%, rgb(255 210 80 / 70%), transparent 65%);
+  animation: ui-god-pack-glow 900ms ease-in-out infinite alternate;
+}
+
+.ui-god-pack-banner {
+  animation: ui-god-pack-banner 500ms ease-in-out infinite alternate;
+}
+
 .ui-pack-crimp {
   background:
     repeating-linear-gradient(90deg, rgb(255 255 255 / 10%) 0 2px, rgb(0 0 0 / 22%) 2px 4px),
@@ -108,6 +135,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .ui-card-flip,
   .ui-shine,
+  .ui-god-pack-glow,
+  .ui-god-pack-banner,
   .ui-pop-in,
   .ui-nudge,
   .ui-bob {

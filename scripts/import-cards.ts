@@ -19,6 +19,8 @@ import {
   parseSet,
 } from '../cards/tcgdex';
 import { cardSets, cardSetTranslations, cards, cardTranslations, cardVariants } from '../db/schema';
+import { BOOSTER_RECIPES, unreachableSlots } from '../game/booster';
+import { isPlayableSet } from '../game/card-sets';
 
 const API_URL = 'https://api.tcgdex.net/v2';
 const CONCURRENT_REQUESTS = 5;
@@ -91,6 +93,19 @@ async function fetchCard(id: string): Promise<CatalogueCard> {
   });
 
   return mergeCardLanguages(english, translations);
+}
+
+// Saved all the same: the game shows the card's name until the image appears there.
+async function unavailableImages(catalogue: readonly CatalogueCard[]) {
+  const imageUrls = catalogue.flatMap(({ translations }) =>
+    translations.flatMap(({ imageUrl }) => (imageUrl ? [imageUrl] : [])),
+  );
+  const checks = await mapWithLimit(imageUrls, CONCURRENT_REQUESTS, async (imageUrl) => {
+    const response = await fetch(`${imageUrl}/low.webp`, { method: 'HEAD' });
+    return response.ok ? [] : [imageUrl];
+  });
+
+  return checks.flat();
 }
 
 async function withLogo(locale: CardLocale, set: ParsedSet) {
@@ -210,6 +225,18 @@ async function main() {
 
       await saveSet(db, english, translations, catalogue);
       console.info(JSON.stringify(catalogueSummary(catalogue), null, 2));
+
+      const unavailable = await unavailableImages(catalogue);
+      if (unavailable.length > 0) {
+        console.warn(`TCGdex has no image at: ${unavailable.join(', ')}`);
+      }
+
+      const unreachable = isPlayableSet(setId)
+        ? unreachableSlots(catalogue, BOOSTER_RECIPES[setId])
+        : [];
+      if (unreachable.length > 0) {
+        console.warn(`No booster of ${setId} can give: ${unreachable.join(', ')}`);
+      }
     }
   } finally {
     await pool.end();
