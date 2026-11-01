@@ -1,17 +1,35 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { OpenedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/booster';
 import type { SetId } from '@/game/card-sets';
+import { type PullTier, packTier } from '@/game/pull-tier';
 import { CardBack } from './card-back';
 import { CardPicture } from './card-picture';
 import { moveThroughChoices } from './menu-focus';
 import { PackBody, packCrimpStyle } from './pack-art';
+import { PullRays, PullScene, tierColor, tierColors } from './pull-scene';
+import { SparksCanvas, useSparks } from './pull-sparks';
 import { TiltCard } from './tilt-card';
 
 const TEAR_ANIMATION_MILLISECONDS = 450;
+// Clockwise, so that the left end rises: the cut goes from left to right.
+const LIFTED_EDGE_DEGREES = 14;
+const TORN_EDGE_DEGREES = 20;
+const FIRST_TEASED_TIER = 2;
+const FIRST_RAYS_TIER = 2;
+const FIRST_SHAKING_TIER = 3;
+const FIRST_FLASHING_TIER = 3;
 
 export type Opening = { setId: SetId } & (
   | { status: 'loading' }
@@ -97,14 +115,26 @@ function SealedPack({
         style={packCrimpStyle(setId)}
         className="ui-pop-in relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)] cursor-grab touch-none select-none outline-offset-4 active:cursor-grabbing"
       >
-        <PackBody setId={setId} setName={setName} logoUrl={logoUrl} />
+        <PackBody setId={setId} setName={setName} logoUrl={logoUrl} cut={progress} />
+        {/* The edge in two parts: what is still attached, and what lifts from the scissors. */}
+        <span
+          aria-hidden="true"
+          style={{ clipPath: `inset(0 0 0 ${progress * 100}%)` }}
+          className="ui-pack-crimp absolute inset-x-0 top-0 h-[13%] rounded-t-md border-4 border-b-0 border-ui-ink"
+        />
         <span
           aria-hidden="true"
           style={{
-            transform: `rotate(${progress * -8}deg) translateY(${isTorn ? '-180%' : `${progress * -8}px`})`,
+            clipPath: `inset(-50% ${(1 - progress) * 100}% -50% -50%)`,
+            transformOrigin: isTorn ? '100% 100%' : `${progress * 100}% 100%`,
+            transform: isTorn
+              ? `translate(10%, -180%) rotate(${TORN_EDGE_DEGREES}deg)`
+              : `rotate(${progress * LIFTED_EDGE_DEGREES}deg)`,
             opacity: isTorn ? 0 : 1,
           }}
-          className="ui-pack-crimp absolute inset-x-0 top-0 h-[13%] origin-right rounded-t-md border-4 border-b-0 border-ui-ink transition-[transform,opacity] duration-300"
+          className={`ui-pack-crimp absolute inset-x-0 top-0 h-[13%] rounded-t-md border-4 border-ui-ink ${
+            isTorn ? 'transition-[transform,opacity] duration-300' : ''
+          }`}
         />
         <span
           aria-hidden="true"
@@ -144,16 +174,25 @@ function GodPackBanner() {
 function Reveal({
   cards,
   isGodPack,
+  arrivalTier,
   onFinished,
 }: {
   cards: OpenedCard[];
   isGodPack: boolean;
+  // The tier of the pack, whose flash this screen fades out of.
+  arrivalTier: PullTier;
   onFinished: () => void;
 }) {
   const t = useTranslations('Booster');
   const [revealed, setRevealed] = useState(0);
   const current = revealed > 0 ? cards[revealed - 1] : null;
+  const next = cards[revealed];
   const isLast = revealed === cards.length;
+  const tier = current?.tier ?? 0;
+  const { canvas, emit } = useSparks();
+  const cardBox = useRef<HTMLDivElement>(null);
+  // Before a great card, the current one trembles and the button calls for it.
+  const isTeasing = (next?.tier ?? 0) >= FIRST_TEASED_TIER;
 
   // Loaded ahead of time, so that each card appears the moment it's revealed.
   useEffect(() => {
@@ -164,18 +203,60 @@ function Reveal({
     }
   }, [cards]);
 
+  useEffect(() => {
+    const box = cardBox.current?.getBoundingClientRect();
+    if (box && tier > 0) {
+      emit({
+        x: box.left + box.width / 2,
+        y: box.top + box.height / 2,
+        count: tier * 70,
+        colors: tierColors(tier),
+        speed: 300 + tier * 130,
+      });
+    }
+  }, [emit, tier]);
+
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center gap-3">
+    <div
+      style={
+        {
+          '--pull-color': tierColor(Math.max(tier, next?.tier ?? 0) as PullTier),
+          '--pull-shake': `${tier * 2}px`,
+        } as CSSProperties
+      }
+      className="relative flex h-full w-full flex-col items-center justify-center gap-3"
+    >
+      <SparksCanvas canvas={canvas} />
+      {arrivalTier > 0 && revealed === 0 && (
+        <div
+          aria-hidden="true"
+          className="ui-pull-arrive pointer-events-none fixed inset-0 z-40"
+          style={{ background: arrivalTier >= 3 ? '#ffffff' : tierColor(arrivalTier) }}
+        />
+      )}
+      {tier >= FIRST_FLASHING_TIER && (
+        <div
+          key={revealed}
+          aria-hidden="true"
+          className="ui-pull-arrive pointer-events-none fixed inset-0 z-40 bg-white"
+        />
+      )}
       {isGodPack && <GodPackBanner />}
       <p aria-live="polite" className="text-lg font-semibold text-ui-paper">
         {current ? current.name : t('readyToReveal')}
       </p>
       <div
-        className={`aspect-[5/7] w-[min(100%,44vh,21.4rem)] [perspective:60rem] ${
+        key={revealed}
+        ref={cardBox}
+        className={`relative aspect-[5/7] w-[min(100%,44vh,21.4rem)] [perspective:60rem] ${
           isGodPack ? '[@media(max-height:30rem)]:w-[34vh]' : ''
-        }`}
+        } ${isTeasing ? 'ui-pull-shake' : tier >= FIRST_SHAKING_TIER ? 'ui-pull-shake-once' : ''}`}
+        style={isTeasing ? ({ '--pull-shake': '1.5px' } as CSSProperties) : undefined}
       >
-        <div key={revealed} className="ui-card-flip size-full">
+        {tier >= FIRST_RAYS_TIER && (
+          <PullRays tier={tier} className="top-1/2 left-1/2 size-[170vmin] -translate-1/2" />
+        )}
+        <div className="ui-card-flip relative size-full">
           <TiltCard isSpecial={current !== null && isSpecial(current)}>
             {current ? (
               <CardPicture name={current.name} imageUrl={current.imageUrl} quality="high" />
@@ -192,7 +273,9 @@ function Reveal({
       <button
         type="button"
         onClick={() => (isLast ? onFinished() : setRevealed(revealed + 1))}
-        className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
+        className={`cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)] ${
+          isTeasing ? 'ui-pull-tease' : ''
+        }`}
       >
         {isLast ? t('seeAll') : t('reveal')}
       </button>
@@ -272,6 +355,11 @@ function Summary({
               type="button"
               aria-label={t('enlargeCard', { name: card.name })}
               onClick={() => setEnlarged(card)}
+              style={
+                card.tier > 0
+                  ? { boxShadow: `0 0 1.1rem 0.25rem ${tierColor(card.tier)}` }
+                  : undefined
+              }
               className={`relative block size-full cursor-pointer rounded-[4.5%/3.2%] outline-offset-2 ${
                 isSpecial(card) ? 'shadow-[0_0_0.9rem_0.15rem_var(--ui-accent)]' : ''
               }`}
@@ -306,7 +394,8 @@ type Props = {
 export function BoosterOpening({ opening, onRetry, onClose }: Props) {
   const t = useTranslations('Booster');
   const dialog = useRef<HTMLDialogElement>(null);
-  const [step, setStep] = useState<'pack' | 'reveal' | 'summary'>('pack');
+  const [step, setStep] = useState<'pack' | 'pull' | 'reveal' | 'summary'>('pack');
+  const finishPull = useCallback(() => setStep('reveal'), []);
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -317,6 +406,14 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
   useEffect(() => {
     dialog.current?.querySelector('button')?.focus();
   }, [opening.status, step]);
+
+  const tier =
+    opening.status === 'ready'
+      ? packTier(
+          opening.cards.map((card) => card.tier),
+          opening.isGodPack,
+        )
+      : 0;
 
   const canLeave = opening.status === 'error' || step === 'summary';
 
@@ -332,7 +429,10 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
       }}
       onClose={onClose}
       onKeyDown={moveThroughChoices}
-      className="m-0 size-full max-h-none max-w-none bg-ui-ink/95 p-4 font-game backdrop:bg-transparent"
+      // The light effects reach past the screen, which must not make it scroll.
+      className={`m-0 size-full max-h-none max-w-none bg-ui-ink/95 p-4 font-game backdrop:bg-transparent ${
+        step === 'pull' || step === 'reveal' ? 'overflow-hidden' : ''
+      }`}
     >
       {opening.status === 'loading' && (
         <div className="flex h-full items-center justify-center text-xl text-ui-paper">
@@ -362,7 +462,7 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
       )}
       {opening.status === 'ready' && (
         <div className="flex h-full items-center justify-center">
-          {opening.isGodPack && step !== 'pack' && (
+          {opening.isGodPack && step !== 'pack' && step !== 'pull' && (
             <div
               aria-hidden="true"
               className="ui-god-pack-glow pointer-events-none fixed inset-0"
@@ -373,13 +473,24 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
               setId={opening.setId}
               setName={opening.setName}
               logoUrl={opening.logoUrl}
-              onTorn={() => setStep('reveal')}
+              onTorn={() => setStep('pull')}
+            />
+          )}
+          {step === 'pull' && (
+            <PullScene
+              setId={opening.setId}
+              setName={opening.setName}
+              logoUrl={opening.logoUrl}
+              tier={tier}
+              isGodPack={opening.isGodPack}
+              onDone={finishPull}
             />
           )}
           {step === 'reveal' && (
             <Reveal
               cards={opening.cards}
               isGodPack={opening.isGodPack}
+              arrivalTier={tier}
               onFinished={() => setStep('summary')}
             />
           )}

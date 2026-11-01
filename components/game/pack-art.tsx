@@ -33,19 +33,32 @@ export function packCrimpStyle(setId: SetId) {
   return { '--pack-crimp': PACK_THEMES[setId].crimp } as CSSProperties;
 }
 
+// Removes what the cut has already gone past, so that nothing stays behind the edge being torn off.
+// It goes below the pack too, to keep the shadow there.
+function cutOutline(cut: number) {
+  const reached = `${cut * 100}%`;
+  return `polygon(0 13%, ${reached} 13%, ${reached} 0, 100% 0, 100% calc(100% + 1rem), 0 calc(100% + 1rem))`;
+}
+
 // Everything but the top edge, which the opening animates on its own.
 export function PackBody({
   setId,
   setName,
   logoUrl,
+  cut = 0,
 }: {
   setId: SetId;
   setName: string;
   logoUrl: string | null;
+  // How far along the top edge the pack has been cut, from 0 to 1.
+  cut?: number;
 }) {
   return (
     <span
-      style={{ background: packBackground(setId) }}
+      style={{
+        background: packBackground(setId),
+        clipPath: cut > 0 ? cutOutline(cut) : undefined,
+      }}
       className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]"
     >
       <span className="absolute inset-x-3 top-[13%] bottom-[7%] flex items-center justify-center">

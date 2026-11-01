@@ -151,6 +151,133 @@ body {
     var(--pack-crimp);
 }
 
+@keyframes ui-pull-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ui-pull-shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  25% {
+    transform: translate(var(--pull-shake), calc(var(--pull-shake) * -0.5)) rotate(-0.6deg);
+  }
+  50% {
+    transform: translate(calc(var(--pull-shake) * -0.8), var(--pull-shake)) rotate(0.5deg);
+  }
+  75% {
+    transform: translate(calc(var(--pull-shake) * 0.6), calc(var(--pull-shake) * 0.5))
+      rotate(-0.3deg);
+  }
+}
+
+@keyframes ui-pull-jolt {
+  0% {
+    transform: scale(1.025);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ui-pull-ring {
+  from {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3);
+  }
+}
+
+@keyframes ui-pull-flicker {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.35);
+  }
+}
+
+@keyframes ui-pull-flash {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-pull-arrive {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-pull-tease {
+  50% {
+    box-shadow:
+      0 4px 0 var(--ui-ink),
+      0 0 1.8rem 0.5rem var(--pull-color);
+  }
+}
+
+.ui-pull-rays-mask {
+  mask-image: radial-gradient(circle, #000 0, rgb(0 0 0 / 55%) 25%, transparent 62%);
+}
+
+.ui-pull-rays {
+  mask-image: repeating-conic-gradient(#000 0 7deg, transparent 7deg 20deg);
+  animation: ui-pull-spin 14s linear infinite;
+}
+
+.ui-pull-tint {
+  background: radial-gradient(circle at 50% 40%, var(--pull-color), transparent 70%);
+}
+
+.ui-pull-beam {
+  background: linear-gradient(to top, var(--pull-color), transparent);
+  clip-path: polygon(8% 100%, 92% 100%, 100% 0, 0 0);
+  mix-blend-mode: screen;
+  animation: ui-pull-flicker 180ms linear infinite;
+}
+
+.ui-pull-shake {
+  animation: ui-pull-shake 140ms linear infinite;
+}
+
+.ui-pull-shake-once {
+  animation: ui-pull-shake 140ms linear 3;
+}
+
+.ui-pull-jolt {
+  animation: ui-pull-jolt 220ms ease-out;
+}
+
+.ui-pull-ring {
+  animation: ui-pull-ring 650ms ease-out forwards;
+}
+
+.ui-pull-flash {
+  animation: ui-pull-flash 350ms ease-in forwards;
+}
+
+.ui-pull-arrive {
+  animation: ui-pull-arrive 600ms ease-out forwards;
+}
+
+.ui-pull-tease {
+  animation: ui-pull-tease 700ms ease-in-out infinite;
+}
+
 .ui-pop-in {
   animation: ui-pop-in 180ms ease-out;
 }
@@ -173,7 +300,25 @@ body {
   .ui-god-pack-banner,
   .ui-pop-in,
   .ui-nudge,
-  .ui-bob {
+  .ui-bob,
+  .ui-pull-rays,
+  .ui-pull-beam,
+  .ui-pull-shake,
+  .ui-pull-shake-once,
+  .ui-pull-jolt,
+  .ui-pull-ring,
+  .ui-pull-flash,
+  .ui-pull-arrive,
+  .ui-pull-tease {
     animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Without their animation these would stay in the way: a ring and full-screen flashes. */
+  .ui-pull-ring,
+  .ui-pull-flash,
+  .ui-pull-arrive {
+    display: none;
   }
 }

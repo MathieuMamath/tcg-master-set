@@ -2,6 +2,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cardSetTranslations, cards, cardTranslations, cardVariants } from '@/db/schema';
 import type { DrawnCard, PoolCard } from '@/game/booster';
+import { cardTier, type PullTier } from '@/game/pull-tier';
 
 export type OpenedCard = {
   id: string;
@@ -9,6 +10,8 @@ export type OpenedCard = {
   rarity: string | null;
   variant: string;
   imageUrl: string | null;
+  // From the rarity in English, since `rarity` above is translated for display.
+  tier: PullTier;
 };
 
 export async function loadBoosterPool(setId: string): Promise<PoolCard[]> {
@@ -38,15 +41,17 @@ export async function loadOpenedCards(
     .select({ name: cardSetTranslations.name, logoUrl: cardSetTranslations.logoUrl })
     .from(cardSetTranslations)
     .where(and(eq(cardSetTranslations.setId, setId), eq(cardSetTranslations.locale, locale)));
+  const cardIds = drawn.map(({ cardId }) => cardId);
+  const rarities = await db
+    .select({ id: cards.id, rarity: cards.rarity })
+    .from(cards)
+    .where(inArray(cards.id, cardIds));
   const translations = await db
     .select()
     .from(cardTranslations)
     .where(
       and(
-        inArray(
-          cardTranslations.cardId,
-          drawn.map(({ cardId }) => cardId),
-        ),
+        inArray(cardTranslations.cardId, cardIds),
         inArray(cardTranslations.locale, [locale, 'en']),
       ),
     );
@@ -63,6 +68,7 @@ export async function loadOpenedCards(
         rarity: translation?.rarity ?? null,
         variant,
         imageUrl: translation?.imageUrl ?? null,
+        tier: cardTier(rarities.find(({ id }) => id === cardId)?.rarity ?? null),
       };
     }),
   };
