@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.26](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.25...v0.1.26) (2026-11-01)
+
+### Bug Fixes
+
+* **city:** make the whole game playable with the keyboard ([#26](https://github.com/MathieuMamath/tcg-master-set/issues/26)) ([ea09883](https://github.com/MathieuMamath/tcg-master-set/commit/ea098838686b20822df22ca0f2157961530511e9))
+
 ## [0.1.25](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.24...v0.1.25) (2026-11-01)
 
 ### Features
