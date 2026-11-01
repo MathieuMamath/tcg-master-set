@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.27](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.26...v0.1.27) (2026-11-01)
+
+### Features
+
+* **boosters:** add light effects that climb to the best card of a pack ([#27](https://github.com/MathieuMamath/tcg-master-set/issues/27)) ([3fd509a](https://github.com/MathieuMamath/tcg-master-set/commit/3fd509a9f014966cfa70e22209c2405087becac2))
+
 ## [0.1.26](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.25...v0.1.26) (2026-11-01)
 
 ### Bug Fixes
