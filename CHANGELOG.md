@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.13](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.12...v0.1.13) (2026-11-01)
+
+### Features
+
+* **boosters:** show the set logo on our own pack design ([#13](https://github.com/MathieuMamath/tcg-master-set/issues/13)) ([5e4ac14](https://github.com/MathieuMamath/tcg-master-set/commit/5e4ac1494528a2f738b1d6c1b1ca19ecce98ad3c))
+
 ## [0.1.12](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.11...v0.1.12) (2026-11-01)
 
 ### Features
