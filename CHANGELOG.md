@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.15](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.14...v0.1.15) (2026-11-01)
+
+### Features
+
+* **boosters:** enlarge cards from the opening summary ([#15](https://github.com/MathieuMamath/tcg-master-set/issues/15)) ([6238649](https://github.com/MathieuMamath/tcg-master-set/commit/623864946adca531d5b4b3ee204245c7b4de3cc6))
+
 ## [0.1.14](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.13...v0.1.14) (2026-11-01)
 
 ### Features
