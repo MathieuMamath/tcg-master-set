@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.23](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.22...v0.1.23) (2026-11-01)
+
+### Features
+
+* **binder:** disable empty binders and sort the choice ([#23](https://github.com/MathieuMamath/tcg-master-set/issues/23)) ([51cfb0a](https://github.com/MathieuMamath/tcg-master-set/commit/51cfb0ae4ed2237aa58e9bc9440d699298860a3e))
+
 ## [0.1.22](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.21...v0.1.22) (2026-11-01)
 
 ### Features
