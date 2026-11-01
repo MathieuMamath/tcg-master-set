@@ -1,5 +1,13 @@
 import { sql } from 'drizzle-orm';
-import { check, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+  check,
+  doublePrecision,
+  integer,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core';
 import { users } from './auth';
 import { cardSets } from './cards';
 
@@ -33,6 +41,18 @@ export const playerBoosters = pgTable(
     check('player_boosters_count_not_negative', sql`${table.count} >= 0`),
   ],
 );
+
+// Where the character stands, so that a player comes back to the same spot.
+export const playerSpots = pgTable('player_spots', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  place: text('place').notNull(),
+  x: doublePrecision('x').notNull(),
+  z: doublePrecision('z').notNull(),
+  heading: doublePrecision('heading').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const playerCards = pgTable(
   'player_cards',

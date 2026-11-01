@@ -16,6 +16,7 @@ vi.mock('@/player/progress', () => ({
   loadPlayerProgress: vi.fn().mockResolvedValue({
     wallet: { coins: 1000, boosters: {} },
     collection: {},
+    spot: null,
   }),
 }));
 
@@ -27,7 +28,7 @@ function renderHome(locale: Locale, messages: typeof en) {
       <HomeScreen
         player={PLAYER}
         sets={[]}
-        progress={{ wallet: { coins: 1000, boosters: {} }, collection: {} }}
+        progress={{ wallet: { coins: 1000, boosters: {} }, collection: {}, spot: null }}
       />
     </NextIntlClientProvider>,
   );

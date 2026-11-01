@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { BEDROOM, BEDROOM_FROM_TOWN, BEDROOM_START } from './bedroom';
 import { isBlocked } from './collision';
 import { type CharacterState, STILL } from './movement';
-import { PLACES } from './places';
+import { PLACES, parseSpot } from './places';
 import { SHOP, SHOP_FROM_TOWN, SHOPKEEPER_POSITION } from './shop';
 import { TOWN } from './town';
 import {
@@ -226,5 +226,49 @@ describe('the shop', () => {
   test('the shopkeeper stands behind the counter and within the room', () => {
     expect(SHOPKEEPER_POSITION.z).toBeLessThan(-1.7);
     expect(isInside(SHOPKEEPER_POSITION, SHOP.bounds)).toBe(true);
+  });
+});
+
+describe('parseSpot', () => {
+  const SPOT = { place: 'bedroom', ...BEDROOM_START };
+
+  test('keeps a spot where the character can stand', () => {
+    expect(parseSpot(SPOT)).toEqual(SPOT);
+  });
+
+  test('accepts every arrival of every place', () => {
+    for (const place of ALL_PLACES) {
+      for (const { to, arrival } of place.exits) {
+        expect(parseSpot({ place: to, ...arrival })).not.toBeNull();
+      }
+    }
+  });
+
+  test('refuses anything that is not a spot', () => {
+    expect(parseSpot(null)).toBeNull();
+    expect(parseSpot(undefined)).toBeNull();
+    expect(parseSpot('bedroom')).toBeNull();
+    expect(parseSpot({ ...SPOT, x: '1' })).toBeNull();
+    expect(parseSpot({ ...SPOT, heading: Number.NaN })).toBeNull();
+  });
+
+  test('refuses a place that does not exist', () => {
+    expect(parseSpot({ ...SPOT, place: 'moon' })).toBeNull();
+    expect(parseSpot({ ...SPOT, place: 'constructor' })).toBeNull();
+  });
+
+  test('refuses a spot outside the place', () => {
+    expect(parseSpot({ ...SPOT, x: BEDROOM.bounds.maxX + 1 })).toBeNull();
+    expect(parseSpot({ ...SPOT, z: BEDROOM.bounds.minZ - 1 })).toBeNull();
+  });
+
+  test('refuses a spot inside an obstacle', () => {
+    const [obstacle] = obstaclesOf(BEDROOM);
+    const center = {
+      x: (obstacle.minX + obstacle.maxX) / 2,
+      z: (obstacle.minZ + obstacle.maxZ) / 2,
+    };
+
+    expect(parseSpot({ ...SPOT, ...center })).toBeNull();
   });
 });

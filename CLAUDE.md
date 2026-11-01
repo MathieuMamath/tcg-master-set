@@ -52,6 +52,8 @@ The schema lives in `db/schema`, and every change goes through a migration in `d
 
 `player_cards` deliberately has no foreign key to `cards`, because `pnpm cards:import` replaces a set's card rows.
 
+`player_spots` keeps where the character stands, saved from the browser and checked by `parseSpot` in `game/places.ts`. A spot gives no advantage, so it isn't checked for how the player got there. A spot that a map change has made invalid is ignored, and the player starts in the bedroom. It is saved on a change of place and when leaving the page. Because a reload can read the database before that last save arrives, `components/game/scene.tsx` also leaves the spot in `sessionStorage` for the next load, which uses it once.
+
 ## Cards
 
 The card catalogue comes from [TCGdex](https://tcgdex.dev/) and only lives in the database, never in the repository. Tests use placeholder data. `pnpm cards:import` copies a set in one transaction and can run again safely. Card images stay hosted by TCGdex.
@@ -68,7 +70,7 @@ Playing requires an account: pages and API routes check `getPlayer()` from `auth
 
 ## Languages
 
-Text lives in `messages/en.json` and `messages/fr.json`, which must define the same keys. A test enforces this. URLs carry the language, such as `/en` and `/fr`.
+Text lives in `messages/en.json` and `messages/fr.json`, which must define the same keys. A test enforces this. URLs carry the language, such as `/en` and `/fr`. Players change it in the settings menu, or with the switcher on the sign-up and sign-in pages.
 
 ## Game code
 

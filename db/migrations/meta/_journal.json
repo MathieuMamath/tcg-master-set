@@ -22,6 +22,13 @@
       "when": 1793561977396,
       "tag": "0002_harsh_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793570726426,
+      "tag": "0003_lively_stone_men",
+      "breakpoints": true
     }
   ]
 }

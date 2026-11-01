@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
-import { LocaleSwitcher } from '@/components/locale-switcher';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
 
@@ -32,10 +31,7 @@ export default async function RootLayout({ children, params }: Props) {
   return (
     <html lang={locale} className="h-full antialiased">
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>
-          <LocaleSwitcher />
-          {children}
-        </NextIntlClientProvider>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
   );
