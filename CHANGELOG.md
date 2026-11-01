@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.20](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.19...v0.1.20) (2026-11-01)
+
+### Content
+
+* **cards:** add the ten most recent booster sets ([#20](https://github.com/MathieuMamath/tcg-master-set/issues/20)) ([3c7d904](https://github.com/MathieuMamath/tcg-master-set/commit/3c7d90493495d3088e8bd62975049528f5015fe2))
+
 ## [0.1.19](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.18...v0.1.19) (2026-11-01)
 
 ### Features
