@@ -1,5 +1,18 @@
-// The sets the game plays with. Their cards come from `pnpm cards:import`.
-export const PLAYABLE_SET_IDS = ['swsh3', '30th'] as const;
+// The sets the game plays with, newest first. Their cards come from `pnpm cards:import`.
+export const PLAYABLE_SET_IDS = [
+  '30th',
+  'me05',
+  'me04',
+  'me03',
+  'me02.5',
+  'me02',
+  'me01',
+  'sv10.5w',
+  'sv10.5b',
+  'sv10',
+  'sv09',
+  'swsh3',
+] as const;
 
 export type SetId = (typeof PLAYABLE_SET_IDS)[number];
 

@@ -356,22 +356,24 @@ export function BinderView({ sets, collection, onClose }: Props) {
         </form>
       )}
       {!chosenSet && (
-        <div className="flex h-full flex-col items-center justify-center gap-5 pt-10 sm:pt-0">
-          <h2 className="text-center text-2xl font-semibold text-ui-paper">
-            {sets.length > 0 ? t('chooseBinder') : t('error')}
-          </h2>
-          <div className="flex w-full flex-wrap justify-center gap-5">
-            {sets.map((set) => (
-              <button
-                key={set.id}
-                type="button"
-                aria-label={`${set.name}. ${t('progress', { owned: ownedInSet(collection, set.id), total: set.slotTotal })}`}
-                onClick={() => choose(set)}
-                className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,15rem)] cursor-pointer rounded-xl outline-offset-4 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
-              >
-                <BinderCover set={set} owned={ownedInSet(collection, set.id)} />
-              </button>
-            ))}
+        <div className="flex h-full flex-col items-center gap-5 overflow-y-auto pt-10 sm:pt-0">
+          <div className="my-auto flex w-full flex-col items-center gap-5 py-2">
+            <h2 className="text-center text-2xl font-semibold text-ui-paper">
+              {sets.length > 0 ? t('chooseBinder') : t('error')}
+            </h2>
+            <div className="flex w-full flex-wrap justify-center gap-5">
+              {sets.map((set) => (
+                <button
+                  key={set.id}
+                  type="button"
+                  aria-label={`${set.name}. ${t('progress', { owned: ownedInSet(collection, set.id), total: set.slotTotal })}`}
+                  onClick={() => choose(set)}
+                  className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,11rem)] cursor-pointer rounded-xl outline-offset-4 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
+                >
+                  <BinderCover set={set} owned={ownedInSet(collection, set.id)} />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
