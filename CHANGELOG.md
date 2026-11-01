@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.16](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.15...v0.1.16) (2026-11-01)
+
+### Features
+
+* **boosters:** tilt enlarged cards with the pointer ([#16](https://github.com/MathieuMamath/tcg-master-set/issues/16)) ([d809d9b](https://github.com/MathieuMamath/tcg-master-set/commit/d809d9bd23cdfd3704e1ffa49cead1a497cc4ce7))
+
 ## [0.1.15](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.14...v0.1.15) (2026-11-01)
 
 ### Features
