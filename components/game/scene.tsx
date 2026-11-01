@@ -33,7 +33,7 @@ import {
   type Place as PlaceData,
   stepInPlace,
 } from '@/game/world';
-import { Place } from './place';
+import { Place, type ShopSigns } from './place';
 
 export type MovementInput = {
   keyboard: Direction;
@@ -173,9 +173,16 @@ type SceneProps = InputProps & {
   webglUnavailable: string;
   onInteractionChange: (interaction: Interaction | null) => void;
   isTalking: boolean;
+  shopSigns: ShopSigns;
 };
 
-export function Scene({ input, webglUnavailable, onInteractionChange, isTalking }: SceneProps) {
+export function Scene({
+  input,
+  webglUnavailable,
+  onInteractionChange,
+  isTalking,
+  shopSigns,
+}: SceneProps) {
   const [visit, setVisit] = useState({ number: 0, place: BEDROOM, arrival: BEDROOM_START });
   const [isFading, setIsFading] = useState(false);
   const fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -216,7 +223,7 @@ export function Scene({ input, webglUnavailable, onInteractionChange, isTalking 
         />
         <Suspense fallback={null}>
           <group key={visit.number}>
-            <Place place={visit.place} />
+            <Place place={visit.place} signs={shopSigns} />
             <Character
               input={input}
               place={visit.place}

@@ -10,14 +10,24 @@
     "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé.",
     "coins": "{count, plural, one {# pièce} other {# pièces}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
-    "talk": "Parler",
     "binder": "Ouvrir le classeur",
     "binderButton": "Classeur",
-    "signOut": "Déconnexion"
+    "signOut": "Déconnexion",
+    "latest": "Parler (nouveautés)",
+    "thisYear": "Parler (cette année)",
+    "older": "Parler (précédentes)"
   },
   "Shopkeeper": {
-    "name": "Vendeuse",
-    "greeting": "Bonjour ! Tu veux un booster ?",
+    "names": {
+      "latest": "Nouveautés",
+      "thisYear": "Cette année",
+      "older": "Collections précédentes"
+    },
+    "greetings": {
+      "latest": "Bonjour ! Voici nos trois dernières collections.",
+      "thisYear": "Bonjour ! J'ai les autres collections de cette année.",
+      "older": "Bonjour ! Je garde toutes les collections précédentes."
+    },
     "thanks": "Merci, et bonne chance pour tes cartes !",
     "notEnoughCoins": "Désolée, il te manque des pièces.",
     "buy": "Acheter un booster {set} ({price} pièces)",

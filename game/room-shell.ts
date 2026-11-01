@@ -2,56 +2,74 @@ import type { Rect } from './collision';
 import type { Arrival, Exit, ExitMarker, PlaceId, PlaceItem } from './world';
 
 const TILE_SIZE = 1.5;
-const HALF_SIZE = (3 * TILE_SIZE) / 2;
-const DOOR_Z = TILE_SIZE;
 
 export const ROOM_FLOOR_HEIGHT = 0.05 * 1.5;
 
-export const ROOM_BOUNDS: Rect = {
-  minX: -HALF_SIZE,
-  maxX: HALF_SIZE,
-  minZ: -HALF_SIZE,
-  maxZ: HALF_SIZE,
-};
+function tileCenters(count: number): number[] {
+  return Array.from({ length: count }, (_, index) => (index - (count - 1) / 2) * TILE_SIZE);
+}
 
-const BACK_WALL_Z = ROOM_BOUNDS.minZ - 0.04;
-const LEFT_WALL_X = ROOM_BOUNDS.minX - 0.04;
+type RoomColors = { floor?: string; wall?: string };
 
-const FLOOR: PlaceItem[] = [-1, 0, 1].flatMap((column) =>
-  [-1, 0, 1].map((row) => ({
-    model: 'furniture/floorFull' as const,
-    x: column * TILE_SIZE,
-    z: row * TILE_SIZE,
-    height: 0,
-  })),
-);
+// A room with its door in the last tile of the left wall.
+export function buildRoom(columns: number, rows: number, colors: RoomColors = {}) {
+  const halfWidth = (columns * TILE_SIZE) / 2;
+  const halfDepth = (rows * TILE_SIZE) / 2;
+  const bounds: Rect = { minX: -halfWidth, maxX: halfWidth, minZ: -halfDepth, maxZ: halfDepth };
+  const columnCenters = tileCenters(columns);
+  const rowCenters = tileCenters(rows);
+  const doorZ = rowCenters[rowCenters.length - 1];
+  const backWallZ = bounds.minZ - 0.04;
+  const leftWallX = bounds.minX - 0.04;
 
-// The two walls away from the camera, so that nothing hides the character.
-const WALLS: PlaceItem[] = [
-  { model: 'furniture/wall', x: -TILE_SIZE, z: BACK_WALL_Z, height: 0 },
-  { model: 'furniture/wall', x: 0, z: BACK_WALL_Z, height: 0 },
-  { model: 'furniture/wall', x: TILE_SIZE, z: BACK_WALL_Z, height: 0 },
-  { model: 'furniture/wall', x: LEFT_WALL_X, z: -TILE_SIZE, height: 0, quarterTurns: 1 },
-  { model: 'furniture/wallWindow', x: LEFT_WALL_X, z: 0, height: 0, quarterTurns: 1 },
-  { model: 'furniture/wallDoorway', x: LEFT_WALL_X, z: DOOR_Z, height: 0, quarterTurns: 1 },
-];
+  const floor: PlaceItem[] = columnCenters.flatMap((x) =>
+    rowCenters.map((z) => ({
+      model: 'furniture/floorFull' as const,
+      x,
+      z,
+      height: 0,
+      color: colors.floor,
+    })),
+  );
 
-export const ROOM_SHELL: readonly PlaceItem[] = [...FLOOR, ...WALLS];
+  // The two walls away from the camera, so that nothing hides the character.
+  const walls: PlaceItem[] = [
+    ...columnCenters.map((x) => ({
+      model: 'furniture/wall' as const,
+      x,
+      z: backWallZ,
+      height: 0,
+      color: colors.wall,
+    })),
+    ...rowCenters.map((z, row) => ({
+      model:
+        z === doorZ
+          ? ('furniture/wallDoorway' as const)
+          : row % 2 === 1
+            ? ('furniture/wallWindow' as const)
+            : ('furniture/wall' as const),
+      x: leftWallX,
+      z,
+      height: 0,
+      quarterTurns: 1,
+      color: colors.wall,
+    })),
+  ];
 
-export const ARRIVAL_THROUGH_ROOM_DOOR: Arrival = { x: -1.3, z: DOOR_Z, heading: Math.PI / 2 };
+  const arrival: Arrival = { x: bounds.minX + 0.95, z: doorZ, heading: Math.PI / 2 };
+  const doorMarker: ExitMarker = { x: bounds.minX + 0.23, z: doorZ, quarterTurns: 1 };
 
-export const ROOM_DOOR_MARKER: ExitMarker = { x: -2.02, z: DOOR_Z, quarterTurns: 1 };
-
-export function roomDoorExit(to: PlaceId, arrival: Arrival): Exit {
-  return {
+  const doorExit = (to: PlaceId, arrivalThere: Arrival): Exit => ({
     // The character can get within its own radius of the wall, so this is always reachable.
     area: {
-      minX: ROOM_BOUNDS.minX,
-      maxX: ROOM_BOUNDS.minX + 0.35,
-      minZ: DOOR_Z - 0.5,
-      maxZ: DOOR_Z + 0.5,
+      minX: bounds.minX,
+      maxX: bounds.minX + 0.35,
+      minZ: doorZ - 0.5,
+      maxZ: doorZ + 0.5,
     },
     to,
-    arrival,
-  };
+    arrival: arrivalThere,
+  });
+
+  return { items: [...floor, ...walls], bounds, arrival, doorMarker, doorExit };
 }
