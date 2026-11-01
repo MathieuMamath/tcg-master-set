@@ -1,8 +1,8 @@
 import { and, eq, gt, gte, sql } from 'drizzle-orm';
-import { loadBoosterPool, loadOpenedCards, type OpenedCard } from '@/cards/booster-pool';
+import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
 import { getDb } from '@/db/client';
 import { playerBoosters, playerCards, playerSpots, playerWallets } from '@/db/schema';
-import { type Collection, slotKey } from '@/game/binder';
+import { type Collection, firstCopies, slotKey } from '@/game/binder';
 import { BOOSTER_RECIPES, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
 import { type PlayerSpot, parseSpot } from '@/game/places';
@@ -22,7 +22,7 @@ export type PlayerProgress = { wallet: Wallet; collection: Collection; spot: Pla
 export type OpenedBooster = {
   setName: string;
   logoUrl: string | null;
-  cards: OpenedCard[];
+  cards: RevealedCard[];
   isGodPack: boolean;
   wallet: Wallet;
 };
@@ -151,16 +151,26 @@ export async function openOwnedBooster(
       return null;
     }
 
-    await transaction
+    const added = await transaction
       .insert(playerCards)
       .values(opened.cards.map(({ cardId, variant }) => ({ userId, cardId, variant, count: 1 })))
       .onConflictDoUpdate({
         target: [playerCards.userId, playerCards.cardId, playerCards.variant],
         set: { count: sql`${playerCards.count} + 1` },
+      })
+      .returning({
+        cardId: playerCards.cardId,
+        variant: playerCards.variant,
+        count: playerCards.count,
       });
+    const firsts = firstCopies(added);
 
     return {
       ...details,
+      cards: details.cards.map((card) => ({
+        ...card,
+        isNew: firsts.has(slotKey(card.id, card.variant)),
+      })),
       isGodPack: opened.isGodPack,
       wallet: await loadWallet(transaction, userId),
     };

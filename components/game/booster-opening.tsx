@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { OpenedCard } from '@/cards/booster-pool';
+import type { RevealedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/booster';
 import type { SetId } from '@/game/card-sets';
 import { type PullTier, packTier } from '@/game/pull-tier';
@@ -38,12 +38,26 @@ export type Opening = { setId: SetId } & (
       status: 'ready';
       setName: string;
       logoUrl: string | null;
-      cards: OpenedCard[];
+      cards: RevealedCard[];
       isGodPack: boolean;
     }
 );
 
-function isSpecial(card: OpenedCard) {
+// Golden writing across the top left corner, sized from the card, which ranges from small to full
+// screen.
+function NewMark() {
+  const t = useTranslations('Booster');
+
+  return (
+    <span className="pointer-events-none absolute inset-0 [container-type:inline-size]">
+      <span className="ui-new-mark absolute top-[3.5cqw] left-[2.5cqw] -rotate-30 text-[11cqw] leading-none font-bold">
+        {t('new')}
+      </span>
+    </span>
+  );
+}
+
+function isSpecial(card: RevealedCard) {
   return card.variant !== 'normal';
 }
 
@@ -177,7 +191,7 @@ function Reveal({
   arrivalTier,
   onFinished,
 }: {
-  cards: OpenedCard[];
+  cards: RevealedCard[];
   isGodPack: boolean;
   // The tier of the pack, whose flash this screen fades out of.
   arrivalTier: PullTier;
@@ -259,7 +273,10 @@ function Reveal({
         <div className="ui-card-flip relative size-full">
           <TiltCard isSpecial={current !== null && isSpecial(current)}>
             {current ? (
-              <CardPicture name={current.name} imageUrl={current.imageUrl} quality="high" />
+              <>
+                <CardPicture name={current.name} imageUrl={current.imageUrl} quality="high" />
+                {current.isNew && <NewMark />}
+              </>
             ) : (
               <CardBack />
             )}
@@ -283,7 +300,7 @@ function Reveal({
   );
 }
 
-function EnlargedCard({ card, onClose }: { card: OpenedCard; onClose: () => void }) {
+function EnlargedCard({ card, onClose }: { card: RevealedCard; onClose: () => void }) {
   const t = useTranslations('Booster');
   const back = useRef<HTMLButtonElement>(null);
 
@@ -314,6 +331,7 @@ function EnlargedCard({ card, onClose }: { card: OpenedCard; onClose: () => void
       <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
         <TiltCard isSpecial={isSpecial(card)}>
           <CardPicture name={card.name} imageUrl={card.imageUrl} quality="high" />
+          {card.isNew && <NewMark />}
         </TiltCard>
       </div>
       <p className="text-center text-lg font-semibold text-ui-paper">
@@ -337,12 +355,12 @@ function Summary({
   isGodPack,
   onClose,
 }: {
-  cards: OpenedCard[];
+  cards: RevealedCard[];
   isGodPack: boolean;
   onClose: () => void;
 }) {
   const t = useTranslations('Booster');
-  const [enlarged, setEnlarged] = useState<OpenedCard | null>(null);
+  const [enlarged, setEnlarged] = useState<RevealedCard | null>(null);
 
   return (
     <div className="relative flex h-full flex-col items-center justify-center gap-4">
@@ -353,7 +371,7 @@ function Summary({
           <li key={card.id} className="ui-pop-in aspect-[5/7]">
             <button
               type="button"
-              aria-label={t('enlargeCard', { name: card.name })}
+              aria-label={t(card.isNew ? 'enlargeNewCard' : 'enlargeCard', { name: card.name })}
               onClick={() => setEnlarged(card)}
               style={
                 card.tier > 0
@@ -365,6 +383,7 @@ function Summary({
               }`}
             >
               <CardPicture name={card.name} imageUrl={card.imageUrl} quality="low" />
+              {card.isNew && <NewMark />}
               {isSpecial(card) && (
                 <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
               )}

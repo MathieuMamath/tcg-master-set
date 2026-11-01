@@ -5,6 +5,7 @@ import {
   binderSlots,
   bindersToChoose,
   clampPage,
+  firstCopies,
   ownedInSet,
   ownedSlotCount,
   pageCount,
@@ -168,4 +169,14 @@ describe('bindersToChoose', () => {
       'old-empty',
     ]);
   });
+});
+
+test('only a count of one is a first copy', () => {
+  const firsts = firstCopies([
+    { cardId: 'a', variant: 'normal', count: 1 },
+    { cardId: 'b', variant: 'normal', count: 2 },
+    { cardId: 'b', variant: 'reverse', count: 1 },
+  ]);
+
+  expect([...firsts]).toEqual([slotKey('a', 'normal'), slotKey('b', 'reverse')]);
 });

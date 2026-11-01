@@ -108,3 +108,12 @@ export function addToCollection(
   }
   return next;
 }
+
+// From the copies counted once a booster is added: a count of one means it wasn't owned before.
+export function firstCopies(
+  added: readonly { cardId: string; variant: string; count: number }[],
+): Set<string> {
+  return new Set(
+    added.filter(({ count }) => count === 1).map(({ cardId, variant }) => slotKey(cardId, variant)),
+  );
+}

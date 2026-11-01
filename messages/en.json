@@ -50,6 +50,8 @@
     "godPack": "GOD PACK!",
     "summaryTitle": "Your new cards",
     "enlargeCard": "See {name} up close",
+    "enlargeNewCard": "See {name} up close, new card",
+    "new": "new",
     "done": "Done",
     "error": "The booster couldn't be opened. It's still in your bag.",
     "retry": "Try again",
