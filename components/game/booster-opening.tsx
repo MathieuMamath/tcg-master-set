@@ -4,13 +4,14 @@ import { useTranslations } from 'next-intl';
 import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from 'react';
 import type { OpenedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/booster';
+import { SetLogo } from './set-logo';
 
 const TEAR_ANIMATION_MILLISECONDS = 450;
 
 export type Opening =
   | { status: 'loading' }
   | { status: 'error' }
-  | { status: 'ready'; setName: string; cards: OpenedCard[] };
+  | { status: 'ready'; setName: string; logoUrl: string | null; cards: OpenedCard[] };
 
 function CardBack() {
   return (
@@ -42,7 +43,15 @@ function CardFace({ card, quality }: { card: OpenedCard; quality: 'high' | 'low'
   );
 }
 
-function SealedPack({ setName, onTorn }: { setName: string; onTorn: () => void }) {
+function SealedPack({
+  setName,
+  logoUrl,
+  onTorn,
+}: {
+  setName: string;
+  logoUrl: string | null;
+  onTorn: () => void;
+}) {
   const t = useTranslations('Booster');
   const drag = useRef<{ startX: number; width: number } | null>(null);
   const [progress, setProgress] = useState(0);
@@ -99,15 +108,12 @@ function SealedPack({ setName, onTorn }: { setName: string; onTorn: () => void }
         onClick={onClick}
         className="ui-pop-in relative aspect-[5/7] w-[min(calc(100vw-2rem),42vh,20rem)] cursor-grab touch-none select-none outline-none active:cursor-grabbing"
       >
-        <span className="absolute inset-0 flex flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border-4 border-ui-ink bg-gradient-to-br from-[#7b5ea7] via-[#2e86ab] to-[#3bb273] px-4 text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]">
-          <span className="ui-shine absolute inset-0" />
-          <span
-            aria-hidden="true"
-            className="flex size-24 rotate-45 items-center justify-center rounded-2xl border-4 border-ui-paper"
-          >
-            <span className="size-10 rounded-full bg-ui-accent" />
+        <span className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink bg-[radial-gradient(circle_at_50%_78%,#ffb347_0%,#d9381e_32%,#4a1020_62%,#160b14_100%)] text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]">
+          <span className="absolute inset-x-3 top-[13%] bottom-[7%] flex items-center justify-center">
+            <SetLogo setName={setName} logoUrl={logoUrl} />
           </span>
-          <span className="relative text-2xl font-semibold">{setName}</span>
+          <span className="ui-shine absolute inset-0" />
+          <span aria-hidden="true" className="ui-pack-crimp absolute inset-x-0 bottom-0 h-[7%]" />
         </span>
         <span
           aria-hidden="true"
@@ -115,7 +121,7 @@ function SealedPack({ setName, onTorn }: { setName: string; onTorn: () => void }
             transform: `rotate(${progress * -8}deg) translateY(${isTorn ? '-180%' : `${progress * -8}px`})`,
             opacity: isTorn ? 0 : 1,
           }}
-          className="absolute inset-x-0 top-0 h-[13%] origin-right rounded-t-xl border-4 border-b-0 border-ui-ink bg-ui-accent transition-[transform,opacity] duration-300"
+          className="ui-pack-crimp absolute inset-x-0 top-0 h-[13%] origin-right rounded-t-md border-4 border-b-0 border-ui-ink transition-[transform,opacity] duration-300"
         />
         <span
           aria-hidden="true"
@@ -274,7 +280,11 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
       {opening.status === 'ready' && (
         <div className="flex h-full items-center justify-center">
           {step === 'pack' && (
-            <SealedPack setName={opening.setName} onTorn={() => setStep('reveal')} />
+            <SealedPack
+              setName={opening.setName}
+              logoUrl={opening.logoUrl}
+              onTorn={() => setStep('reveal')}
+            />
           )}
           {step === 'reveal' && (
             <Reveal cards={opening.cards} onFinished={() => setStep('summary')} />

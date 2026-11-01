@@ -32,10 +32,10 @@ export async function loadOpenedCards(
   drawn: readonly DrawnCard[],
   setId: string,
   locale: string,
-): Promise<{ setName: string; cards: OpenedCard[] }> {
+): Promise<{ setName: string; logoUrl: string | null; cards: OpenedCard[] }> {
   const db = getDb();
   const [set] = await db
-    .select({ name: cardSetTranslations.name })
+    .select({ name: cardSetTranslations.name, logoUrl: cardSetTranslations.logoUrl })
     .from(cardSetTranslations)
     .where(and(eq(cardSetTranslations.setId, setId), eq(cardSetTranslations.locale, locale)));
   const translations = await db
@@ -53,6 +53,7 @@ export async function loadOpenedCards(
 
   return {
     setName: set?.name ?? '',
+    logoUrl: set?.logoUrl ?? null,
     cards: drawn.map(({ cardId, variant }) => {
       const forCard = translations.filter((translation) => translation.cardId === cardId);
       const translation = forCard.find((row) => row.locale === locale) ?? forCard[0];
