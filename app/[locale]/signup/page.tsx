@@ -1,6 +1,7 @@
 import type { Locale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
 import { AuthForm } from '@/components/auth/auth-form';
+import { LocaleSwitcher } from '@/components/locale-switcher';
 import { redirect } from '@/i18n/navigation';
 
 type Props = {
@@ -15,5 +16,10 @@ export default async function SignupPage({ params }: Props) {
     redirect({ href: '/', locale });
   }
 
-  return <AuthForm mode="signup" />;
+  return (
+    <>
+      <LocaleSwitcher />
+      <AuthForm mode="signup" />
+    </>
+  );
 }

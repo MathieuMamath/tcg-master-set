@@ -3,7 +3,6 @@
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { authClient } from '@/auth/client';
 import type { Player } from '@/auth/session';
 import { addToCollection } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
@@ -21,7 +20,9 @@ import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { Joystick } from './joystick';
+import { SaveNotice, useSaveNotice } from './save-notice';
 import type { MovementInput } from './scene';
+import { SettingsMenu } from './settings-menu';
 import { ShopDialog } from './shop-dialog';
 
 // Three.js needs the browser, and this keeps it out of the bundle of every other screen.
@@ -45,11 +46,14 @@ export function Game({ player, sets, progress }: Props) {
   const [opening, setOpening] = useState<Opening | null>(null);
   const [isBinderOpen, setIsBinderOpen] = useState(false);
   const [isBagOpen, setIsBagOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [collection, setCollection] = useState(progress.collection);
+  const { isSaving, showSaveNotice } = useSaveNotice();
   const locale = useLocale();
   const tBooster = useTranslations('Booster');
+  const tSettings = useTranslations('Settings');
   const tShopkeeper = useTranslations('Shopkeeper');
-  const isDialogOpen = isTalking || isBinderOpen || isBagOpen || opening !== null;
+  const isDialogOpen = isTalking || isBinderOpen || isBagOpen || isSettingsOpen || opening !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
@@ -139,6 +143,7 @@ export function Game({ player, sets, progress }: Props) {
       setWallet(updated);
       setCollection((current) => addToCollection(current, cards));
       setOpening({ status: 'ready', setId, setName, logoUrl, cards, isGodPack });
+      showSaveNotice();
     } catch {
       setOpening({ status: 'error', setId });
     }
@@ -152,6 +157,10 @@ export function Game({ player, sets, progress }: Props) {
       }
       const { wallet: updated, line } = await response.json();
       setWallet(updated);
+      // A refused purchase changes nothing.
+      if (line === 'thanks') {
+        showSaveNotice();
+      }
       return line;
     } catch {
       return 'unavailable';
@@ -163,10 +172,9 @@ export function Game({ player, sets, progress }: Props) {
     setIsBagOpen(true);
   };
 
-  const signOut = async () => {
-    await authClient.signOut();
-    // A full load, so that the server sees the session has ended.
-    window.location.assign(`/${locale}/login`);
+  const openSettings = () => {
+    stopWalking();
+    setIsSettingsOpen(true);
   };
 
   return (
@@ -174,6 +182,9 @@ export function Game({ player, sets, progress }: Props) {
       <Scene
         input={input}
         webglUnavailable={t('webglUnavailable')}
+        onSave={showSaveNotice}
+        playerId={player.id}
+        savedSpot={progress.spot}
         onInteractionChange={setInteraction}
         isTalking={isTalking}
         shopSigns={{
@@ -182,8 +193,11 @@ export function Game({ player, sets, progress }: Props) {
           older: tShopkeeper('names.older'),
         }}
       />
-      <div className="absolute inset-x-4 top-0 flex flex-wrap items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
-        <div className="flex flex-wrap gap-2">
+      <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
+        <div className="flex min-w-0 flex-wrap gap-2">
+          <p className="max-w-40 truncate rounded-full border-3 border-ui-ink bg-ui-paper px-3 py-0.5">
+            {player.username}
+          </p>
           <p className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-1.5">
             <span
               aria-hidden="true"
@@ -216,16 +230,26 @@ export function Game({ player, sets, progress }: Props) {
             {t('binderButton')}
           </button>
         </div>
-        <p className="ml-auto flex items-center gap-2 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-1 pl-3">
-          {player.username}
-          <button
-            type="button"
-            onClick={signOut}
-            className="cursor-pointer rounded-full bg-ui-ink/10 px-2 hover:bg-ui-ink/20"
-          >
-            {t('signOut')}
-          </button>
-        </p>
+        <button
+          type="button"
+          aria-label={tSettings('open')}
+          onClick={openSettings}
+          className="shrink-0 cursor-pointer rounded-full border-3 border-ui-ink bg-ui-paper p-1"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
+            {[0, 45, 90, 135].map((angle) => (
+              <path
+                key={angle}
+                d="M12 1v22"
+                stroke="currentColor"
+                strokeWidth="4"
+                transform={`rotate(${angle} 12 12)`}
+              />
+            ))}
+            <circle cx="12" cy="12" r="7" fill="currentColor" />
+            <circle cx="12" cy="12" r="3" fill="var(--ui-paper)" />
+          </svg>
+        </button>
       </div>
       {interaction && !isDialogOpen && (
         <button
@@ -268,6 +292,7 @@ export function Game({ player, sets, progress }: Props) {
           onClose={() => setIsBagOpen(false)}
         />
       )}
+      {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
       {talkingTo && (
         <ShopDialog
           stock={talkingTo}
@@ -276,6 +301,7 @@ export function Game({ player, sets, progress }: Props) {
           onClose={() => setTalkingTo(null)}
         />
       )}
+      <SaveNotice isSaving={isSaving} />
     </div>
   );
 }

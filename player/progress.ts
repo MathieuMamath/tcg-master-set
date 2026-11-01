@@ -1,10 +1,11 @@
 import { and, eq, gt, gte, sql } from 'drizzle-orm';
 import { loadBoosterPool, loadOpenedCards, type OpenedCard } from '@/cards/booster-pool';
 import { getDb } from '@/db/client';
-import { playerBoosters, playerCards, playerWallets } from '@/db/schema';
+import { playerBoosters, playerCards, playerSpots, playerWallets } from '@/db/schema';
 import { type Collection, slotKey } from '@/game/binder';
 import { BOOSTER_RECIPES, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
+import { type PlayerSpot, parseSpot } from '@/game/places';
 import {
   BOOSTER_PRICE,
   type ShopkeeperLine,
@@ -16,7 +17,7 @@ import {
 type Database = ReturnType<typeof getDb>;
 type Reader = Pick<Database, 'select' | 'insert'>;
 
-export type PlayerProgress = { wallet: Wallet; collection: Collection };
+export type PlayerProgress = { wallet: Wallet; collection: Collection; spot: PlayerSpot | null };
 
 export type OpenedBooster = {
   setName: string;
@@ -52,7 +53,7 @@ async function loadWallet(database: Reader, userId: string): Promise<Wallet> {
 
 export async function loadPlayerProgress(userId: string): Promise<PlayerProgress> {
   const db = getDb();
-  const [wallet, cards] = await Promise.all([
+  const [wallet, cards, spots] = await Promise.all([
     loadWallet(db, userId),
     db
       .select({
@@ -62,6 +63,15 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
       })
       .from(playerCards)
       .where(eq(playerCards.userId, userId)),
+    db
+      .select({
+        place: playerSpots.place,
+        x: playerSpots.x,
+        z: playerSpots.z,
+        heading: playerSpots.heading,
+      })
+      .from(playerSpots)
+      .where(eq(playerSpots.userId, userId)),
   ]);
 
   return {
@@ -69,7 +79,19 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     collection: Object.fromEntries(
       cards.map(({ cardId, variant, count }) => [slotKey(cardId, variant), count]),
     ),
+    spot: parseSpot(spots[0]),
   };
+}
+
+export async function savePlayerSpot(userId: string, spot: PlayerSpot): Promise<void> {
+  const { place, x, z, heading } = spot;
+  await getDb()
+    .insert(playerSpots)
+    .values({ userId, place, x, z, heading })
+    .onConflictDoUpdate({
+      target: playerSpots.userId,
+      set: { place, x, z, heading, updatedAt: new Date() },
+    });
 }
 
 // The coins and the booster change together, or not at all. The coins are only taken if they are

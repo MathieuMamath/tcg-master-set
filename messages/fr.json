@@ -12,7 +12,7 @@
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
     "binder": "Ouvrir le classeur",
     "binderButton": "Classeur",
-    "signOut": "Déconnexion",
+    "autoSaving": "Sauvegarde automatique...",
     "latest": "Parler (nouveautés)",
     "thisYear": "Parler (cette année)",
     "older": "Parler (précédentes)"
@@ -77,6 +77,13 @@
       "firstEdition": "1re éd.",
       "wPromo": "Promo"
     }
+  },
+  "Settings": {
+    "open": "Réglages",
+    "title": "Réglages",
+    "language": "Langue",
+    "signOut": "Déconnexion",
+    "close": "Fermer"
   },
   "Auth": {
     "signupTitle": "Crée ton compte",

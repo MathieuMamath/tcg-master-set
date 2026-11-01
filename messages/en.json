@@ -12,7 +12,7 @@
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
     "binder": "Open the binder",
     "binderButton": "Binder",
-    "signOut": "Sign out",
+    "autoSaving": "Auto-saving...",
     "latest": "Talk (new releases)",
     "thisYear": "Talk (this year)",
     "older": "Talk (earlier sets)"
@@ -77,6 +77,13 @@
       "firstEdition": "1st ed.",
       "wPromo": "Promo"
     }
+  },
+  "Settings": {
+    "open": "Settings",
+    "title": "Settings",
+    "language": "Language",
+    "signOut": "Sign out",
+    "close": "Close"
   },
   "Auth": {
     "signupTitle": "Create your account",
