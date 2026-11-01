@@ -1,13 +1,21 @@
-import { useTranslations } from 'next-intl';
-import { Game } from '@/components/game/game';
+import type { Locale } from 'next-intl';
+import { getPlayer } from '@/auth/session';
+import { HomeScreen } from '@/components/game/home-screen';
+import { redirect } from '@/i18n/navigation';
 
-export default function HomePage() {
-  const t = useTranslations('Home');
+type Props = {
+  // The root layout has already rejected any unknown language.
+  params: Promise<{ locale: Locale }>;
+};
 
-  return (
-    <main className="relative flex-1">
-      <h1 className="sr-only">{t('title')}</h1>
-      <Game />
-    </main>
-  );
+// Playing requires an account.
+export default async function HomePage({ params }: Props) {
+  const { locale } = await params;
+  const player = await getPlayer();
+
+  if (!player) {
+    return redirect({ href: '/signup', locale });
+  }
+
+  return <HomeScreen player={player} />;
 }

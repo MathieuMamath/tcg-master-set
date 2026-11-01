@@ -12,7 +12,8 @@
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
     "talk": "Parler",
     "binder": "Ouvrir le classeur",
-    "binderButton": "Classeur"
+    "binderButton": "Classeur",
+    "signOut": "Déconnexion"
   },
   "Shopkeeper": {
     "name": "Vendeuse",
@@ -56,6 +57,33 @@
       "reverse": "Reverse",
       "firstEdition": "1re éd.",
       "wPromo": "Promo"
+    }
+  },
+  "Auth": {
+    "signupTitle": "Crée ton compte",
+    "signupIntro": "Il te faut un compte pour commencer ta collection.",
+    "loginTitle": "Te revoilà",
+    "loginIntro": "Connecte-toi pour retrouver ta collection.",
+    "username": "Pseudo",
+    "usernameHint": "De {min} à {max} lettres, chiffres, points, tirets ou tirets bas.",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "passwordHint": "Au moins {min} caractères.",
+    "signupAction": "Créer mon compte",
+    "loginAction": "Se connecter",
+    "hasAccount": "Tu as déjà un compte ?",
+    "goToLogin": "Se connecter",
+    "noAccount": "Pas encore de compte ?",
+    "goToSignup": "Créer un compte",
+    "errors": {
+      "invalidCredentials": "E-mail ou mot de passe incorrect.",
+      "emailTaken": "Cet e-mail est déjà utilisé.",
+      "usernameTaken": "Ce pseudo est déjà pris.",
+      "invalidEmail": "Cette adresse e-mail ne semble pas valide.",
+      "invalidUsername": "Choisis un pseudo qui respecte les règles indiquées dessous.",
+      "invalidPassword": "Choisis un mot de passe qui respecte la règle indiquée dessous.",
+      "tooManyAttempts": "Trop de tentatives. Attends un instant avant de réessayer.",
+      "unavailable": "Quelque chose s'est mal passé. Réessaie dans un instant."
     }
   },
   "LocaleSwitcher": {

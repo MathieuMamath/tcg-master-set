@@ -12,7 +12,7 @@
 
 - **Never commit card data or card images**, nor any other third-party asset whose license allows no redistribution. They are imported at runtime or deploy time from outside the repository. The repository runs on placeholder cards.
 - **Keep the product name, domain, logos and repository metadata generic**, without third-party trademarks.
-- **The server decides.** Booster draws, balances, resale and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. The one temporary exception is the wallet in `game/shop-dialogue.ts`, which lives in the browser for one visit until player accounts exist. Boosters are drawn on the server, but it can't check who owns one until then. The collection is also provisional: `components/game/collection-storage.ts` keeps it in `localStorage`, so a player could edit it.
+- **The server decides.** Booster draws, balances, resale and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. The one temporary exception is the wallet in `game/shop-dialogue.ts`, which lives in the browser for one visit until it moves to the database. Boosters are drawn on the server for any signed-in player, because it doesn't store who owns one yet. The collection is also provisional: `components/game/collection-storage.ts` keeps it in `localStorage`, per player and per browser, so a player could edit it.
 - **No real money**: no payments, donations or ads.
 - **Single-player only.**
 
@@ -55,6 +55,10 @@ The schema lives in `db/schema`, and every change goes through a migration in `d
 The card catalogue comes from [TCGdex](https://tcgdex.dev/) and only lives in the database, never in the repository. Tests use placeholder data. `pnpm cards:import` copies a set in one transaction and can run again safely. Card images stay hosted by TCGdex.
 
 A card's `rarity` column is in English, because game rules compare it. Translated rarities are for display only.
+
+## Accounts
+
+Playing requires an account: pages and API routes check `getPlayer()` from `auth/session.ts` on the server. [Better Auth](https://www.better-auth.com/) handles sign-up, sign-in, sessions and password hashing through `auth/server.ts`. Only the email, username and hashed password are collected. Show players `auth/rules.ts` error keys, never the library's messages.
 
 ## Languages
 

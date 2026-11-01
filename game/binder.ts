@@ -4,8 +4,8 @@ const VARIANT_ORDER = ['normal', 'firstEdition', 'holo', 'reverse', 'wPromo'];
 
 export const COLLECTION_STORAGE_KEY = 'tcg-master-set:collection';
 
-// How many copies the player owns, by slot key. Provisional: it lives in the browser until
-// player accounts exist.
+// How many copies the player owns, by slot key. Provisional: it lives in the browser until it
+// moves to the database.
 export type Collection = Readonly<Record<string, number>>;
 
 export type BinderCard = {

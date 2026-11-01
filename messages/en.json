@@ -12,7 +12,8 @@
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
     "talk": "Talk",
     "binder": "Open the binder",
-    "binderButton": "Binder"
+    "binderButton": "Binder",
+    "signOut": "Sign out"
   },
   "Shopkeeper": {
     "name": "Shopkeeper",
@@ -56,6 +57,33 @@
       "reverse": "Reverse",
       "firstEdition": "1st ed.",
       "wPromo": "Promo"
+    }
+  },
+  "Auth": {
+    "signupTitle": "Create your account",
+    "signupIntro": "You need an account to start your collection.",
+    "loginTitle": "Welcome back",
+    "loginIntro": "Sign in to get back to your collection.",
+    "username": "Username",
+    "usernameHint": "{min} to {max} letters, numbers, dots, dashes or underscores.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least {min} characters.",
+    "signupAction": "Create my account",
+    "loginAction": "Sign in",
+    "hasAccount": "Already have an account?",
+    "goToLogin": "Sign in",
+    "noAccount": "New here?",
+    "goToSignup": "Create an account",
+    "errors": {
+      "invalidCredentials": "Wrong email or password.",
+      "emailTaken": "This email is already in use.",
+      "usernameTaken": "This username is already taken.",
+      "invalidEmail": "This email address doesn't look valid.",
+      "invalidUsername": "Please choose a username that follows the rules below it.",
+      "invalidPassword": "Please choose a password that follows the rule below it.",
+      "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
+      "unavailable": "Something went wrong. Please try again in a moment."
     }
   },
   "LocaleSwitcher": {

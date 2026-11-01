@@ -1,8 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
+import { getPlayer } from '@/auth/session';
 import { loadBoosterPool, loadOpenedCards } from '@/cards/booster-pool';
 import { drawBooster } from '@/game/booster';
 import { POST } from './route';
 
+vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/cards/booster-pool', () => ({
   loadBoosterPool: vi.fn(),
   loadOpenedCards: vi.fn(),
@@ -17,6 +19,7 @@ function open(locale: string) {
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.mocked(getPlayer).mockResolvedValue({ id: 'player-1', username: 'Placeholder' });
   vi.mocked(loadBoosterPool).mockResolvedValue([]);
 });
 
@@ -31,6 +34,12 @@ test('returns the drawn cards in the requested language', async () => {
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual(opened);
   expect(loadOpenedCards).toHaveBeenCalledWith(drawn, 'swsh3', 'fr');
+});
+
+test('refuses a visitor who is not signed in', async () => {
+  vi.mocked(getPlayer).mockResolvedValue(null);
+
+  expect((await open('en')).status).toBe(401);
 });
 
 test('rejects an unknown language', async () => {

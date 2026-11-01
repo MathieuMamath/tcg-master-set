@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { authClient } from '@/auth/client';
+import type { Player } from '@/auth/session';
 import { addToCollection, type Collection } from '@/game/binder';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import { buyBooster, STARTING_WALLET } from '@/game/shop-dialogue';
@@ -19,7 +21,7 @@ const Scene = dynamic(() => import('./scene').then((module) => module.Scene), { 
 
 const INTERACT_KEY = 'KeyE';
 
-export function Game() {
+export function Game({ player }: { player: Player }) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
@@ -35,8 +37,8 @@ export function Game() {
   controls.current = { interaction, isDialogOpen };
 
   useEffect(() => {
-    setCollection(loadCollection());
-  }, []);
+    setCollection(loadCollection(player.id));
+  }, [player.id]);
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -116,13 +118,19 @@ export function Game() {
       const { setName, cards } = await response.json();
       setWallet((current) => ({ ...current, boosters: current.boosters - 1 }));
       // Saved right away, since the draw is final even if the player closes the page now.
-      const updated = addToCollection(loadCollection(), cards);
-      saveCollection(updated);
+      const updated = addToCollection(loadCollection(player.id), cards);
+      saveCollection(player.id, updated);
       setCollection(updated);
       setOpening({ status: 'ready', setName, cards });
     } catch {
       setOpening({ status: 'error' });
     }
+  };
+
+  const signOut = async () => {
+    await authClient.signOut();
+    // A full load, so that the server sees the session has ended.
+    window.location.assign(`/${locale}/login`);
   };
 
   return (
@@ -133,38 +141,50 @@ export function Game() {
         onInteractionChange={setInteraction}
         isTalking={isTalking}
       />
-      <div className="absolute top-0 left-4 flex flex-wrap gap-2 font-game text-sm font-semibold text-ui-ink">
-        <p className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-1.5">
-          <span
-            aria-hidden="true"
-            className="size-4 rounded-full border-2 border-ui-ink bg-ui-accent"
-          />
-          {t('coins', { count: wallet.coins })}
+      <div className="absolute inset-x-4 top-0 flex flex-wrap items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
+        <div className="flex flex-wrap gap-2">
+          <p className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-1.5">
+            <span
+              aria-hidden="true"
+              className="size-4 rounded-full border-2 border-ui-ink bg-ui-accent"
+            />
+            {t('coins', { count: wallet.coins })}
+          </p>
+          <button
+            type="button"
+            disabled={wallet.boosters === 0}
+            aria-label={`${t('boosters', { count: wallet.boosters })}. ${tBooster('title')}`}
+            onClick={openBooster}
+            className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent"
+          >
+            <span
+              aria-hidden="true"
+              className="h-4 w-3 rounded-xs border-2 border-ui-ink bg-[#7b5ea7]"
+            />
+            {t('boosters', { count: wallet.boosters })}
+          </button>
+          <button
+            type="button"
+            onClick={openBinder}
+            className="flex cursor-pointer items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2"
+          >
+            <span
+              aria-hidden="true"
+              className="h-4 w-3.5 rounded-xs border-2 border-l-4 border-ui-ink bg-[#2e86ab]"
+            />
+            {t('binderButton')}
+          </button>
+        </div>
+        <p className="ml-auto flex items-center gap-2 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-1 pl-3">
+          {player.username}
+          <button
+            type="button"
+            onClick={signOut}
+            className="cursor-pointer rounded-full bg-ui-ink/10 px-2 hover:bg-ui-ink/20"
+          >
+            {t('signOut')}
+          </button>
         </p>
-        <button
-          type="button"
-          disabled={wallet.boosters === 0}
-          aria-label={`${t('boosters', { count: wallet.boosters })}. ${tBooster('title')}`}
-          onClick={openBooster}
-          className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent"
-        >
-          <span
-            aria-hidden="true"
-            className="h-4 w-3 rounded-xs border-2 border-ui-ink bg-[#7b5ea7]"
-          />
-          {t('boosters', { count: wallet.boosters })}
-        </button>
-        <button
-          type="button"
-          onClick={openBinder}
-          className="flex cursor-pointer items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2"
-        >
-          <span
-            aria-hidden="true"
-            className="h-4 w-3.5 rounded-xs border-2 border-l-4 border-ui-ink bg-[#2e86ab]"
-          />
-          {t('binderButton')}
-        </button>
       </div>
       {interaction && !isDialogOpen && (
         <button

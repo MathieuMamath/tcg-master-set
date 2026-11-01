@@ -1,4 +1,5 @@
 import { hasLocale } from 'next-intl';
+import { getPlayer } from '@/auth/session';
 import { loadBoosterPool, loadOpenedCards } from '@/cards/booster-pool';
 import { ACTIVE_SET_ID } from '@/cards/tcgdex';
 import { drawBooster } from '@/game/booster';
@@ -13,6 +14,10 @@ export async function POST(request: Request) {
   }
 
   try {
+    if (!(await getPlayer())) {
+      return Response.json({ error: 'not-signed-in' }, { status: 401 });
+    }
+
     const drawn = drawBooster(await loadBoosterPool(ACTIVE_SET_ID));
     if (!drawn) {
       return Response.json({ error: 'catalogue-unavailable' }, { status: 503 });

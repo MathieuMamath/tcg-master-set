@@ -1,7 +1,9 @@
 import { beforeEach, expect, test, vi } from 'vitest';
+import { getPlayer } from '@/auth/session';
 import { loadBinderCatalogue } from '@/cards/binder-catalogue';
 import { GET } from './route';
 
+vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/cards/binder-catalogue', () => ({ loadBinderCatalogue: vi.fn() }));
 
 function load(locale: string) {
@@ -10,6 +12,7 @@ function load(locale: string) {
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.mocked(getPlayer).mockResolvedValue({ id: 'player-1', username: 'Placeholder' });
 });
 
 test('returns the catalogue in the requested language', async () => {
@@ -26,6 +29,12 @@ test('returns the catalogue in the requested language', async () => {
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual(catalogue);
   expect(loadBinderCatalogue).toHaveBeenCalledWith('swsh3', 'fr');
+});
+
+test('refuses a visitor who is not signed in', async () => {
+  vi.mocked(getPlayer).mockResolvedValue(null);
+
+  expect((await load('en')).status).toBe(401);
 });
 
 test('rejects an unknown language', async () => {

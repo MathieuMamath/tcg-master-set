@@ -18,7 +18,7 @@ You need Node.js 26, pnpm 10 or later, and Docker.
 
 ```bash
 pnpm install
-cp .env.example .env.local
+cp .env.example .env.local # then set AUTH_SECRET
 pnpm db:up
 pnpm db:migrate
 pnpm cards:import swsh3
