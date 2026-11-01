@@ -1,18 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { loadBoosterPool, loadOpenedCards } from '@/cards/booster-pool';
-import { openBooster } from '@/game/booster';
+import { openOwnedBooster } from '@/player/progress';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/cards/booster-pool', () => ({
-  loadBoosterPool: vi.fn(),
-  loadOpenedCards: vi.fn(),
-}));
-vi.mock('@/game/booster', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/game/booster')>()),
-  openBooster: vi.fn(),
-}));
+vi.mock('@/player/progress', () => ({ openOwnedBooster: vi.fn() }));
 
 function open(locale: string, set = 'swsh3') {
   return POST(
@@ -25,20 +17,29 @@ function open(locale: string, set = 'swsh3') {
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
   vi.mocked(getPlayer).mockResolvedValue({ id: 'player-1', username: 'Placeholder' });
-  vi.mocked(loadBoosterPool).mockResolvedValue([]);
 });
 
-test('returns the drawn cards in the requested language', async () => {
-  const drawn = [{ cardId: 'card-1', variant: 'normal' }];
-  const opened = { setName: 'Placeholder', logoUrl: 'https://test.invalid/logo', cards: [] };
-  vi.mocked(openBooster).mockReturnValue({ cards: drawn, isGodPack: true });
-  vi.mocked(loadOpenedCards).mockResolvedValue(opened);
+test('opens a booster of the signed-in player, in the requested language', async () => {
+  const opened = {
+    setName: 'Placeholder',
+    logoUrl: 'https://test.invalid/logo',
+    cards: [],
+    isGodPack: true,
+    wallet: { coins: 900, boosters: {} },
+  };
+  vi.mocked(openOwnedBooster).mockResolvedValue(opened);
 
   const response = await open('fr', '30th');
 
   expect(response.status).toBe(200);
-  expect(await response.json()).toEqual({ ...opened, isGodPack: true });
-  expect(loadOpenedCards).toHaveBeenCalledWith(drawn, '30th', 'fr');
+  expect(await response.json()).toEqual(opened);
+  expect(openOwnedBooster).toHaveBeenCalledWith('player-1', '30th', 'fr');
+});
+
+test('refuses to open a booster the player does not have', async () => {
+  vi.mocked(openOwnedBooster).mockResolvedValue(null);
+
+  expect((await open('en')).status).toBe(409);
 });
 
 test('refuses a visitor who is not signed in', async () => {
@@ -55,14 +56,8 @@ test('rejects a set the game does not play with', async () => {
   expect((await open('en', 'other')).status).toBe(400);
 });
 
-test('reports an empty catalogue as unavailable', async () => {
-  vi.mocked(openBooster).mockReturnValue(null);
-
-  expect((await open('en')).status).toBe(503);
-});
-
 test('hides database errors from the player', async () => {
-  vi.mocked(loadBoosterPool).mockRejectedValue(new Error('connection to secret-host refused'));
+  vi.mocked(openOwnedBooster).mockRejectedValue(new Error('connection to secret-host refused'));
 
   const response = await open('en');
 

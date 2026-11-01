@@ -7,7 +7,7 @@ import { BOOSTER_PRICE, type ShopkeeperLine, type ShopkeeperStock } from '@/game
 import { revealedLength } from '@/game/typewriter';
 
 const CHOICE_CLASS =
-  'group flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-lg font-medium outline-none hover:bg-ui-accent/40 focus-visible:bg-ui-accent/70';
+  'group flex w-full cursor-pointer items-center disabled:cursor-wait gap-2 rounded-lg px-2 py-1.5 text-left text-lg font-medium outline-none hover:bg-ui-accent/40 focus-visible:bg-ui-accent/70';
 
 function ChoiceMarker() {
   return (
@@ -58,7 +58,7 @@ function TypedLine({ text }: { text: string }) {
 type Props = {
   stock: ShopkeeperStock;
   sets: readonly PlayableSet[];
-  onBuy: (setId: SetId) => ShopkeeperLine;
+  onBuy: (setId: SetId) => Promise<ShopkeeperLine>;
   onClose: () => void;
 };
 
@@ -70,6 +70,8 @@ export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
     line: 'greeting',
     turn: 0,
   });
+
+  const [isBuying, setIsBuying] = useState(false);
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -113,8 +115,11 @@ export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
                 key={id}
                 type="button"
                 className={CHOICE_CLASS}
-                onClick={() => {
-                  const line = onBuy(id);
+                disabled={isBuying}
+                onClick={async () => {
+                  setIsBuying(true);
+                  const line = await onBuy(id);
+                  setIsBuying(false);
                   setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
                 }}
               >

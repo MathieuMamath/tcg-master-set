@@ -3,6 +3,7 @@ import { getPlayer } from '@/auth/session';
 import { loadPlayableSets } from '@/cards/playable-sets';
 import { HomeScreen } from '@/components/game/home-screen';
 import { redirect } from '@/i18n/navigation';
+import { loadPlayerProgress } from '@/player/progress';
 
 type Props = {
   // The root layout has already rejected any unknown language.
@@ -18,5 +19,10 @@ export default async function HomePage({ params }: Props) {
     return redirect({ href: '/signup', locale });
   }
 
-  return <HomeScreen player={player} sets={await loadPlayableSets(locale)} />;
+  const [sets, progress] = await Promise.all([
+    loadPlayableSets(locale),
+    loadPlayerProgress(player.id),
+  ]);
+
+  return <HomeScreen player={player} sets={sets} progress={progress} />;
 }

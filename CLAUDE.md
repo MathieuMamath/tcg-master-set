@@ -12,7 +12,7 @@
 
 - **Never commit card data or card images**, nor any other third-party asset whose license allows no redistribution. They are imported at runtime or deploy time from outside the repository. The repository runs on placeholder cards.
 - **Keep the product name, domain, logos and repository metadata generic**, without third-party trademarks.
-- **The server decides.** Booster draws, balances, resale and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. The one temporary exception is the wallet in `game/shop-dialogue.ts`, which lives in the browser for one visit until it moves to the database. Boosters are drawn on the server for any signed-in player, because it doesn't store who owns one yet. The collection is also provisional: `components/game/collection-storage.ts` keeps it in `localStorage`, per player and per browser, so a player could edit it.
+- **The server decides.** Booster draws, balances, resale and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. Coins, boosters and the collection live in the database and only change through `player/progress.ts`.
 - **No real money**: no payments, donations or ads.
 - **Single-player only.**
 
@@ -49,6 +49,8 @@ Work reaches `main` through a squashed PR, never a direct push. Lefthook refuses
 ## Data
 
 The schema lives in `db/schema`, and every change goes through a migration in `db/migrations`. Call `getDb()` from `db/client.ts` on the server only. Add a table with the feature that needs it.
+
+`player_cards` deliberately has no foreign key to `cards`, because `pnpm cards:import` replaces a set's card rows.
 
 ## Cards
 

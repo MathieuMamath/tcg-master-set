@@ -1,9 +1,8 @@
 import { hasLocale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
-import { loadBoosterPool, loadOpenedCards } from '@/cards/booster-pool';
-import { BOOSTER_RECIPES, openBooster } from '@/game/booster';
 import { isPlayableSet } from '@/game/card-sets';
 import { routing } from '@/i18n/routing';
+import { openOwnedBooster } from '@/player/progress';
 
 export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -18,18 +17,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    if (!(await getPlayer())) {
+    const player = await getPlayer();
+    if (!player) {
       return Response.json({ error: 'not-signed-in' }, { status: 401 });
     }
 
-    const opened = openBooster(await loadBoosterPool(setId), BOOSTER_RECIPES[setId]);
+    const opened = await openOwnedBooster(player.id, setId, locale);
     if (!opened) {
-      return Response.json({ error: 'catalogue-unavailable' }, { status: 503 });
+      return Response.json({ error: 'no-booster' }, { status: 409 });
     }
-    return Response.json({
-      ...(await loadOpenedCards(opened.cards, setId, locale)),
-      isGodPack: opened.isGodPack,
-    });
+    return Response.json(opened);
   } catch (error) {
     // Logged as text: the full error object carries the database client's internals.
     console.error(

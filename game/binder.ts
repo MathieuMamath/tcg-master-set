@@ -2,10 +2,7 @@ export const SLOTS_PER_PAGE = 9;
 
 const VARIANT_ORDER = ['normal', 'firstEdition', 'holo', 'reverse', 'wPromo'];
 
-export const COLLECTION_STORAGE_KEY = 'tcg-master-set:collection';
-
-// How many copies the player owns, by slot key. Provisional: it lives in the browser until it
-// moves to the database.
+// How many copies the player owns, by slot key.
 export type Collection = Readonly<Record<string, number>>;
 
 export type BinderCard = {
@@ -110,25 +107,4 @@ export function addToCollection(
     next[key] = (next[key] ?? 0) + 1;
   }
   return next;
-}
-
-// Stored data can be missing or corrupted, so anything unexpected is left out.
-export function parseCollection(stored: string | null): Collection {
-  if (stored === null) {
-    return {};
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(stored);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return {};
-    }
-    return Object.fromEntries(
-      Object.entries(parsed).filter(
-        ([, count]) => typeof count === 'number' && Number.isInteger(count) && count > 0,
-      ),
-    );
-  } catch {
-    return {};
-  }
 }
