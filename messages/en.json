@@ -20,11 +20,13 @@
     "greeting": "Hello! Would you like a booster pack?",
     "thanks": "Thank you, and good luck with your cards!",
     "notEnoughCoins": "Sorry, you don't have enough coins.",
-    "buy": "Buy a booster ({price} coins)",
+    "buy": "Buy a {set} booster ({price} coins)",
     "leave": "Goodbye"
   },
   "Booster": {
     "title": "Open a booster",
+    "bagTitle": "Which booster do you want to open?",
+    "bagCount": "{name} ({count})",
     "loading": "Getting your booster...",
     "tearHint": "Drag across the top of the pack to cut it open",
     "tearKeyboard": "Cut the pack open",

@@ -54,6 +54,8 @@ The schema lives in `db/schema`, and every change goes through a migration in `d
 
 The card catalogue comes from [TCGdex](https://tcgdex.dev/) and only lives in the database, never in the repository. Tests use placeholder data. `pnpm cards:import` copies a set in one transaction and can run again safely. Card images stay hosted by TCGdex.
 
+The game plays with the sets in `game/card-sets.ts` that have been imported. A new set also needs a recipe in `game/booster.ts` and a pack theme in `components/game/booster-opening.tsx`.
+
 A card's `rarity` column is in English, because game rules compare it. Translated rarities are for display only.
 
 ## Accounts

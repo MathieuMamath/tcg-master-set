@@ -4,16 +4,18 @@ import { useTranslations } from 'next-intl';
 import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from 'react';
 import type { OpenedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/booster';
+import type { SetId } from '@/game/card-sets';
 import { CardBack } from './card-back';
-import { SetLogo } from './set-logo';
+import { PackBody, packCrimpStyle } from './pack-art';
 import { TiltCard } from './tilt-card';
 
 const TEAR_ANIMATION_MILLISECONDS = 450;
 
-export type Opening =
+export type Opening = { setId: SetId } & (
   | { status: 'loading' }
   | { status: 'error' }
-  | { status: 'ready'; setName: string; logoUrl: string | null; cards: OpenedCard[] };
+  | { status: 'ready'; setName: string; logoUrl: string | null; cards: OpenedCard[] }
+);
 
 function isSpecial(card: OpenedCard) {
   return card.variant !== 'normal';
@@ -40,10 +42,12 @@ function CardFace({ card, quality }: { card: OpenedCard; quality: 'high' | 'low'
 }
 
 function SealedPack({
+  setId,
   setName,
   logoUrl,
   onTorn,
 }: {
+  setId: SetId;
   setName: string;
   logoUrl: string | null;
   onTorn: () => void;
@@ -102,15 +106,10 @@ function SealedPack({
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
         onClick={onClick}
+        style={packCrimpStyle(setId)}
         className="ui-pop-in relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)] cursor-grab touch-none select-none outline-none active:cursor-grabbing"
       >
-        <span className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink bg-[radial-gradient(circle_at_50%_78%,#ffb347_0%,#d9381e_32%,#4a1020_62%,#160b14_100%)] text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]">
-          <span className="absolute inset-x-3 top-[13%] bottom-[7%] flex items-center justify-center">
-            <SetLogo setName={setName} logoUrl={logoUrl} />
-          </span>
-          <span className="ui-shine absolute inset-0" />
-          <span aria-hidden="true" className="ui-pack-crimp absolute inset-x-0 bottom-0 h-[7%]" />
-        </span>
+        <PackBody setId={setId} setName={setName} logoUrl={logoUrl} />
         <span
           aria-hidden="true"
           style={{
@@ -328,6 +327,7 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
         <div className="flex h-full items-center justify-center">
           {step === 'pack' && (
             <SealedPack
+              setId={opening.setId}
               setName={opening.setName}
               logoUrl={opening.logoUrl}
               onTorn={() => setStep('reveal')}

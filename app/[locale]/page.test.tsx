@@ -10,6 +10,7 @@ import HomePage from './page';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/auth/client', () => ({ authClient: { signOut: vi.fn() } }));
+vi.mock('@/cards/playable-sets', () => ({ loadPlayableSets: vi.fn().mockResolvedValue([]) }));
 vi.mock('@/i18n/navigation', () => ({ redirect: vi.fn() }));
 
 const PLAYER = { id: 'player-1', username: 'Placeholder' };
@@ -17,13 +18,13 @@ const PLAYER = { id: 'player-1', username: 'Placeholder' };
 function renderHome(locale: Locale, messages: typeof en) {
   return renderToStaticMarkup(
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <HomeScreen player={PLAYER} />
+      <HomeScreen player={PLAYER} sets={[]} />
     </NextIntlClientProvider>,
   );
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.mocked(redirect).mockClear();
 });
 
 test('the home screen shows the game title and the player', () => {

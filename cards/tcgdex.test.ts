@@ -3,6 +3,7 @@ import { routing } from '@/i18n/routing';
 import {
   CARD_LOCALES,
   catalogueSummary,
+  expectedLogoUrl,
   mergeCardLanguages,
   type ParsedCard,
   parseCard,
@@ -12,6 +13,7 @@ import {
 // Placeholder data with the API's shape: no real card data belongs in this repository.
 const SET_RESPONSE = {
   id: 'set-1',
+  serie: { id: 'series-1' },
   name: 'Placeholder Set',
   releaseDate: '2020-01-01',
   logo: 'https://example.test/logo',
@@ -40,10 +42,19 @@ describe('CARD_LOCALES', () => {
   });
 });
 
+describe('expectedLogoUrl', () => {
+  test('follows the layout of the image server', () => {
+    expect(expectedLogoUrl('fr', 'series-1', 'set-1')).toBe(
+      'https://assets.tcgdex.net/fr/series-1/set-1/logo',
+    );
+  });
+});
+
 describe('parseSet', () => {
   test('reads a set and its card list', () => {
     expect(parseSet(SET_RESPONSE)).toEqual({
       id: 'set-1',
+      seriesId: 'series-1',
       name: 'Placeholder Set',
       releaseDate: '2020-01-01',
       officialCardCount: 1,

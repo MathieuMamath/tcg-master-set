@@ -9,11 +9,16 @@ vi.mock('@/cards/booster-pool', () => ({
   loadBoosterPool: vi.fn(),
   loadOpenedCards: vi.fn(),
 }));
-vi.mock('@/game/booster', () => ({ drawBooster: vi.fn() }));
+vi.mock('@/game/booster', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/game/booster')>()),
+  drawBooster: vi.fn(),
+}));
 
-function open(locale: string) {
+function open(locale: string, set = 'swsh3') {
   return POST(
-    new Request(`http://test.invalid/api/boosters/open?locale=${locale}`, { method: 'POST' }),
+    new Request(`http://test.invalid/api/boosters/open?locale=${locale}&set=${set}`, {
+      method: 'POST',
+    }),
   );
 }
 
@@ -29,11 +34,11 @@ test('returns the drawn cards in the requested language', async () => {
   vi.mocked(drawBooster).mockReturnValue(drawn);
   vi.mocked(loadOpenedCards).mockResolvedValue(opened);
 
-  const response = await open('fr');
+  const response = await open('fr', '30th');
 
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual(opened);
-  expect(loadOpenedCards).toHaveBeenCalledWith(drawn, 'swsh3', 'fr');
+  expect(loadOpenedCards).toHaveBeenCalledWith(drawn, '30th', 'fr');
 });
 
 test('refuses a visitor who is not signed in', async () => {
@@ -44,6 +49,10 @@ test('refuses a visitor who is not signed in', async () => {
 
 test('rejects an unknown language', async () => {
   expect((await open('xx')).status).toBe(400);
+});
+
+test('rejects a set the game does not play with', async () => {
+  expect((await open('en', 'other')).status).toBe(400);
 });
 
 test('reports an empty catalogue as unavailable', async () => {

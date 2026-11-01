@@ -1,5 +1,4 @@
-// The only set the game plays with for now.
-export const ACTIVE_SET_ID = 'swsh3';
+const ASSETS_URL = 'https://assets.tcgdex.net';
 
 export const CARD_LOCALES = ['en', 'fr'] as const;
 
@@ -7,6 +6,7 @@ export type CardLocale = (typeof CARD_LOCALES)[number];
 
 export type ParsedSet = {
   id: string;
+  seriesId: string | null;
   name: string;
   releaseDate: string;
   officialCardCount: number;
@@ -77,6 +77,11 @@ function requiredCount(source: Json, field: string, context: string): number {
   return value;
 }
 
+// Where the image server keeps a logo, for the recent sets whose API response leaves it out.
+export function expectedLogoUrl(locale: CardLocale, seriesId: string, setId: string) {
+  return `${ASSETS_URL}/${locale}/${seriesId}/${setId}/logo`;
+}
+
 export function parseSet(response: unknown): ParsedSet {
   if (!isJson(response)) {
     throw new Error('Set: the response should be an object');
@@ -91,6 +96,7 @@ export function parseSet(response: unknown): ParsedSet {
 
   return {
     id,
+    seriesId: isJson(response.serie) ? optionalString(response.serie, 'id') : null,
     name: requiredString(response, 'name', context),
     releaseDate: requiredString(response, 'releaseDate', context),
     officialCardCount: requiredCount(cardCount, 'official', context),

@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import type { PlayableSet, SetId } from '@/game/card-sets';
 import { BOOSTER_PRICE, type ShopkeeperLine } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 
@@ -55,12 +56,13 @@ function TypedLine({ text }: { text: string }) {
 }
 
 type Props = {
-  onBuy: () => ShopkeeperLine;
+  sets: readonly PlayableSet[];
+  onBuy: (setId: SetId) => ShopkeeperLine;
   onClose: () => void;
 };
 
 // Mounted only while talking, so every conversation starts with a greeting.
-export function ShopDialog({ onBuy, onClose }: Props) {
+export function ShopDialog({ sets, onBuy, onClose }: Props) {
   const t = useTranslations('Shopkeeper');
   const dialog = useRef<HTMLDialogElement>(null);
   const [speech, setSpeech] = useState<{ line: ShopkeeperLine; turn: number }>({
@@ -101,17 +103,20 @@ export function ShopDialog({ onBuy, onClose }: Props) {
       <div className="-mt-3 rounded-2xl border-4 border-ui-ink bg-ui-paper px-5 pt-6 pb-3 shadow-[0_6px_0_var(--ui-ink)]">
         <TypedLine key={speech.turn} text={t(speech.line)} />
         <form method="dialog" className="mt-2 border-ui-ink/20 border-t-2 pt-2">
-          <button
-            type="button"
-            className={CHOICE_CLASS}
-            onClick={() => {
-              const line = onBuy();
-              setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
-            }}
-          >
-            <ChoiceMarker />
-            {t('buy', { price: BOOSTER_PRICE })}
-          </button>
+          {sets.map(({ id, name }) => (
+            <button
+              key={id}
+              type="button"
+              className={CHOICE_CLASS}
+              onClick={() => {
+                const line = onBuy(id);
+                setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
+              }}
+            >
+              <ChoiceMarker />
+              {t('buy', { set: name, price: BOOSTER_PRICE })}
+            </button>
+          ))}
           <button type="submit" className={CHOICE_CLASS}>
             <ChoiceMarker />
             {t('leave')}

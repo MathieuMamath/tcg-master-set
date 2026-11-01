@@ -20,11 +20,13 @@
     "greeting": "Bonjour ! Tu veux un booster ?",
     "thanks": "Merci, et bonne chance pour tes cartes !",
     "notEnoughCoins": "Désolée, il te manque des pièces.",
-    "buy": "Acheter un booster ({price} pièces)",
+    "buy": "Acheter un booster {set} ({price} pièces)",
     "leave": "Au revoir"
   },
   "Booster": {
     "title": "Ouvrir un booster",
+    "bagTitle": "Quel booster veux-tu ouvrir ?",
+    "bagCount": "{name} ({count})",
     "loading": "Préparation de ton booster...",
     "tearHint": "Fais glisser en haut du paquet pour le découper",
     "tearKeyboard": "Découper le paquet",
