@@ -6,6 +6,7 @@ import type { OpenedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/booster';
 import { CardBack } from './card-back';
 import { SetLogo } from './set-logo';
+import { TiltCard } from './tilt-card';
 
 const TEAR_ANIMATION_MILLISECONDS = 450;
 
@@ -157,37 +158,30 @@ function Reveal({ cards, onFinished }: { cards: OpenedCard[]; onFinished: () => 
     }
   }, [cards]);
 
-  const label = isLast ? t('seeAll') : t('reveal');
-
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3">
       <p aria-live="polite" className="text-lg font-semibold text-ui-paper">
         {current ? current.name : t('readyToReveal')}
       </p>
-      <button
-        ref={button}
-        type="button"
-        aria-label={label}
-        onClick={() => (isLast ? onFinished() : setRevealed(revealed + 1))}
-        className="aspect-[5/7] h-[min(62vh,30rem)] max-w-full cursor-pointer outline-none [perspective:60rem]"
-      >
-        <span
-          key={revealed}
-          className={`ui-card-flip relative block size-full rounded-[4.5%/3.2%] ${
-            current && isSpecial(current) ? 'ui-card-special' : ''
-          }`}
-        >
-          {current ? <CardFace card={current} quality="high" /> : <CardBack />}
-          {current && isSpecial(current) && (
-            <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
-          )}
-        </span>
-      </button>
+      <div className="aspect-[5/7] w-[min(100%,44vh,21.4rem)] [perspective:60rem]">
+        <div key={revealed} className="ui-card-flip size-full">
+          <TiltCard isSpecial={current !== null && isSpecial(current)}>
+            {current ? <CardFace card={current} quality="high" /> : <CardBack />}
+          </TiltCard>
+        </div>
+      </div>
       <p className="text-ui-paper">
         {current?.rarity && <span className="font-semibold">{current.rarity} · </span>}
         {t('progress', { current: revealed, total: cards.length })}
       </p>
-      <p className="text-sm text-ui-paper/70">{label}</p>
+      <button
+        ref={button}
+        type="button"
+        onClick={() => (isLast ? onFinished() : setRevealed(revealed + 1))}
+        className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
+      >
+        {isLast ? t('seeAll') : t('reveal')}
+      </button>
     </div>
   );
 }
@@ -215,15 +209,10 @@ function EnlargedCard({ card, onClose }: { card: OpenedCard; onClose: () => void
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
-      <div
-        className={`ui-pop-in relative aspect-[5/7] w-[min(100%,50vh,24rem)] rounded-[4.5%/3.2%] ${
-          isSpecial(card) ? 'ui-card-special' : ''
-        }`}
-      >
-        <CardFace card={card} quality="high" />
-        {isSpecial(card) && (
-          <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
-        )}
+      <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
+        <TiltCard isSpecial={isSpecial(card)}>
+          <CardFace card={card} quality="high" />
+        </TiltCard>
       </div>
       <p className="text-center text-lg font-semibold text-ui-paper">
         {card.name}
