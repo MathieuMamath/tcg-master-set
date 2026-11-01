@@ -185,7 +185,7 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
             disabled={boosterTotal === 0}
             aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
             onClick={openBag}
-            className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent"
+            className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span
               aria-hidden="true"

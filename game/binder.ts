@@ -87,6 +87,19 @@ export function ownedInSet(collection: Collection, setId: string): number {
   return Object.keys(collection).filter((key) => key.startsWith(`${setId}-`)).length;
 }
 
+// The binders the player can open come first, then each group goes from newest to oldest.
+export function bindersToChoose<Set extends { id: string; releaseDate: string }>(
+  sets: readonly Set[],
+  collection: Collection,
+): (Set & { owned: number })[] {
+  return sets
+    .map((set) => ({ ...set, owned: ownedInSet(collection, set.id) }))
+    .sort(
+      (a, b) =>
+        Number(b.owned > 0) - Number(a.owned > 0) || b.releaseDate.localeCompare(a.releaseDate),
+    );
+}
+
 export function addToCollection(
   collection: Collection,
   cards: readonly { id: string; variant: string }[],
