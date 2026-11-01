@@ -37,14 +37,14 @@ describe('buyBooster', () => {
     expect(line).toBe('notEnoughCoins');
   });
 
-  test('the starting coins buy three boosters and no more', () => {
+  test('the starting coins buy ten boosters and no more', () => {
     let wallet = STARTING_WALLET;
-    for (let purchase = 0; purchase < 5; purchase++) {
+    for (let purchase = 0; purchase < 12; purchase++) {
       wallet = buyBooster(wallet, purchase % 2 === 0 ? 'swsh3' : '30th').wallet;
     }
 
     expect(wallet.coins).toBe(0);
-    expect(totalBoosters(wallet)).toBe(3);
+    expect(totalBoosters(wallet)).toBe(10);
   });
 });
 
