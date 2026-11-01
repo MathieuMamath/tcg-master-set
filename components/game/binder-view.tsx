@@ -12,6 +12,7 @@ import {
   pageCount,
   slotsOnPage,
 } from '@/game/binder';
+import { TiltCard } from './tilt-card';
 
 const POCKET_CLASS = 'relative aspect-[5/7] rounded-[4.5%/3.2%]';
 const NAV_BUTTON_CLASS =
@@ -134,11 +135,13 @@ function CardDetail({
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
       <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
-        <CardImage
-          card={slot.card}
-          quality="high"
-          className="size-full rounded-[4.5%/3.2%] object-cover"
-        />
+        <TiltCard isSpecial={slot.variant !== 'normal'}>
+          <CardImage
+            card={slot.card}
+            quality="high"
+            className="size-full rounded-[4.5%/3.2%] object-cover"
+          />
+        </TiltCard>
       </div>
       <p className="text-center text-lg font-semibold text-ui-paper">
         {slot.card.name}
