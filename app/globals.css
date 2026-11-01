@@ -278,6 +278,16 @@ body {
   animation: ui-pull-tease 700ms ease-in-out infinite;
 }
 
+.ui-new-mark {
+  background: linear-gradient(105deg, #e8a317 35%, #fff6c9 50%, #e8a317 65%);
+  background-size: 250% 100%;
+  background-clip: text;
+  color: transparent;
+  /* The outline keeps the gold readable on every card, even the yellow ones. */
+  filter: drop-shadow(0 0 0.04em #5a3a00) drop-shadow(0 0.04em 0.06em rgb(0 0 0 / 60%));
+  animation: ui-shine 2600ms linear infinite;
+}
+
 .ui-pop-in {
   animation: ui-pop-in 180ms ease-out;
 }
@@ -309,7 +319,8 @@ body {
   .ui-pull-ring,
   .ui-pull-flash,
   .ui-pull-arrive,
-  .ui-pull-tease {
+  .ui-pull-tease,
+  .ui-new-mark {
     animation: none;
   }
 }
