@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.25](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.24...v0.1.25) (2026-11-01)
+
+### Features
+
+* **city:** add a settings menu and save where the character stands ([#25](https://github.com/MathieuMamath/tcg-master-set/issues/25)) ([208db1c](https://github.com/MathieuMamath/tcg-master-set/commit/208db1c1acfcd568b1681a079055837026883ec4)), references [#24](https://github.com/MathieuMamath/tcg-master-set/issues/24)
+
 ## [0.1.24](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.23...v0.1.24) (2026-11-01)
 
 ### Features
