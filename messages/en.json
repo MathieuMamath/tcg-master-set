@@ -42,6 +42,7 @@
     "tearHint": "Drag across the top of the pack to cut it open",
     "tearKeyboard": "Cut the pack open",
     "tearKeyHint": "or press Space",
+    "skip": "Skip",
     "readyToReveal": "Your cards are waiting!",
     "reveal": "Reveal the next card",
     "seeAll": "See all your cards",
