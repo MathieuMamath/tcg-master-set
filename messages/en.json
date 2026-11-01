@@ -33,6 +33,7 @@
     "seeAll": "See all your cards",
     "progress": "{current} / {total}",
     "summaryTitle": "Your new cards",
+    "enlargeCard": "See {name} up close",
     "done": "Done",
     "error": "The booster couldn't be opened. It's still in your bag.",
     "retry": "Try again",

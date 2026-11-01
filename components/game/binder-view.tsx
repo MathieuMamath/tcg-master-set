@@ -133,7 +133,7 @@ function CardDetail({
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
-      <div className="ui-pop-in aspect-[5/7] h-[min(70vh,34rem)] max-w-full">
+      <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
         <CardImage
           card={slot.card}
           quality="high"
