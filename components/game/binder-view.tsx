@@ -16,6 +16,7 @@ import {
   turnPage,
 } from '@/game/binder';
 import type { PlayableSet } from '@/game/card-sets';
+import { horizontalStep } from '@/game/menu-keys';
 import {
   BinderCover,
   BinderOpening,
@@ -24,6 +25,7 @@ import {
   WIDE_PAGE_WIDTH_CLASS,
 } from './binder-cover';
 import { CardPicture } from './card-picture';
+import { isFocusLost, moveThroughChoices, moveThroughChoicesVertically } from './menu-focus';
 import { TiltCard } from './tilt-card';
 import { useWideScreen } from './use-wide-screen';
 
@@ -31,7 +33,7 @@ const CLOSE_BUTTON_CLASS =
   'cursor-pointer rounded-full border-4 border-ui-ink bg-ui-paper px-4 py-1 font-semibold text-ui-ink';
 const POCKET_CLASS = 'relative aspect-[5/7] rounded-[4.5%/3.2%]';
 const NAV_BUTTON_CLASS =
-  'cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-4 py-1 font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)] disabled:cursor-default disabled:opacity-40';
+  'cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-4 py-1 font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)] aria-disabled:cursor-default aria-disabled:opacity-40';
 
 type Catalogue = { setName: string; cards: BinderCard[] };
 
@@ -97,9 +99,14 @@ function CardDetail({
   const t = useTranslations('Binder');
   const close = useRef<HTMLButtonElement>(null);
 
+  // Read while rendering, because the pocket behind loses the focus once this appears.
+  const [opener] = useState(() => document.activeElement as HTMLElement | null);
+
+  // The focus goes back to the pocket this card came from.
   useEffect(() => {
     close.current?.focus();
-  }, []);
+    return () => opener?.focus();
+  }, [opener]);
 
   // Escape goes back to the page first, rather than closing the whole binder.
   useEffect(() => {
@@ -141,6 +148,7 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
   const [detail, setDetail] = useState<BinderSlot | null>(null);
   // The first pages take over from the opening animation, so they must appear without moving.
   const [hasTurned, setHasTurned] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
   const isWide = useWideScreen();
   const pagesAtOnce = isWide ? 2 : 1;
   const pages = pageCount(slots.length);
@@ -158,12 +166,11 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
       if (detail) {
         return;
       }
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const step = horizontalStep(event.code);
+      if (step) {
         event.preventDefault();
         setHasTurned(true);
-        setPage((current) =>
-          turnPage(current, event.key === 'ArrowLeft' ? -1 : 1, slots.length, pagesAtOnce),
-        );
+        setPage((current) => turnPage(current, step, slots.length, pagesAtOnce));
       }
     };
 
@@ -171,17 +178,30 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [detail, slots.length, pagesAtOnce]);
 
+  // On arrival, and when a turned page takes away the pocket that had the focus.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new page is what can lose the focus.
+  useEffect(() => {
+    if (isFocusLost()) {
+      root.current?.querySelector<HTMLElement>('button:not([aria-disabled="true"])')?.focus();
+    }
+  }, [shown[0]]);
+
   const pageClass = isWide
     ? WIDE_PAGE_WIDTH_CLASS
     : 'w-[min(100%,calc((100dvh-14.5rem)*0.7))] sm:w-[min(100%,calc((100dvh-11.5rem)*0.7))]';
 
   return (
-    <div className="flex h-full flex-col items-center gap-3">
+    // biome-ignore lint/a11y/noStaticElementInteractions: only catches keys from the buttons inside.
+    <div
+      ref={root}
+      onKeyDown={moveThroughChoicesVertically}
+      className="flex h-full flex-col items-center gap-3"
+    >
       <div className="text-center text-ui-paper">
         <h2 className="text-xl font-semibold">{catalogue.setName}</h2>
         <p>{t('progress', { owned: ownedSlotCount(slots, collection), total: slots.length })}</p>
       </div>
-      <div className="flex min-h-0 w-full justify-center gap-2">
+      <div inert={detail !== null} className="flex min-h-0 w-full justify-center gap-2">
         {shown.map((shownPage) => (
           <ul
             key={shownPage}
@@ -205,10 +225,11 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
           />
         )}
       </div>
-      <div className="flex items-center gap-3 text-ui-paper">
+      <div inert={detail !== null} className="flex items-center gap-3 text-ui-paper">
+        {/* Not `disabled`, which would take the focus away at the first and last pages. */}
         <button
           type="button"
-          disabled={shown[0] === 0}
+          aria-disabled={shown[0] === 0}
           aria-label={t('previousPage')}
           onClick={() => turn(-1)}
           className={NAV_BUTTON_CLASS}
@@ -222,7 +243,7 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
         </span>
         <button
           type="button"
-          disabled={lastShown === pages - 1}
+          aria-disabled={lastShown === pages - 1}
           aria-label={t('nextPage')}
           onClick={() => turn(1)}
           className={NAV_BUTTON_CLASS}
@@ -251,6 +272,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
   const t = useTranslations('Binder');
   const locale = useLocale();
   const dialog = useRef<HTMLDialogElement>(null);
+  const binderList = useRef<HTMLDivElement>(null);
   const [catalogue, setCatalogue] = useState<Catalogue | null>(null);
   const [hasFailed, setHasFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -264,6 +286,13 @@ export function BinderView({ sets, collection, onClose }: Props) {
   useEffect(() => {
     dialog.current?.showModal();
   }, []);
+
+  // Ready to pick a binder, on arrival and when coming back from one.
+  useEffect(() => {
+    if (!isBinderChosen) {
+      binderList.current?.querySelector<HTMLElement>('button:enabled')?.focus();
+    }
+  }, [isBinderChosen]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt exists to run this again.
   useEffect(() => {
@@ -340,6 +369,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
       ref={dialog}
       aria-label={t('title')}
       onClose={onClose}
+      onKeyDown={chosenSet ? undefined : moveThroughChoices}
       className="m-0 size-full max-h-none max-w-none bg-ui-ink/95 p-4 font-game backdrop:bg-transparent"
     >
       {chosenSet ? (
@@ -366,7 +396,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
             {sets.length > 0 && binders.every(({ owned }) => owned === 0) && (
               <p className="text-center text-ui-paper/80">{t('noCardsYet')}</p>
             )}
-            <div className="flex w-full flex-wrap justify-center gap-5">
+            <div ref={binderList} className="flex w-full flex-wrap justify-center gap-5">
               {binders.map(({ owned, ...set }) => (
                 <button
                   key={set.id}

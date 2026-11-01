@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import type { PlayableSet, SetId } from '@/game/card-sets';
+import { moveThroughChoices } from './menu-focus';
 import { PackBody, packCrimpStyle } from './pack-art';
 
 type Props = {
@@ -24,6 +25,7 @@ export function BoosterBag({ boosters, onPick, onClose }: Props) {
       ref={dialog}
       aria-labelledby="booster-bag-title"
       onClose={onClose}
+      onKeyDown={moveThroughChoices}
       className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-2xl border-4 border-ui-ink bg-ui-paper p-5 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-ui-ink/50"
     >
       <h2 id="booster-bag-title" className="text-center text-xl font-semibold">

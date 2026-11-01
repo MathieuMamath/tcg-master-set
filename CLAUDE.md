@@ -76,6 +76,8 @@ Text lives in `messages/en.json` and `messages/fr.json`, which must define the s
 
 Game rules live in `game/` as plain tested functions, without React or Three.js. `components/game/` displays them, and the 3D scene loads only in the browser.
 
+The game must stay playable with the keyboard alone. Every screen puts the focus on something that can be pressed, and menus follow the movement keys through `components/game/menu-focus.ts`. Don't use `disabled` on a button that can have the focus, because the browser takes the focus away and no key reaches the dialog any more. Use `aria-disabled` instead.
+
 3D models live in `public/models/`, with their license next to them. Only commit the files the game uses.
 
 ## Next.js
