@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.17](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.16...v0.1.17) (2026-11-01)
+
+### Features
+
+* **cards:** add the 30th Celebration set ([#17](https://github.com/MathieuMamath/tcg-master-set/issues/17)) ([213ebd2](https://github.com/MathieuMamath/tcg-master-set/commit/213ebd2cb36cbacb0b3dded60900fc274b6daa68))
+
 ## [0.1.16](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.15...v0.1.16) (2026-11-01)
 
 ### Features
