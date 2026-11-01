@@ -14,6 +14,10 @@ export type Opening =
   | { status: 'error' }
   | { status: 'ready'; setName: string; logoUrl: string | null; cards: OpenedCard[] };
 
+function isSpecial(card: OpenedCard) {
+  return card.variant !== 'normal';
+}
+
 function CardFace({ card, quality }: { card: OpenedCard; quality: 'high' | 'low' }) {
   if (!card.imageUrl) {
     return (
@@ -97,7 +101,7 @@ function SealedPack({
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
         onClick={onClick}
-        className="ui-pop-in relative aspect-[5/7] w-[min(calc(100vw-2rem),42vh,20rem)] cursor-grab touch-none select-none outline-none active:cursor-grabbing"
+        className="ui-pop-in relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)] cursor-grab touch-none select-none outline-none active:cursor-grabbing"
       >
         <span className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink bg-[radial-gradient(circle_at_50%_78%,#ffb347_0%,#d9381e_32%,#4a1020_62%,#160b14_100%)] text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]">
           <span className="absolute inset-x-3 top-[13%] bottom-[7%] flex items-center justify-center">
@@ -170,11 +174,11 @@ function Reveal({ cards, onFinished }: { cards: OpenedCard[]; onFinished: () => 
         <span
           key={revealed}
           className={`ui-card-flip relative block size-full rounded-[4.5%/3.2%] ${
-            current && current.variant !== 'normal' ? 'ui-card-special' : ''
+            current && isSpecial(current) ? 'ui-card-special' : ''
           }`}
         >
           {current ? <CardFace card={current} quality="high" /> : <CardBack />}
-          {current && current.variant !== 'normal' && (
+          {current && isSpecial(current) && (
             <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
           )}
         </span>
@@ -188,8 +192,58 @@ function Reveal({ cards, onFinished }: { cards: OpenedCard[]; onFinished: () => 
   );
 }
 
+function EnlargedCard({ card, onClose }: { card: OpenedCard; onClose: () => void }) {
+  const t = useTranslations('Booster');
+  const back = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    back.current?.focus();
+  }, []);
+
+  // Escape goes back to the summary first, rather than closing the whole opening.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
+      <div
+        className={`ui-pop-in relative aspect-[5/7] w-[min(100%,50vh,24rem)] rounded-[4.5%/3.2%] ${
+          isSpecial(card) ? 'ui-card-special' : ''
+        }`}
+      >
+        <CardFace card={card} quality="high" />
+        {isSpecial(card) && (
+          <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
+        )}
+      </div>
+      <p className="text-center text-lg font-semibold text-ui-paper">
+        {card.name}
+        {card.rarity && ` · ${card.rarity}`}
+      </p>
+      <button
+        ref={back}
+        type="button"
+        onClick={onClose}
+        className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
+      >
+        {t('back')}
+      </button>
+    </div>
+  );
+}
+
 function Summary({ cards, onClose }: { cards: OpenedCard[]; onClose: () => void }) {
   const t = useTranslations('Booster');
+  const [enlarged, setEnlarged] = useState<OpenedCard | null>(null);
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4">
@@ -197,7 +251,19 @@ function Summary({ cards, onClose }: { cards: OpenedCard[]; onClose: () => void 
       <ul className="grid w-full max-w-3xl grid-cols-5 gap-1.5 sm:gap-2">
         {cards.map((card) => (
           <li key={card.id} className="ui-pop-in aspect-[5/7]">
-            <CardFace card={card} quality="low" />
+            <button
+              type="button"
+              aria-label={t('enlargeCard', { name: card.name })}
+              onClick={() => setEnlarged(card)}
+              className={`relative block size-full cursor-pointer rounded-[4.5%/3.2%] outline-offset-2 ${
+                isSpecial(card) ? 'shadow-[0_0_0.9rem_0.15rem_var(--ui-accent)]' : ''
+              }`}
+            >
+              <CardFace card={card} quality="low" />
+              {isSpecial(card) && (
+                <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
+              )}
+            </button>
           </li>
         ))}
       </ul>
@@ -208,6 +274,7 @@ function Summary({ cards, onClose }: { cards: OpenedCard[]; onClose: () => void 
       >
         {t('done')}
       </button>
+      {enlarged && <EnlargedCard card={enlarged} onClose={() => setEnlarged(null)} />}
     </div>
   );
 }
