@@ -1,13 +1,14 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import { BOOSTER_PRICE, type ShopkeeperLine, type ShopkeeperStock } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
+import { moveThroughChoices } from './menu-focus';
 
 const CHOICE_CLASS =
-  'group flex w-full cursor-pointer items-center disabled:cursor-wait gap-2 rounded-lg px-2 py-1.5 text-left text-lg font-medium outline-none hover:bg-ui-accent/40 focus-visible:bg-ui-accent/70';
+  'group flex w-full cursor-pointer items-center aria-disabled:cursor-wait gap-2 rounded-lg px-2 py-1.5 text-left text-lg font-medium outline-none hover:bg-ui-accent/40 focus-visible:bg-ui-accent/70';
 
 function ChoiceMarker() {
   return (
@@ -77,18 +78,6 @@ export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
     dialog.current?.showModal();
   }, []);
 
-  // Choices are picked like in a game menu, with the same keys used to walk.
-  const moveThroughChoices = (event: KeyboardEvent) => {
-    const step = { ArrowUp: -1, KeyW: -1, ArrowDown: 1, KeyS: 1 }[event.code];
-    if (!step) {
-      return;
-    }
-    event.preventDefault();
-    const choices = Array.from(dialog.current?.querySelectorAll('button') ?? []);
-    const current = choices.indexOf(document.activeElement as HTMLButtonElement);
-    choices[(current + step + choices.length) % choices.length]?.focus();
-  };
-
   return (
     <dialog
       ref={dialog}
@@ -115,8 +104,12 @@ export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
                 key={id}
                 type="button"
                 className={CHOICE_CLASS}
-                disabled={isBuying}
+                // Not `disabled`, which would take the focus away from the keyboard.
+                aria-disabled={isBuying}
                 onClick={async () => {
+                  if (isBuying) {
+                    return;
+                  }
                   setIsBuying(true);
                   const line = await onBuy(id);
                   setIsBuying(false);

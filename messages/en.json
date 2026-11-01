@@ -6,7 +6,7 @@
     "title": "TCG Master Set"
   },
   "Game": {
-    "keyboardHint": "Use the arrow keys or WASD to move.",
+    "keyboardHint": "Use the arrow keys or WASD to move, and Tab to reach the menus.",
     "webglUnavailable": "This game needs WebGL, which your browser doesn't support or has turned off.",
     "coins": "{count, plural, one {# coin} other {# coins}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
@@ -41,6 +41,7 @@
     "loading": "Getting your booster...",
     "tearHint": "Drag across the top of the pack to cut it open",
     "tearKeyboard": "Cut the pack open",
+    "tearKeyHint": "or press Space",
     "readyToReveal": "Your cards are waiting!",
     "reveal": "Reveal the next card",
     "seeAll": "See all your cards",

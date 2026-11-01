@@ -7,6 +7,7 @@ import { isTearComplete, tearProgress } from '@/game/booster';
 import type { SetId } from '@/game/card-sets';
 import { CardBack } from './card-back';
 import { CardPicture } from './card-picture';
+import { moveThroughChoices } from './menu-focus';
 import { PackBody, packCrimpStyle } from './pack-art';
 import { TiltCard } from './tilt-card';
 
@@ -94,7 +95,7 @@ function SealedPack({
         onPointerCancel={onPointerEnd}
         onClick={onClick}
         style={packCrimpStyle(setId)}
-        className="ui-pop-in relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)] cursor-grab touch-none select-none outline-none active:cursor-grabbing"
+        className="ui-pop-in relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)] cursor-grab touch-none select-none outline-offset-4 active:cursor-grabbing"
       >
         <PackBody setId={setId} setName={setName} logoUrl={logoUrl} />
         <span
@@ -122,7 +123,10 @@ function SealedPack({
           ✂
         </span>
       </button>
-      <p className="text-center text-lg text-ui-paper">{t('tearHint')}</p>
+      <div className="text-center text-ui-paper">
+        <p className="text-lg">{t('tearHint')}</p>
+        <p className="pointer-coarse:hidden">{t('tearKeyHint')}</p>
+      </div>
     </div>
   );
 }
@@ -148,13 +152,11 @@ function Reveal({
 }) {
   const t = useTranslations('Booster');
   const [revealed, setRevealed] = useState(0);
-  const button = useRef<HTMLButtonElement>(null);
   const current = revealed > 0 ? cards[revealed - 1] : null;
   const isLast = revealed === cards.length;
 
   // Loaded ahead of time, so that each card appears the moment it's revealed.
   useEffect(() => {
-    button.current?.focus();
     for (const { imageUrl } of cards) {
       if (imageUrl) {
         new Image().src = `${imageUrl}/high.webp`;
@@ -188,7 +190,6 @@ function Reveal({
         {t('progress', { current: revealed, total: cards.length })}
       </p>
       <button
-        ref={button}
         type="button"
         onClick={() => (isLast ? onFinished() : setRevealed(revealed + 1))}
         className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
@@ -203,9 +204,14 @@ function EnlargedCard({ card, onClose }: { card: OpenedCard; onClose: () => void
   const t = useTranslations('Booster');
   const back = useRef<HTMLButtonElement>(null);
 
+  // Read while rendering, because the card behind loses the focus once this appears.
+  const [opener] = useState(() => document.activeElement as HTMLElement | null);
+
+  // The focus goes back to the card this one enlarges.
   useEffect(() => {
     back.current?.focus();
-  }, []);
+    return () => opener?.focus();
+  }, [opener]);
 
   // Escape goes back to the summary first, rather than closing the whole opening.
   useEffect(() => {
@@ -259,7 +265,7 @@ function Summary({
     <div className="relative flex h-full flex-col items-center justify-center gap-4">
       {isGodPack && <GodPackBanner />}
       <h2 className="text-2xl font-semibold text-ui-paper">{t('summaryTitle')}</h2>
-      <ul className="grid w-full max-w-3xl grid-cols-5 gap-1.5 sm:gap-2">
+      <ul inert={enlarged !== null} className="grid w-full max-w-3xl grid-cols-5 gap-1.5 sm:gap-2">
         {cards.map((card) => (
           <li key={card.id} className="ui-pop-in aspect-[5/7]">
             <button
@@ -280,6 +286,7 @@ function Summary({
       </ul>
       <button
         type="button"
+        inert={enlarged !== null}
         onClick={onClose}
         className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
       >
@@ -305,6 +312,12 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
     dialog.current?.showModal();
   }, []);
 
+  // Each screen replaces the button that had the focus, and the next one is ready to be pressed.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: these are what change the screen.
+  useEffect(() => {
+    dialog.current?.querySelector('button')?.focus();
+  }, [opening.status, step]);
+
   const canLeave = opening.status === 'error' || step === 'summary';
 
   return (
@@ -318,6 +331,7 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
         }
       }}
       onClose={onClose}
+      onKeyDown={moveThroughChoices}
       className="m-0 size-full max-h-none max-w-none bg-ui-ink/95 p-4 font-game backdrop:bg-transparent"
     >
       {opening.status === 'loading' && (

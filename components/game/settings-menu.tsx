@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { authClient } from '@/auth/client';
 import { useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
+import { moveThroughChoices } from './menu-focus';
 
 // Each language is written in its own language, so these names are not translated.
 const LANGUAGE_NAMES: Record<Locale, string> = { en: 'English', fr: 'Français' };
@@ -34,6 +35,7 @@ export function SettingsMenu({ onClose }: Props) {
       ref={dialog}
       aria-labelledby="settings-title"
       onClose={onClose}
+      onKeyDown={moveThroughChoices}
       className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-sm overflow-y-auto rounded-2xl border-4 border-ui-ink bg-ui-paper p-5 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-ui-ink/50"
     >
       <h2 id="settings-title" className="text-center text-xl font-semibold">

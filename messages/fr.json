@@ -6,7 +6,7 @@
     "title": "TCG Master Set"
   },
   "Game": {
-    "keyboardHint": "Utilise les flèches ou ZQSD pour te déplacer.",
+    "keyboardHint": "Utilise les flèches ou ZQSD pour te déplacer, et Tab pour atteindre les menus.",
     "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé.",
     "coins": "{count, plural, one {# pièce} other {# pièces}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
@@ -41,6 +41,7 @@
     "loading": "Préparation de ton booster...",
     "tearHint": "Fais glisser en haut du paquet pour le découper",
     "tearKeyboard": "Découper le paquet",
+    "tearKeyHint": "ou appuie sur Espace",
     "readyToReveal": "Tes cartes t'attendent !",
     "reveal": "Révéler la carte suivante",
     "seeAll": "Voir toutes tes cartes",
