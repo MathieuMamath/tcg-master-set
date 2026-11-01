@@ -115,13 +115,13 @@ export function Game({ player }: { player: Player }) {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      const { setName, cards } = await response.json();
+      const { setName, logoUrl, cards } = await response.json();
       setWallet((current) => ({ ...current, boosters: current.boosters - 1 }));
       // Saved right away, since the draw is final even if the player closes the page now.
       const updated = addToCollection(loadCollection(player.id), cards);
       saveCollection(player.id, updated);
       setCollection(updated);
-      setOpening({ status: 'ready', setName, cards });
+      setOpening({ status: 'ready', setName, logoUrl, cards });
     } catch {
       setOpening({ status: 'error' });
     }

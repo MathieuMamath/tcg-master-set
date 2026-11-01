@@ -25,7 +25,7 @@ beforeEach(() => {
 
 test('returns the drawn cards in the requested language', async () => {
   const drawn = [{ cardId: 'card-1', variant: 'normal' }];
-  const opened = { setName: 'Placeholder', cards: [] };
+  const opened = { setName: 'Placeholder', logoUrl: 'https://test.invalid/logo', cards: [] };
   vi.mocked(drawBooster).mockReturnValue(drawn);
   vi.mocked(loadOpenedCards).mockResolvedValue(opened);
 
