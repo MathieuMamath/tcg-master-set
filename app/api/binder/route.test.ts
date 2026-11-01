@@ -6,8 +6,8 @@ import { GET } from './route';
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/cards/binder-catalogue', () => ({ loadBinderCatalogue: vi.fn() }));
 
-function load(locale: string) {
-  return GET(new Request(`http://test.invalid/api/binder?locale=${locale}`));
+function load(locale: string, set = 'swsh3') {
+  return GET(new Request(`http://test.invalid/api/binder?locale=${locale}&set=${set}`));
 }
 
 beforeEach(() => {
@@ -24,11 +24,11 @@ test('returns the catalogue in the requested language', async () => {
   };
   vi.mocked(loadBinderCatalogue).mockResolvedValue(catalogue);
 
-  const response = await load('fr');
+  const response = await load('fr', '30th');
 
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual(catalogue);
-  expect(loadBinderCatalogue).toHaveBeenCalledWith('swsh3', 'fr');
+  expect(loadBinderCatalogue).toHaveBeenCalledWith('30th', 'fr');
 });
 
 test('refuses a visitor who is not signed in', async () => {
@@ -39,6 +39,10 @@ test('refuses a visitor who is not signed in', async () => {
 
 test('rejects an unknown language', async () => {
   expect((await load('xx')).status).toBe(400);
+});
+
+test('rejects a set the game does not play with', async () => {
+  expect((await load('en', 'other')).status).toBe(400);
 });
 
 test('reports an empty catalogue as unavailable', async () => {

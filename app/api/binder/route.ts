@@ -1,16 +1,21 @@
 import { hasLocale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
 import { loadBinderCatalogue } from '@/cards/binder-catalogue';
-import { ACTIVE_SET_ID } from '@/cards/tcgdex';
+import { isPlayableSet } from '@/game/card-sets';
 import { routing } from '@/i18n/routing';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-  const locale = new URL(request.url).searchParams.get('locale');
+  const { searchParams } = new URL(request.url);
+  const locale = searchParams.get('locale');
+  const setId = searchParams.get('set');
 
   if (!hasLocale(routing.locales, locale)) {
     return Response.json({ error: 'unknown-locale' }, { status: 400 });
+  }
+  if (!isPlayableSet(setId)) {
+    return Response.json({ error: 'unknown-set' }, { status: 400 });
   }
 
   try {
@@ -18,7 +23,7 @@ export async function GET(request: Request) {
       return Response.json({ error: 'not-signed-in' }, { status: 401 });
     }
 
-    const catalogue = await loadBinderCatalogue(ACTIVE_SET_ID, locale);
+    const catalogue = await loadBinderCatalogue(setId, locale);
     if (catalogue.cards.length === 0) {
       return Response.json({ error: 'catalogue-unavailable' }, { status: 503 });
     }

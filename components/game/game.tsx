@@ -6,10 +6,18 @@ import { useEffect, useRef, useState } from 'react';
 import { authClient } from '@/auth/client';
 import type { Player } from '@/auth/session';
 import { addToCollection, type Collection } from '@/game/binder';
+import type { PlayableSet, SetId } from '@/game/card-sets';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
-import { buyBooster, STARTING_WALLET } from '@/game/shop-dialogue';
+import {
+  boosterCount,
+  buyBooster,
+  removeBooster,
+  STARTING_WALLET,
+  totalBoosters,
+} from '@/game/shop-dialogue';
 import type { Interaction } from '@/game/world';
 import { BinderView } from './binder-view';
+import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { loadCollection, saveCollection } from './collection-storage';
 import { Joystick } from './joystick';
@@ -21,7 +29,7 @@ const Scene = dynamic(() => import('./scene').then((module) => module.Scene), { 
 
 const INTERACT_KEY = 'KeyE';
 
-export function Game({ player }: { player: Player }) {
+export function Game({ player, sets }: { player: Player; sets: readonly PlayableSet[] }) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
@@ -29,10 +37,15 @@ export function Game({ player }: { player: Player }) {
   const [wallet, setWallet] = useState(STARTING_WALLET);
   const [opening, setOpening] = useState<Opening | null>(null);
   const [isBinderOpen, setIsBinderOpen] = useState(false);
+  const [isBagOpen, setIsBagOpen] = useState(false);
   const [collection, setCollection] = useState<Collection>({});
   const locale = useLocale();
   const tBooster = useTranslations('Booster');
-  const isDialogOpen = isTalking || isBinderOpen || opening !== null;
+  const isDialogOpen = isTalking || isBinderOpen || isBagOpen || opening !== null;
+  const ownedBoosters = sets
+    .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
+    .filter(({ count }) => count > 0);
+  const boosterTotal = totalBoosters(wallet);
   const controls = useRef({ interaction, isDialogOpen });
   controls.current = { interaction, isDialogOpen };
 
@@ -106,25 +119,33 @@ export function Game({ player }: { player: Player }) {
   };
 
   // The booster only leaves the wallet once the server has drawn its cards.
-  const openBooster = async () => {
+  const openBooster = async (setId: SetId) => {
     stopWalking();
-    setOpening({ status: 'loading' });
+    setIsBagOpen(false);
+    setOpening({ status: 'loading', setId });
 
     try {
-      const response = await fetch(`/api/boosters/open?locale=${locale}`, { method: 'POST' });
+      const response = await fetch(`/api/boosters/open?locale=${locale}&set=${setId}`, {
+        method: 'POST',
+      });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
       const { setName, logoUrl, cards } = await response.json();
-      setWallet((current) => ({ ...current, boosters: current.boosters - 1 }));
+      setWallet((current) => removeBooster(current, setId));
       // Saved right away, since the draw is final even if the player closes the page now.
       const updated = addToCollection(loadCollection(player.id), cards);
       saveCollection(player.id, updated);
       setCollection(updated);
-      setOpening({ status: 'ready', setName, logoUrl, cards });
+      setOpening({ status: 'ready', setId, setName, logoUrl, cards });
     } catch {
-      setOpening({ status: 'error' });
+      setOpening({ status: 'error', setId });
     }
+  };
+
+  const openBag = () => {
+    stopWalking();
+    setIsBagOpen(true);
   };
 
   const signOut = async () => {
@@ -152,16 +173,16 @@ export function Game({ player }: { player: Player }) {
           </p>
           <button
             type="button"
-            disabled={wallet.boosters === 0}
-            aria-label={`${t('boosters', { count: wallet.boosters })}. ${tBooster('title')}`}
-            onClick={openBooster}
+            disabled={boosterTotal === 0}
+            aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
+            onClick={openBag}
             className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent"
           >
             <span
               aria-hidden="true"
               className="h-4 w-3 rounded-xs border-2 border-ui-ink bg-[#7b5ea7]"
             />
-            {t('boosters', { count: wallet.boosters })}
+            {t('boosters', { count: boosterTotal })}
           </button>
           <button
             type="button"
@@ -211,15 +232,27 @@ export function Game({ player }: { player: Player }) {
         </>
       )}
       {isBinderOpen && (
-        <BinderView collection={collection} onClose={() => setIsBinderOpen(false)} />
+        <BinderView sets={sets} collection={collection} onClose={() => setIsBinderOpen(false)} />
       )}
       {opening && (
-        <BoosterOpening opening={opening} onRetry={openBooster} onClose={() => setOpening(null)} />
+        <BoosterOpening
+          opening={opening}
+          onRetry={() => openBooster(opening.setId)}
+          onClose={() => setOpening(null)}
+        />
+      )}
+      {isBagOpen && (
+        <BoosterBag
+          boosters={ownedBoosters}
+          onPick={openBooster}
+          onClose={() => setIsBagOpen(false)}
+        />
       )}
       {isTalking && (
         <ShopDialog
-          onBuy={() => {
-            const result = buyBooster(wallet);
+          sets={sets}
+          onBuy={(setId) => {
+            const result = buyBooster(wallet, setId);
             setWallet(result.wallet);
             return result.line;
           }}

@@ -12,6 +12,7 @@ import {
   pageCount,
   slotsOnPage,
 } from '@/game/binder';
+import type { PlayableSet, SetId } from '@/game/card-sets';
 import { TiltCard } from './tilt-card';
 
 const POCKET_CLASS = 'relative aspect-[5/7] rounded-[4.5%/3.2%]';
@@ -184,13 +185,13 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
 
   return (
     <div className="flex h-full flex-col items-center gap-3">
-      <div className="pt-10 text-center text-ui-paper sm:pt-0">
-        <h2 className="text-xl font-semibold">{catalogue.setName}</h2>
+      <div className="text-center text-ui-paper">
+        <h2 className="sr-only">{catalogue.setName}</h2>
         <p>{t('progress', { owned: ownedSlotCount(slots, collection), total: slots.length })}</p>
       </div>
       <ul
         key={page}
-        className="ui-pop-in grid min-h-0 w-[min(100%,calc((100dvh-15rem)*0.7))] grid-cols-3 gap-2 rounded-2xl border-4 border-ui-paper/40 bg-[#3b3157] p-2"
+        className="ui-pop-in grid min-h-0 w-[min(100%,calc((100dvh-17.5rem)*0.7))] sm:w-[min(100%,calc((100dvh-12rem)*0.7))] grid-cols-3 gap-2 rounded-2xl border-4 border-ui-paper/40 bg-[#3b3157] p-2"
       >
         {slotsOnPage(slots, page).map((slot) => (
           <li key={slot.key}>
@@ -231,17 +232,19 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
 }
 
 type Props = {
+  sets: readonly PlayableSet[];
   collection: Collection;
   onClose: () => void;
 };
 
-export function BinderView({ collection, onClose }: Props) {
+export function BinderView({ sets, collection, onClose }: Props) {
   const t = useTranslations('Binder');
   const locale = useLocale();
   const dialog = useRef<HTMLDialogElement>(null);
   const [catalogue, setCatalogue] = useState<Catalogue | null>(null);
   const [hasFailed, setHasFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [setId, setSetId] = useState<SetId | undefined>(sets[0]?.id);
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -251,8 +254,14 @@ export function BinderView({ collection, onClose }: Props) {
   useEffect(() => {
     let isCurrent = true;
     setHasFailed(false);
+    setCatalogue(null);
 
-    fetch(`/api/binder?locale=${locale}`)
+    if (!setId) {
+      setHasFailed(true);
+      return;
+    }
+
+    fetch(`/api/binder?locale=${locale}&set=${setId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
@@ -273,7 +282,7 @@ export function BinderView({ collection, onClose }: Props) {
     return () => {
       isCurrent = false;
     };
-  }, [locale, attempt]);
+  }, [locale, setId, attempt]);
 
   return (
     <dialog
@@ -290,24 +299,43 @@ export function BinderView({ collection, onClose }: Props) {
           {t('close')}
         </button>
       </form>
-      {catalogue && <Pages catalogue={catalogue} collection={collection} />}
-      {!catalogue && !hasFailed && (
-        <div className="flex h-full items-center justify-center text-xl text-ui-paper">
-          {t('loading')}
+      <div className="flex h-full flex-col gap-2 pt-12 sm:pt-0">
+        <div className="flex flex-wrap justify-center gap-2">
+          {sets.map(({ id, name }) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={id === setId}
+              onClick={() => setSetId(id)}
+              className={`cursor-pointer rounded-full border-4 border-ui-ink px-4 py-1 font-semibold ${
+                id === setId ? 'bg-ui-accent text-ui-ink' : 'bg-ui-paper/80 text-ui-ink'
+              }`}
+            >
+              {name}
+            </button>
+          ))}
         </div>
-      )}
-      {!catalogue && hasFailed && (
-        <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-ui-paper">
-          <p className="max-w-sm text-xl">{t('error')}</p>
-          <button
-            type="button"
-            onClick={() => setAttempt(attempt + 1)}
-            className={NAV_BUTTON_CLASS}
-          >
-            {t('retry')}
-          </button>
+        <div className="min-h-0 flex-1">
+          {catalogue && <Pages key={setId} catalogue={catalogue} collection={collection} />}
+          {!catalogue && !hasFailed && (
+            <div className="flex h-full items-center justify-center text-xl text-ui-paper">
+              {t('loading')}
+            </div>
+          )}
+          {!catalogue && hasFailed && (
+            <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-ui-paper">
+              <p className="max-w-sm text-xl">{t('error')}</p>
+              <button
+                type="button"
+                onClick={() => setAttempt(attempt + 1)}
+                className={NAV_BUTTON_CLASS}
+              >
+                {t('retry')}
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </dialog>
   );
 }

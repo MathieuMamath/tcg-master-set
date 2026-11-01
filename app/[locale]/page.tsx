@@ -1,5 +1,6 @@
 import type { Locale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
+import { loadPlayableSets } from '@/cards/playable-sets';
 import { HomeScreen } from '@/components/game/home-screen';
 import { redirect } from '@/i18n/navigation';
 
@@ -17,5 +18,5 @@ export default async function HomePage({ params }: Props) {
     return redirect({ href: '/signup', locale });
   }
 
-  return <HomeScreen player={player} />;
+  return <HomeScreen player={player} sets={await loadPlayableSets(locale)} />;
 }

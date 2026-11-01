@@ -11,6 +11,7 @@ import {
   type CardLocale,
   type CatalogueCard,
   catalogueSummary,
+  expectedLogoUrl,
   mergeCardLanguages,
   type ParsedCard,
   type ParsedSet,
@@ -92,12 +93,27 @@ async function fetchCard(id: string): Promise<CatalogueCard> {
   return mergeCardLanguages(english, translations);
 }
 
+async function withLogo(locale: CardLocale, set: ParsedSet) {
+  if (set.logoUrl || !set.seriesId) {
+    return { locale, set };
+  }
+
+  // Checked as an image, because the image server answers 200 for addresses that don't exist.
+  const logoUrl = expectedLogoUrl(locale, set.seriesId, set.id);
+  const response = await fetch(`${logoUrl}.png`, { method: 'HEAD' });
+  const isImage = response.ok && response.headers.get('content-type')?.startsWith('image/');
+
+  return { locale, set: isImage ? { ...set, logoUrl } : set };
+}
+
 async function fetchSet(id: string) {
   const responses = await Promise.all(
     CARD_LOCALES.map((locale) => fetchJson(`${locale}/sets/${id}`)),
   );
-  const sets = responses.flatMap((response, index) =>
-    response === null ? [] : [{ locale: CARD_LOCALES[index], set: parseSet(response) }],
+  const sets = await Promise.all(
+    responses.flatMap((response, index) =>
+      response === null ? [] : [withLogo(CARD_LOCALES[index], parseSet(response))],
+    ),
   );
   const english = sets.find(({ locale }) => locale === 'en')?.set;
   if (!english) {
