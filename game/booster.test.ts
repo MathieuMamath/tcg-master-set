@@ -48,6 +48,21 @@ const CELEBRATION_POOL: PoolCard[] = [
   ...cardsOf('Futuristic Rare', 2, ['holo']),
 ];
 
+const RECENT_RECIPE = BOOSTER_RECIPES.me05;
+const RECENT_POOL: PoolCard[] = [
+  ...cardsOf('Common', 20, ['normal', 'holo', 'reverse']),
+  ...cardsOf('Uncommon', 20),
+  ...cardsOf('Rare', 8, ['normal', 'holo', 'reverse']),
+  ...cardsOf('Double rare', 4, ['normal', 'holo']),
+  ...cardsOf('Ultra Rare', 4, ['holo']),
+  ...cardsOf('Illustration rare', 4, ['holo']),
+  ...cardsOf('Special illustration rare', 3, ['holo']),
+  ...cardsOf('Mega Attack Rare', 1, ['holo']),
+  ...cardsOf('Black White Rare', 1, ['holo']),
+  ...cardsOf('Hyper rare', 1, ['holo']),
+  ...cardsOf('Mega Hyper Rare', 1, ['holo']),
+];
+
 // A repeatable stand-in for Math.random.
 function seeded(seed: number) {
   let state = seed;
@@ -68,6 +83,7 @@ function manyBoosters(pool: readonly PoolCard[], recipe: BoosterRecipe, count = 
 describe.each([
   ['Darkness Ablaze', POOL, RECIPE],
   ['30th Celebration', CELEBRATION_POOL, CELEBRATION_RECIPE],
+  ['recent', RECENT_POOL, RECENT_RECIPE],
 ])('the %s booster', (_, pool, recipe) => {
   test('holds ten cards, never twice the same', () => {
     for (const booster of manyBoosters(pool, recipe, 500)) {
@@ -164,6 +180,7 @@ describe('the 30th Celebration slots', () => {
 describe.each([
   ['Darkness Ablaze', POOL, RECIPE],
   ['30th Celebration', CELEBRATION_POOL, CELEBRATION_RECIPE],
+  ['recent', RECENT_POOL, RECENT_RECIPE],
 ])('a %s god pack', (_, pool, recipe) => {
   test('holds ten different cards, all of them hits, best last', () => {
     for (const booster of Array.from({ length: 200 }, (_, seed) =>

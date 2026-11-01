@@ -21,7 +21,7 @@ pnpm install
 cp .env.example .env.local # then set AUTH_SECRET
 pnpm db:up
 pnpm db:migrate
-pnpm cards:import swsh3 30th
+pnpm cards:import 30th me05 me04 me03 me02.5 me02 me01 sv10.5w sv10.5b sv10 sv09 swsh3
 pnpm dev
 ```
 

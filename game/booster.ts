@@ -37,7 +37,60 @@ function always(rarity: string, count: number): BoosterSlot[] {
   return Array.from({ length: count }, () => [{ source: [rarity], weight: 1 }]);
 }
 
+// Scarlet & Violet and Mega Evolution sets share their rarities, with a few names for their rarest
+// cards, which share the rarest outcome.
+const CHASE_RARITIES = ['Mega Attack Rare', 'Black White Rare', 'Hyper rare', 'Mega Hyper Rare'];
+
+const RECENT_RECIPE: BoosterRecipe = {
+  slots: [
+    ...always('Common', 4),
+    ...always('Uncommon', 3),
+    [
+      { source: REVERSE, weight: 92.5 },
+      { source: ['Illustration rare'], weight: 7.5 },
+    ],
+    [
+      { source: REVERSE, weight: 95 },
+      { source: ['Special illustration rare'], weight: 3.2 },
+      { source: CHASE_RARITIES, weight: 1.8 },
+    ],
+    [
+      { source: ['Rare'], weight: 80 },
+      { source: ['Double rare'], weight: 13.5 },
+      { source: ['Ultra Rare'], weight: 6.5 },
+    ],
+  ],
+  godPackRarities: [
+    'Double rare',
+    'Ultra Rare',
+    'Illustration rare',
+    'Special illustration rare',
+    ...CHASE_RARITIES,
+  ],
+  revealOrder: [
+    'Common',
+    'Uncommon',
+    REVERSE,
+    'Rare',
+    'Double rare',
+    'Ultra Rare',
+    'Illustration rare',
+    'Special illustration rare',
+    ...CHASE_RARITIES,
+  ],
+};
+
 export const BOOSTER_RECIPES: Record<SetId, BoosterRecipe> = {
+  me05: RECENT_RECIPE,
+  me04: RECENT_RECIPE,
+  me03: RECENT_RECIPE,
+  'me02.5': RECENT_RECIPE,
+  me02: RECENT_RECIPE,
+  me01: RECENT_RECIPE,
+  'sv10.5w': RECENT_RECIPE,
+  'sv10.5b': RECENT_RECIPE,
+  sv10: RECENT_RECIPE,
+  sv09: RECENT_RECIPE,
   swsh3: {
     slots: [
       ...always('Common', 4),

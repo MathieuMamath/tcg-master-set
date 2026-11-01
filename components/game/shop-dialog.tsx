@@ -103,20 +103,22 @@ export function ShopDialog({ sets, onBuy, onClose }: Props) {
       <div className="-mt-3 rounded-2xl border-4 border-ui-ink bg-ui-paper px-5 pt-6 pb-3 shadow-[0_6px_0_var(--ui-ink)]">
         <TypedLine key={speech.turn} text={t(speech.line)} />
         <form method="dialog" className="mt-2 border-ui-ink/20 border-t-2 pt-2">
-          {sets.map(({ id, name }) => (
-            <button
-              key={id}
-              type="button"
-              className={CHOICE_CLASS}
-              onClick={() => {
-                const line = onBuy(id);
-                setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
-              }}
-            >
-              <ChoiceMarker />
-              {t('buy', { set: name, price: BOOSTER_PRICE })}
-            </button>
-          ))}
+          <div className="max-h-[35dvh] overflow-y-auto">
+            {sets.map(({ id, name }) => (
+              <button
+                key={id}
+                type="button"
+                className={CHOICE_CLASS}
+                onClick={() => {
+                  const line = onBuy(id);
+                  setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
+                }}
+              >
+                <ChoiceMarker />
+                {t('buy', { set: name, price: BOOSTER_PRICE })}
+              </button>
+            ))}
+          </div>
           <button type="submit" className={CHOICE_CLASS}>
             <ChoiceMarker />
             {t('leave')}

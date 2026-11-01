@@ -24,12 +24,12 @@ export function BoosterBag({ boosters, onPick, onClose }: Props) {
       ref={dialog}
       aria-labelledby="booster-bag-title"
       onClose={onClose}
-      className="ui-pop-in m-auto w-[calc(100%-2rem)] max-w-md overflow-visible rounded-2xl border-4 border-ui-ink bg-ui-paper p-5 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-ui-ink/50"
+      className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-2xl border-4 border-ui-ink bg-ui-paper p-5 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-ui-ink/50"
     >
       <h2 id="booster-bag-title" className="text-center text-xl font-semibold">
         {t('bagTitle')}
       </h2>
-      <div className="mt-4 flex flex-wrap justify-center gap-5">
+      <div className="mt-4 flex flex-wrap justify-center gap-5 pt-1 pr-1">
         {boosters.map(({ id, name, logoUrl, count }) => (
           <button
             key={id}
@@ -37,7 +37,7 @@ export function BoosterBag({ boosters, onPick, onClose }: Props) {
             aria-label={t('bagCount', { name, count })}
             onClick={() => onPick(id)}
             style={packCrimpStyle(id)}
-            className="relative aspect-[5/7.6] w-[min(40%,8.5rem)] cursor-pointer rounded-md outline-offset-4 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
+            className="relative aspect-[5/7.6] w-[min(40%,7.5rem)] cursor-pointer rounded-md outline-offset-4 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
           >
             <PackBody setId={id} setName={name} logoUrl={logoUrl} />
             <span
