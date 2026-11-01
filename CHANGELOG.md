@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.22](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.21...v0.1.22) (2026-11-01)
+
+### Features
+
+* **shop:** share the sets between three shopkeepers ([#22](https://github.com/MathieuMamath/tcg-master-set/issues/22)) ([78f31e1](https://github.com/MathieuMamath/tcg-master-set/commit/78f31e1f452a3530008b15ef1481c9dd27e1275d))
+
 ## [0.1.21](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.20...v0.1.21) (2026-11-01)
 
 ### Balance
