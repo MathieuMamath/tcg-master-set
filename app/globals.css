@@ -7,6 +7,7 @@
   --ui-paper: #fff6e0;
   --ui-accent: #ffc83d;
   --ui-accent-dark: #c9711a;
+  --ui-danger: #c81e3a;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -16,6 +17,7 @@
   --color-ui-paper: var(--ui-paper);
   --color-ui-accent: var(--ui-accent);
   --color-ui-accent-dark: var(--ui-accent-dark);
+  --color-ui-danger: var(--ui-danger);
   --font-game: "Fredoka Variable", ui-rounded, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
