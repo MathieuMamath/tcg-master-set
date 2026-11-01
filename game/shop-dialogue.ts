@@ -9,7 +9,7 @@ export type Wallet = {
 
 // Provisional: until it moves to the database, the wallet only lives in the browser for one visit.
 // The server will decide purchases, as for every other balance.
-export const STARTING_WALLET: Wallet = { coins: 300, boosters: {} };
+export const STARTING_WALLET: Wallet = { coins: 1000, boosters: {} };
 
 export type ShopkeeperLine = 'greeting' | 'thanks' | 'notEnoughCoins';
 
