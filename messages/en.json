@@ -30,6 +30,7 @@
     },
     "thanks": "Thank you, and good luck with your cards!",
     "notEnoughCoins": "Sorry, you don't have enough coins.",
+    "unavailable": "Sorry, the till isn't working right now. Please try again.",
     "buy": "Buy a {set} booster ({price} coins)",
     "leave": "Goodbye"
   },

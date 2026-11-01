@@ -29,7 +29,8 @@
       "older": "Bonjour ! Je garde toutes les collections précédentes."
     },
     "thanks": "Merci, et bonne chance pour tes cartes !",
-    "notEnoughCoins": "Désolée, il te manque des pièces.",
+    "notEnoughCoins": "Oups, il te manque des pièces.",
+    "unavailable": "Oups, la caisse ne marche pas pour l'instant. Réessaie.",
     "buy": "Acheter un booster {set} ({price} pièces)",
     "leave": "Au revoir"
   },

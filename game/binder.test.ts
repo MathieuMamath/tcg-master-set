@@ -9,7 +9,6 @@ import {
   ownedSlotCount,
   pageCount,
   pagesShown,
-  parseCollection,
   SLOTS_PER_PAGE,
   slotKey,
   slotsOnPage,
@@ -98,29 +97,6 @@ describe('the collection', () => {
     };
 
     expect(ownedSlotCount(slots, collection)).toBe(1);
-  });
-});
-
-describe('parseCollection', () => {
-  test('reads back a saved collection', () => {
-    const saved = { [slotKey('a', 'normal')]: 2 };
-
-    expect(parseCollection(JSON.stringify(saved))).toEqual(saved);
-  });
-
-  test.each([
-    ['nothing stored', null],
-    ['invalid JSON', '{nope'],
-    ['a list', '[1,2]'],
-    ['a JSON null', 'null'],
-  ])('treats %s as an empty collection', (_, stored) => {
-    expect(parseCollection(stored)).toEqual({});
-  });
-
-  test('drops invalid counts and keeps valid ones', () => {
-    const stored = JSON.stringify({ good: 2, zero: 0, negative: -1, text: 'many', half: 1.5 });
-
-    expect(parseCollection(stored)).toEqual({ good: 2 });
   });
 });
 

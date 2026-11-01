@@ -5,23 +5,21 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { authClient } from '@/auth/client';
 import type { Player } from '@/auth/session';
-import { addToCollection, type Collection } from '@/game/binder';
+import { addToCollection } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import {
   boosterCount,
-  buyBooster,
-  removeBooster,
+  type ShopkeeperLine,
   type ShopkeeperStock,
-  STARTING_WALLET,
   setsSoldBy,
   totalBoosters,
 } from '@/game/shop-dialogue';
 import type { Interaction } from '@/game/world';
+import type { PlayerProgress } from '@/player/progress';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
-import { loadCollection, saveCollection } from './collection-storage';
 import { Joystick } from './joystick';
 import type { MovementInput } from './scene';
 import { ShopDialog } from './shop-dialog';
@@ -31,17 +29,23 @@ const Scene = dynamic(() => import('./scene').then((module) => module.Scene), { 
 
 const INTERACT_KEY = 'KeyE';
 
-export function Game({ player, sets }: { player: Player; sets: readonly PlayableSet[] }) {
+type Props = {
+  player: Player;
+  sets: readonly PlayableSet[];
+  progress: PlayerProgress;
+};
+
+export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
   const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | null>(null);
   const isTalking = talkingTo !== null;
-  const [wallet, setWallet] = useState(STARTING_WALLET);
+  const [wallet, setWallet] = useState(progress.wallet);
   const [opening, setOpening] = useState<Opening | null>(null);
   const [isBinderOpen, setIsBinderOpen] = useState(false);
   const [isBagOpen, setIsBagOpen] = useState(false);
-  const [collection, setCollection] = useState<Collection>({});
+  const [collection, setCollection] = useState(progress.collection);
   const locale = useLocale();
   const tBooster = useTranslations('Booster');
   const tShopkeeper = useTranslations('Shopkeeper');
@@ -52,10 +56,6 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
   const boosterTotal = totalBoosters(wallet);
   const controls = useRef({ interaction, isDialogOpen });
   controls.current = { interaction, isDialogOpen };
-
-  useEffect(() => {
-    setCollection(loadCollection(player.id));
-  }, [player.id]);
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -122,7 +122,7 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
     setIsBinderOpen(true);
   };
 
-  // The booster only leaves the wallet once the server has drawn its cards.
+  // The server takes the booster and keeps the cards. This only shows the result.
   const openBooster = async (setId: SetId) => {
     stopWalking();
     setIsBagOpen(false);
@@ -135,15 +135,26 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      const { setName, logoUrl, cards, isGodPack } = await response.json();
-      setWallet((current) => removeBooster(current, setId));
-      // Saved right away, since the draw is final even if the player closes the page now.
-      const updated = addToCollection(loadCollection(player.id), cards);
-      saveCollection(player.id, updated);
-      setCollection(updated);
+      const { setName, logoUrl, cards, isGodPack, wallet: updated } = await response.json();
+      setWallet(updated);
+      setCollection((current) => addToCollection(current, cards));
       setOpening({ status: 'ready', setId, setName, logoUrl, cards, isGodPack });
     } catch {
       setOpening({ status: 'error', setId });
+    }
+  };
+
+  const buy = async (setId: SetId): Promise<ShopkeeperLine> => {
+    try {
+      const response = await fetch(`/api/shop/buy?set=${setId}`, { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { wallet: updated, line } = await response.json();
+      setWallet(updated);
+      return line;
+    } catch {
+      return 'unavailable';
     }
   };
 
@@ -261,11 +272,7 @@ export function Game({ player, sets }: { player: Player; sets: readonly Playable
         <ShopDialog
           stock={talkingTo}
           sets={setsSoldBy(talkingTo, sets, new Date().getFullYear())}
-          onBuy={(setId) => {
-            const result = buyBooster(wallet, setId);
-            setWallet(result.wallet);
-            return result.line;
-          }}
+          onBuy={buy}
           onClose={() => setTalkingTo(null)}
         />
       )}

@@ -12,13 +12,23 @@ vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/auth/client', () => ({ authClient: { signOut: vi.fn() } }));
 vi.mock('@/cards/playable-sets', () => ({ loadPlayableSets: vi.fn().mockResolvedValue([]) }));
 vi.mock('@/i18n/navigation', () => ({ redirect: vi.fn() }));
+vi.mock('@/player/progress', () => ({
+  loadPlayerProgress: vi.fn().mockResolvedValue({
+    wallet: { coins: 1000, boosters: {} },
+    collection: {},
+  }),
+}));
 
 const PLAYER = { id: 'player-1', username: 'Placeholder' };
 
 function renderHome(locale: Locale, messages: typeof en) {
   return renderToStaticMarkup(
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <HomeScreen player={PLAYER} sets={[]} />
+      <HomeScreen
+        player={PLAYER}
+        sets={[]}
+        progress={{ wallet: { coins: 1000, boosters: {} }, collection: {} }}
+      />
     </NextIntlClientProvider>,
   );
 }
