@@ -17,12 +17,14 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DESK_TOP } from '@/game/bedroom';
+import type { Rect } from '@/game/collision';
 import {
   LIBRARY_BOOKCASE_Z,
   LIBRARY_BOOKCASES,
   LIBRARY_COUNTER_TOP,
   LIBRARY_COUNTER_Z,
 } from '@/game/library';
+import { GRANDPA_TABLE, LAKE, PARK_FROM_TOWN } from '@/game/park';
 import {
   SHOP_BOOKCASE_Z,
   SHOP_BOOKCASES,
@@ -37,7 +39,7 @@ import {
   SHOP_WIDTH,
 } from '@/game/shop';
 import type { ShopkeeperStock } from '@/game/shop-dialogue';
-import { APARTMENT_X, LIBRARY_FRONT_Z, LIBRARY_X } from '@/game/town';
+import { APARTMENT_X, LIBRARY_FRONT_Z, LIBRARY_X, PARK_SIGN } from '@/game/town';
 import {
   type ExitMarker as ExitMarkerData,
   MODEL_NAMES,
@@ -291,7 +293,7 @@ function NeonBar({
 }
 
 type Station = (typeof SHOP_STATIONS)[number];
-export type ShopSigns = Record<ShopkeeperStock | 'library' | 'grandma', string>;
+export type ShopSigns = Record<ShopkeeperStock | 'library' | 'grandma' | 'park', string>;
 
 const SIGN_WIDTH = 1.6;
 const SIGN_HEIGHT = 0.34;
@@ -523,6 +525,13 @@ function TownDecoration({ signs }: { signs: ShopSigns }) {
         color="#f6dbe3"
         text={signs.grandma}
       />
+      <TextSign position={[PARK_SIGN.x, 1.4, PARK_SIGN.z]} color="#bfe3a6" text={signs.park} />
+      {[-0.6, 0.6].map((offset) => (
+        <mesh key={offset} castShadow position={[PARK_SIGN.x + offset, 0.6, PARK_SIGN.z - 0.03]}>
+          <boxGeometry args={[0.07, 1.2, 0.05]} />
+          <meshStandardMaterial color="#7a5236" />
+        </mesh>
+      ))}
     </>
   );
 }
@@ -537,6 +546,28 @@ function GrandmaLook({ x, z, groundHeight }: { x: number; z: number; groundHeigh
       </mesh>
       <mesh castShadow position={[0, 0.94, -0.1]}>
         <sphereGeometry args={[0.09, 12, 10]} />
+        <meshStandardMaterial color="#eeeeee" roughness={0.9} />
+      </mesh>
+      {[-0.08, 0.08].map((offset) => (
+        <mesh key={offset} position={[offset, 0.6, 0.2]}>
+          <torusGeometry args={[0.05, 0.012, 8, 16]} />
+          <meshStandardMaterial color="#3a3a44" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// White hair, a beard and round glasses, added to a younger model to make him a grandfather.
+function GrandpaLook({ x, z, groundHeight }: { x: number; z: number; groundHeight: number }) {
+  return (
+    <group position={[x, groundHeight, z]}>
+      <mesh castShadow position={[0, 0.74, -0.05]}>
+        <sphereGeometry args={[0.19, 16, 12]} />
+        <meshStandardMaterial color="#eeeeee" roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[0, 0.46, 0.14]}>
+        <sphereGeometry args={[0.12, 12, 10]} />
         <meshStandardMaterial color="#eeeeee" roughness={0.9} />
       </mesh>
       {[-0.08, 0.08].map((offset) => (
@@ -585,6 +616,111 @@ function Npc({
   );
 }
 
+function roundedRectangle({ minX, maxX, minZ, maxZ }: Rect, radius: number): Shape {
+  const shape = new Shape();
+  shape.moveTo(minX + radius, -maxZ);
+  shape.lineTo(maxX - radius, -maxZ);
+  shape.quadraticCurveTo(maxX, -maxZ, maxX, -maxZ + radius);
+  shape.lineTo(maxX, -minZ - radius);
+  shape.quadraticCurveTo(maxX, -minZ, maxX - radius, -minZ);
+  shape.lineTo(minX + radius, -minZ);
+  shape.quadraticCurveTo(minX, -minZ, minX, -minZ - radius);
+  shape.lineTo(minX, -maxZ + radius);
+  shape.quadraticCurveTo(minX, -maxZ, minX + radius, -maxZ);
+  return shape;
+}
+
+const SHORE_WIDTH = 0.28;
+const LAKE_SHAPE = roundedRectangle(LAKE, 1.1);
+const SHORE_SHAPE = roundedRectangle(
+  {
+    minX: LAKE.minX - SHORE_WIDTH,
+    maxX: LAKE.maxX + SHORE_WIDTH,
+    minZ: LAKE.minZ - SHORE_WIDTH,
+    maxZ: LAKE.maxZ + SHORE_WIDTH,
+  },
+  1.3,
+);
+const LILY_PADS = [
+  [-3.6, -3, 0.34],
+  [-3, -2.6, 0.22],
+  [3.9, -5.6, 0.3],
+  [0.8, -6, 0.24],
+] as const;
+const RIPPLES = [
+  [-1.5, -4.2],
+  [2.2, -3.4],
+  [-3.2, -5.6],
+] as const;
+const RIPPLE_SECONDS = 4;
+
+// Rings spreading slowly across the water, so that the lake doesn't look like a painted floor.
+function Ripple({ x, z, delay }: { x: number; z: number; delay: number }) {
+  const ring = useRef<Mesh>(null);
+
+  useFrame(({ clock }) => {
+    if (!ring.current) {
+      return;
+    }
+    const progress = ((clock.elapsedTime + delay) % RIPPLE_SECONDS) / RIPPLE_SECONDS;
+    ring.current.scale.setScalar(0.3 + progress * 1.4);
+    (ring.current.material as MeshStandardMaterial).opacity = 0.45 * (1 - progress);
+  });
+
+  return (
+    <mesh ref={ring} position={[x, 0.035, z]} rotation={[-Math.PI / 2, 0, 0]}>
+      <ringGeometry args={[0.92, 1, 40]} />
+      <meshStandardMaterial color="#e6f6ff" transparent depthWrite={false} />
+    </mesh>
+  );
+}
+
+// Plain shapes: no model in the game is a lawn or a lake.
+function ParkDecoration() {
+  return (
+    <>
+      <mesh receiveShadow position={[0, 0, -2]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[80, 60]} />
+        <meshStandardMaterial color="#8fc46b" roughness={1} />
+      </mesh>
+      <mesh receiveShadow position={[-3, 0.008, PARK_FROM_TOWN.z]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[14, 1.4]} />
+        <meshStandardMaterial color="#d9c394" roughness={1} />
+      </mesh>
+      <mesh receiveShadow position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <shapeGeometry args={[SHORE_SHAPE, 12]} />
+        <meshStandardMaterial color="#d9c394" roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.024, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <shapeGeometry args={[LAKE_SHAPE, 12]} />
+        <meshStandardMaterial color="#4aa6d6" roughness={0.25} metalness={0.1} />
+      </mesh>
+      {LILY_PADS.map(([x, z, radius]) => (
+        <mesh key={`${x}-${z}`} position={[x, 0.04, z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[radius, 16, 0.3, 5.7]} />
+          <meshStandardMaterial color="#4f9d5b" />
+        </mesh>
+      ))}
+      {RIPPLES.map(([x, z], index) => (
+        <Ripple key={`${x}-${z}`} x={x} z={z} delay={(index * RIPPLE_SECONDS) / RIPPLES.length} />
+      ))}
+      {/* A game ready on the table, waiting for someone to play. */}
+      {[-0.13, 0, 0.13].flatMap((x) =>
+        [-0.1, 0.1].map((z) => (
+          <mesh
+            key={`${x}-${z}`}
+            position={[GRANDPA_TABLE.x + x, 0.36, GRANDPA_TABLE.z + z]}
+            rotation={[0, 0, 0]}
+          >
+            <boxGeometry args={[0.09, 0.01, 0.13]} />
+            <meshStandardMaterial color="#3f5fb5" />
+          </mesh>
+        )),
+      )}
+    </>
+  );
+}
+
 function BedroomDecoration() {
   return (
     <>
@@ -624,6 +760,12 @@ export function Place({ place, signs }: { place: PlaceData; signs: ShopSigns }) 
         .map(({ x, z }) => (
           <GrandmaLook key="grandma" x={x} z={z} groundHeight={place.groundHeight} />
         ))}
+      {place.npcs
+        .filter(({ stock }) => stock === 'grandpa')
+        .map(({ x, z }) => (
+          <GrandpaLook key="grandpa" x={x} z={z} groundHeight={place.groundHeight} />
+        ))}
+      {place.id === 'park' && <ParkDecoration />}
       {place.id === 'town' && <TownDecoration signs={signs} />}
     </>
   );

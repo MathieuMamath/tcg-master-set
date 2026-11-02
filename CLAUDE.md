@@ -72,7 +72,9 @@ A card's `rarity` column is in English, because game rules compare it. Translate
 
 ## Quests
 
-Quest rules live in `game/quests.ts`, and rewards are paid in `player/progress.ts`. The cleaning happens in the browser, so the server records when an attempt starts and only pays if the time adds up. A quest pays once a day, by UTC date, so that it can't be repeated for endless coins.
+Quest rules live in `game/quests.ts`, and rewards are paid in `player/progress.ts`. The grandmother's cleaning happens in the browser, so the server records when an attempt starts and only pays if the time adds up. A quest pays once a day, by UTC date, so that it can't be repeated for endless coins.
+
+The grandfather's memory game is in `game/memory-game.ts`. Its board stays in `player_quests.memory_game`, and each flipped card is a request to the server, which alone counts the moves and pays. The game's pictures go to the browser at the start, without their positions. The park's lake (`LAKE` in `game/park.ts`) is there for a later quest.
 
 ## Accounts
 

@@ -43,6 +43,13 @@
       "when": 1793647896038,
       "tag": "0005_clammy_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793649562839,
+      "tag": "0006_organic_clint_barton",
+      "breakpoints": true
     }
   ]
 }

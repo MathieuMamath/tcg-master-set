@@ -3,11 +3,13 @@ import {
   check,
   doublePrecision,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
+import type { MemoryGame } from '@/game/memory-game';
 import { users } from './auth';
 import { cardSets } from './cards';
 
@@ -96,6 +98,8 @@ export const playerQuests = pgTable(
     questId: text('quest_id').notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }),
     completedOn: text('completed_on'),
+    // The memory game under way, for the quest whose board the browser must not know.
+    memoryGame: jsonb('memory_game').$type<MemoryGame>(),
   },
   (table) => [primaryKey({ columns: [table.userId, table.questId] })],
 );
