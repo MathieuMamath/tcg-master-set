@@ -62,6 +62,8 @@ The game plays with the sets in `game/card-sets.ts` that have been imported. A n
 
 Every booster holds ten cards, without energy or code bonus cards. A recipe adapts the slots to its set's rarities, and every version of every card must stay obtainable: `pnpm cards:import` warns about any that aren't. Cards are revealed from the most common to the best, following the recipe's `revealOrder`. As the game's own rule for every set, one booster in two thousand is instead a god pack of ten hits, which the opening only announces once the pack is cut.
 
+The server only takes the booster and draws the cards when the pack is cut. Until then the player can back out at no cost, and backing out can't be used to draw again.
+
 Once cut, the pack climbs through light effects up to its best card, from a `PullTier` in `game/pull-tier.ts`. The server gives each card its tier from the rarity in English. A new rarity needs a tier there, or it gets the plain opening.
 
 A card's `rarity` column is in English, because game rules compare it. Translated rarities are for display only.
