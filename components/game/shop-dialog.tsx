@@ -44,7 +44,8 @@ function TypedLine({ text }: { text: string }) {
   }, [text]);
 
   return (
-    <p className="min-h-14 text-xl leading-7">
+    // Phones keep room for two lines, so that the dialog doesn't change size from one line to the next.
+    <p className="min-h-14 text-xl leading-7 sm:min-h-0">
       <span className="sr-only" aria-live="polite">
         {text}
       </span>

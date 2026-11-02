@@ -12,7 +12,7 @@
 
 - **Never commit card data or card images**, nor any other third-party asset whose license allows no redistribution. They are imported at runtime or deploy time from outside the repository. The repository runs on placeholder cards.
 - **Keep the product name, domain, logos and repository metadata generic**, without third-party trademarks.
-- **The server decides.** Booster draws, balances, resale and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. Coins, boosters and the collection live in the database and only change through `player/progress.ts`.
+- **The server decides.** Booster draws, balances, duplicate coins and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. Coins, boosters and the collection live in the database and only change through `player/progress.ts`.
 - **No real money**: no payments, donations or ads.
 - **Single-player only.**
 
@@ -63,6 +63,8 @@ The game plays with the sets in `game/card-sets.ts` that have been imported. A n
 Every booster holds ten cards, without energy or code bonus cards. A recipe adapts the slots to its set's rarities, and every version of every card must stay obtainable: `pnpm cards:import` warns about any that aren't. Cards are revealed from the most common to the best, following the recipe's `revealOrder`. As the game's own rule for every set, one booster in two thousand is instead a god pack of ten hits, which the opening only announces once the pack is cut.
 
 The server only takes the booster and draws the cards when the pack is cut. Until then the player can back out at no cost, and backing out can't be used to draw again.
+
+Opening a booster pays for its duplicates in the same transaction, from the values in `game/duplicate-coins.ts`. A duplicate is a version of a card the player already owns. The copy is kept, so that the binder still counts it.
 
 Once cut, the pack climbs through light effects up to its best card, from a `PullTier` in `game/pull-tier.ts`. The server gives each card its tier from the rarity in English. A new rarity needs a tier there, or it gets the plain opening.
 
