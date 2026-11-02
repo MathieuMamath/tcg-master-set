@@ -85,3 +85,17 @@ export const playerBinders = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.setId] })],
 );
+
+// Where each player stands with each quest: the attempt under way, and the day of the last reward.
+export const playerQuests = pgTable(
+  'player_quests',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    questId: text('quest_id').notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedOn: text('completed_on'),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.questId] })],
+);

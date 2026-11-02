@@ -70,6 +70,10 @@ Once cut, the pack climbs through light effects up to its best card, from a `Pul
 
 A card's `rarity` column is in English, because game rules compare it. Translated rarities are for display only.
 
+## Quests
+
+Quest rules live in `game/quests.ts`, and rewards are paid in `player/progress.ts`. The cleaning happens in the browser, so the server records when an attempt starts and only pays if the time adds up. A quest pays once a day, by UTC date, so that it can't be repeated for endless coins.
+
 ## Accounts
 
 Playing requires an account: pages and API routes check `getPlayer()` from `auth/session.ts` on the server. [Better Auth](https://www.better-auth.com/) handles sign-up, sign-in, sessions and password hashing through `auth/server.ts`. Only the email, username and hashed password are collected. Show players `auth/rules.ts` error keys, never the library's messages.

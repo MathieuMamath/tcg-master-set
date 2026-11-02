@@ -37,7 +37,7 @@ import {
   SHOP_WIDTH,
 } from '@/game/shop';
 import type { ShopkeeperStock } from '@/game/shop-dialogue';
-import { LIBRARY_FRONT_Z, LIBRARY_X } from '@/game/town';
+import { APARTMENT_X, LIBRARY_FRONT_Z, LIBRARY_X } from '@/game/town';
 import {
   type ExitMarker as ExitMarkerData,
   MODEL_NAMES,
@@ -291,7 +291,7 @@ function NeonBar({
 }
 
 type Station = (typeof SHOP_STATIONS)[number];
-export type ShopSigns = Record<ShopkeeperStock | 'library', string>;
+export type ShopSigns = Record<ShopkeeperStock | 'library' | 'grandma', string>;
 
 const SIGN_WIDTH = 1.6;
 const SIGN_HEIGHT = 0.34;
@@ -512,7 +512,40 @@ function LibraryDecoration() {
 // The sign above the library's door, since it shares its model with the shop.
 function TownDecoration({ signs }: { signs: ShopSigns }) {
   return (
-    <TextSign position={[LIBRARY_X, 1.72, LIBRARY_FRONT_Z]} color="#ead9bd" text={signs.library} />
+    <>
+      <TextSign
+        position={[LIBRARY_X, 1.72, LIBRARY_FRONT_Z]}
+        color="#ead9bd"
+        text={signs.library}
+      />
+      <TextSign
+        position={[APARTMENT_X, 1.72, LIBRARY_FRONT_Z]}
+        color="#f6dbe3"
+        text={signs.grandma}
+      />
+    </>
+  );
+}
+
+// White hair and round glasses, added to a younger model to make her a grandmother.
+function GrandmaLook({ x, z, groundHeight }: { x: number; z: number; groundHeight: number }) {
+  return (
+    <group position={[x, groundHeight, z]}>
+      <mesh castShadow position={[0, 0.74, -0.05]}>
+        <sphereGeometry args={[0.2, 16, 12]} />
+        <meshStandardMaterial color="#eeeeee" roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[0, 0.94, -0.1]}>
+        <sphereGeometry args={[0.09, 12, 10]} />
+        <meshStandardMaterial color="#eeeeee" roughness={0.9} />
+      </mesh>
+      {[-0.08, 0.08].map((offset) => (
+        <mesh key={offset} position={[offset, 0.6, 0.2]}>
+          <torusGeometry args={[0.05, 0.012, 8, 16]} />
+          <meshStandardMaterial color="#3a3a44" />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -586,6 +619,11 @@ export function Place({ place, signs }: { place: PlaceData; signs: ShopSigns }) 
       {place.id === 'bedroom' && <BedroomDecoration />}
       {place.id === 'shop' && <ShopDecoration signs={signs} />}
       {place.id === 'library' && <LibraryDecoration />}
+      {place.npcs
+        .filter(({ stock }) => stock === 'grandma')
+        .map(({ x, z }) => (
+          <GrandmaLook key="grandma" x={x} z={z} groundHeight={place.groundHeight} />
+        ))}
       {place.id === 'town' && <TownDecoration signs={signs} />}
     </>
   );

@@ -19,7 +19,8 @@
     "thisYear": "Parler (cette année)",
     "older": "Parler (précédentes)",
     "binderSeller": "Parler (classeurs)",
-    "dash": "Dash"
+    "dash": "Dash",
+    "grandma": "Parler (mamie)"
   },
   "Shopkeeper": {
     "names": {
@@ -131,5 +132,21 @@
   },
   "LocaleSwitcher": {
     "label": "Langue"
+  },
+  "Quest": {
+    "name": "Mamie",
+    "lines": {
+      "greeting": "Oh, ce sol est dans un état ! Tu peux nettoyer toutes les taches en 30 secondes ? Je te donnerai 100 pièces.",
+      "hurry": "Vite, il reste des taches !",
+      "rewarded": "Quelle propreté ! Voici tes 100 pièces, mon petit.",
+      "failed": "Oh, tu n'as pas eu le temps. On recommence ?",
+      "alreadyDone": "Tu en as assez fait pour aujourd'hui, mon petit. Reviens demain !",
+      "unavailable": "Oh là là, quelque chose s'est mal passé. Réessaie."
+    },
+    "accept": "Je m'en occupe",
+    "retry": "Réessayer",
+    "leave": "Au revoir",
+    "timeLeft": "{seconds} s",
+    "stainsLeft": "{count, plural, one {# tache restante} other {# taches restantes}}"
   }
 }

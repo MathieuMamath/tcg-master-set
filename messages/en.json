@@ -19,7 +19,8 @@
     "thisYear": "Talk (this year)",
     "older": "Talk (earlier sets)",
     "binderSeller": "Talk (binders)",
-    "dash": "Dash"
+    "dash": "Dash",
+    "grandma": "Talk (Grandma)"
   },
   "Shopkeeper": {
     "names": {
@@ -131,5 +132,21 @@
   },
   "LocaleSwitcher": {
     "label": "Language"
+  },
+  "Quest": {
+    "name": "Grandma",
+    "lines": {
+      "greeting": "Oh, this floor is a mess! Could you clean every stain in 30 seconds? I'll give you 100 coins.",
+      "hurry": "Quick, there are still stains!",
+      "rewarded": "How spotless! Here are your 100 coins, dear.",
+      "failed": "Oh, you ran out of time. Shall we try again?",
+      "alreadyDone": "You've done enough for today, dear. Come back tomorrow!",
+      "unavailable": "Oh dear, something went wrong. Please try again."
+    },
+    "accept": "I'll do it",
+    "retry": "Try again",
+    "leave": "Goodbye",
+    "timeLeft": "{seconds} s",
+    "stainsLeft": "{count, plural, one {# stain left} other {# stains left}}"
   }
 }

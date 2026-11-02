@@ -5,6 +5,7 @@ import {
   playerBinders,
   playerBoosters,
   playerCards,
+  playerQuests,
   playerSpots,
   playerWallets,
 } from '@/db/schema';
@@ -13,6 +14,13 @@ import { boosterRecipe, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
 import { duplicateCoins } from '@/game/duplicate-coins';
 import { type PlayerSpot, parseSpot } from '@/game/places';
+import {
+  canFinishQuest,
+  canStartQuest,
+  GRANDMA_QUEST,
+  QUEST_REWARD,
+  questDay,
+} from '@/game/quests';
 import {
   BINDER_PRICE,
   BOOSTER_PRICE,
@@ -104,6 +112,57 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     ),
     spot: parseSpot(spots[0]),
   };
+}
+
+// Starting again simply replaces an attempt that was given up on.
+export async function startGrandmaQuest(userId: string): Promise<{ hasStarted: boolean }> {
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    const [attempt] = await transaction
+      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, GRANDMA_QUEST)))
+      .for('update');
+    if (attempt && !canStartQuest(attempt, now)) {
+      return { hasStarted: false };
+    }
+    await transaction
+      .insert(playerQuests)
+      .values({ userId, questId: GRANDMA_QUEST, startedAt: now })
+      .onConflictDoUpdate({
+        target: [playerQuests.userId, playerQuests.questId],
+        set: { startedAt: now },
+      });
+    return { hasStarted: true };
+  });
+}
+
+// The attempt's row is locked and used up with the reward, so that it can only pay once.
+export async function finishGrandmaQuest(
+  userId: string,
+): Promise<{ isRewarded: boolean; wallet: Wallet }> {
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    await loadWallet(transaction, userId);
+    const [attempt] = await transaction
+      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, GRANDMA_QUEST)))
+      .for('update');
+    if (!attempt || !canFinishQuest(attempt, now)) {
+      return { isRewarded: false, wallet: await loadWallet(transaction, userId) };
+    }
+
+    await transaction
+      .update(playerQuests)
+      .set({ startedAt: null, completedOn: questDay(now) })
+      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, GRANDMA_QUEST)));
+    await transaction
+      .update(playerWallets)
+      .set({ coins: sql`${playerWallets.coins} + ${QUEST_REWARD}`, updatedAt: new Date() })
+      .where(eq(playerWallets.userId, userId));
+    return { isRewarded: true, wallet: await loadWallet(transaction, userId) };
+  });
 }
 
 export async function savePlayerSpot(userId: string, spot: PlayerSpot): Promise<void> {

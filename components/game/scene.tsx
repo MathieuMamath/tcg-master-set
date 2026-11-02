@@ -24,6 +24,7 @@ import {
   STILL,
 } from '@/game/movement';
 import { PLACES, type PlayerSpot, parseSpot } from '@/game/places';
+import { type Stain, stainsReached } from '@/game/quests';
 import {
   type Arrival,
   dashInPlace,
@@ -47,6 +48,7 @@ export type MovementInput = {
 
 const PUFF_INTERVAL_SECONDS = 0.04;
 const FIRST_PUFFS = 4;
+const PUFFS_PER_STAIN = 3;
 const PUFF_BEHIND_FEET = 0.2;
 
 const CHARACTER_MODEL = '/models/characters/character-male-a.glb';
@@ -143,16 +145,38 @@ type InputProps = {
 
 type CharacterProps = InputProps &
   Spot & {
+    stains: readonly Stain[];
+    onStainCleaned: (id: number) => void;
     onExit: (exit: Exit) => void;
     onInteractionChange: (interaction: Interaction | null) => void;
     isTalking: boolean;
   };
+
+// A dark splash on the floor: a blob with two drops, each stain its own way round.
+function Stains({ stains, groundHeight }: { stains: readonly Stain[]; groundHeight: number }) {
+  return stains.map(({ id, x, z }) => (
+    <group key={id} position={[x, groundHeight + 0.012, z]} rotation={[0, id * 1.7, 0]}>
+      {[
+        [0, 0, 0.22],
+        [0.2, 0.08, 0.1],
+        [-0.14, 0.16, 0.07],
+      ].map(([offsetX, offsetZ, radius]) => (
+        <mesh key={radius} position={[offsetX, 0, offsetZ]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[radius, 20]} />
+          <meshStandardMaterial color="#4a3423" transparent opacity={0.85} depthWrite={false} />
+        </mesh>
+      ))}
+    </group>
+  ));
+}
 
 function Character({
   input,
   place,
   arrival,
   cameraFocus,
+  stains,
+  onStainCleaned,
   onExit,
   onInteractionChange,
   isTalking,
@@ -224,6 +248,15 @@ function Character({
           : stepInPlace(place, state.current, direction, delta);
     const { x, z, heading, isMoving } = state.current;
 
+    if (place.id === 'apartment') {
+      for (const { id, x: stainX, z: stainZ } of stainsReached(stains, state.current)) {
+        for (let puff = 0; puff < PUFFS_PER_STAIN; puff += 1) {
+          emitPuff(smoke.current, stainX, place.groundHeight + 0.08, stainZ);
+        }
+        onStainCleaned(id);
+      }
+    }
+
     if (isDashing) {
       const behindX = x - Math.sin(heading) * PUFF_BEHIND_FEET;
       const behindZ = z - Math.cos(heading) * PUFF_BEHIND_FEET;
@@ -294,6 +327,9 @@ function Character({
 type SceneProps = InputProps & {
   webglUnavailable: string;
   onSave: (request: Promise<unknown>) => void;
+  stains: readonly Stain[];
+  onStainCleaned: (id: number) => void;
+  onPlaceLeft: () => void;
   playerId: string;
   savedSpot: PlayerSpot | null;
   onInteractionChange: (interaction: Interaction | null) => void;
@@ -305,6 +341,9 @@ export function Scene({
   input,
   webglUnavailable,
   onSave,
+  stains,
+  onStainCleaned,
+  onPlaceLeft,
   playerId,
   savedSpot,
   onInteractionChange,
@@ -338,6 +377,7 @@ export function Scene({
   }, [playerId]);
 
   const leaveThrough = (exit: Exit) => {
+    onPlaceLeft();
     setIsFading(true);
     fadeTimer.current = setTimeout(() => {
       const next = {
@@ -378,11 +418,16 @@ export function Scene({
         <Suspense fallback={null}>
           <group key={visit.number}>
             <Place place={visit.place} signs={shopSigns} />
+            {visit.place.id === 'apartment' && (
+              <Stains stains={stains} groundHeight={visit.place.groundHeight} />
+            )}
             <Character
               input={input}
               place={visit.place}
               arrival={visit.arrival}
               cameraFocus={visit.cameraFocus}
+              stains={stains}
+              onStainCleaned={onStainCleaned}
               onExit={leaveThrough}
               onInteractionChange={onInteractionChange}
               isTalking={isTalking}
