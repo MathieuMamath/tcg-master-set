@@ -1,0 +1,1 @@
+ALTER TABLE "player_quests" ADD COLUMN "memory_game" jsonb;

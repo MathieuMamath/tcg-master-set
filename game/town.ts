@@ -2,6 +2,7 @@ import { APARTMENT_FROM_TOWN } from './apartment';
 import { BEDROOM_FROM_TOWN } from './bedroom';
 import type { Rect } from './collision';
 import { LIBRARY_FROM_TOWN } from './library';
+import { PARK_FROM_TOWN } from './park';
 import { SHOP_FROM_TOWN } from './shop';
 import type { Place, PlaceItem } from './world';
 
@@ -17,6 +18,7 @@ const BUILDINGS_Z = -3;
 export const APARTMENT_X = -10;
 export const LIBRARY_X = 10;
 export const LIBRARY_FRONT_Z = -1.42;
+export const PARK_SIGN = { x: 12.3, z: 0.1 };
 
 // Stops the character from walking behind the buildings, out of sight.
 const BOUNDS: Rect = { minX: -HALF_LENGTH, maxX: HALF_LENGTH, minZ: -1.4, maxZ: 3.5 };
@@ -97,12 +99,19 @@ export const TOWN: Place = {
       to: 'apartment',
       arrival: APARTMENT_FROM_TOWN,
     },
+    // The road's far end leads out of town.
+    {
+      area: { minX: HALF_LENGTH - 0.45, maxX: HALF_LENGTH, minZ: 0.5, maxZ: 3.5 },
+      to: 'park',
+      arrival: PARK_FROM_TOWN,
+    },
   ],
   exitMarkers: [
     { x: HOUSE_X, z: -1.2, quarterTurns: 0 },
     { x: SHOP_DOOR_X, z: -1.2, quarterTurns: 0 },
     { x: LIBRARY_X, z: -1.2, quarterTurns: 0 },
     { x: APARTMENT_X, z: -1.2, quarterTurns: 0 },
+    { x: HALF_LENGTH - 0.5, z: 2, quarterTurns: 3 },
   ],
   npcs: [],
   groundHeight: GROUND_HEIGHT,

@@ -4,8 +4,10 @@ import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
+import type { MemoryCard } from '@/cards/memory-cards';
 import { addToCollection } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
+import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import { pickStains, type Stain } from '@/game/quests';
 import {
@@ -19,13 +21,14 @@ import {
   totalBoosters,
   type Wallet,
 } from '@/game/shop-dialogue';
-import type { Interaction } from '@/game/world';
+import type { Interaction, QuestGiver } from '@/game/world';
 import type { PlayerProgress } from '@/player/progress';
 import { AnimatedCount } from './animated-count';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { Joystick } from './joystick';
+import { MemoryDialog } from './memory-dialog';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
 import { SaveNotice, useSaveNotice } from './save-notice';
@@ -49,12 +52,14 @@ export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL, wantsDash: false });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
-  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | 'grandma' | null>(
+  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | QuestGiver | null>(
     null,
   );
   const [quest, setQuest] = useState<{ startedAt: number; stains: readonly Stain[] } | null>(null);
   const [questLine, setQuestLine] = useState<QuestLine>('greeting');
   const isFinishingQuest = useRef(false);
+  const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
+  const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
   const [binders, setBinders] = useState(progress.binders);
   const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(progress.wallet);
@@ -72,7 +77,13 @@ export function Game({ player, sets, progress }: Props) {
   const tSettings = useTranslations('Settings');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tQuest = useTranslations('Quest');
-  const isDialogOpen = isTalking || isBinderOpen || isBagOpen || isSettingsOpen || opening !== null;
+  const isDialogOpen =
+    isTalking ||
+    isBinderOpen ||
+    isBagOpen ||
+    isSettingsOpen ||
+    opening !== null ||
+    memoryCards !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
@@ -317,6 +328,38 @@ export function Game({ player, sets, progress }: Props) {
     setQuestLine('greeting');
   }, []);
 
+  const startMemoryGame = async (): Promise<QuestLine | null> => {
+    try {
+      const response = await fetch(`/api/quests/grandpa/start?locale=${locale}`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { hasStarted, cards } = await response.json();
+      if (!hasStarted) {
+        return 'alreadyDone';
+      }
+      setMemoryCards(cards);
+      setGrandpaLine('greeting');
+      return null;
+    } catch {
+      return 'unavailable';
+    }
+  };
+
+  const endMemoryGame = (ending: { status: MemoryStatus; wallet: Wallet } | null) => {
+    setMemoryCards(null);
+    if (ending?.status === 'won') {
+      showSaveNotice();
+    }
+    if (ending) {
+      setWallet(ending.wallet);
+    }
+    setGrandpaLine(ending ? (ending.status === 'won' ? 'rewarded' : 'failed') : 'unavailable');
+    setTalkingTo('grandpa');
+  };
+
   const openBag = () => {
     stopWalking();
     setIsBagOpen(true);
@@ -345,7 +388,8 @@ export function Game({ player, sets, progress }: Props) {
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
           library: tShopkeeper('names.binderSeller'),
-          grandma: tQuest('name'),
+          grandma: tQuest('grandma.name'),
+          park: tShopkeeper('names.park'),
         }}
       />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
@@ -418,7 +462,7 @@ export function Game({ player, sets, progress }: Props) {
           {t(interaction)}
         </button>
       )}
-      {!isTalking && (
+      {!isTalking && memoryCards === null && (
         <>
           <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
             {t('keyboardHint')}
@@ -466,6 +510,7 @@ export function Game({ player, sets, progress }: Props) {
       )}
       {talkingTo === 'grandma' && (
         <QuestDialog
+          giver="grandma"
           line={questLine}
           onAccept={quest ? null : startQuest}
           onClose={() => {
@@ -478,7 +523,27 @@ export function Game({ player, sets, progress }: Props) {
           }}
         />
       )}
-      {talkingTo && talkingTo !== 'grandma' && (
+      {talkingTo === 'grandpa' && (
+        <QuestDialog
+          giver="grandpa"
+          line={grandpaLine}
+          onAccept={startMemoryGame}
+          onClose={() => {
+            setTalkingTo(null);
+            setGrandpaLine((line) =>
+              line === 'rewarded' || line === 'failed' ? 'greeting' : line,
+            );
+          }}
+        />
+      )}
+      {memoryCards && !isTalking && (
+        <MemoryDialog
+          cards={memoryCards}
+          onEnd={endMemoryGame}
+          onGiveUp={() => setMemoryCards(null)}
+        />
+      )}
+      {talkingTo && talkingTo !== 'grandma' && talkingTo !== 'grandpa' && (
         <ShopDialog
           stock={talkingTo}
           choices={

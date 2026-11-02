@@ -2,6 +2,7 @@ import { APARTMENT } from './apartment';
 import { BEDROOM } from './bedroom';
 import { isBlocked } from './collision';
 import { LIBRARY } from './library';
+import { PARK } from './park';
 import { SHOP } from './shop';
 import { TOWN } from './town';
 import { type Arrival, CHARACTER_RADIUS, obstaclesOf, type Place, type PlaceId } from './world';
@@ -12,6 +13,7 @@ export const PLACES: Record<PlaceId, Place> = {
   shop: SHOP,
   library: LIBRARY,
   apartment: APARTMENT,
+  park: PARK,
 };
 
 export type PlayerSpot = Arrival & { place: PlaceId };

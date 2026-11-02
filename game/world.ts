@@ -53,7 +53,9 @@ export const NPC_MODELS = ['character-female-b', 'character-male-c', 'character-
 
 export type NpcModel = (typeof NPC_MODELS)[number];
 
-export type PlaceId = 'bedroom' | 'town' | 'shop' | 'library' | 'apartment';
+export type QuestGiver = 'grandma' | 'grandpa';
+
+export type PlaceId = 'bedroom' | 'town' | 'shop' | 'library' | 'apartment' | 'park';
 
 export type PlaceItem = {
   model: ModelName;
@@ -83,7 +85,7 @@ export type ExitMarker = Position & { quarterTurns: number };
 export type Npc = Position & {
   model: NpcModel;
   // What this NPC sells.
-  stock: ShopkeeperStock | 'binderSeller' | 'grandma';
+  stock: ShopkeeperStock | 'binderSeller' | QuestGiver;
   heading: number;
   // Where the player has to stand to talk to this NPC.
   talkArea: Rect;
@@ -97,6 +99,8 @@ export type Place = {
   exitMarkers: readonly ExitMarker[];
   npcs: readonly Npc[];
   binderArea?: Rect;
+  // A body of water, drawn by the place's decoration, which stops the character at its shore.
+  water?: Rect;
   groundHeight: number;
   cameraStart: Position;
   fitsOnScreen: boolean;
@@ -130,7 +134,7 @@ export function obstaclesOf(place: Place): Rect[] {
     maxZ: z + NPC_RADIUS,
   }));
 
-  return [...furniture, ...npcs];
+  return [...furniture, ...npcs, ...(place.water ? [place.water] : [])];
 }
 
 export function stepInPlace(
@@ -174,7 +178,7 @@ export function npcInReach(place: Place, position: Position): Npc | undefined {
   return place.npcs.find(({ talkArea }) => isInside(position, talkArea));
 }
 
-export type Interaction = ShopkeeperStock | 'binderSeller' | 'grandma' | 'binder';
+export type Interaction = ShopkeeperStock | 'binderSeller' | QuestGiver | 'binder';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);

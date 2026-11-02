@@ -6,6 +6,7 @@ import { BEDROOM, BEDROOM_FROM_TOWN, BEDROOM_START } from './bedroom';
 import { isBlocked } from './collision';
 import { LIBRARY, LIBRARY_FROM_TOWN } from './library';
 import { type CharacterState, STILL } from './movement';
+import { LAKE, PARK, PARK_FROM_TOWN } from './park';
 import { PLACES, parseSpot } from './places';
 import { SHOP, SHOP_FROM_TOWN, SHOPKEEPER_POSITION } from './shop';
 import { TOWN } from './town';
@@ -320,6 +321,56 @@ describe('the library', () => {
 
   test('nobody is within reach at its door', () => {
     expect(npcInReach(LIBRARY, LIBRARY_FROM_TOWN)).toBeUndefined();
+  });
+});
+
+describe('the park', () => {
+  test('the far end of the town road leads to the park', () => {
+    const exit = exitReachedWalking(TOWN, standingAt({ x: 10, z: 2 }), { x: 1, z: 0 });
+
+    expect(exit?.to).toBe('park');
+  });
+
+  test('its exit leads back to the end of the town road', () => {
+    const exit = exitReachedWalking(PARK, standingAt(PARK_FROM_TOWN), { x: -1, z: 0 });
+
+    expect(exit?.to).toBe('town');
+  });
+
+  test('the lake stops the character at its shore', () => {
+    const state = walk(PARK, standingAt({ x: 0, z: 1 }), { x: 0, z: -1 }, 900);
+
+    expect(state.z).toBeGreaterThanOrEqual(LAKE.maxZ + CHARACTER_RADIUS - 0.01);
+  });
+
+  test('the character can walk all the way round the lake', () => {
+    const corners = [
+      { x: LAKE.minX - 1, z: LAKE.maxZ + 1 },
+      { x: LAKE.minX - 1, z: LAKE.minZ - 1 },
+      { x: LAKE.maxX + 1, z: LAKE.minZ - 1 },
+      { x: LAKE.maxX + 1, z: LAKE.maxZ + 1 },
+    ];
+
+    for (const corner of corners) {
+      expect(isInside(corner, PARK.bounds)).toBe(true);
+    }
+    // Along each side of the lake, from one corner to the next.
+    corners.forEach((corner, index) => {
+      const next = corners[(index + 1) % corners.length];
+      const steps = 40;
+      for (let step = 0; step <= steps; step += 1) {
+        const spot = {
+          x: corner.x + ((next.x - corner.x) * step) / steps,
+          z: corner.z + ((next.z - corner.z) * step) / steps,
+        };
+        expect(isBlocked(spot, obstaclesOf(PARK), CHARACTER_RADIUS)).toBe(false);
+      }
+    });
+  });
+
+  test('the grandfather can be reached without being in the way of the entrance', () => {
+    expect(npcInReach(PARK, PARK_FROM_TOWN)).toBeUndefined();
+    expect(interactionAt(PARK, { x: 3, z: 1 })).toBe('grandpa');
   });
 });
 

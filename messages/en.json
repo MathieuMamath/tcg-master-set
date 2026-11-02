@@ -20,14 +20,16 @@
     "older": "Talk (earlier sets)",
     "binderSeller": "Talk (binders)",
     "dash": "Dash",
-    "grandma": "Talk (Grandma)"
+    "grandma": "Talk (Grandma)",
+    "grandpa": "Talk (Grandpa)"
   },
   "Shopkeeper": {
     "names": {
       "latest": "New releases",
       "thisYear": "This year",
       "older": "Earlier sets",
-      "binderSeller": "Library"
+      "binderSeller": "Library",
+      "park": "Park"
     },
     "greetings": {
       "latest": "Hello! Here are our three newest sets.",
@@ -134,19 +136,42 @@
     "label": "Language"
   },
   "Quest": {
-    "name": "Grandma",
-    "lines": {
-      "greeting": "Oh, this floor is a mess! Could you clean every stain in 30 seconds? I'll give you 100 coins.",
-      "hurry": "Quick, there are still stains!",
-      "rewarded": "How spotless! Here are your 100 coins, dear.",
-      "failed": "Oh, you ran out of time. Shall we try again?",
-      "alreadyDone": "You've done enough for today, dear. Come back tomorrow!",
-      "unavailable": "Oh dear, something went wrong. Please try again."
+    "grandma": {
+      "name": "Grandma",
+      "lines": {
+        "greeting": "Oh, this floor is a mess! Could you clean every stain in 30 seconds? I'll give you 100 coins.",
+        "hurry": "Quick, there are still stains!",
+        "rewarded": "How spotless! Here are your 100 coins, dear.",
+        "failed": "Oh, you ran out of time. Shall we try again?",
+        "alreadyDone": "You've done enough for today, dear. Come back tomorrow!",
+        "unavailable": "Oh dear, something went wrong. Please try again."
+      },
+      "accept": "I'll do it"
     },
-    "accept": "I'll do it",
+    "grandpa": {
+      "name": "Grandpa",
+      "lines": {
+        "greeting": "Fancy a game of memory? Find all 8 pairs in 20 moves at most, and I'll give you 150 coins.",
+        "hurry": "Your turn!",
+        "rewarded": "Well, I never! You beat me. Here are your 150 coins.",
+        "failed": "Ha! Out of moves, my memory is still the best. Another game?",
+        "alreadyDone": "One defeat a day is enough for me. Come back tomorrow!",
+        "unavailable": "Hm, I've mislaid my cards. Please try again."
+      },
+      "accept": "Let's play"
+    },
     "retry": "Try again",
     "leave": "Goodbye",
     "timeLeft": "{seconds} s",
-    "stainsLeft": "{count, plural, one {# stain left} other {# stains left}}"
+    "stainsLeft": "{count, plural, one {# stain left} other {# stains left}}",
+    "memory": {
+      "title": "Memory game",
+      "moves": "Moves: {moves} / {limit}",
+      "pairs": "Pairs: {found} / {total}",
+      "giveUp": "Give up",
+      "hiddenCard": "Card {number}, face down",
+      "shownCard": "Card {number}: {name}",
+      "foundCard": "Card {number}: {name}, pair found"
+    }
   }
 }
