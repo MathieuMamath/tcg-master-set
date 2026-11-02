@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.30](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.29...v0.1.30) (2026-11-02)
+
+### Features
+
+* **boosters:** earn coins from duplicates, depending on their rarity ([#30](https://github.com/MathieuMamath/tcg-master-set/issues/30)) ([d6c0795](https://github.com/MathieuMamath/tcg-master-set/commit/d6c0795ed4b11a857959f5abd89eac2c78c1c109))
+
 ## [0.1.29](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.28...v0.1.29) (2026-11-02)
 
 ### Features
