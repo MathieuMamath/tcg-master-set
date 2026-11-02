@@ -126,27 +126,47 @@ export function Game({ player, sets, progress }: Props) {
     setIsBinderOpen(true);
   };
 
-  // The server takes the booster and keeps the cards. This only shows the result.
-  const openBooster = async (setId: SetId) => {
+  const pickBooster = (setId: SetId) => {
+    const set = sets.find(({ id }) => id === setId);
+    if (!set) {
+      return;
+    }
     stopWalking();
     setIsBagOpen(false);
-    setOpening({ status: 'loading', setId });
+    setOpening({ status: 'sealed', setId, setName: set.name, logoUrl: set.logoUrl });
+  };
+
+  // The server takes the booster and keeps the cards. This only shows the result.
+  const cutBooster = async () => {
+    if (!opening) {
+      return;
+    }
+    const pack = { setId: opening.setId, setName: opening.setName, logoUrl: opening.logoUrl };
+    setOpening({ status: 'cutting', ...pack });
 
     try {
-      const response = await fetch(`/api/boosters/open?locale=${locale}&set=${setId}`, {
+      const response = await fetch(`/api/boosters/open?locale=${locale}&set=${pack.setId}`, {
         method: 'POST',
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      const { setName, logoUrl, cards, isGodPack, wallet: updated } = await response.json();
+      const { cards, isGodPack, wallet: updated } = await response.json();
       setWallet(updated);
       setCollection((current) => addToCollection(current, cards));
-      setOpening({ status: 'ready', setId, setName, logoUrl, cards, isGodPack });
+      setOpening({ status: 'ready', ...pack, cards, isGodPack });
       showSaveNotice();
     } catch {
-      setOpening({ status: 'error', setId });
+      setOpening({ status: 'error', ...pack });
     }
+  };
+
+  // Backing out of a sealed pack returns to the bag, to pick another one.
+  const closeOpening = () => {
+    if (opening?.status === 'sealed') {
+      setIsBagOpen(true);
+    }
+    setOpening(null);
   };
 
   const buy = async (setId: SetId): Promise<ShopkeeperLine> => {
@@ -278,17 +298,11 @@ export function Game({ player, sets, progress }: Props) {
       {isBinderOpen && (
         <BinderView sets={sets} collection={collection} onClose={() => setIsBinderOpen(false)} />
       )}
-      {opening && (
-        <BoosterOpening
-          opening={opening}
-          onRetry={() => openBooster(opening.setId)}
-          onClose={() => setOpening(null)}
-        />
-      )}
+      {opening && <BoosterOpening opening={opening} onCut={cutBooster} onClose={closeOpening} />}
       {isBagOpen && (
         <BoosterBag
           boosters={ownedBoosters}
-          onPick={openBooster}
+          onPick={pickBooster}
           onClose={() => setIsBagOpen(false)}
         />
       )}

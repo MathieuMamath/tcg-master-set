@@ -31,16 +31,13 @@ const FIRST_RAYS_TIER = 2;
 const FIRST_SHAKING_TIER = 3;
 const FIRST_FLASHING_TIER = 3;
 
-export type Opening = { setId: SetId } & (
-  | { status: 'loading' }
+// Sealed until the player cuts it: only then does the server take the booster and draw the cards,
+// so that cancelling costs nothing and can't be used to draw again.
+export type Opening = { setId: SetId; setName: string; logoUrl: string | null } & (
+  | { status: 'sealed' }
+  | { status: 'cutting' }
   | { status: 'error' }
-  | {
-      status: 'ready';
-      setName: string;
-      logoUrl: string | null;
-      cards: RevealedCard[];
-      isGodPack: boolean;
-    }
+  | { status: 'ready'; cards: RevealedCard[]; isGodPack: boolean }
 );
 
 // Golden writing across the top left corner, sized from the card, which ranges from small to full
@@ -66,14 +63,17 @@ function SealedPack({
   setName,
   logoUrl,
   onTorn,
+  onCancel,
 }: {
   setId: SetId;
   setName: string;
   logoUrl: string | null;
   onTorn: () => void;
+  onCancel: () => void;
 }) {
   const t = useTranslations('Booster');
   const drag = useRef<{ startX: number; width: number } | null>(null);
+  const tearTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [progress, setProgress] = useState(0);
   const [isTorn, setIsTorn] = useState(false);
 
@@ -83,8 +83,11 @@ function SealedPack({
     }
     setIsTorn(true);
     setProgress(1);
-    setTimeout(onTorn, TEAR_ANIMATION_MILLISECONDS);
+    tearTimer.current = setTimeout(onTorn, TEAR_ANIMATION_MILLISECONDS);
   };
+
+  // Leaving during the animation must not open the pack afterwards.
+  useEffect(() => () => clearTimeout(tearTimer.current), []);
 
   const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -171,6 +174,39 @@ function SealedPack({
         <p className="text-lg">{t('tearHint')}</p>
         <p className="pointer-coarse:hidden">{t('tearKeyHint')}</p>
       </div>
+      {!isTorn && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="fixed top-4 right-4 cursor-pointer rounded-full border-4 border-ui-ink bg-ui-paper px-4 py-1 font-semibold text-ui-ink"
+        >
+          {t('cancel')}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// While the server draws the cards, in the same place as the pack before and after.
+function CutPack({
+  setId,
+  setName,
+  logoUrl,
+}: {
+  setId: SetId;
+  setName: string;
+  logoUrl: string | null;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div
+        style={packCrimpStyle(setId)}
+        className="relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)]"
+      >
+        <PackBody setId={setId} setName={setName} logoUrl={logoUrl} cut={1} />
+        <span aria-hidden="true" className="absolute inset-x-0 top-[13%] h-1 bg-ui-ink" />
+      </div>
+      <div className="h-14" />
     </div>
   );
 }
@@ -296,6 +332,18 @@ function Reveal({
       >
         {isLast ? t('seeAll') : t('reveal')}
       </button>
+      {/* The space stays taken on the last card, so that the screen doesn't jump. */}
+      <div className="h-6">
+        {!isLast && (
+          <button
+            type="button"
+            onClick={onFinished}
+            className="cursor-pointer text-ui-paper/70 underline hover:text-ui-paper focus-visible:text-ui-paper"
+          >
+            {t('skip')}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -406,14 +454,14 @@ function Summary({
 
 type Props = {
   opening: Opening;
-  onRetry: () => void;
+  onCut: () => void;
   onClose: () => void;
 };
 
-export function BoosterOpening({ opening, onRetry, onClose }: Props) {
+export function BoosterOpening({ opening, onCut, onClose }: Props) {
   const t = useTranslations('Booster');
   const dialog = useRef<HTMLDialogElement>(null);
-  const [step, setStep] = useState<'pack' | 'pull' | 'reveal' | 'summary'>('pack');
+  const [step, setStep] = useState<'pull' | 'reveal' | 'summary'>('pull');
   const finishPull = useCallback(() => setStep('reveal'), []);
 
   useEffect(() => {
@@ -434,14 +482,14 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
         )
       : 0;
 
-  const canLeave = opening.status === 'error' || step === 'summary';
+  const canLeave = opening.status === 'sealed' || opening.status === 'error' || step === 'summary';
 
   return (
     <dialog
       ref={dialog}
       aria-label={t('title')}
       onCancel={(event) => {
-        // A pack that has been paid for can't be abandoned halfway.
+        // A pack that has been cut can't be abandoned halfway.
         if (!canLeave) {
           event.preventDefault();
         }
@@ -450,12 +498,23 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
       onKeyDown={moveThroughChoices}
       // The light effects reach past the screen, which must not make it scroll.
       className={`m-0 size-full max-h-none max-w-none bg-ui-ink/95 p-4 font-game backdrop:bg-transparent ${
-        step === 'pull' || step === 'reveal' ? 'overflow-hidden' : ''
+        opening.status === 'ready' && step !== 'summary' ? 'overflow-hidden' : ''
       }`}
     >
-      {opening.status === 'loading' && (
-        <div className="flex h-full items-center justify-center text-xl text-ui-paper">
-          {t('loading')}
+      {opening.status === 'sealed' && (
+        <div className="flex h-full items-center justify-center">
+          <SealedPack
+            setId={opening.setId}
+            setName={opening.setName}
+            logoUrl={opening.logoUrl}
+            onTorn={onCut}
+            onCancel={onClose}
+          />
+        </div>
+      )}
+      {opening.status === 'cutting' && (
+        <div className="flex h-full items-center justify-center">
+          <CutPack setId={opening.setId} setName={opening.setName} logoUrl={opening.logoUrl} />
         </div>
       )}
       {opening.status === 'error' && (
@@ -464,7 +523,7 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={onRetry}
+              onClick={onCut}
               className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-5 py-1.5 font-semibold text-ui-ink"
             >
               {t('retry')}
@@ -481,18 +540,10 @@ export function BoosterOpening({ opening, onRetry, onClose }: Props) {
       )}
       {opening.status === 'ready' && (
         <div className="flex h-full items-center justify-center">
-          {opening.isGodPack && step !== 'pack' && step !== 'pull' && (
+          {opening.isGodPack && step !== 'pull' && (
             <div
               aria-hidden="true"
               className="ui-god-pack-glow pointer-events-none fixed inset-0"
-            />
-          )}
-          {step === 'pack' && (
-            <SealedPack
-              setId={opening.setId}
-              setName={opening.setName}
-              logoUrl={opening.logoUrl}
-              onTorn={() => setStep('pull')}
             />
           )}
           {step === 'pull' && (
