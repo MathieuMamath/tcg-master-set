@@ -11,6 +11,8 @@
     "coins": "{count, plural, one {# coin} other {# coins}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
     "binder": "Open the binder",
+    "countUp": "+{count}",
+    "countDown": "−{count}",
     "binderButton": "Binder",
     "autoSaving": "Auto-saving...",
     "latest": "Talk (new releases)",

@@ -13,9 +13,11 @@ import {
   type ShopkeeperStock,
   setsSoldBy,
   totalBoosters,
+  type Wallet,
 } from '@/game/shop-dialogue';
 import type { Interaction } from '@/game/world';
 import type { PlayerProgress } from '@/player/progress';
+import { AnimatedCount } from './animated-count';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
@@ -44,6 +46,9 @@ export function Game({ player, sets, progress }: Props) {
   const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(progress.wallet);
   const [opening, setOpening] = useState<Opening | null>(null);
+  // Held back until the opening closes, so that the counters move in front of the player, and so
+  // that the coins don't give away a duplicate before the cards are shown.
+  const walletAfterOpening = useRef<Wallet | null>(null);
   const [isBinderOpen, setIsBinderOpen] = useState(false);
   const [isBagOpen, setIsBagOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -152,7 +157,7 @@ export function Game({ player, sets, progress }: Props) {
         throw new Error(`HTTP ${response.status}`);
       }
       const { cards, isGodPack, wallet: updated } = await response.json();
-      setWallet(updated);
+      walletAfterOpening.current = updated;
       setCollection((current) => addToCollection(current, cards));
       setOpening({ status: 'ready', ...pack, cards, isGodPack });
       showSaveNotice();
@@ -167,6 +172,10 @@ export function Game({ player, sets, progress }: Props) {
       setIsBagOpen(true);
     }
     setOpening(null);
+    if (walletAfterOpening.current) {
+      setWallet(walletAfterOpening.current);
+      walletAfterOpening.current = null;
+    }
   };
 
   const buy = async (setId: SetId): Promise<ShopkeeperLine> => {
@@ -218,25 +227,25 @@ export function Game({ player, sets, progress }: Props) {
           <p className="max-w-40 truncate rounded-full border-3 border-ui-ink bg-ui-paper px-3 py-0.5">
             {player.username}
           </p>
-          <p className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-1.5">
+          <p className="relative flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-1.5">
             <span
               aria-hidden="true"
               className="size-4 rounded-full border-2 border-ui-ink bg-ui-accent"
             />
-            {t('coins', { count: wallet.coins })}
+            <AnimatedCount value={wallet.coins} format={(count) => t('coins', { count })} />
           </p>
           <button
             type="button"
             disabled={boosterTotal === 0}
             aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
             onClick={openBag}
-            className="flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="relative flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span
               aria-hidden="true"
               className="h-4 w-3 rounded-xs border-2 border-ui-ink bg-[#7b5ea7]"
             />
-            {t('boosters', { count: boosterTotal })}
+            <AnimatedCount value={boosterTotal} format={(count) => t('boosters', { count })} />
           </button>
           <button
             type="button"
