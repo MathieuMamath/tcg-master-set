@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { PlayableSet } from './card-sets';
 import {
   BOOSTER_PRICE,
+  bindersForSale,
   boosterCount,
   SHOPKEEPER_STOCKS,
   STARTING_COINS,
@@ -52,6 +53,20 @@ describe('setsSoldBy', () => {
     for (const stock of SHOPKEEPER_STOCKS) {
       expect(setsSoldBy(stock, withUnsold, 2026).map(({ id }) => id)).not.toContain('base1');
     }
+  });
+
+  test('the library only sells binders of the sets on sale, newest first', () => {
+    const withUnsold = [set('base1', '2026-10-01'), ...SETS];
+
+    expect(bindersForSale(withUnsold).map(({ id }) => id)).toEqual([
+      '30th',
+      'me05',
+      'me04',
+      'me03',
+      'me02',
+      'sv10',
+      'swsh3',
+    ]);
   });
 
   test('the first shopkeeper sells the three newest sets', () => {

@@ -1,10 +1,16 @@
 import { BEDROOM } from './bedroom';
 import { isBlocked } from './collision';
+import { LIBRARY } from './library';
 import { SHOP } from './shop';
 import { TOWN } from './town';
 import { type Arrival, CHARACTER_RADIUS, obstaclesOf, type Place, type PlaceId } from './world';
 
-export const PLACES: Record<PlaceId, Place> = { bedroom: BEDROOM, town: TOWN, shop: SHOP };
+export const PLACES: Record<PlaceId, Place> = {
+  bedroom: BEDROOM,
+  town: TOWN,
+  shop: SHOP,
+  library: LIBRARY,
+};
 
 export type PlayerSpot = Arrival & { place: PlaceId };
 

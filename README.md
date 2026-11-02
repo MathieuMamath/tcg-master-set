@@ -1,6 +1,6 @@
 # TCG Master Set
 
-A cozy single-player 3D game about collecting. You live in a small modern town, earn coins through daily quests, buy booster packs at the shop, and fill your binders until every master set is complete. Duplicates turn into more coins, depending on their rarity.
+A cozy single-player 3D game about collecting. You live in a small modern town, earn coins through daily quests, buy binders at the library and booster packs at the shop, and fill your binders until every master set is complete. Duplicates turn into more coins, depending on their rarity.
 
 There are no duels and no real money.
 

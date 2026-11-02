@@ -1,13 +1,20 @@
 import { and, eq, gt, gte, sql } from 'drizzle-orm';
 import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
 import { getDb } from '@/db/client';
-import { playerBoosters, playerCards, playerSpots, playerWallets } from '@/db/schema';
+import {
+  playerBinders,
+  playerBoosters,
+  playerCards,
+  playerSpots,
+  playerWallets,
+} from '@/db/schema';
 import { type Collection, firstCopies, slotKey } from '@/game/binder';
 import { boosterRecipe, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
 import { duplicateCoins } from '@/game/duplicate-coins';
 import { type PlayerSpot, parseSpot } from '@/game/places';
 import {
+  BINDER_PRICE,
   BOOSTER_PRICE,
   type ShopkeeperLine,
   STARTING_COINS,
@@ -18,7 +25,12 @@ import {
 type Database = ReturnType<typeof getDb>;
 type Reader = Pick<Database, 'select' | 'insert'>;
 
-export type PlayerProgress = { wallet: Wallet; collection: Collection; spot: PlayerSpot | null };
+export type PlayerProgress = {
+  wallet: Wallet;
+  binders: SetId[];
+  collection: Collection;
+  spot: PlayerSpot | null;
+};
 
 export type OpenedBooster = {
   setName: string;
@@ -52,10 +64,19 @@ async function loadWallet(database: Reader, userId: string): Promise<Wallet> {
   };
 }
 
+async function loadBinders(database: Reader, userId: string): Promise<SetId[]> {
+  const binders = await database
+    .select({ setId: playerBinders.setId })
+    .from(playerBinders)
+    .where(eq(playerBinders.userId, userId));
+  return binders.flatMap(({ setId }) => (isPlayableSet(setId) ? [setId] : []));
+}
+
 export async function loadPlayerProgress(userId: string): Promise<PlayerProgress> {
   const db = getDb();
-  const [wallet, cards, spots] = await Promise.all([
+  const [wallet, binders, cards, spots] = await Promise.all([
     loadWallet(db, userId),
+    loadBinders(db, userId),
     db
       .select({
         cardId: playerCards.cardId,
@@ -77,6 +98,7 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
 
   return {
     wallet,
+    binders,
     collection: Object.fromEntries(
       cards.map(({ cardId, variant, count }) => [slotKey(cardId, variant), count]),
     ),
@@ -95,7 +117,7 @@ export async function savePlayerSpot(userId: string, spot: PlayerSpot): Promise<
     });
 }
 
-// The coins and the booster change together, or not at all. The coins are only taken if they are
+// A set's boosters need its binder first. The coins and the booster change together, or not at all. The coins are only taken if they are
 // there, so that two purchases at once can never go below zero.
 export async function buyBooster(
   userId: string,
@@ -103,6 +125,14 @@ export async function buyBooster(
 ): Promise<{ wallet: Wallet; line: ShopkeeperLine }> {
   return getDb().transaction(async (transaction) => {
     await loadWallet(transaction, userId);
+    const [binder] = await transaction
+      .select({ setId: playerBinders.setId })
+      .from(playerBinders)
+      .where(and(eq(playerBinders.userId, userId), eq(playerBinders.setId, setId)));
+    if (!binder) {
+      return { wallet: await loadWallet(transaction, userId), line: 'needsBinder' as const };
+    }
+
     const [paid] = await transaction
       .update(playerWallets)
       .set({ coins: sql`${playerWallets.coins} - ${BOOSTER_PRICE}`, updatedAt: new Date() })
@@ -120,6 +150,44 @@ export async function buyBooster(
         set: { count: sql`${playerBoosters.count} + 1` },
       });
     return { wallet: await loadWallet(transaction, userId), line: 'thanks' as const };
+  });
+}
+
+// The binder is added first, so that of two purchases at once only one goes on to pay.
+export async function buyBinder(
+  userId: string,
+  setId: SetId,
+): Promise<{ wallet: Wallet; binders: SetId[]; line: ShopkeeperLine }> {
+  return getDb().transaction(async (transaction) => {
+    await loadWallet(transaction, userId);
+    const result = async (line: ShopkeeperLine) => ({
+      wallet: await loadWallet(transaction, userId),
+      binders: await loadBinders(transaction, userId),
+      line,
+    });
+
+    const [added] = await transaction
+      .insert(playerBinders)
+      .values({ userId, setId })
+      .onConflictDoNothing()
+      .returning({ setId: playerBinders.setId });
+    if (!added) {
+      return result('alreadyOwned');
+    }
+
+    const [paid] = await transaction
+      .update(playerWallets)
+      .set({ coins: sql`${playerWallets.coins} - ${BINDER_PRICE}`, updatedAt: new Date() })
+      .where(and(eq(playerWallets.userId, userId), gte(playerWallets.coins, BINDER_PRICE)))
+      .returning({ coins: playerWallets.coins });
+    if (!paid) {
+      await transaction
+        .delete(playerBinders)
+        .where(and(eq(playerBinders.userId, userId), eq(playerBinders.setId, setId)));
+      return result('notEnoughCoins');
+    }
+
+    return result('thanks');
   });
 }
 

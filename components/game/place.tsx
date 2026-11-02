@@ -18,6 +18,12 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DESK_TOP } from '@/game/bedroom';
 import {
+  LIBRARY_BOOKCASE_Z,
+  LIBRARY_BOOKCASES,
+  LIBRARY_COUNTER_TOP,
+  LIBRARY_COUNTER_Z,
+} from '@/game/library';
+import {
   SHOP_BOOKCASE_Z,
   SHOP_BOOKCASES,
   SHOP_COUNTER_TOP,
@@ -31,6 +37,7 @@ import {
   SHOP_WIDTH,
 } from '@/game/shop';
 import type { ShopkeeperStock } from '@/game/shop-dialogue';
+import { LIBRARY_FRONT_Z, LIBRARY_X } from '@/game/town';
 import {
   type ExitMarker as ExitMarkerData,
   MODEL_NAMES,
@@ -68,7 +75,7 @@ for (const model of NPC_MODELS) {
 }
 
 // Models have different origins, so each is centred on its footprint and rests on height 0.
-function centredModel(scene: Object3D, color?: string): Object3D {
+function centredModel(scene: Object3D, color?: string, tint?: string): Object3D {
   const model = scene.clone(true);
   const bounds = new Box3().setFromObject(model);
   const center = bounds.getCenter(new Vector3());
@@ -81,6 +88,13 @@ function centredModel(scene: Object3D, color?: string): Object3D {
       const mesh = node as Mesh;
       mesh.material = new MeshStandardMaterial({ color, roughness: 0.8 });
     }
+    if (tint && (node as Mesh).isMesh) {
+      const mesh = node as Mesh;
+      // A copy, since the clone still shares its material with the model's other copies.
+      const material = (mesh.material as MeshStandardMaterial).clone();
+      material.color.set(tint);
+      mesh.material = material;
+    }
   });
 
   const wrapper = new Object3D();
@@ -89,14 +103,14 @@ function centredModel(scene: Object3D, color?: string): Object3D {
 }
 
 function Model({
-  item: { model, x, z, height, quarterTurns = 0, sizeFactor = 1, color },
+  item: { model, x, z, height, quarterTurns = 0, sizeFactor = 1, color, tint },
   groundHeight,
 }: {
   item: PlaceItem;
   groundHeight: number;
 }) {
   const gltf = useLoader(GLTFLoader, modelUrl(model));
-  const object = useMemo(() => centredModel(gltf.scene, color), [gltf, color]);
+  const object = useMemo(() => centredModel(gltf.scene, color, tint), [gltf, color, tint]);
 
   return (
     <primitive
@@ -277,14 +291,22 @@ function NeonBar({
 }
 
 type Station = (typeof SHOP_STATIONS)[number];
-export type ShopSigns = Record<ShopkeeperStock, string>;
+export type ShopSigns = Record<ShopkeeperStock | 'library', string>;
 
 const SIGN_WIDTH = 1.6;
 const SIGN_HEIGHT = 0.34;
 const SIGN_FONT = '"Fredoka Variable", sans-serif';
 
-// A lit panel on the wall behind a counter, with what its shopkeeper sells.
-function ShopSign({ station: { x, neon }, text }: { station: Station; text: string }) {
+// A lit panel on a wall, saying what is sold there.
+function TextSign({
+  position,
+  color,
+  text,
+}: {
+  position: [number, number, number];
+  color: string;
+  text: string;
+}) {
   const [fontIsReady, setFontIsReady] = useState(false);
 
   useEffect(() => {
@@ -298,7 +320,7 @@ function ShopSign({ station: { x, neon }, text }: { station: Station; text: stri
     canvas.height = 218;
     const context = canvas.getContext('2d');
     if (context) {
-      context.fillStyle = neon;
+      context.fillStyle = color;
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.fillStyle = '#1b1730';
       context.textAlign = 'center';
@@ -314,12 +336,12 @@ function ShopSign({ station: { x, neon }, text }: { station: Station; text: stri
     map.colorSpace = SRGBColorSpace;
     map.anisotropy = 4;
     return map;
-  }, [fontIsReady, neon, text]);
+  }, [fontIsReady, color, text]);
 
   useEffect(() => () => texture.dispose(), [texture]);
 
   return (
-    <mesh position={[x, 1.68, SHOP_WALL_Z + 0.03]}>
+    <mesh position={position}>
       <planeGeometry args={[SIGN_WIDTH, SIGN_HEIGHT]} />
       <meshBasicMaterial map={texture} toneMapped={false} />
     </mesh>
@@ -421,7 +443,12 @@ function ShopDecoration({ signs }: { signs: ShopSigns }) {
         <PackRack key={`${x}-${z}`} x={x} z={z} />
       ))}
       {SHOP_STATIONS.map((station) => (
-        <ShopSign key={station.stock} station={station} text={signs[station.stock]} />
+        <TextSign
+          key={station.stock}
+          position={[station.x, 1.68, SHOP_WALL_Z + 0.03]}
+          color={station.neon}
+          text={signs[station.stock]}
+        />
       ))}
       {SHOP_STATIONS.map((station) => (
         <SpinningIcon key={station.stock} station={station} />
@@ -439,6 +466,53 @@ function ShopDecoration({ signs }: { signs: ShopSigns }) {
       <Poster x={-1.2} color="#ff4fa3" accent="#fcfcfc" z={SHOP_WALL_Z} />
       <Poster x={1.2} color="#31e0d8" accent="#26547c" z={SHOP_WALL_Z} />
     </>
+  );
+}
+
+// Rows of binder spines on every shelf, standing close together like books.
+function LibraryShelves() {
+  return LIBRARY_BOOKCASES.flatMap((bookcaseX, bookcase) =>
+    SHELF_HEIGHTS.flatMap((shelfHeight, shelf) =>
+      [-2, -1, 0, 1, 2].map((slot) => (
+        <mesh
+          key={`${bookcaseX}-${shelfHeight}-${slot}`}
+          castShadow
+          position={[bookcaseX + slot * 0.1, shelfHeight + 0.1, LIBRARY_BOOKCASE_Z]}
+        >
+          <boxGeometry args={[0.085, 0.2, 0.2]} />
+          <meshStandardMaterial
+            color={BINDER_COLORS[(bookcase * 2 + shelf * 3 + slot + 2) % BINDER_COLORS.length]}
+          />
+        </mesh>
+      )),
+    ),
+  );
+}
+
+// A small stack of binders on the counter, to show what is on sale here.
+function LibraryDecoration() {
+  return (
+    <>
+      <LibraryShelves />
+      {BINDER_COLORS.slice(0, 3).map((color, index) => (
+        <mesh
+          key={color}
+          castShadow
+          position={[0.42, LIBRARY_COUNTER_TOP + 0.03 + index * 0.06, LIBRARY_COUNTER_Z]}
+          rotation={[0, index * 0.2, 0]}
+        >
+          <boxGeometry args={[0.28, 0.05, 0.34]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
+// The sign above the library's door, since it shares its model with the shop.
+function TownDecoration({ signs }: { signs: ShopSigns }) {
+  return (
+    <TextSign position={[LIBRARY_X, 1.72, LIBRARY_FRONT_Z]} color="#ead9bd" text={signs.library} />
   );
 }
 
@@ -511,6 +585,8 @@ export function Place({ place, signs }: { place: PlaceData; signs: ShopSigns }) 
       ))}
       {place.id === 'bedroom' && <BedroomDecoration />}
       {place.id === 'shop' && <ShopDecoration signs={signs} />}
+      {place.id === 'library' && <LibraryDecoration />}
+      {place.id === 'town' && <TownDecoration signs={signs} />}
     </>
   );
 }
