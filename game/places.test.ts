@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
+import { APARTMENT, APARTMENT_FROM_TOWN } from './apartment';
 import { BEDROOM, BEDROOM_FROM_TOWN, BEDROOM_START } from './bedroom';
 import { isBlocked } from './collision';
 import { LIBRARY, LIBRARY_FROM_TOWN } from './library';
@@ -258,6 +259,36 @@ describe('dashInPlace', () => {
     }
 
     expect(isInside(state, SHOP.bounds)).toBe(true);
+  });
+});
+
+describe('the apartment', () => {
+  test('walking up to its door from the street leads inside', () => {
+    const exit = exitReachedWalking(TOWN, standingAt({ x: -10, z: 0 }), { x: 0, z: -1 });
+
+    expect(exit?.to).toBe('apartment');
+  });
+
+  test('walking through its door leads back to the town', () => {
+    const exit = exitReachedWalking(APARTMENT, standingAt(APARTMENT_FROM_TOWN), { x: -1, z: 0 });
+
+    expect(exit?.to).toBe('town');
+  });
+
+  test('walking up to the grandmother offers a conversation', () => {
+    const start = standingAt({ x: 1.5, z: 1 });
+
+    expect(interactionAt(APARTMENT, start)).toBeNull();
+    expect(interactionAt(APARTMENT, walk(APARTMENT, start, { x: 0, z: -1 }, 360))).toBe('grandma');
+  });
+
+  test('the road reaches the far end of the town', () => {
+    const state = walk(TOWN, standingAt({ x: -5, z: 2 }), { x: -1, z: 0 }, 900);
+
+    expect(state.x).toBeLessThan(-13);
+    expect(TOWN.items.some(({ model, x }) => model.includes('road-straight') && x === -12)).toBe(
+      true,
+    );
   });
 });
 

@@ -53,7 +53,7 @@ export const NPC_MODELS = ['character-female-b', 'character-male-c', 'character-
 
 export type NpcModel = (typeof NPC_MODELS)[number];
 
-export type PlaceId = 'bedroom' | 'town' | 'shop' | 'library';
+export type PlaceId = 'bedroom' | 'town' | 'shop' | 'library' | 'apartment';
 
 export type PlaceItem = {
   model: ModelName;
@@ -83,7 +83,7 @@ export type ExitMarker = Position & { quarterTurns: number };
 export type Npc = Position & {
   model: NpcModel;
   // What this NPC sells.
-  stock: ShopkeeperStock | 'binderSeller';
+  stock: ShopkeeperStock | 'binderSeller' | 'grandma';
   heading: number;
   // Where the player has to stand to talk to this NPC.
   talkArea: Rect;
@@ -174,7 +174,7 @@ export function npcInReach(place: Place, position: Position): Npc | undefined {
   return place.npcs.find(({ talkArea }) => isInside(position, talkArea));
 }
 
-export type Interaction = ShopkeeperStock | 'binderSeller' | 'binder';
+export type Interaction = ShopkeeperStock | 'binderSeller' | 'grandma' | 'binder';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);

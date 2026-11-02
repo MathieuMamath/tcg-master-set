@@ -7,10 +7,10 @@ import type { ShopkeeperLine, ShopkeeperStock } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 import { moveThroughChoices } from './menu-focus';
 
-const CHOICE_CLASS =
+export const CHOICE_CLASS =
   'group flex w-full cursor-pointer items-center aria-disabled:cursor-wait gap-2 rounded-lg px-2 py-1.5 text-left text-lg font-medium outline-none hover:bg-ui-accent/40 focus-visible:bg-ui-accent/70';
 
-function ChoiceMarker() {
+export function ChoiceMarker() {
   return (
     <span
       aria-hidden="true"
@@ -22,7 +22,7 @@ function ChoiceMarker() {
 }
 
 // Mounted anew for each line, so that it always starts typing from the beginning.
-function TypedLine({ text }: { text: string }) {
+export function TypedLine({ text }: { text: string }) {
   const [length, setLength] = useState(0);
 
   useEffect(() => {

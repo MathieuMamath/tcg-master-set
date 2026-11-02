@@ -2,11 +2,12 @@
 
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import { addToCollection } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
+import { pickStains, type Stain } from '@/game/quests';
 import {
   BINDER_PRICE,
   BOOSTER_PRICE,
@@ -25,6 +26,8 @@ import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { Joystick } from './joystick';
+import { QuestBanner } from './quest-banner';
+import { QuestDialog, type QuestLine } from './quest-dialog';
 import { SaveNotice, useSaveNotice } from './save-notice';
 import type { MovementInput } from './scene';
 import { SettingsMenu } from './settings-menu';
@@ -46,7 +49,12 @@ export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL, wantsDash: false });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
-  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | null>(null);
+  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | 'grandma' | null>(
+    null,
+  );
+  const [quest, setQuest] = useState<{ startedAt: number; stains: readonly Stain[] } | null>(null);
+  const [questLine, setQuestLine] = useState<QuestLine>('greeting');
+  const isFinishingQuest = useRef(false);
   const [binders, setBinders] = useState(progress.binders);
   const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(progress.wallet);
@@ -63,6 +71,7 @@ export function Game({ player, sets, progress }: Props) {
   const tBooster = useTranslations('Booster');
   const tSettings = useTranslations('Settings');
   const tShopkeeper = useTranslations('Shopkeeper');
+  const tQuest = useTranslations('Quest');
   const isDialogOpen = isTalking || isBinderOpen || isBagOpen || isSettingsOpen || opening !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
@@ -239,6 +248,75 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
+  const startQuest = async (): Promise<QuestLine | null> => {
+    try {
+      const response = await fetch('/api/quests/grandma/start', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { hasStarted } = await response.json();
+      if (!hasStarted) {
+        return 'alreadyDone';
+      }
+      isFinishingQuest.current = false;
+      setQuest({ startedAt: Date.now(), stains: pickStains() });
+      setQuestLine('hurry');
+      return null;
+    } catch {
+      return 'unavailable';
+    }
+  };
+
+  const finishQuest = async () => {
+    setQuest(null);
+    stopWalking();
+    try {
+      const response = await fetch('/api/quests/grandma/finish', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { isRewarded, wallet: updated } = await response.json();
+      setWallet(updated);
+      if (isRewarded) {
+        showSaveNotice();
+      }
+      setQuestLine(isRewarded ? 'rewarded' : 'failed');
+    } catch {
+      setQuestLine('unavailable');
+    }
+    setTalkingTo('grandma');
+  };
+
+  // Called from the 3D scene's frames, where the same stain can be reported more than once before
+  // the state updates. The last one must only finish the quest once.
+  const cleanStain = (id: number) => {
+    if (!quest || isFinishingQuest.current) {
+      return;
+    }
+    const left = quest.stains.filter((stain) => stain.id !== id);
+    if (left.length === 0) {
+      isFinishingQuest.current = true;
+      finishQuest();
+    } else {
+      setQuest({ ...quest, stains: left });
+    }
+  };
+
+  // Stable, so that the banner's timer isn't restarted at each render.
+  const timeUp = useCallback(() => {
+    setQuest(null);
+    setQuestLine('failed');
+    input.current.keyboard = STILL;
+    input.current.joystick = STILL;
+    setTalkingTo('grandma');
+  }, []);
+
+  // Stepping out of the apartment gives up on the quest, since the stains stay inside.
+  const leavePlace = useCallback(() => {
+    setQuest(null);
+    setQuestLine('greeting');
+  }, []);
+
   const openBag = () => {
     stopWalking();
     setIsBagOpen(true);
@@ -255,6 +333,9 @@ export function Game({ player, sets, progress }: Props) {
         input={input}
         webglUnavailable={t('webglUnavailable')}
         onSave={showSaveNotice}
+        stains={quest?.stains ?? []}
+        onStainCleaned={cleanStain}
+        onPlaceLeft={leavePlace}
         playerId={player.id}
         savedSpot={progress.spot}
         onInteractionChange={setInteraction}
@@ -264,6 +345,7 @@ export function Game({ player, sets, progress }: Props) {
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
           library: tShopkeeper('names.binderSeller'),
+          grandma: tQuest('name'),
         }}
       />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
@@ -375,7 +457,28 @@ export function Game({ player, sets, progress }: Props) {
         />
       )}
       {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
-      {talkingTo && (
+      {quest && !isTalking && (
+        <QuestBanner
+          startedAt={quest.startedAt}
+          stainsLeft={quest.stains.length}
+          onTimeUp={timeUp}
+        />
+      )}
+      {talkingTo === 'grandma' && (
+        <QuestDialog
+          line={questLine}
+          onAccept={quest ? null : startQuest}
+          onClose={() => {
+            setTalkingTo(null);
+            if (!quest) {
+              setQuestLine((line) =>
+                line === 'rewarded' || line === 'failed' ? 'greeting' : line,
+              );
+            }
+          }}
+        />
+      )}
+      {talkingTo && talkingTo !== 'grandma' && (
         <ShopDialog
           stock={talkingTo}
           choices={
