@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.36](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.35...v0.1.36) (2026-11-02)
+
+### Features
+
+* **quests:** add a memory game against a grandfather in a new park ([#36](https://github.com/MathieuMamath/tcg-master-set/issues/36)) ([b9a032b](https://github.com/MathieuMamath/tcg-master-set/commit/b9a032b38bcad40b9ab320d1db4f691d1e7de036)), references [MathieuMamath/tcg-master-set#35](https://github.com/MathieuMamath/tcg-master-set/issues/35)
+
 ## [0.1.35](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.34...v0.1.35) (2026-11-02)
 
 ### Features
