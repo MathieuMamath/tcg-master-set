@@ -8,10 +8,17 @@ export async function loadBinderCatalogue(
   locale: string,
 ): Promise<{ setName: string; cards: BinderCard[] }> {
   const db = getDb();
-  const [set] = await db
-    .select({ name: cardSetTranslations.name })
+  const names = await db
+    .select({ locale: cardSetTranslations.locale, name: cardSetTranslations.name })
     .from(cardSetTranslations)
-    .where(and(eq(cardSetTranslations.setId, setId), eq(cardSetTranslations.locale, locale)));
+    .where(
+      and(
+        eq(cardSetTranslations.setId, setId),
+        inArray(cardSetTranslations.locale, [locale, 'en']),
+      ),
+    );
+  // Many older sets never came out in every language.
+  const set = names.find((name) => name.locale === locale) ?? names[0];
   const setCards = await db
     .select({ id: cards.id, localId: cards.localId })
     .from(cards)
@@ -45,7 +52,8 @@ export async function loadBinderCatalogue(
         localId,
         name: translation?.name ?? id,
         rarity: translation?.rarity ?? null,
-        imageUrl: translation?.imageUrl ?? null,
+        // Older cards often only have a scan in one of the languages.
+        imageUrl: translation?.imageUrl ?? forCard.find((row) => row.imageUrl)?.imageUrl ?? null,
         variants: variants.filter(({ cardId }) => cardId === id).map(({ variant }) => variant),
       };
     }),

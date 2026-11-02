@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { SetId } from '@/game/card-sets';
+import { SET_COLORS } from '@/game/set-colors';
 import { SetLogo } from './set-logo';
 
 function theme(glow: string, middle: string, dark: string, edge: string) {
@@ -9,7 +10,9 @@ function theme(glow: string, middle: string, dark: string, edge: string) {
   };
 }
 
-const PACK_THEMES: Record<SetId, { background: string; crimp: string }> = {
+type PackTheme = { background: string; crimp: string };
+
+const PACK_THEMES: Partial<Record<SetId, PackTheme>> = {
   '30th': theme('#6d7cff', '#3a2f9e', '#1f1a5e', '#0d0b2e'),
   me05: theme('#8d8d9e', '#3f3f50', '#1d1d28', '#08080d'),
   me04: theme('#ff6fb5', '#b0246f', '#561147', '#1f0820'),
@@ -24,13 +27,29 @@ const PACK_THEMES: Record<SetId, { background: string; crimp: string }> = {
   swsh3: theme('#ffb347', '#d9381e', '#4a1020', '#160b14'),
 };
 
+const NEUTRAL_COLOR = '#6b7280';
+
+function darkened(hex: string, keep: number): string {
+  const channels = [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16));
+  return `rgb(${channels.map((channel) => Math.round(channel * keep)).join(' ')})`;
+}
+
+// Drawn by hand for the sets on sale, and otherwise from the main colour of the set's logo.
+function packTheme(setId: SetId): PackTheme {
+  const color = SET_COLORS[setId]?.hex ?? NEUTRAL_COLOR;
+  return (
+    PACK_THEMES[setId] ??
+    theme(color, darkened(color, 0.7), darkened(color, 0.4), darkened(color, 0.15))
+  );
+}
+
 export function packBackground(setId: SetId) {
-  return PACK_THEMES[setId].background;
+  return packTheme(setId).background;
 }
 
 // For the element around the pack, so that its top edge gets the same colour as the rest.
 export function packCrimpStyle(setId: SetId) {
-  return { '--pack-crimp': PACK_THEMES[setId].crimp } as CSSProperties;
+  return { '--pack-crimp': packTheme(setId).crimp } as CSSProperties;
 }
 
 // Removes what the cut has already gone past, so that nothing stays behind the edge being torn off.

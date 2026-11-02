@@ -58,7 +58,7 @@ The schema lives in `db/schema`, and every change goes through a migration in `d
 
 The card catalogue comes from [TCGdex](https://tcgdex.dev/) and only lives in the database, never in the repository. Tests use placeholder data. `pnpm cards:import` copies a set in one transaction and can run again safely. Card images stay hosted by TCGdex.
 
-The game plays with the sets in `game/card-sets.ts` that have been imported. A new set also needs a recipe in `game/booster.ts` and a pack theme in `components/game/pack-art.tsx`.
+The game plays with the sets in `game/card-sets.ts` that have been imported, and shopkeepers only sell those in `SOLD_SET_IDS`. A set without its own recipe in `game/booster.ts` gets one built from its rarities, and a set without its own pack theme in `components/game/pack-art.tsx` takes the colour of its logo from `game/set-colors.ts`.
 
 Every booster holds ten cards, without energy or code bonus cards. A recipe adapts the slots to its set's rarities, and every version of every card must stay obtainable: `pnpm cards:import` warns about any that aren't. Cards are revealed from the most common to the best, following the recipe's `revealOrder`. As the game's own rule for every set, one booster in two thousand is instead a god pack of ten hits, which the opening only announces once the pack is cut.
 

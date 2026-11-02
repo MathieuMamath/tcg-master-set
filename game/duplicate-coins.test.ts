@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { BOOSTER_RECIPES } from './booster';
+import { BOOSTER_RECIPES, type BoosterRecipe } from './booster';
 import { duplicateCoins } from './duplicate-coins';
 import { BOOSTER_PRICE } from './shop-dialogue';
 
@@ -29,7 +29,8 @@ test('values never go down along the reveal order of any set', () => {
 });
 
 test('the usual outcome of each set pays back well under the price of a booster', () => {
-  for (const { slots } of Object.values(BOOSTER_RECIPES)) {
+  const recipes: BoosterRecipe[] = Object.values(BOOSTER_RECIPES);
+  for (const { slots } of recipes) {
     const total = slots.reduce((sum, [{ source }]) => {
       // A reverse is a common or uncommon card in most boosters.
       const worth = source === 'reverse' ? duplicateCoins('Uncommon') : duplicateCoins(source[0]);
@@ -37,4 +38,8 @@ test('the usual outcome of each set pays back well under the price of a booster'
     }, 0);
     expect(total).toBeLessThan(BOOSTER_PRICE / 2);
   }
+});
+
+test('a card marked as having no rarity is worth the least', () => {
+  expect(duplicateCoins('None')).toBe(2);
 });

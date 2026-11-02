@@ -3,7 +3,7 @@ import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/boo
 import { getDb } from '@/db/client';
 import { playerBoosters, playerCards, playerSpots, playerWallets } from '@/db/schema';
 import { type Collection, firstCopies, slotKey } from '@/game/binder';
-import { BOOSTER_RECIPES, openBooster } from '@/game/booster';
+import { boosterRecipe, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
 import { duplicateCoins } from '@/game/duplicate-coins';
 import { type PlayerSpot, parseSpot } from '@/game/places';
@@ -131,7 +131,7 @@ export async function openOwnedBooster(
   locale: string,
 ): Promise<OpenedBooster | null> {
   const pool = await loadBoosterPool(setId);
-  const opened = openBooster(pool, BOOSTER_RECIPES[setId]);
+  const opened = openBooster(pool, boosterRecipe(setId, pool));
   if (!opened) {
     throw new Error(`Set ${setId} can't fill a booster`);
   }

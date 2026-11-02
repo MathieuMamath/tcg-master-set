@@ -46,6 +46,14 @@ describe('setsSoldBy', () => {
   const ids = (stock: (typeof SHOPKEEPER_STOCKS)[number], year = 2026) =>
     setsSoldBy(stock, SETS, year).map(({ id }) => id);
 
+  test('no shopkeeper sells a set that only has a binder', () => {
+    const withUnsold = [set('base1', '2026-10-01'), ...SETS];
+
+    for (const stock of SHOPKEEPER_STOCKS) {
+      expect(setsSoldBy(stock, withUnsold, 2026).map(({ id }) => id)).not.toContain('base1');
+    }
+  });
+
   test('the first shopkeeper sells the three newest sets', () => {
     expect(ids('latest')).toEqual(['30th', 'me05', 'me04']);
   });

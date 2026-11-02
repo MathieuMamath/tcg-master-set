@@ -1,4 +1,5 @@
 import type { PlayableSet, SetId } from './card-sets';
+import { isSoldSet } from './card-sets';
 
 export const BOOSTER_PRICE = 100;
 
@@ -31,7 +32,9 @@ export function setsSoldBy(
   sets: readonly PlayableSet[],
   currentYear: number,
 ): PlayableSet[] {
-  const newestFirst = [...sets].sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
+  const newestFirst = sets
+    .filter(({ id }) => isSoldSet(id))
+    .sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
   if (stock === 'latest') {
     return newestFirst.slice(0, LATEST_SET_COUNT);
   }

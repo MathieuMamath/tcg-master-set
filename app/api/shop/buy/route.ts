@@ -1,11 +1,11 @@
 import { getPlayer } from '@/auth/session';
-import { isPlayableSet } from '@/game/card-sets';
+import { isSoldSet } from '@/game/card-sets';
 import { buyBooster } from '@/player/progress';
 
 export async function POST(request: Request) {
   const setId = new URL(request.url).searchParams.get('set');
 
-  if (!isPlayableSet(setId)) {
+  if (!isSoldSet(setId)) {
     return Response.json({ error: 'unknown-set' }, { status: 400 });
   }
 
