@@ -11,6 +11,8 @@
     "coins": "{count, plural, one {# pièce} other {# pièces}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
     "binder": "Ouvrir le classeur",
+    "countUp": "+{count}",
+    "countDown": "−{count}",
     "binderButton": "Classeur",
     "autoSaving": "Sauvegarde automatique...",
     "latest": "Parler (nouveautés)",
