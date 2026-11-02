@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.29](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.28...v0.1.29) (2026-11-02)
+
+### Features
+
+* **boosters:** draw when the pack is cut, so that it can be cancelled ([#29](https://github.com/MathieuMamath/tcg-master-set/issues/29)) ([03275de](https://github.com/MathieuMamath/tcg-master-set/commit/03275de1a78eac84bd8b7c94d8d439d4e95540cd))
+
 ## [0.1.28](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.27...v0.1.28) (2026-11-01)
 
 ### Features
