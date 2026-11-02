@@ -53,7 +53,7 @@ export const NPC_MODELS = ['character-female-b', 'character-male-c', 'character-
 
 export type NpcModel = (typeof NPC_MODELS)[number];
 
-export type QuestGiver = 'grandma' | 'grandpa';
+export type QuestGiver = 'grandma' | 'grandpa' | 'boy';
 
 export type PlaceId = 'bedroom' | 'town' | 'shop' | 'library' | 'apartment' | 'park';
 
@@ -87,6 +87,8 @@ export type Npc = Position & {
   // What this NPC sells.
   stock: ShopkeeperStock | 'binderSeller' | QuestGiver;
   heading: number;
+  // For a child, smaller than the grown-up model.
+  sizeFactor?: number;
   // Where the player has to stand to talk to this NPC.
   talkArea: Rect;
 };

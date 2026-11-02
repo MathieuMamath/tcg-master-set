@@ -22,11 +22,12 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import type { Interaction, QuestGiver } from '@/game/world';
-import type { PlayerProgress } from '@/player/progress';
+import type { FishingCatch, PlayerProgress } from '@/player/progress';
 import { AnimatedCount } from './animated-count';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
+import { FishingDialog } from './fishing-dialog';
 import { Joystick } from './joystick';
 import { MemoryDialog } from './memory-dialog';
 import { QuestBanner } from './quest-banner';
@@ -60,6 +61,8 @@ export function Game({ player, sets, progress }: Props) {
   const isFinishingQuest = useRef(false);
   const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
   const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
+  const [isFishing, setIsFishing] = useState(false);
+  const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [binders, setBinders] = useState(progress.binders);
   const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(progress.wallet);
@@ -83,7 +86,8 @@ export function Game({ player, sets, progress }: Props) {
     isBagOpen ||
     isSettingsOpen ||
     opening !== null ||
-    memoryCards !== null;
+    memoryCards !== null ||
+    isFishing;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
@@ -360,6 +364,49 @@ export function Game({ player, sets, progress }: Props) {
     setTalkingTo('grandpa');
   };
 
+  const startFishing = async (): Promise<QuestLine | null> => {
+    try {
+      const response = await fetch('/api/quests/fishing/start', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { hasStarted } = await response.json();
+      if (!hasStarted) {
+        return 'alreadyDone';
+      }
+      setIsFishing(true);
+      return null;
+    } catch {
+      return 'unavailable';
+    }
+  };
+
+  // The server draws the fish and pays for it. This only shows the result.
+  const reelIn = async (): Promise<FishingCatch | null> => {
+    try {
+      const response = await fetch('/api/quests/fishing/catch', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const caught: FishingCatch = await response.json();
+      if (caught.fish) {
+        showSaveNotice();
+      }
+      return caught;
+    } catch {
+      return null;
+    }
+  };
+
+  const endFishing = (line: QuestLine, updated?: Wallet) => {
+    setIsFishing(false);
+    if (updated) {
+      setWallet(updated);
+    }
+    setBoyLine(line);
+    setTalkingTo('boy');
+  };
+
   const openBag = () => {
     stopWalking();
     setIsBagOpen(true);
@@ -462,7 +509,7 @@ export function Game({ player, sets, progress }: Props) {
           {t(interaction)}
         </button>
       )}
-      {!isTalking && memoryCards === null && (
+      {!isTalking && memoryCards === null && !isFishing && (
         <>
           <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
             {t('keyboardHint')}
@@ -543,7 +590,25 @@ export function Game({ player, sets, progress }: Props) {
           onGiveUp={() => setMemoryCards(null)}
         />
       )}
-      {talkingTo && talkingTo !== 'grandma' && talkingTo !== 'grandpa' && (
+      {talkingTo === 'boy' && (
+        <QuestDialog
+          giver="boy"
+          line={boyLine}
+          onAccept={startFishing}
+          onClose={() => {
+            setTalkingTo(null);
+            setBoyLine((line) =>
+              line === 'rewarded' || line === 'rewardedShiny' || line === 'failed'
+                ? 'greeting'
+                : line,
+            );
+          }}
+        />
+      )}
+      {isFishing && !isTalking && (
+        <FishingDialog sets={sets} onReelIn={reelIn} onEnd={endFishing} />
+      )}
+      {talkingTo && talkingTo !== 'grandma' && talkingTo !== 'grandpa' && talkingTo !== 'boy' && (
         <ShopDialog
           stock={talkingTo}
           choices={

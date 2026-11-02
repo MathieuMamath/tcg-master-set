@@ -24,7 +24,7 @@ import {
   LIBRARY_COUNTER_TOP,
   LIBRARY_COUNTER_Z,
 } from '@/game/library';
-import { GRANDPA_TABLE, LAKE, PARK_FROM_TOWN } from '@/game/park';
+import { BOY_POSITION, GRANDPA_TABLE, LAKE, PARK_FROM_TOWN } from '@/game/park';
 import {
   SHOP_BOOKCASE_Z,
   SHOP_BOOKCASES,
@@ -580,8 +580,36 @@ function GrandpaLook({ x, z, groundHeight }: { x: number; z: number; groundHeigh
   );
 }
 
+// A cap on a smaller model to make him a child, and a fishing rod reaching over the lake.
+function BoyLook({ groundHeight }: { groundHeight: number }) {
+  return (
+    <group position={[BOY_POSITION.x, groundHeight, BOY_POSITION.z]}>
+      <mesh castShadow position={[0, 0.54, -0.01]}>
+        <sphereGeometry args={[0.17, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color="#2e86ab" />
+      </mesh>
+      <mesh castShadow position={[0, 0.55, 0.16]}>
+        <boxGeometry args={[0.2, 0.02, 0.14]} />
+        <meshStandardMaterial color="#2e86ab" />
+      </mesh>
+      <mesh castShadow position={[0.22, 0.42, -0.4]} rotation={[-0.9, 0, 0]}>
+        <cylinderGeometry args={[0.008, 0.014, 1.1, 6]} />
+        <meshStandardMaterial color="#7a5236" />
+      </mesh>
+      <mesh position={[0.22, 0.42, -0.84]}>
+        <cylinderGeometry args={[0.003, 0.003, 0.84, 4]} />
+        <meshStandardMaterial color="#f7f3e8" />
+      </mesh>
+      <mesh position={[0.22, 0.04 - groundHeight, -0.84]}>
+        <sphereGeometry args={[0.04, 10, 8]} />
+        <meshStandardMaterial color="#e4572e" />
+      </mesh>
+    </group>
+  );
+}
+
 function Npc({
-  npc: { model, x, z, heading },
+  npc: { model, x, z, heading, sizeFactor = 1 },
   groundHeight,
 }: {
   npc: NpcData;
@@ -612,7 +640,13 @@ function Npc({
   });
 
   return (
-    <primitive object={gltf.scene} position={[x, groundHeight, z]} rotation={[0, heading, 0]} />
+    <primitive
+      object={gltf.scene}
+      position={[x, groundHeight, z]}
+      rotation={[0, heading, 0]}
+      // Always set, since places share the loaded model and it would keep another's size.
+      scale={sizeFactor}
+    />
   );
 }
 
@@ -765,7 +799,12 @@ export function Place({ place, signs }: { place: PlaceData; signs: ShopSigns }) 
         .map(({ x, z }) => (
           <GrandpaLook key="grandpa" x={x} z={z} groundHeight={place.groundHeight} />
         ))}
-      {place.id === 'park' && <ParkDecoration />}
+      {place.id === 'park' && (
+        <>
+          <ParkDecoration />
+          <BoyLook groundHeight={place.groundHeight} />
+        </>
+      )}
       {place.id === 'town' && <TownDecoration signs={signs} />}
     </>
   );

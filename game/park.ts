@@ -9,6 +9,7 @@ export const LAKE: Rect = { minX: -5.5, maxX: 5.5, minZ: -7, maxZ: -1.8 };
 export const PARK_FROM_TOWN = { x: -8.6, z: 2, heading: Math.PI / 2 };
 export const GRANDPA_POSITION = { x: 3, z: 0 };
 export const GRANDPA_TABLE = { x: 3, z: 0.62 };
+export const BOY_POSITION = { x: -3.5, z: -1.45 };
 
 const BOUNDS: Rect = { minX: -9.5, maxX: 9.5, minZ: -8.6, maxZ: 3.8 };
 
@@ -50,6 +51,21 @@ const GRANDPA: Npc = {
   },
 };
 
+// On the shore, with his back to the lake he wants a fish from.
+const BOY: Npc = {
+  model: 'character-female-d',
+  stock: 'boy',
+  ...BOY_POSITION,
+  heading: 0,
+  sizeFactor: 0.72,
+  talkArea: {
+    minX: BOY_POSITION.x - 0.8,
+    maxX: BOY_POSITION.x + 0.8,
+    minZ: BOY_POSITION.z,
+    maxZ: BOY_POSITION.z + 1,
+  },
+};
+
 export const PARK: Place = {
   id: 'park',
   items: [
@@ -72,7 +88,7 @@ export const PARK: Place = {
     },
   ],
   exitMarkers: [{ x: BOUNDS.minX + 0.45, z: 2, quarterTurns: 1 }],
-  npcs: [GRANDPA],
+  npcs: [GRANDPA, BOY],
   water: LAKE,
   groundHeight: GROUND_HEIGHT,
   cameraStart: { x: -6, z: 2 },

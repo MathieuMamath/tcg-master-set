@@ -10,6 +10,7 @@ export type QuestLine =
   | 'greeting'
   | 'hurry'
   | 'rewarded'
+  | 'rewardedShiny'
   | 'failed'
   | 'alreadyDone'
   | 'unavailable';
@@ -30,7 +31,10 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
   const [speech, setSpeech] = useState({ line: firstLine, turn: 0 });
   const [isAsking, setIsAsking] = useState(false);
   const canAccept =
-    onAccept !== null && speech.line !== 'rewarded' && speech.line !== 'alreadyDone';
+    onAccept !== null &&
+    speech.line !== 'rewarded' &&
+    speech.line !== 'rewardedShiny' &&
+    speech.line !== 'alreadyDone';
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -51,7 +55,13 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
         {t(`${giver}.name`)}
       </h2>
       <div className="-mt-3 rounded-2xl border-4 border-ui-ink bg-ui-paper px-5 pt-6 pb-3 shadow-[0_6px_0_var(--ui-ink)]">
-        <TypedLine key={speech.turn} text={t(`${giver}.lines.${speech.line}`)} />
+        <TypedLine
+          key={speech.turn}
+          text={
+            // Each quest giver only ever gets the lines it has, which this type can't tell.
+            t(`${giver}.lines.${speech.line}` as 'grandma.lines.greeting')
+          }
+        />
         <form method="dialog" className="mt-2 border-ui-ink/20 border-t-2 pt-2">
           {canAccept && (
             <button

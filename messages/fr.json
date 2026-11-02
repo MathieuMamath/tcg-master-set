@@ -21,7 +21,8 @@
     "binderSeller": "Parler (classeurs)",
     "dash": "Dash",
     "grandma": "Parler (mamie)",
-    "grandpa": "Parler (papy)"
+    "grandpa": "Parler (papy)",
+    "boy": "Parler (petit garçon)"
   },
   "Shopkeeper": {
     "names": {
@@ -152,7 +153,6 @@
       "name": "Papy",
       "lines": {
         "greeting": "Une petite partie de mémoire ? Retrouve les 8 paires en 20 coups maximum, et je te donnerai 150 pièces.",
-        "hurry": "À toi de jouer !",
         "rewarded": "Ça alors, tu m'as battu ! Voici tes 150 pièces.",
         "failed": "Ha ! Plus de coups, ma mémoire reste la meilleure. On en refait une ?",
         "alreadyDone": "Une défaite par jour me suffit. Reviens demain !",
@@ -160,10 +160,36 @@
       },
       "accept": "Jouons"
     },
+    "boy": {
+      "name": "Petit garçon",
+      "lines": {
+        "greeting": "Dis ! Tu peux me pêcher un Magicarpe dans le lac ? S'il te plaît ! Je te donnerai 50 pièces, et encore mieux s'il est doré !",
+        "rewarded": "Trop bien, un Magicarpe ! Merci beaucoup, voici tes 50 pièces !",
+        "rewardedShiny": "C'EST PAS VRAI !!! UN MAGICARPE DORÉ !!! C'EST LE PLUS BEAU JOUR DE MA VIE !!! Tiens, prends ce booster de la toute dernière série !!!",
+        "failed": "Oh non, tu arrêtes déjà ? Allez, encore un essai !",
+        "alreadyDone": "J'ai eu mon poisson aujourd'hui ! Reviens demain !",
+        "unavailable": "Oh, ma ligne est tout emmêlée. Réessaie !"
+      },
+      "accept": "Je vais le pêcher"
+    },
     "retry": "Réessayer",
     "leave": "Au revoir",
     "timeLeft": "{seconds} s",
     "stainsLeft": "{count, plural, one {# tache restante} other {# taches restantes}}",
+    "fishing": {
+      "title": "Pêche",
+      "waiting": "Ça va bien finir par mordre...",
+      "reel": "Ça mord ! Remonte la ligne !",
+      "reeling": "Ça remonte...",
+      "giveUp": "Arrêter de pêcher",
+      "giveToBoy": "Le lui donner",
+      "commonFish": "Un Magicarpe !",
+      "shinyFish": "UN MAGICARPE DORÉ !",
+      "coins": "+{count} pièces",
+      "booster": "+1 booster {set}",
+      "floatResting": "Le flotteur repose sur l'eau",
+      "floatBiting": "Le flotteur s'enfonce !"
+    },
     "memory": {
       "title": "Jeu de mémoire",
       "moves": "Coups : {moves} / {limit}",

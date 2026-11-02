@@ -1,5 +1,6 @@
 import { and, eq, gt, gte, sql } from 'drizzle-orm';
 import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
+import { loadLatestSoldSetId } from '@/cards/playable-sets';
 import { getDb } from '@/db/client';
 import {
   playerBinders,
@@ -13,6 +14,7 @@ import { type Collection, firstCopies, slotKey } from '@/game/binder';
 import { boosterRecipe, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
 import { duplicateCoins } from '@/game/duplicate-coins';
+import { catchFish, FISH_COINS, FISHING_QUEST, type Fish } from '@/game/fishing';
 import {
   dealMemoryGame,
   flipMemoryCard,
@@ -122,26 +124,37 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
 }
 
 // Starting again simply replaces an attempt that was given up on.
-export async function startGrandmaQuest(userId: string): Promise<{ hasStarted: boolean }> {
+async function startQuestAttempt(
+  userId: string,
+  questId: string,
+): Promise<{ hasStarted: boolean }> {
   return getDb().transaction(async (transaction) => {
     const now = new Date();
     const [attempt] = await transaction
       .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
       .from(playerQuests)
-      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, GRANDMA_QUEST)))
+      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId)))
       .for('update');
     if (attempt && !canStartQuest(attempt, now)) {
       return { hasStarted: false };
     }
     await transaction
       .insert(playerQuests)
-      .values({ userId, questId: GRANDMA_QUEST, startedAt: now })
+      .values({ userId, questId, startedAt: now })
       .onConflictDoUpdate({
         target: [playerQuests.userId, playerQuests.questId],
         set: { startedAt: now },
       });
     return { hasStarted: true };
   });
+}
+
+export function startGrandmaQuest(userId: string): Promise<{ hasStarted: boolean }> {
+  return startQuestAttempt(userId, GRANDMA_QUEST);
+}
+
+export function startFishingQuest(userId: string): Promise<{ hasStarted: boolean }> {
+  return startQuestAttempt(userId, FISHING_QUEST);
 }
 
 // The attempt's row is locked and used up with the reward, so that it can only pay once.
@@ -248,6 +261,55 @@ export async function flipGrandpaCard(
       .set({ coins: sql`${playerWallets.coins} + ${MEMORY_REWARD}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
     return { ...answer, wallet: await loadWallet(transaction, userId) };
+  });
+}
+
+export type FishingCatch = {
+  // Null when no attempt is under way.
+  fish: Fish | null;
+  boosterSetId: SetId | null;
+  wallet: Wallet;
+};
+
+// The fish is drawn here, in the transaction that uses up the attempt, so that it can't be drawn
+// again. A shiny pays in coins too if no set has been imported, since it has no booster to give.
+export async function reelInFish(userId: string): Promise<FishingCatch> {
+  const latestSetId = await loadLatestSoldSetId();
+
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    await loadWallet(transaction, userId);
+    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, FISHING_QUEST));
+    const [attempt] = await transaction
+      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(quest)
+      .for('update');
+    if (!attempt?.startedAt || !canStartQuest(attempt, now)) {
+      return { fish: null, boosterSetId: null, wallet: await loadWallet(transaction, userId) };
+    }
+
+    await transaction
+      .update(playerQuests)
+      .set({ startedAt: null, completedOn: questDay(now) })
+      .where(quest);
+    const fish = catchFish();
+    const boosterSetId = fish === 'shiny' ? latestSetId : null;
+    if (boosterSetId) {
+      await transaction
+        .insert(playerBoosters)
+        .values({ userId, setId: boosterSetId, count: 1 })
+        .onConflictDoUpdate({
+          target: [playerBoosters.userId, playerBoosters.setId],
+          set: { count: sql`${playerBoosters.count} + 1` },
+        });
+    } else {
+      await transaction
+        .update(playerWallets)
+        .set({ coins: sql`${playerWallets.coins} + ${FISH_COINS}`, updatedAt: new Date() })
+        .where(eq(playerWallets.userId, userId));
+    }
+    return { fish, boosterSetId, wallet: await loadWallet(transaction, userId) };
   });
 }
 
