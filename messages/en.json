@@ -17,24 +17,32 @@
     "autoSaving": "Auto-saving...",
     "latest": "Talk (new releases)",
     "thisYear": "Talk (this year)",
-    "older": "Talk (earlier sets)"
+    "older": "Talk (earlier sets)",
+    "binderSeller": "Talk (binders)"
   },
   "Shopkeeper": {
     "names": {
       "latest": "New releases",
       "thisYear": "This year",
-      "older": "Earlier sets"
+      "older": "Earlier sets",
+      "binderSeller": "Library"
     },
     "greetings": {
       "latest": "Hello! Here are our three newest sets.",
       "thisYear": "Hello! I have the other sets from this year.",
-      "older": "Hello! I keep all the earlier sets."
+      "older": "Hello! I keep all the earlier sets.",
+      "binderSeller": "Hello! You need a binder to start a collection."
     },
     "thanks": "Thank you, and good luck with your cards!",
     "notEnoughCoins": "Sorry, you don't have enough coins.",
     "unavailable": "Sorry, the till isn't working right now. Please try again.",
     "buy": "Buy a {set} booster ({price} coins)",
-    "leave": "Goodbye"
+    "leave": "Goodbye",
+    "needsBinder": "You need its binder first. The library next door sells them.",
+    "alreadyOwned": "You already have this binder.",
+    "buyBinder": "Buy the {set} binder ({price} coins)",
+    "binderOwned": "{set}: binder already bought",
+    "buyNeedsBinder": "{set}: binder needed first"
   },
   "Booster": {
     "title": "Open a booster",
@@ -83,7 +91,8 @@
       "reverse": "Reverse",
       "firstEdition": "1st ed.",
       "wPromo": "Promo"
-    }
+    },
+    "noBinderYet": "Buy your first binder at the library, past the shop."
   },
   "Settings": {
     "open": "Settings",

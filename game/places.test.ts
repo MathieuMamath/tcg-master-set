@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { BEDROOM, BEDROOM_FROM_TOWN, BEDROOM_START } from './bedroom';
 import { isBlocked } from './collision';
+import { LIBRARY, LIBRARY_FROM_TOWN } from './library';
 import { type CharacterState, STILL } from './movement';
 import { PLACES, parseSpot } from './places';
 import { SHOP, SHOP_FROM_TOWN, SHOPKEEPER_POSITION } from './shop';
@@ -226,6 +227,37 @@ describe('the shop', () => {
   test('the shopkeeper stands behind the counter and within the room', () => {
     expect(SHOPKEEPER_POSITION.z).toBeLessThan(-1.7);
     expect(isInside(SHOPKEEPER_POSITION, SHOP.bounds)).toBe(true);
+  });
+});
+
+describe('the library', () => {
+  test('walking up to its door from the street leads inside', () => {
+    const exit = exitReachedWalking(TOWN, standingAt({ x: 10, z: 0 }), { x: 0, z: -1 });
+
+    expect(exit?.to).toBe('library');
+  });
+
+  test('the pavement leads from the shop to the library', () => {
+    const state = walk(TOWN, standingAt({ x: 2.9, z: -0.35 }), { x: 1, z: 0 }, 600);
+
+    expect(state.x).toBeGreaterThan(10);
+  });
+
+  test('walking through its door leads back to the town', () => {
+    const exit = exitReachedWalking(LIBRARY, standingAt(LIBRARY_FROM_TOWN), { x: -1, z: 0 });
+
+    expect(exit?.to).toBe('town');
+  });
+
+  test('walking up to the counter offers a conversation with the seller', () => {
+    const start = standingAt({ x: 0, z: 1 });
+
+    expect(interactionAt(LIBRARY, start)).toBeNull();
+    expect(interactionAt(LIBRARY, walk(LIBRARY, start, { x: 0, z: -1 }, 360))).toBe('binderSeller');
+  });
+
+  test('nobody is within reach at its door', () => {
+    expect(npcInReach(LIBRARY, LIBRARY_FROM_TOWN)).toBeUndefined();
   });
 });
 

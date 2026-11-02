@@ -71,3 +71,17 @@ export const playerCards = pgTable(
     check('player_cards_count_positive', sql`${table.count} > 0`),
   ],
 );
+
+// The binders the player has bought. Buying a set's boosters requires its binder.
+export const playerBinders = pgTable(
+  'player_binders',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    setId: text('set_id')
+      .notNull()
+      .references(() => cardSets.id),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.setId] })],
+);

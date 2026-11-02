@@ -17,24 +17,32 @@
     "autoSaving": "Sauvegarde automatique...",
     "latest": "Parler (nouveautés)",
     "thisYear": "Parler (cette année)",
-    "older": "Parler (précédentes)"
+    "older": "Parler (précédentes)",
+    "binderSeller": "Parler (classeurs)"
   },
   "Shopkeeper": {
     "names": {
       "latest": "Nouveautés",
       "thisYear": "Cette année",
-      "older": "Collections précédentes"
+      "older": "Collections précédentes",
+      "binderSeller": "Bibliothèque"
     },
     "greetings": {
       "latest": "Bonjour ! Voici nos trois dernières collections.",
       "thisYear": "Bonjour ! J'ai les autres collections de cette année.",
-      "older": "Bonjour ! Je garde toutes les collections précédentes."
+      "older": "Bonjour ! Je garde toutes les collections précédentes.",
+      "binderSeller": "Bonjour ! Il te faut un classeur pour commencer une collection."
     },
     "thanks": "Merci, et bonne chance pour tes cartes !",
     "notEnoughCoins": "Oups, il te manque des pièces.",
     "unavailable": "Oups, la caisse ne marche pas pour l'instant. Réessaie.",
     "buy": "Acheter un booster {set} ({price} pièces)",
-    "leave": "Au revoir"
+    "leave": "Au revoir",
+    "needsBinder": "Il te faut d'abord son classeur. La bibliothèque d'à côté en vend.",
+    "alreadyOwned": "Tu as déjà ce classeur.",
+    "buyBinder": "Acheter le classeur {set} ({price} pièces)",
+    "binderOwned": "{set} : classeur déjà acheté",
+    "buyNeedsBinder": "{set} : classeur requis"
   },
   "Booster": {
     "title": "Ouvrir un booster",
@@ -83,7 +91,8 @@
       "reverse": "Reverse",
       "firstEdition": "1re éd.",
       "wPromo": "Promo"
-    }
+    },
+    "noBinderYet": "Achète ton premier classeur à la bibliothèque, après la boutique."
   },
   "Settings": {
     "open": "Réglages",

@@ -391,7 +391,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
         <div className="flex h-full flex-col items-center gap-5 overflow-y-auto pt-10 sm:pt-0">
           <div className="my-auto flex w-full flex-col items-center gap-5 py-2">
             <h2 className="text-center text-2xl font-semibold text-ui-paper">
-              {sets.length > 0 ? t('chooseBinder') : t('error')}
+              {sets.length > 0 ? t('chooseBinder') : t('noBinderYet')}
             </h2>
             {sets.length > 0 && binders.every(({ owned }) => owned === 0) && (
               <p className="text-center text-ui-paper/80">{t('noCardsYet')}</p>

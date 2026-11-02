@@ -2,6 +2,7 @@ import type { PlayableSet, SetId } from './card-sets';
 import { isSoldSet } from './card-sets';
 
 export const BOOSTER_PRICE = 100;
+export const BINDER_PRICE = 500;
 
 export type Wallet = {
   coins: number;
@@ -10,7 +11,13 @@ export type Wallet = {
 
 export const STARTING_COINS = 1000;
 
-export type ShopkeeperLine = 'greeting' | 'thanks' | 'notEnoughCoins' | 'unavailable';
+export type ShopkeeperLine =
+  | 'greeting'
+  | 'thanks'
+  | 'notEnoughCoins'
+  | 'needsBinder'
+  | 'alreadyOwned'
+  | 'unavailable';
 
 export function boosterCount(wallet: Wallet, setId: SetId): number {
   return wallet.boosters[setId] ?? 0;
@@ -43,4 +50,12 @@ export function setsSoldBy(
   return newestFirst
     .slice(LATEST_SET_COUNT)
     .filter((set) => (stock === 'thisYear' ? isThisYear(set) : !isThisYear(set)));
+}
+
+// The binders on sale are those of the sets on sale, newest first. Opening a set's binder is what
+// lets the player buy its boosters.
+export function bindersForSale(sets: readonly PlayableSet[]): PlayableSet[] {
+  return sets
+    .filter(({ id }) => isSoldSet(id))
+    .sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
 }

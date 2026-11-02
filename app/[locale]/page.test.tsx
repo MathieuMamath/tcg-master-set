@@ -15,6 +15,7 @@ vi.mock('@/i18n/navigation', () => ({ redirect: vi.fn() }));
 vi.mock('@/player/progress', () => ({
   loadPlayerProgress: vi.fn().mockResolvedValue({
     wallet: { coins: 1000, boosters: {} },
+    binders: [],
     collection: {},
     spot: null,
   }),
@@ -28,7 +29,12 @@ function renderHome(locale: Locale, messages: typeof en) {
       <HomeScreen
         player={PLAYER}
         sets={[]}
-        progress={{ wallet: { coins: 1000, boosters: {} }, collection: {}, spot: null }}
+        progress={{
+          wallet: { coins: 1000, boosters: {} },
+          binders: [],
+          collection: {},
+          spot: null,
+        }}
       />
     </NextIntlClientProvider>,
   );

@@ -8,6 +8,9 @@ import { addToCollection } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import {
+  BINDER_PRICE,
+  BOOSTER_PRICE,
+  bindersForSale,
   boosterCount,
   type ShopkeeperLine,
   type ShopkeeperStock,
@@ -42,7 +45,8 @@ export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
-  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | null>(null);
+  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | null>(null);
+  const [binders, setBinders] = useState(progress.binders);
   const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(progress.wallet);
   const [opening, setOpening] = useState<Opening | null>(null);
@@ -196,6 +200,24 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
+  const buyBinder = async (setId: SetId): Promise<ShopkeeperLine> => {
+    try {
+      const response = await fetch(`/api/binders/buy?set=${setId}`, { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { wallet: updated, binders: bought, line } = await response.json();
+      setWallet(updated);
+      setBinders(bought);
+      if (line === 'thanks') {
+        showSaveNotice();
+      }
+      return line;
+    } catch {
+      return 'unavailable';
+    }
+  };
+
   const openBag = () => {
     stopWalking();
     setIsBagOpen(true);
@@ -220,6 +242,7 @@ export function Game({ player, sets, progress }: Props) {
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
+          library: tShopkeeper('names.binderSeller'),
         }}
       />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
@@ -305,7 +328,11 @@ export function Game({ player, sets, progress }: Props) {
         </>
       )}
       {isBinderOpen && (
-        <BinderView sets={sets} collection={collection} onClose={() => setIsBinderOpen(false)} />
+        <BinderView
+          sets={sets.filter(({ id }) => binders.includes(id))}
+          collection={collection}
+          onClose={() => setIsBinderOpen(false)}
+        />
       )}
       {opening && <BoosterOpening opening={opening} onCut={cutBooster} onClose={closeOpening} />}
       {isBagOpen && (
@@ -319,8 +346,26 @@ export function Game({ player, sets, progress }: Props) {
       {talkingTo && (
         <ShopDialog
           stock={talkingTo}
-          sets={setsSoldBy(talkingTo, sets, new Date().getFullYear())}
-          onBuy={buy}
+          choices={
+            talkingTo === 'binderSeller'
+              ? bindersForSale(sets).map(({ id, name }) => {
+                  const isOwned = binders.includes(id);
+                  return {
+                    setId: id,
+                    label: isOwned
+                      ? tShopkeeper('binderOwned', { set: name })
+                      : tShopkeeper('buyBinder', { set: name, price: BINDER_PRICE }),
+                    isUnavailable: isOwned,
+                  };
+                })
+              : setsSoldBy(talkingTo, sets, new Date().getFullYear()).map(({ id, name }) => ({
+                  setId: id,
+                  label: binders.includes(id)
+                    ? tShopkeeper('buy', { set: name, price: BOOSTER_PRICE })
+                    : tShopkeeper('buyNeedsBinder', { set: name }),
+                }))
+          }
+          onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
           onClose={() => setTalkingTo(null)}
         />
       )}

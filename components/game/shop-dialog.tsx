@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import type { PlayableSet, SetId } from '@/game/card-sets';
-import { BOOSTER_PRICE, type ShopkeeperLine, type ShopkeeperStock } from '@/game/shop-dialogue';
+import type { SetId } from '@/game/card-sets';
+import type { ShopkeeperLine, ShopkeeperStock } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 import { moveThroughChoices } from './menu-focus';
 
@@ -57,15 +57,17 @@ function TypedLine({ text }: { text: string }) {
   );
 }
 
+export type ShopChoice = { setId: SetId; label: string; isUnavailable?: boolean };
+
 type Props = {
-  stock: ShopkeeperStock;
-  sets: readonly PlayableSet[];
+  stock: ShopkeeperStock | 'binderSeller';
+  choices: readonly ShopChoice[];
   onBuy: (setId: SetId) => Promise<ShopkeeperLine>;
   onClose: () => void;
 };
 
 // Mounted only while talking, so every conversation starts with a greeting.
-export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
+export function ShopDialog({ stock, choices, onBuy, onClose }: Props) {
   const t = useTranslations('Shopkeeper');
   const dialog = useRef<HTMLDialogElement>(null);
   const [speech, setSpeech] = useState<{ line: ShopkeeperLine; turn: number }>({
@@ -77,6 +79,8 @@ export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
 
   useEffect(() => {
     dialog.current?.showModal();
+    // The first choice that can be pressed, past any binder already bought.
+    dialog.current?.querySelector<HTMLElement>('button[aria-disabled="false"]')?.focus();
   }, []);
 
   return (
@@ -100,25 +104,25 @@ export function ShopDialog({ stock, sets, onBuy, onClose }: Props) {
         />
         <form method="dialog" className="mt-2 border-ui-ink/20 border-t-2 pt-2">
           <div className="max-h-[35dvh] overflow-y-auto">
-            {sets.map(({ id, name }) => (
+            {choices.map(({ setId, label, isUnavailable = false }) => (
               <button
-                key={id}
+                key={setId}
                 type="button"
-                className={CHOICE_CLASS}
+                className={`${CHOICE_CLASS} ${isUnavailable ? 'opacity-50' : ''}`}
                 // Not `disabled`, which would take the focus away from the keyboard.
-                aria-disabled={isBuying}
+                aria-disabled={isBuying || isUnavailable}
                 onClick={async () => {
-                  if (isBuying) {
+                  if (isBuying || isUnavailable) {
                     return;
                   }
                   setIsBuying(true);
-                  const line = await onBuy(id);
+                  const line = await onBuy(setId);
                   setIsBuying(false);
                   setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
                 }}
               >
                 <ChoiceMarker />
-                {t('buy', { set: name, price: BOOSTER_PRICE })}
+                {label}
               </button>
             ))}
           </div>
