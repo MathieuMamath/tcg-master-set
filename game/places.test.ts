@@ -6,7 +6,7 @@ import { BEDROOM, BEDROOM_FROM_TOWN, BEDROOM_START } from './bedroom';
 import { isBlocked } from './collision';
 import { LIBRARY, LIBRARY_FROM_TOWN } from './library';
 import { type CharacterState, STILL } from './movement';
-import { LAKE, PARK, PARK_FROM_TOWN } from './park';
+import { BOY_POSITION, LAKE, PARK, PARK_FROM_TOWN } from './park';
 import { PLACES, parseSpot } from './places';
 import { SHOP, SHOP_FROM_TOWN, SHOPKEEPER_POSITION } from './shop';
 import { TOWN } from './town';
@@ -371,6 +371,10 @@ describe('the park', () => {
   test('the grandfather can be reached without being in the way of the entrance', () => {
     expect(npcInReach(PARK, PARK_FROM_TOWN)).toBeUndefined();
     expect(interactionAt(PARK, { x: 3, z: 1 })).toBe('grandpa');
+  });
+
+  test('the little boy can be reached from the path round the lake', () => {
+    expect(interactionAt(PARK, { x: BOY_POSITION.x, z: LAKE.maxZ + 1 })).toBe('boy');
   });
 });
 

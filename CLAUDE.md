@@ -74,7 +74,9 @@ A card's `rarity` column is in English, because game rules compare it. Translate
 
 Quest rules live in `game/quests.ts`, and rewards are paid in `player/progress.ts`. The grandmother's cleaning happens in the browser, so the server records when an attempt starts and only pays if the time adds up. A quest pays once a day, by UTC date, so that it can't be repeated for endless coins.
 
-The grandfather's memory game is in `game/memory-game.ts`. Its board stays in `player_quests.memory_game`, and each flipped card is a request to the server, which alone counts the moves and pays. The game's pictures go to the browser at the start, without their positions. The park's lake (`LAKE` in `game/park.ts`) is there for a later quest.
+The grandfather's memory game is in `game/memory-game.ts`. Its board stays in `player_quests.memory_game`, and each flipped card is a request to the server, which alone counts the moves and pays. The game's pictures go to the browser at the start, without their positions. 
+
+The little boy's fishing quest is in `game/fishing.ts`, at the park's lake (`LAKE` in `game/park.ts`). The server draws the fish when it is reeled in, in the transaction that uses up the attempt, so backing out can't be used to draw again. A common fish pays coins, and a shiny one pays a booster of the newest set on sale. The wait for a bite is only for show. The fish is a simple drawing of our own, not a third-party image.
 
 ## Accounts
 
