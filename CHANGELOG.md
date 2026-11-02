@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.37](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.36...v0.1.37) (2026-11-02)
+
+### Features
+
+* **quests:** add a fishing quest for a little boy at the park's lake ([#37](https://github.com/MathieuMamath/tcg-master-set/issues/37)) ([2fc7ccc](https://github.com/MathieuMamath/tcg-master-set/commit/2fc7ccca58fee1d576a475a3e25b90ba94dc2be7))
+
 ## [0.1.36](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.35...v0.1.36) (2026-11-02)
 
 ### Features
