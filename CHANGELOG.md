@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.34](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.33...v0.1.34) (2026-11-02)
+
+### Features
+
+* **city:** add a dash on Space with a trail of smoke ([#34](https://github.com/MathieuMamath/tcg-master-set/issues/34)) ([b69160a](https://github.com/MathieuMamath/tcg-master-set/commit/b69160a41e41b73168dfe62b36767171893a6fb1))
+
 ## [0.1.33](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.32...v0.1.33) (2026-11-02)
 
 ### Features
