@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.31](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.30...v0.1.31) (2026-11-02)
+
+### Features
+
+* **city:** animate the coin and booster counters when they change ([#31](https://github.com/MathieuMamath/tcg-master-set/issues/31)) ([66b4a15](https://github.com/MathieuMamath/tcg-master-set/commit/66b4a15a756b50fdaaabeba5705b9cd9b6bb3a70))
+
 ## [0.1.30](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.29...v0.1.30) (2026-11-02)
 
 ### Features
