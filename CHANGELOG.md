@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.35](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.34...v0.1.35) (2026-11-02)
+
+### Features
+
+* **quests:** add the first quest, cleaning the grandmother's apartment ([#35](https://github.com/MathieuMamath/tcg-master-set/issues/35)) ([a89508a](https://github.com/MathieuMamath/tcg-master-set/commit/a89508a423c884a3248b4804dab7dd2255d3f427)), references [#34](https://github.com/MathieuMamath/tcg-master-set/issues/34)
+
 ## [0.1.34](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.33...v0.1.34) (2026-11-02)
 
 ### Features
