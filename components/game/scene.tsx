@@ -12,6 +12,7 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { BEDROOM, BEDROOM_START } from '@/game/bedroom';
+import { type DashState, dashDirection, NO_DASH, tickDash } from '@/game/dash';
 import {
   type CharacterState,
   cameraDistanceFactor,
@@ -25,6 +26,7 @@ import {
 import { PLACES, type PlayerSpot, parseSpot } from '@/game/places';
 import {
   type Arrival,
+  dashInPlace,
   type Exit,
   exitAt,
   type Interaction,
@@ -33,12 +35,19 @@ import {
   type Place as PlaceData,
   stepInPlace,
 } from '@/game/world';
+import { createSmoke, DashSmoke, emitPuff } from './dash-smoke';
 import { Place, type ShopSigns } from './place';
 
 export type MovementInput = {
   keyboard: Direction;
   joystick: Direction;
+  // Set by whoever asks for a dash, and used up by the character.
+  wantsDash: boolean;
 };
+
+const PUFF_INTERVAL_SECONDS = 0.04;
+const FIRST_PUFFS = 4;
+const PUFF_BEHIND_FEET = 0.2;
 
 const CHARACTER_MODEL = '/models/characters/character-male-a.glb';
 const CAMERA_OFFSET = { x: 0, y: 5.6, z: 6.4 };
@@ -155,6 +164,9 @@ function Character({
   const hasLeft = useRef(false);
   const interaction = useRef<Interaction | null>(null);
   const closeUp = useRef(0);
+  const dash = useRef<DashState>(NO_DASH);
+  const smoke = useRef(createSmoke());
+  const nextPuff = useRef(0);
   const camera = useThree((three) => three.camera);
   const viewport = useThree((three) => three.viewport);
 
@@ -188,13 +200,42 @@ function Character({
     const pushed = joystick.x !== 0 || joystick.z !== 0 ? joystick : keyboard;
     const direction = hasLeft.current ? STILL : pushed;
     const wasMoving = state.current.isMoving;
+    const wasDashing = dash.current.remaining > 0;
+
+    dash.current = tickDash(
+      dash.current,
+      input.current.wantsDash && !isTalking && !hasLeft.current,
+      delta,
+    );
+    input.current.wantsDash = false;
+    const isDashing = dash.current.remaining > 0;
 
     const npc = npcInReach(place, state.current);
     state.current =
       isTalking && npc
         ? faceTowards(state.current, npc, delta)
-        : stepInPlace(place, state.current, direction, delta);
+        : isDashing
+          ? dashInPlace(
+              place,
+              state.current,
+              dashDirection(direction, state.current.heading),
+              delta,
+            )
+          : stepInPlace(place, state.current, direction, delta);
     const { x, z, heading, isMoving } = state.current;
+
+    if (isDashing) {
+      const behindX = x - Math.sin(heading) * PUFF_BEHIND_FEET;
+      const behindZ = z - Math.cos(heading) * PUFF_BEHIND_FEET;
+      nextPuff.current -= delta;
+      const puffs = wasDashing ? (nextPuff.current <= 0 ? 1 : 0) : FIRST_PUFFS;
+      for (let puff = 0; puff < puffs; puff++) {
+        emitPuff(smoke.current, behindX, place.groundHeight + 0.08, behindZ);
+      }
+      if (puffs > 0) {
+        nextPuff.current = PUFF_INTERVAL_SECONDS;
+      }
+    }
 
     const exit = exitAt(place, state.current);
     if (exit && !hasLeft.current) {
@@ -242,7 +283,12 @@ function Character({
     camera.lookAt(lookX, CAMERA_LOOK_HEIGHT, lookZ);
   });
 
-  return <primitive ref={root} object={gltf.scene} />;
+  return (
+    <>
+      <primitive ref={root} object={gltf.scene} />
+      <DashSmoke smoke={smoke} />
+    </>
+  );
 }
 
 type SceneProps = InputProps & {

@@ -10,6 +10,7 @@ import { SHOP, SHOP_FROM_TOWN, SHOPKEEPER_POSITION } from './shop';
 import { TOWN } from './town';
 import {
   CHARACTER_RADIUS,
+  dashInPlace,
   exitAt,
   footprintOf,
   interactionAt,
@@ -227,6 +228,36 @@ describe('the shop', () => {
   test('the shopkeeper stands behind the counter and within the room', () => {
     expect(SHOPKEEPER_POSITION.z).toBeLessThan(-1.7);
     expect(isInside(SHOPKEEPER_POSITION, SHOP.bounds)).toBe(true);
+  });
+});
+
+describe('dashInPlace', () => {
+  const LONG_FRAME = 0.1;
+
+  test('goes further than walking in the same time', () => {
+    const start = standingAt({ x: -1, z: 1.5 });
+    const dashed = dashInPlace(SHOP, start, { x: 1, z: 0 }, FRAME);
+    const walked = stepInPlace(SHOP, start, { x: 1, z: 0 }, FRAME);
+
+    expect(dashed.x).toBeGreaterThan(walked.x);
+  });
+
+  test('never goes through a counter, even on a long frame', () => {
+    let state = standingAt({ x: SHOPKEEPER_POSITION.x, z: -0.7 });
+    for (let frame = 0; frame < 10; frame++) {
+      state = dashInPlace(SHOP, state, { x: 0, z: -1 }, LONG_FRAME);
+    }
+
+    expect(state.z).toBeGreaterThan(-1.4);
+  });
+
+  test('never leaves the place', () => {
+    let state = standingAt({ x: 0, z: 1.5 });
+    for (let frame = 0; frame < 20; frame++) {
+      state = dashInPlace(SHOP, state, { x: 0, z: 1 }, LONG_FRAME);
+    }
+
+    expect(isInside(state, SHOP.bounds)).toBe(true);
   });
 });
 

@@ -34,6 +34,7 @@ import { ShopDialog } from './shop-dialog';
 const Scene = dynamic(() => import('./scene').then((module) => module.Scene), { ssr: false });
 
 const INTERACT_KEY = 'KeyE';
+const DASH_KEY = 'Space';
 
 type Props = {
   player: Player;
@@ -43,7 +44,7 @@ type Props = {
 
 export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
-  const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL });
+  const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL, wantsDash: false });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
   const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | null>(null);
   const [binders, setBinders] = useState(progress.binders);
@@ -80,7 +81,18 @@ export function Game({ player, sets, progress }: Props) {
       pressedKeys.clear();
       update();
     };
+    // A button reached with the keyboard keeps Space, but one that was only clicked doesn't. The
+    // browser's own :focus-visible can't tell, since it turns on as soon as a key is pressed.
+    let lastUsedPointer = false;
+    const onPointerDown = () => {
+      lastUsedPointer = true;
+    };
+    const isPressingAButton = () =>
+      !lastUsedPointer && document.activeElement?.tagName === 'BUTTON';
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'Tab') {
+        lastUsedPointer = false;
+      }
       // While a dialog is open, the keys belong to it.
       if (controls.current.isDialogOpen) {
         return;
@@ -93,8 +105,15 @@ export function Game({ player, sets, progress }: Props) {
         } else {
           setTalkingTo(controls.current.interaction);
         }
+      } else if (event.code === DASH_KEY && !isPressingAButton()) {
+        event.preventDefault();
+        if (!event.repeat) {
+          input.current.wantsDash = true;
+        }
       } else if (isMovementKey(event.code)) {
         event.preventDefault();
+        // Walking away from a menu button gives Space back to the dash.
+        (document.activeElement as HTMLElement | null)?.blur();
         pressedKeys.add(event.code);
         update();
       }
@@ -104,12 +123,14 @@ export function Game({ player, sets, progress }: Props) {
       update();
     };
 
+    window.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
     // A key released in another window never sends keyup here.
     window.addEventListener('blur', releaseKeys);
 
     return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('blur', releaseKeys);
@@ -325,6 +346,17 @@ export function Game({ player, sets, progress }: Props) {
               input.current.joystick = direction;
             }}
           />
+          <button
+            type="button"
+            aria-hidden="true"
+            tabIndex={-1}
+            onPointerDown={() => {
+              input.current.wantsDash = true;
+            }}
+            className="absolute right-8 bottom-20 hidden size-20 touch-none select-none items-center justify-center rounded-full border border-current/30 bg-current/10 font-game font-semibold pointer-coarse:flex"
+          >
+            {t('dash')}
+          </button>
         </>
       )}
       {isBinderOpen && (
