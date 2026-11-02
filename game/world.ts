@@ -1,10 +1,12 @@
 import { moveWithCollisions, type Position, type Rect } from './collision';
+import { DASH_SPEED_FACTOR } from './dash';
 import { type CharacterState, type Direction, stepCharacter } from './movement';
 import type { ShopkeeperStock } from './shop-dialogue';
 
 export const CHARACTER_RADIUS = 0.25;
 
 const NPC_RADIUS = 0.25;
+const MAX_STEPS_PER_SECOND = 60;
 
 const FURNITURE_SCALE = 1.5;
 const TOWN_SCALE = 3;
@@ -147,6 +149,21 @@ export function stepInPlace(
   );
 
   return { ...next, ...position };
+}
+
+// In short steps, because a whole frame at this speed could jump over a thin obstacle.
+export function dashInPlace(
+  place: Place,
+  state: CharacterState,
+  direction: Direction,
+  delta: number,
+): CharacterState {
+  const steps = Math.ceil(delta * DASH_SPEED_FACTOR * MAX_STEPS_PER_SECOND);
+  let current = state;
+  for (let step = 0; step < steps; step++) {
+    current = stepInPlace(place, current, direction, (delta * DASH_SPEED_FACTOR) / steps);
+  }
+  return current;
 }
 
 export function exitAt(place: Place, position: Position): Exit | undefined {

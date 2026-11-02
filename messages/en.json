@@ -6,7 +6,7 @@
     "title": "TCG Master Set"
   },
   "Game": {
-    "keyboardHint": "Use the arrow keys or WASD to move, and Tab to reach the menus.",
+    "keyboardHint": "Use the arrow keys or WASD to move, Space to dash, and Tab to reach the menus.",
     "webglUnavailable": "This game needs WebGL, which your browser doesn't support or has turned off.",
     "coins": "{count, plural, one {# coin} other {# coins}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
@@ -18,7 +18,8 @@
     "latest": "Talk (new releases)",
     "thisYear": "Talk (this year)",
     "older": "Talk (earlier sets)",
-    "binderSeller": "Talk (binders)"
+    "binderSeller": "Talk (binders)",
+    "dash": "Dash"
   },
   "Shopkeeper": {
     "names": {

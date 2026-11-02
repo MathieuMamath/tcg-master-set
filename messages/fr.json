@@ -6,7 +6,7 @@
     "title": "TCG Master Set"
   },
   "Game": {
-    "keyboardHint": "Utilise les flèches ou ZQSD pour te déplacer, et Tab pour atteindre les menus.",
+    "keyboardHint": "Utilise les flèches ou ZQSD pour te déplacer, Espace pour un dash, et Tab pour atteindre les menus.",
     "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé.",
     "coins": "{count, plural, one {# pièce} other {# pièces}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
@@ -18,7 +18,8 @@
     "latest": "Parler (nouveautés)",
     "thisYear": "Parler (cette année)",
     "older": "Parler (précédentes)",
-    "binderSeller": "Parler (classeurs)"
+    "binderSeller": "Parler (classeurs)",
+    "dash": "Dash"
   },
   "Shopkeeper": {
     "names": {
