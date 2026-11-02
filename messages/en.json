@@ -52,6 +52,7 @@
     "enlargeCard": "See {name} up close",
     "enlargeNewCard": "See {name} up close, new card",
     "new": "new",
+    "summaryCoins": "{count, plural, one {+# coin} other {+# coins}} from duplicates",
     "done": "Done",
     "error": "The booster couldn't be opened. It's still in your bag.",
     "retry": "Try again",

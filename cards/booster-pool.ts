@@ -14,8 +14,9 @@ export type OpenedCard = {
   tier: PullTier;
 };
 
-// A card as the player discovers it: whether it fills an empty pocket of the binder.
-export type RevealedCard = OpenedCard & { isNew: boolean };
+// A card as the player discovers it: either it fills an empty pocket of the binder, or it's a
+// duplicate that brought these coins.
+export type RevealedCard = OpenedCard & { isNew: boolean; coins: number };
 
 export async function loadBoosterPool(setId: string): Promise<PoolCard[]> {
   const db = getDb();

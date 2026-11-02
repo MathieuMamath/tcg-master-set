@@ -5,6 +5,7 @@ import { playerBoosters, playerCards, playerSpots, playerWallets } from '@/db/sc
 import { type Collection, firstCopies, slotKey } from '@/game/binder';
 import { BOOSTER_RECIPES, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
+import { duplicateCoins } from '@/game/duplicate-coins';
 import { type PlayerSpot, parseSpot } from '@/game/places';
 import {
   BOOSTER_PRICE,
@@ -129,7 +130,8 @@ export async function openOwnedBooster(
   setId: SetId,
   locale: string,
 ): Promise<OpenedBooster | null> {
-  const opened = openBooster(await loadBoosterPool(setId), BOOSTER_RECIPES[setId]);
+  const pool = await loadBoosterPool(setId);
+  const opened = openBooster(pool, BOOSTER_RECIPES[setId]);
   if (!opened) {
     throw new Error(`Set ${setId} can't fill a booster`);
   }
@@ -164,13 +166,24 @@ export async function openOwnedBooster(
         count: playerCards.count,
       });
     const firsts = firstCopies(added);
+    const rarities = new Map(pool.map(({ id, rarity }) => [id, rarity]));
+    const cards = details.cards.map((card) => {
+      const isNew = firsts.has(slotKey(card.id, card.variant));
+      return { ...card, isNew, coins: isNew ? 0 : duplicateCoins(rarities.get(card.id) ?? null) };
+    });
+
+    // In the same transaction, so that the coins can't be lost or earned twice.
+    await transaction
+      .update(playerWallets)
+      .set({
+        coins: sql`${playerWallets.coins} + ${cards.reduce((total, { coins }) => total + coins, 0)}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(playerWallets.userId, userId));
 
     return {
       ...details,
-      cards: details.cards.map((card) => ({
-        ...card,
-        isNew: firsts.has(slotKey(card.id, card.variant)),
-      })),
+      cards,
       isGodPack: opened.isGodPack,
       wallet: await loadWallet(transaction, userId),
     };

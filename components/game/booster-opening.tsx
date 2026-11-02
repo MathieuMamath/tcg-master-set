@@ -41,13 +41,13 @@ export type Opening = { setId: SetId; setName: string; logoUrl: string | null } 
 );
 
 // Golden writing across the top left corner, sized from the card, which ranges from small to full
-// screen.
+// screen. A card without it is a duplicate, whose coins the summary adds up.
 function NewMark() {
   const t = useTranslations('Booster');
 
   return (
     <span className="pointer-events-none absolute inset-0 [container-type:inline-size]">
-      <span className="ui-new-mark absolute top-[3.5cqw] left-[2.5cqw] -rotate-30 text-[11cqw] leading-none font-bold">
+      <span className="ui-new-mark absolute top-[14cqw] left-[3cqw] origin-left -rotate-45 text-[10cqw] leading-none font-bold">
         {t('new')}
       </span>
     </span>
@@ -409,6 +409,7 @@ function Summary({
 }) {
   const t = useTranslations('Booster');
   const [enlarged, setEnlarged] = useState<RevealedCard | null>(null);
+  const coinsEarned = cards.reduce((total, { coins }) => total + coins, 0);
 
   return (
     <div className="relative flex h-full flex-col items-center justify-center gap-4">
@@ -439,6 +440,15 @@ function Summary({
           </li>
         ))}
       </ul>
+      {coinsEarned > 0 && (
+        <p className="flex items-center gap-1.5 text-lg font-semibold text-ui-accent">
+          <span
+            aria-hidden="true"
+            className="size-4 rounded-full border-2 border-ui-ink bg-ui-accent"
+          />
+          {t('summaryCoins', { count: coinsEarned })}
+        </p>
+      )}
       <button
         type="button"
         inert={enlarged !== null}
