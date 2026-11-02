@@ -1,4 +1,5 @@
 import type { SetId } from './card-sets';
+import { cardTier } from './pull-tier';
 
 // Booster contents: ten cards in every set, with odds based on those players report for recent
 // real boosters. No official rates exist. Each recipe adapts them to the rarities of its set, and
@@ -80,7 +81,7 @@ const RECENT_RECIPE: BoosterRecipe = {
   ],
 };
 
-export const BOOSTER_RECIPES: Record<SetId, BoosterRecipe> = {
+export const BOOSTER_RECIPES = {
   me05: RECENT_RECIPE,
   me04: RECENT_RECIPE,
   me03: RECENT_RECIPE,
@@ -157,7 +158,111 @@ export const BOOSTER_RECIPES: Record<SetId, BoosterRecipe> = {
       'Futuristic Rare',
     ],
   },
-};
+} satisfies Partial<Record<SetId, BoosterRecipe>>;
+
+// Every rarity of every era, from the most common to the rarest.
+const RARITY_ORDER = [
+  'None',
+  'Common',
+  'Uncommon',
+  'Promo',
+  'Rare',
+  'Holo Rare',
+  'Pikachu Rare',
+  'Rare Holo',
+  'Classic Collection',
+  'Shiny rare',
+  'Double rare',
+  'Holo Rare V',
+  'Holo Rare VMAX',
+  'Holo Rare VSTAR',
+  'Rare PRIME',
+  'Rare Holo LV.X',
+  'LEGEND',
+  'Full Art Trainer',
+  'Radiant Rare',
+  'Amazing Rare',
+  'ACE SPEC Rare',
+  'Shiny rare V',
+  'Ultra Rare',
+  'Illustration rare',
+  'Shiny rare VMAX',
+  'Shiny Ultra Rare',
+  'Special illustration rare',
+  'Secret Rare',
+  ...CHASE_RARITIES,
+  'RGB Rare',
+  'Futuristic Rare',
+];
+
+const NO_RARITY = 'None';
+const COMMON_RARITIES = [NO_RARITY, 'Common'];
+const LOW_RARITIES = [...COMMON_RARITIES, 'Uncommon'];
+const USUAL_OUTCOME_WEIGHT = 95;
+const HIT_OUTCOME_WEIGHT = 5;
+const NEXT_RARITY_ODDS = 0.25;
+
+function rarityRank(rarity: string): number {
+  const rank = RARITY_ORDER.indexOf(rarity);
+  // A rarity this game doesn't know yet counts as a plain rare.
+  return rank === -1 ? RARITY_ORDER.indexOf('Rare') : rank;
+}
+
+// The rarer the rarity, the less often it comes, sharing out the given weight.
+function decreasingOutcomes(rarities: readonly string[], total: number): Outcome[] {
+  const shares = rarities.map((_, index) => NEXT_RARITY_ODDS ** index);
+  const sum = shares.reduce((first, second) => first + second, 0);
+  return rarities.map((rarity, index) => ({
+    source: [rarity],
+    weight: (shares[index] / sum) * total,
+  }));
+}
+
+// The recipe of a set without one of its own, from whatever rarities its era had: the same ten
+// slots as recent sets, where every rarity can come. Any card can also fill in, for the small sets
+// that run out of a rarity.
+export function genericRecipe(pool: readonly PoolCard[]): BoosterRecipe {
+  const rarities = [...new Set(pool.map(({ rarity }) => rarity ?? NO_RARITY))].sort(
+    (first, second) => rarityRank(first) - rarityRank(second),
+  );
+  const lows = rarities.filter((rarity) => LOW_RARITIES.includes(rarity));
+  const highs = rarities.filter((rarity) => !LOW_RARITIES.includes(rarity));
+  const commons = rarities.filter((rarity) => COMMON_RARITIES.includes(rarity));
+  const firstSource = commons.length > 0 ? commons : rarities.slice(0, 1);
+  const secondSource = rarities.includes('Uncommon') ? ['Uncommon'] : firstSource;
+  const hasReverses = pool.some(({ variants }) => variants.includes(REVERSE));
+  const filler: Outcome = { source: rarities, weight: 0 };
+
+  const usualSource = hasReverses ? REVERSE : secondSource;
+  const bestHalf = highs.slice(Math.floor(highs.length / 2));
+  const hitSlot: BoosterSlot = [
+    { source: usualSource, weight: USUAL_OUTCOME_WEIGHT },
+    ...decreasingOutcomes(bestHalf, HIT_OUTCOME_WEIGHT),
+    filler,
+  ];
+  const rareSlot: BoosterSlot =
+    highs.length > 0
+      ? [...decreasingOutcomes(highs, 1), filler]
+      : [{ source: secondSource, weight: 1 }, filler];
+  const hits = rarities.filter((rarity) => cardTier(rarity) > 0);
+
+  return {
+    slots: [
+      ...Array.from({ length: 4 }, () => [{ source: firstSource, weight: 1 }, filler]),
+      ...Array.from({ length: 3 }, () => [{ source: secondSource, weight: 1 }, filler]),
+      hitSlot,
+      hitSlot,
+      rareSlot,
+    ],
+    godPackRarities: hits.length > 0 ? hits : highs,
+    revealOrder: [...lows, REVERSE, ...highs],
+  };
+}
+
+export function boosterRecipe(setId: SetId, pool: readonly PoolCard[]): BoosterRecipe {
+  const recipes: Partial<Record<SetId, BoosterRecipe>> = BOOSTER_RECIPES;
+  return recipes[setId] ?? genericRecipe(pool);
+}
 
 export function boosterSize({ slots }: BoosterRecipe): number {
   return slots.length;
@@ -181,9 +286,7 @@ function pickOutcome(slot: BoosterSlot, random: Random): Outcome {
 }
 
 function matches({ rarity, variants }: PoolCard, { source }: Outcome): boolean {
-  return source === REVERSE
-    ? variants.includes(REVERSE)
-    : rarity !== null && source.includes(rarity);
+  return source === REVERSE ? variants.includes(REVERSE) : source.includes(rarity ?? NO_RARITY);
 }
 
 // Any version but the reverse, which only reverse outcomes give.
@@ -197,7 +300,7 @@ export function revealRank(
   rarity: string | null,
   variant: string,
 ): number {
-  const rank = rarity === null ? -1 : revealOrder.indexOf(rarity);
+  const rank = revealOrder.indexOf(rarity ?? NO_RARITY);
   return variant === REVERSE ? Math.max(rank, revealOrder.indexOf(REVERSE)) : rank;
 }
 
@@ -280,7 +383,7 @@ export function unreachableSlots(pool: readonly PoolCard[], recipe: BoosterRecip
           !outcomes.some(({ source }) =>
             variant === REVERSE
               ? source === REVERSE
-              : source !== REVERSE && card.rarity !== null && source.includes(card.rarity),
+              : source !== REVERSE && source.includes(card.rarity ?? NO_RARITY),
           ),
       )
       .map((variant) => `${card.id} (${variant})`),

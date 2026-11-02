@@ -41,10 +41,21 @@ export async function loadOpenedCards(
   locale: string,
 ): Promise<{ setName: string; logoUrl: string | null; cards: OpenedCard[] }> {
   const db = getDb();
-  const [set] = await db
-    .select({ name: cardSetTranslations.name, logoUrl: cardSetTranslations.logoUrl })
+  const setRows = await db
+    .select({
+      locale: cardSetTranslations.locale,
+      name: cardSetTranslations.name,
+      logoUrl: cardSetTranslations.logoUrl,
+    })
     .from(cardSetTranslations)
-    .where(and(eq(cardSetTranslations.setId, setId), eq(cardSetTranslations.locale, locale)));
+    .where(
+      and(
+        eq(cardSetTranslations.setId, setId),
+        inArray(cardSetTranslations.locale, [locale, 'en']),
+      ),
+    );
+  // Many older sets never came out in every language.
+  const set = setRows.find((row) => row.locale === locale) ?? setRows[0];
   const cardIds = drawn.map(({ cardId }) => cardId);
   const rarities = await db
     .select({ id: cards.id, rarity: cards.rarity })
@@ -71,7 +82,8 @@ export async function loadOpenedCards(
         name: translation?.name ?? cardId,
         rarity: translation?.rarity ?? null,
         variant,
-        imageUrl: translation?.imageUrl ?? null,
+        // Older cards often only have a scan in one of the languages.
+        imageUrl: translation?.imageUrl ?? forCard.find((row) => row.imageUrl)?.imageUrl ?? null,
         tier: cardTier(rarities.find(({ id }) => id === cardId)?.rarity ?? null),
       };
     }),

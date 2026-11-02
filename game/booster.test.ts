@@ -2,9 +2,11 @@ import { describe, expect, test } from 'vitest';
 import {
   BOOSTER_RECIPES,
   type BoosterRecipe,
+  boosterRecipe,
   boosterSize,
   drawBooster,
   drawGodPack,
+  genericRecipe,
   isTearComplete,
   openBooster,
   type PoolCard,
@@ -270,5 +272,69 @@ describe('tearing the pack', () => {
   test('completes before the very end of the pack', () => {
     expect(isTearComplete(0.5)).toBe(false);
     expect(isTearComplete(0.8)).toBe(true);
+  });
+});
+
+describe('genericRecipe', () => {
+  function cards(rarity: string | null, count: number, variants = ['normal']) {
+    return Array.from({ length: count }, (_, index) => ({
+      id: `${rarity}-${index}`,
+      rarity,
+      variants,
+    }));
+  }
+
+  const ERAS = {
+    'an old set': [...cards('Common', 40), ...cards('Uncommon', 30), ...cards('Rare', 15)],
+    'a set with holos and reverses': [
+      ...cards('Common', 40, ['normal', 'reverse']),
+      ...cards('Uncommon', 30, ['normal', 'reverse']),
+      ...cards('Rare', 15, ['holo', 'reverse']),
+      ...cards('Rare Holo', 10, ['holo']),
+      ...cards('Secret Rare', 3, ['holo']),
+    ],
+    'a set of promos': cards('Promo', 25, ['holo']),
+    'a set without rarities': cards(null, 12),
+    'a set with an unknown rarity': [...cards('Common', 12), ...cards('A future rarity', 2)],
+    'a tiny set': [...cards('Common', 4), ...cards('Uncommon', 3), ...cards('Rare', 3)],
+  };
+
+  test.each(Object.entries(ERAS))('fills a ten-card booster from %s', (_, pool) => {
+    const recipe = genericRecipe(pool);
+
+    for (let draw = 0; draw < 200; draw += 1) {
+      expect(drawBooster(pool, recipe)).toHaveLength(10);
+    }
+  });
+
+  test.each(Object.entries(ERAS))('leaves nothing unreachable in %s', (_, pool) => {
+    expect(unreachableSlots(pool, genericRecipe(pool))).toEqual([]);
+  });
+
+  test('reveals the best cards last', () => {
+    const pool = ERAS['a set with holos and reverses'];
+    const recipe = genericRecipe(pool);
+    const drawn = drawBooster(pool, recipe) ?? [];
+    const ranks = drawn.map(({ cardId, variant }) =>
+      revealRank(recipe, pool.find(({ id }) => id === cardId)?.rarity ?? null, variant),
+    );
+
+    expect(ranks).toEqual([...ranks].sort((first, second) => first - second));
+  });
+
+  test('fills a god pack with hits when the set has enough', () => {
+    const pool = ERAS['a set with holos and reverses'];
+
+    expect(drawGodPack(pool, genericRecipe(pool))).toHaveLength(10);
+  });
+
+  test('a set with its own recipe keeps it', () => {
+    expect(boosterRecipe('swsh3', [])).toBe(BOOSTER_RECIPES.swsh3);
+  });
+
+  test('a set without one gets a recipe from its rarities', () => {
+    const pool = ERAS['an old set'];
+
+    expect(boosterRecipe('base1', pool).revealOrder).toContain('Rare');
   });
 });

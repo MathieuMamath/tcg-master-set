@@ -12,6 +12,7 @@ function buy(set: string) {
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.mocked(buyBooster).mockReset();
   vi.mocked(getPlayer).mockResolvedValue({ id: 'player-1', username: 'Placeholder' });
 });
 
@@ -43,4 +44,11 @@ test('hides database errors from the player', async () => {
 
   expect(response.status).toBe(503);
   expect(await response.text()).not.toContain('secret-host');
+});
+
+test('refuses a set that has a binder but is not for sale', async () => {
+  const response = await buy('base1');
+
+  expect(response.status).toBe(400);
+  expect(buyBooster).not.toHaveBeenCalled();
 });

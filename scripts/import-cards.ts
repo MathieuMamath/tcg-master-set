@@ -2,6 +2,8 @@
 // while it runs. Images stay hosted by TCGdex. Running it again updates the same rows.
 //
 // Usage: pnpm cards:import <set id> [<set id>...]
+//        pnpm cards:import all        every set the game plays with
+//        pnpm cards:import missing    the ones that aren't in the database yet
 
 import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -19,12 +21,12 @@ import {
   parseSet,
 } from '../cards/tcgdex';
 import { cardSets, cardSetTranslations, cards, cardTranslations, cardVariants } from '../db/schema';
-import { BOOSTER_RECIPES, unreachableSlots } from '../game/booster';
-import { isPlayableSet } from '../game/card-sets';
+import { boosterRecipe, unreachableSlots } from '../game/booster';
+import { isPlayableSet, PLAYABLE_SET_IDS } from '../game/card-sets';
 
 const API_URL = 'https://api.tcgdex.net/v2';
 const CONCURRENT_REQUESTS = 5;
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 6;
 const RETRY_DELAY_MILLISECONDS = 1000;
 const REQUEST_TIMEOUT_MILLISECONDS = 30_000;
 
@@ -46,7 +48,7 @@ async function fetchJson(path: string): Promise<unknown | null> {
       return await response.json();
     } catch (error) {
       lastError = error;
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MILLISECONDS * attempt));
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MILLISECONDS * 2 ** attempt));
     }
   }
 
@@ -199,12 +201,48 @@ async function saveSet(
   });
 }
 
+async function importSet(db: ReturnType<typeof drizzle>, setId: string) {
+  const { english, translations } = await fetchSet(setId);
+  console.info(`Importing ${english.name} (${setId}): ${english.cardIds.length} cards...`);
+
+  const catalogue = await mapWithLimit(english.cardIds, CONCURRENT_REQUESTS, fetchCard);
+  if (catalogue.length === 0) {
+    throw new Error(`Set ${setId} has no cards`);
+  }
+
+  await saveSet(db, english, translations, catalogue);
+  console.info(JSON.stringify(catalogueSummary(catalogue), null, 2));
+
+  const unavailable = await unavailableImages(catalogue);
+  if (unavailable.length > 0) {
+    console.warn(`TCGdex has no image at: ${unavailable.join(', ')}`);
+  }
+
+  const unreachable = isPlayableSet(setId)
+    ? unreachableSlots(catalogue, boosterRecipe(setId, catalogue))
+    : [];
+  if (unreachable.length > 0) {
+    console.warn(`No booster of ${setId} can give: ${unreachable.join(', ')}`);
+  }
+}
+
+async function setsToImport(db: ReturnType<typeof drizzle>, requested: readonly string[]) {
+  if (requested.includes('all')) {
+    return [...PLAYABLE_SET_IDS];
+  }
+  if (requested.includes('missing')) {
+    const imported = await db.select({ id: cardSets.id }).from(cardSets);
+    return PLAYABLE_SET_IDS.filter((id) => !imported.some((set) => set.id === id));
+  }
+  return requested;
+}
+
 async function main() {
-  const setIds = process.argv.slice(2);
+  const requested = process.argv.slice(2);
   const connectionString = process.env.DATABASE_URL;
 
-  if (setIds.length === 0) {
-    throw new Error('Usage: pnpm cards:import <set id> [<set id>...]');
+  if (requested.length === 0) {
+    throw new Error('Usage: pnpm cards:import <set id> [<set id>...], or all, or missing');
   }
   if (!connectionString) {
     throw new Error('DATABASE_URL is not set. Copy .env.example to .env.local.');
@@ -212,34 +250,24 @@ async function main() {
 
   const pool = new Pool({ connectionString });
   const db = drizzle(pool);
+  const failed: string[] = [];
 
   try {
-    for (const setId of setIds) {
-      const { english, translations } = await fetchSet(setId);
-      console.info(`Importing ${english.name} (${setId}): ${english.cardIds.length} cards...`);
-
-      const catalogue = await mapWithLimit(english.cardIds, CONCURRENT_REQUESTS, fetchCard);
-      if (catalogue.length === 0) {
-        throw new Error(`Set ${setId} has no cards`);
-      }
-
-      await saveSet(db, english, translations, catalogue);
-      console.info(JSON.stringify(catalogueSummary(catalogue), null, 2));
-
-      const unavailable = await unavailableImages(catalogue);
-      if (unavailable.length > 0) {
-        console.warn(`TCGdex has no image at: ${unavailable.join(', ')}`);
-      }
-
-      const unreachable = isPlayableSet(setId)
-        ? unreachableSlots(catalogue, BOOSTER_RECIPES[setId])
-        : [];
-      if (unreachable.length > 0) {
-        console.warn(`No booster of ${setId} can give: ${unreachable.join(', ')}`);
+    // One set failing doesn't stop the others, since a long import can meet a passing API error.
+    for (const setId of await setsToImport(db, requested)) {
+      try {
+        await importSet(db, setId);
+      } catch (error) {
+        failed.push(setId);
+        console.error(`Set ${setId} failed:`, error instanceof Error ? error.message : error);
       }
     }
   } finally {
     await pool.end();
+  }
+
+  if (failed.length > 0) {
+    throw new Error(`These sets failed: ${failed.join(' ')}`);
   }
 }
 

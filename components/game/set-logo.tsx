@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { clearEdgeBackground } from '@/game/logo-background';
 
 async function loadLogo(logoUrl: string) {
@@ -29,17 +29,28 @@ export function SetLogo({ setName, logoUrl }: { setName: string; logoUrl: string
     status: logoUrl ? 'loading' : 'failed',
   });
 
+  const placeholder = useRef<HTMLSpanElement>(null);
+
+  // Only once it's on screen, because the list of binders has a logo for every set.
   useEffect(() => {
-    if (!logoUrl) {
+    if (!logoUrl || !placeholder.current) {
       return;
     }
     let isCurrent = true;
-    loadLogo(logoUrl).then(
-      (src) => isCurrent && setLogo({ src }),
-      () => isCurrent && setLogo({ status: 'failed' }),
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        observer.disconnect();
+        loadLogo(logoUrl).then(
+          (src) => isCurrent && setLogo({ src }),
+          () => isCurrent && setLogo({ status: 'failed' }),
+        );
+      }
+    });
+    observer.observe(placeholder.current);
+
     return () => {
       isCurrent = false;
+      observer.disconnect();
     };
   }, [logoUrl]);
 
@@ -57,5 +68,7 @@ export function SetLogo({ setName, logoUrl }: { setName: string; logoUrl: string
   }
   return logo.status === 'failed' ? (
     <span className="text-2xl font-semibold">{setName}</span>
-  ) : null;
+  ) : (
+    <span ref={placeholder} className="size-full" />
+  );
 }

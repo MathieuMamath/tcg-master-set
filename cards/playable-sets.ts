@@ -1,7 +1,7 @@
 import { and, count, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cardSets, cardSetTranslations, cards, cardVariants } from '@/db/schema';
-import { isPlayableSet, PLAYABLE_SET_IDS, type PlayableSet } from '@/game/card-sets';
+import { PLAYABLE_SET_IDS, type PlayableSet } from '@/game/card-sets';
 
 // Only the sets that have been imported, so that the game never offers an empty one.
 export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {
@@ -15,6 +15,7 @@ export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {
   const rows = await db
     .select({
       id: cardSetTranslations.setId,
+      locale: cardSetTranslations.locale,
       name: cardSetTranslations.name,
       logoUrl: cardSetTranslations.logoUrl,
       releaseDate: cardSets.releaseDate,
@@ -23,19 +24,22 @@ export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {
     .innerJoin(cardSets, eq(cardSets.id, cardSetTranslations.setId))
     .where(
       and(
-        eq(cardSetTranslations.locale, locale),
+        inArray(cardSetTranslations.locale, [locale, 'en']),
         inArray(cardSetTranslations.setId, [...PLAYABLE_SET_IDS]),
       ),
     );
 
   return PLAYABLE_SET_IDS.flatMap((id) => {
-    const row = rows.find((candidate) => candidate.id === id);
-    return row && isPlayableSet(row.id)
+    const forSet = rows.filter((candidate) => candidate.id === id);
+    // Many older sets never came out in every language, or have their logo in English only.
+    const translated = forSet.find((candidate) => candidate.locale === locale);
+    const row = translated ?? forSet[0];
+    return row
       ? [
           {
-            id: row.id,
+            id,
             name: row.name,
-            logoUrl: row.logoUrl,
+            logoUrl: translated?.logoUrl ?? forSet.find(({ logoUrl }) => logoUrl)?.logoUrl ?? null,
             releaseDate: row.releaseDate,
             slotTotal: slotTotals.find((total) => total.id === id)?.slotTotal ?? 0,
           },
