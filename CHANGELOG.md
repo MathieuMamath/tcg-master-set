@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.33](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.32...v0.1.33) (2026-11-02)
+
+### Features
+
+* **shop:** add a library that sells the binders boosters now require ([#33](https://github.com/MathieuMamath/tcg-master-set/issues/33)) ([497589d](https://github.com/MathieuMamath/tcg-master-set/commit/497589d45ca513388e1cce230744bed15af46546)), references [#32](https://github.com/MathieuMamath/tcg-master-set/issues/32)
+
 ## [0.1.32](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.31...v0.1.32) (2026-11-02)
 
 ### Features
