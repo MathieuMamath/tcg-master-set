@@ -31,15 +31,17 @@ import { BoosterOpening, type Opening } from './booster-opening';
 import { FishingDialog } from './fishing-dialog';
 import { Joystick } from './joystick';
 import { MemoryDialog } from './memory-dialog';
+import type { MovementInput } from './paper-scene';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
 import { SaveNotice, useSaveNotice } from './save-notice';
-import type { MovementInput } from './scene';
 import { SettingsMenu } from './settings-menu';
 import { ShopDialog } from './shop-dialog';
 
 // Three.js needs the browser, and this keeps it out of the bundle of every other screen.
-const Scene = dynamic(() => import('./scene').then((module) => module.Scene), { ssr: false });
+const PaperScene = dynamic(() => import('./paper-scene').then((module) => module.PaperScene), {
+  ssr: false,
+});
 
 const INTERACT_KEY = 'KeyE';
 const DASH_KEY = 'Space';
@@ -53,13 +55,13 @@ type Props = {
 export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL, wantsDash: false });
-  const [interaction, setInteraction] = useState<Interaction | null>(null);
+  // Nothing can be reached until the places come back in paper.
+  const [interaction] = useState<Interaction | null>(null);
   const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | QuestGiver | null>(
     null,
   );
   const [quest, setQuest] = useState<{ startedAt: number; stains: readonly Stain[] } | null>(null);
   const [questLine, setQuestLine] = useState<QuestLine>('greeting');
-  const isFinishingQuest = useRef(false);
   const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
   const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
   const [isFishing, setIsFishing] = useState(false);
@@ -83,7 +85,6 @@ export function Game({ player, sets, progress }: Props) {
   const tBooster = useTranslations('Booster');
   const tSettings = useTranslations('Settings');
   const tShopkeeper = useTranslations('Shopkeeper');
-  const tQuest = useTranslations('Quest');
   const isDialogOpen =
     isTalking ||
     isBinderOpen ||
@@ -282,47 +283,11 @@ export function Game({ player, sets, progress }: Props) {
       if (!hasStarted) {
         return 'alreadyDone';
       }
-      isFinishingQuest.current = false;
       setQuest({ startedAt: Date.now(), stains: pickStains() });
       setQuestLine('hurry');
       return null;
     } catch {
       return 'unavailable';
-    }
-  };
-
-  const finishQuest = async () => {
-    setQuest(null);
-    stopWalking();
-    try {
-      const response = await fetch('/api/quests/grandma/finish', { method: 'POST' });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const { isRewarded, wallet: updated } = await response.json();
-      setWallet(updated);
-      if (isRewarded) {
-        showSaveNotice();
-      }
-      setQuestLine(isRewarded ? 'rewarded' : 'failed');
-    } catch {
-      setQuestLine('unavailable');
-    }
-    setTalkingTo('grandma');
-  };
-
-  // Called from the 3D scene's frames, where the same stain can be reported more than once before
-  // the state updates. The last one must only finish the quest once.
-  const cleanStain = (id: number) => {
-    if (!quest || isFinishingQuest.current) {
-      return;
-    }
-    const left = quest.stains.filter((stain) => stain.id !== id);
-    if (left.length === 0) {
-      isFinishingQuest.current = true;
-      finishQuest();
-    } else {
-      setQuest({ ...quest, stains: left });
     }
   };
 
@@ -333,12 +298,6 @@ export function Game({ player, sets, progress }: Props) {
     input.current.keyboard = STILL;
     input.current.joystick = STILL;
     setTalkingTo('grandma');
-  }, []);
-
-  // Stepping out of the apartment gives up on the quest, since the stains stay inside.
-  const leavePlace = useCallback(() => {
-    setQuest(null);
-    setQuestLine('greeting');
   }, []);
 
   const startMemoryGame = async (): Promise<QuestLine | null> => {
@@ -453,28 +412,7 @@ export function Game({ player, sets, progress }: Props) {
 
   return (
     <div className="absolute inset-0">
-      <Scene
-        input={input}
-        webglUnavailable={t('webglUnavailable')}
-        onSave={showSaveNotice}
-        stains={quest?.stains ?? []}
-        onStainCleaned={cleanStain}
-        onPlaceLeft={leavePlace}
-        playerId={player.id}
-        savedSpot={progress.spot}
-        onInteractionChange={setInteraction}
-        isTalking={isTalking}
-        shopSigns={{
-          latest: tShopkeeper('names.latest'),
-          thisYear: tShopkeeper('names.thisYear'),
-          older: tShopkeeper('names.older'),
-          library: tShopkeeper('names.binderSeller'),
-          grandma: tQuest('grandma.name'),
-          park: tShopkeeper('names.park'),
-          arcade: tShopkeeper('names.arcade'),
-          basketball: tShopkeeper('names.basketball'),
-        }}
-      />
+      <PaperScene input={input} webglUnavailable={t('webglUnavailable')} />
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
@@ -500,7 +438,7 @@ export function Game({ player, sets, progress }: Props) {
           <button
             type="button"
             onClick={openBinder}
-            className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 text-lg leading-tight"
+            className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
           >
             <span
               aria-hidden="true"

@@ -52,7 +52,7 @@ The schema lives in `db/schema`, and every change goes through a migration in `d
 
 `player_cards` deliberately has no foreign key to `cards`, because `pnpm cards:import` replaces a set's card rows.
 
-`player_spots` keeps where the character stands, saved from the browser and checked by `parseSpot` in `game/places.ts`. A spot gives no advantage, so it isn't checked for how the player got there. A spot that a map change has made invalid is ignored, and the player starts in the bedroom. It is saved on a change of place and when leaving the page. Because a reload can read the database before that last save arrives, `components/game/scene.tsx` also leaves the spot in `sessionStorage` for the next load, which uses it once.
+`player_spots` keeps where the character stands, saved from the browser and checked by `parseSpot` in `game/places.ts`. A spot gives no advantage, so it isn't checked for how the player got there. A spot that a map change has made invalid is ignored, and the player starts in the bedroom. Nothing saves it for now: the places are being rebuilt in paper, and saving comes back with them.
 
 ## Cards
 
@@ -90,13 +90,15 @@ Text lives in `messages/en.json` and `messages/fr.json`, which must define the s
 
 ## Game code
 
-Game rules live in `game/` as plain tested functions, without React or Three.js. `components/game/` displays them, and the 3D scene loads only in the browser.
+Game rules live in `game/` as plain tested functions, without React or Three.js. `components/game/` displays them, and the scene loads only in the browser.
+
+The world is made of paper cut-outs, seen from the side like a diorama: characters only walk left and right. The drawings are made by code on canvases in `components/game/paper-art.ts`, so the repository holds no images. The player is Pip, a fox. The old 3D town is disconnected while its places come back one by one in paper, so `components/game/paper-scene.tsx` only holds an empty stage for now, and the quests, shops and library can't be reached.
 
 Desktop comes first: comfort, polish and effects are designed for it. Phones must still work, with every screen usable and the game playable, but they don't need to match it, and a choice between the two goes to desktop.
 
 The game must stay playable with the keyboard alone. Every screen puts the focus on something that can be pressed, and menus follow the movement keys through `components/game/menu-focus.ts`. Don't use `disabled` on a button that can have the focus, because the browser takes the focus away and no key reaches the dialog any more. Use `aria-disabled` instead.
 
-3D models live in `public/models/`, with their license next to them. Only commit the files the game uses.
+3D models live in `public/models/`, with their license next to them. Only commit the files the game uses. The Kenney models of the old 3D town go with the place that used them, once it is rebuilt in paper.
 
 ## Next.js
 
