@@ -54,7 +54,12 @@ type Props = {
 
 export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
-  const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL, wantsDash: false });
+  const input = useRef<MovementInput>({
+    keyboard: STILL,
+    joystick: STILL,
+    wantsDash: false,
+    wantsDoor: false,
+  });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
   const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | QuestGiver | null>(
     null,
@@ -84,6 +89,7 @@ export function Game({ player, sets, progress }: Props) {
   const tBooster = useTranslations('Booster');
   const tSettings = useTranslations('Settings');
   const tShopkeeper = useTranslations('Shopkeeper');
+  const tTown = useTranslations('Town');
   const isDialogOpen =
     isTalking ||
     isBinderOpen ||
@@ -131,6 +137,11 @@ export function Game({ player, sets, progress }: Props) {
         releaseKeys();
         if (controls.current.interaction === 'binder') {
           setIsBinderOpen(true);
+        } else if (
+          controls.current.interaction === 'leaveHome' ||
+          controls.current.interaction === 'goHome'
+        ) {
+          input.current.wantsDoor = true;
         } else if (controls.current.interaction === 'basketball') {
           setIsPlayingBasketball(true);
         } else {
@@ -177,6 +188,8 @@ export function Game({ player, sets, progress }: Props) {
     stopWalking();
     if (interaction === 'binder') {
       setIsBinderOpen(true);
+    } else if (interaction === 'leaveHome' || interaction === 'goHome') {
+      input.current.wantsDoor = true;
     } else if (interaction === 'basketball') {
       setIsPlayingBasketball(true);
     } else if (interaction) {
@@ -414,6 +427,7 @@ export function Game({ player, sets, progress }: Props) {
       <PaperScene
         input={input}
         webglUnavailable={t('webglUnavailable')}
+        townSigns={{ shop: tTown('shop'), closed: tTown('closed') }}
         onInteractionChange={setInteraction}
       />
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">

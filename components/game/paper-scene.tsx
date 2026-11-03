@@ -1,7 +1,7 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { type RefObject, useMemo, useRef } from 'react';
+import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CanvasTexture,
   DoubleSide,
@@ -17,10 +17,16 @@ import {
   BEDROOM,
   BEDROOM_FURNITURE,
   BEDROOM_WALLS,
+  exitAlong,
   interactionAlong,
+  SIDE_PLACES,
+  type SideExit,
+  type SidePlaceId,
   type SideRoom,
+  TOWN_BUILDINGS,
+  TOWN_ENDS,
 } from '@/game/side-rooms';
-import { sidePush, stepWalker, WALKING_SPEED, type Walker } from '@/game/side-walk';
+import { type Facing, sidePush, stepWalker, WALKING_SPEED, type Walker } from '@/game/side-walk';
 import { skyLook } from '@/game/sky';
 import type { Interaction } from '@/game/world';
 import {
@@ -29,13 +35,19 @@ import {
   drawBigPlant,
   drawBookcase,
   drawChair,
+  drawCloud,
   drawCorrugatedEdge,
   drawDesk,
   drawDoor,
+  drawHills,
+  drawHouse,
   drawPip,
   drawPlanks,
   drawShadowBlob,
+  drawShop,
   drawSky,
+  drawSkyGradient,
+  drawStreet,
   drawUprightCorrugatedEdge,
   drawWallpaper,
   drawWindowFrame,
@@ -48,7 +60,11 @@ export type MovementInput = {
   joystick: Direction;
   // Set by whoever asks for a dash, and used up by the character.
   wantsDash: boolean;
+  // Set by whoever asks to go through the door the character stands at, and used up the same way.
+  wantsDoor: boolean;
 };
+
+export type TownSigns = { shop: string; closed: string };
 
 const PIP_Z = 1.25;
 const PIP_HEIGHT = 1.75;
@@ -81,12 +97,12 @@ function easeBack(progress: number): number {
 }
 
 // A flat cut-out standing on the ground. Its only shadow is the one on the ground below it.
-function CutOut({ map, height }: { map: Texture; height: number }) {
+function CutOut({ map, height, width }: { map: Texture; height: number; width?: number }) {
   const image = map.image as HTMLCanvasElement;
-  const width = (height * image.width) / image.height;
+  const shownWidth = width ?? (height * image.width) / image.height;
   return (
     <mesh position={[0, height / 2, 0]}>
-      <planeGeometry args={[width, height]} />
+      <planeGeometry args={[shownWidth, height]} />
       <meshBasicMaterial map={map} alphaTest={0.5} side={DoubleSide} />
     </mesh>
   );
@@ -271,14 +287,136 @@ function Bedroom() {
   );
 }
 
+const STREET_FRONT_Z = 3;
+const CLOUD_SPAN = 50;
+const CLOUD_SPEED = 25;
+const CLOUDS = [
+  { x: -14, y: 5.8, size: 1.3 },
+  { x: -6, y: 6.6, size: 1.6 },
+  { x: 2, y: 5.6, size: 1.2 },
+  { x: 9, y: 6.9, size: 1.5 },
+  { x: 17, y: 6, size: 1.3 },
+  { x: 23, y: 6.8, size: 1.1 },
+];
+const BUILDINGS_Z = -1.4;
+const HILL_ROWS = [
+  { z: -7, color: '#9cc6a6', hatch: '#6e9e7a', bumps: 7, height: 3.6, seed: 1 },
+  { z: -5.5, color: '#78ae6c', hatch: '#4e8448', bumps: 8, height: 2.8, seed: 2 },
+  { z: -4, color: '#579552', hatch: '#3b7238', bumps: 9, height: 1.8, seed: 3 },
+];
+
+// The street: a wide sky, rows of hills, our house and the shop, which hasn't opened yet.
+function Town({ signs }: { signs: TownSigns }) {
+  const look = skyLook('day', 'fewClouds');
+  const fontsReady = useFontsReady();
+  const textures = useMemo(
+    () => ({
+      street: texture(drawStreet()),
+      edge: texture(drawCorrugatedEdge()),
+      shadow: texture(drawShadowBlob()),
+      house: texture(cutOut(420, 380, drawHouse, 9, 61)),
+      hills: HILL_ROWS.map(({ color, hatch, bumps, seed, height }) =>
+        texture(
+          cutOut(1600, Math.round(height * 100), drawHills(color, hatch, bumps, seed), 8, seed),
+        ),
+      ),
+    }),
+    [],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const shop = useMemo(
+    () => texture(cutOut(480, 380, drawShop(signs.shop, signs.closed), 9, 62)),
+    [fontsReady, signs.shop, signs.closed],
+  );
+  const sky = useMemo(() => texture(drawSkyGradient(look)), [look]);
+  const cloud = useMemo(() => texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)), [look]);
+  const clouds = useRef<(Group | null)[]>([]);
+
+  // The clouds drift along, and come back round from the other side.
+  useFrame((_, delta) => {
+    for (const group of clouds.current) {
+      if (group) {
+        group.position.x += delta * look.drift * CLOUD_SPEED;
+        if (group.position.x > CLOUD_SPAN / 2) {
+          group.position.x -= CLOUD_SPAN;
+        }
+      }
+    }
+  });
+
+  const { house, shop: shopPlace } = TOWN_BUILDINGS;
+  const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
+  return (
+    <>
+      <mesh position={[0, 7, -10]}>
+        <planeGeometry args={[80, 26]} />
+        <meshBasicMaterial map={sky} />
+      </mesh>
+      {CLOUDS.slice(0, look.cloudCount + 2).map(({ x, y, size }, index) => (
+        <group
+          key={x}
+          ref={(group) => {
+            clouds.current[index] = group;
+          }}
+          position={[x, y, -8]}
+        >
+          <CutOut map={cloud} height={size} />
+        </group>
+      ))}
+      {HILL_ROWS.map(({ z, height }, index) => (
+        <group key={z} position={[0, -0.15, z]}>
+          <CutOut map={textures.hills[index]} height={(height * 100 + 24) / 100} width={40} />
+        </group>
+      ))}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -1]}>
+        <planeGeometry args={[streetWidth, 8]} />
+        <meshBasicMaterial map={textures.street} />
+      </mesh>
+      <mesh position={[0, -0.18, STREET_FRONT_Z]}>
+        <boxGeometry args={[streetWidth, 0.36, 0.14]} />
+        <meshBasicMaterial map={textures.edge} />
+      </mesh>
+      <Furniture
+        map={textures.house}
+        x={house.x}
+        z={BUILDINGS_Z}
+        height={4.06}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={shop}
+        x={shopPlace.x}
+        z={BUILDINGS_Z}
+        height={4.06}
+        shadow={textures.shadow}
+      />
+    </>
+  );
+}
+
+// The drawings with text wait for the game's fonts, or they would be drawn in a fallback font.
+function useFontsReady(): boolean {
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => {
+    Promise.all(
+      ['48px "Bagel Fat One"', '20px "Patrick Hand"'].map((font) => document.fonts.load(font)),
+    ).then(() => setIsReady(true));
+  }, []);
+  return isReady;
+}
+
 function Pip({
   input,
   room,
+  arrival,
   onInteractionChange,
+  onExit,
 }: {
   input: RefObject<MovementInput>;
   room: SideRoom;
+  arrival: { x: number; facing: Facing };
   onInteractionChange: (interaction: Interaction | null) => void;
+  onExit: (exit: SideExit) => void;
 }) {
   const pip = useMemo(() => texture(cutOut(240, 300, drawPip, 10, 21)), []);
   const blob = useMemo(() => texture(drawShadowBlob()), []);
@@ -286,10 +424,15 @@ function Pip({
   const flipper = useRef<Group>(null);
   const bouncer = useRef<Group>(null);
   const shadow = useRef<Mesh>(null);
-  const walker = useRef<Walker>({ x: room.start, velocity: 0, facing: 1 });
+  const walker = useRef<Walker>({ x: arrival.x, velocity: 0, facing: arrival.facing });
   const interaction = useRef<Interaction | null>(null);
+  const hasPlacedCamera = useRef(false);
   const dash = useRef<DashState>(NO_DASH);
-  const turn = useRef({ from: 0, to: 0, elapsed: TURN_SECONDS });
+  const turn = useRef({
+    from: arrival.facing > 0 ? 0 : Math.PI,
+    to: arrival.facing > 0 ? 0 : Math.PI,
+    elapsed: TURN_SECONDS,
+  });
   const walk = useRef({ phase: 0, time: 0, sinceBall: 0 });
   const balls = useRef(createPaperBalls());
   const { camera, size } = useThree();
@@ -311,6 +454,11 @@ function Pip({
     if (reached !== interaction.current) {
       interaction.current = reached;
       onInteractionChange(reached);
+    }
+    const exit = input.current.wantsDoor ? exitAlong(room, x) : null;
+    input.current.wantsDoor = false;
+    if (exit) {
+      onExit(exit);
     }
 
     // Turning round flips the cut-out like a card.
@@ -366,8 +514,11 @@ function Pip({
     const halfAngle = Math.tan(((FIELD_OF_VIEW / 2) * Math.PI) / 180);
     const viewWidth = aspect < 1 ? VIEW_WIDTH_TALL : VIEW_WIDTH_WIDE;
     const distance = Math.max(MIN_CAMERA_DISTANCE, viewWidth / 2 / (halfAngle * aspect));
-    const cameraX =
-      camera.position.x + (x * CAMERA_FOLLOW - camera.position.x) * Math.min(1, delta * 3);
+    // On arriving somewhere, the camera starts where it belongs rather than sliding there.
+    const cameraX = hasPlacedCamera.current
+      ? camera.position.x + (x * CAMERA_FOLLOW - camera.position.x) * Math.min(1, delta * 3)
+      : x * CAMERA_FOLLOW;
+    hasPlacedCamera.current = true;
     camera.position.set(cameraX, LOOK_HEIGHT + distance * 0.1, distance);
     camera.lookAt(cameraX, LOOK_HEIGHT, 0);
   });
@@ -393,23 +544,71 @@ function Pip({
 type Props = {
   input: RefObject<MovementInput>;
   webglUnavailable: string;
+  townSigns: TownSigns;
   onInteractionChange: (interaction: Interaction | null) => void;
 };
 
-// The paper world, seen from the side. Only the bedroom is back so far.
-export function PaperScene({ input, webglUnavailable, onInteractionChange }: Props) {
+// Matches the duration-300 class on the overlay.
+const FADE_MILLISECONDS = 300;
+
+// The paper world, seen from the side. Every visit starts afresh, so that the character arrives
+// at the door it came through.
+export function PaperScene({ input, webglUnavailable, townSigns, onInteractionChange }: Props) {
+  const [visit, setVisit] = useState<{
+    number: number;
+    place: SidePlaceId;
+    arrival: { x: number; facing: Facing };
+  }>({ number: 0, place: 'bedroom', arrival: { x: BEDROOM.start, facing: 1 } });
+  const [isFading, setIsFading] = useState(false);
+  const fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(fadeTimer.current), []);
+
+  const goThrough = (exit: SideExit) => {
+    if (isFading) {
+      return;
+    }
+    setIsFading(true);
+    onInteractionChange(null);
+    fadeTimer.current = setTimeout(() => {
+      setVisit(({ number }) => ({ number: number + 1, place: exit.to, arrival: exit.arrival }));
+      setIsFading(false);
+    }, FADE_MILLISECONDS);
+  };
+
   return (
-    <Canvas
-      camera={{ fov: FIELD_OF_VIEW, near: 0.1, far: 200, position: [0, 3.7, MIN_CAMERA_DISTANCE] }}
-      dpr={[1, 2]}
-      // The drawings keep their own colours, without the tone mapping meant for lit 3D scenes.
-      flat
-      fallback={<p className="p-4 text-center">{webglUnavailable}</p>}
-    >
-      <ambientLight intensity={1.6} color="#fff4e4" />
-      <directionalLight position={[-4, 8, 10]} intensity={1.2} />
-      <Bedroom />
-      <Pip input={input} room={BEDROOM} onInteractionChange={onInteractionChange} />
-    </Canvas>
+    <>
+      <Canvas
+        camera={{
+          fov: FIELD_OF_VIEW,
+          near: 0.1,
+          far: 200,
+          position: [0, 3.7, MIN_CAMERA_DISTANCE],
+        }}
+        dpr={[1, 2]}
+        // The drawings keep their own colours, without the tone mapping meant for lit 3D scenes.
+        flat
+        fallback={<p className="p-4 text-center">{webglUnavailable}</p>}
+      >
+        <ambientLight intensity={1.6} color="#fff4e4" />
+        <directionalLight position={[-4, 8, 10]} intensity={1.2} />
+        <group key={visit.number}>
+          {visit.place === 'bedroom' ? <Bedroom /> : <Town signs={townSigns} />}
+          <Pip
+            input={input}
+            room={SIDE_PLACES[visit.place]}
+            arrival={visit.arrival}
+            onInteractionChange={onInteractionChange}
+            onExit={goThrough}
+          />
+        </group>
+      </Canvas>
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 bg-ui-ink transition-opacity duration-300 ${
+          isFading ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </>
   );
 }

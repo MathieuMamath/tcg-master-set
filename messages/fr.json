@@ -23,7 +23,9 @@
     "grandma": "Parler (mamie)",
     "grandpa": "Parler (papy)",
     "boy": "Parler (petit garçon)",
-    "basketball": "Jouer (basket)"
+    "basketball": "Jouer (basket)",
+    "leaveHome": "Sortir",
+    "goHome": "Rentrer à la maison"
   },
   "Shopkeeper": {
     "names": {
@@ -226,5 +228,9 @@
     "swish": "Parfait ! +3",
     "basket": "Panier ! +2",
     "miss": "Raté !"
+  },
+  "Town": {
+    "shop": "Boutique",
+    "closed": "Bientôt ouvert"
   }
 }
