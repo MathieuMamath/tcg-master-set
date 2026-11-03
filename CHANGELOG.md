@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.45](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.44...v0.1.45) (2026-11-03)
+
+### Features
+
+* **shop:** open the shop in paper, run by raccoon triplets ([#45](https://github.com/MathieuMamath/tcg-master-set/issues/45)) ([aa929b6](https://github.com/MathieuMamath/tcg-master-set/commit/aa929b67d55d2c34ccebd0f9e2bd5db408e4c2f6))
+
 ## [0.1.44](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.43...v0.1.44) (2026-11-03)
 
 ### Features
