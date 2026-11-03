@@ -194,7 +194,14 @@ export function npcInReach(place: Place, position: Position): Npc | undefined {
   return place.npcs.find(({ talkArea }) => isInside(position, talkArea));
 }
 
-export type Interaction = ShopkeeperStock | 'binderSeller' | QuestGiver | 'binder' | 'basketball';
+export type Interaction =
+  | ShopkeeperStock
+  | 'binderSeller'
+  | QuestGiver
+  | 'binder'
+  | 'basketball'
+  | 'leaveHome'
+  | 'goHome';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);
