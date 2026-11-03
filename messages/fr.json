@@ -25,7 +25,9 @@
     "boy": "Parler (petit garçon)",
     "basketball": "Jouer (basket)",
     "leaveHome": "Sortir",
-    "goHome": "Rentrer à la maison"
+    "goHome": "Rentrer à la maison",
+    "enterShop": "Entrer dans la boutique",
+    "leaveShop": "Sortir"
   },
   "Shopkeeper": {
     "names": {
@@ -52,7 +54,17 @@
     "alreadyOwned": "Tu as déjà ce classeur.",
     "buyBinder": "Acheter le classeur {set} ({price} pièces)",
     "binderOwned": "{set} : classeur déjà acheté",
-    "buyNeedsBinder": "{set} : classeur requis"
+    "buyNeedsBinder": "{set} : classeur requis",
+    "sellers": {
+      "latest": "Filou",
+      "thisYear": "Frimousse",
+      "older": "Fripouille"
+    },
+    "titles": {
+      "latest": "l’aînée des triplées",
+      "thisYear": "la cadette des triplées",
+      "older": "la benjamine des triplées"
+    }
   },
   "Booster": {
     "title": "Ouvrir un booster",
@@ -230,7 +242,15 @@
     "miss": "Raté !"
   },
   "Town": {
-    "shop": "Boutique",
-    "closed": "Bientôt ouvert"
+    "shop": "La Tanière aux Cartes"
+  },
+  "Hails": {
+    "latest": "Bienvenue à la Tanière !",
+    "thisYear": "Bonjour, bonjour !",
+    "older": "Psst… viens voir !",
+    "binderSeller": "Bonjour, petit lecteur !",
+    "grandma": "Coucou, mon petit !",
+    "grandpa": "Une petite partie ?",
+    "boy": "Hé ! Par ici !"
   }
 }

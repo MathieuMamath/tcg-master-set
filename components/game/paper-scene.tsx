@@ -10,6 +10,7 @@ import {
   RepeatWrapping,
   SRGBColorSpace,
   type Texture,
+  Vector3,
 } from 'three';
 import { type DashState, NO_DASH, tickDash } from '@/game/dash';
 import { type Direction, STILL } from '@/game/movement';
@@ -19,10 +20,13 @@ import {
   BEDROOM_WALLS,
   exitAlong,
   interactionAlong,
+  SHOP_COUNTERS,
+  SHOP_WALLS,
   SIDE_PLACES,
   type SideExit,
   type SidePlaceId,
   type SideRoom,
+  speakerAlong,
   TOWN_BUILDINGS,
   TOWN_ENDS,
 } from '@/game/side-rooms';
@@ -34,17 +38,21 @@ import {
   drawBed,
   drawBigPlant,
   drawBookcase,
+  drawBoosterShelves,
   drawChair,
   drawCloud,
   drawCorrugatedEdge,
+  drawCounter,
   drawDesk,
   drawDoor,
   drawHills,
   drawHouse,
   drawPip,
   drawPlanks,
+  drawRaccoon,
   drawShadowBlob,
   drawShop,
+  drawSign,
   drawSky,
   drawSkyGradient,
   drawStreet,
@@ -52,6 +60,9 @@ import {
   drawWallpaper,
   drawWindowFrame,
   paint,
+  RACCOON_SIZE,
+  SELLERS,
+  solidTop,
 } from './paper-art';
 import { createPaperBalls, emitPaperBall, PaperBalls } from './paper-balls';
 
@@ -64,7 +75,8 @@ export type MovementInput = {
   wantsDoor: boolean;
 };
 
-export type TownSigns = { shop: string; closed: string };
+// The words painted in the scene, in the player's language.
+export type SceneSigns = { shop: string; latest: string; thisYear: string; older: string };
 
 const PIP_Z = 1.25;
 const PIP_HEIGHT = 1.75;
@@ -79,6 +91,12 @@ const MIN_CAMERA_DISTANCE = 17;
 const MAX_FRAME_SECONDS = 0.05;
 
 const TURN_SECONDS = 0.34;
+// The speech bubble floats this far above the top of a character's head.
+const BUBBLE_GAP = 0.12;
+
+// The top of each character the player can talk to here, measured from its drawing, so that the
+// speech bubble sits just above it whatever its size.
+type SpeakerTops = Partial<Record<Interaction, { y: number; z: number }>>;
 const WALK_BOUNCE = 0.14;
 const BALL_INTERVAL_SECONDS = 0.05;
 const FIRST_BALLS = 3;
@@ -113,8 +131,6 @@ const WALL_HEIGHT = 4.2;
 const FRONT_Z = 2.6;
 const ROOM_DEPTH = FRONT_Z - WALL_Z;
 const WALL_THICKNESS = 0.16;
-const ROOM_WIDTH = BEDROOM_WALLS.right - BEDROOM_WALLS.left;
-const ROOM_CENTER_X = (BEDROOM_WALLS.left + BEDROOM_WALLS.right) / 2;
 // Paper drawn at this many pixels for one unit of the world, to keep every drawing to scale.
 const PIXELS_PER_UNIT = 100;
 
@@ -204,31 +220,33 @@ function Furniture({
   );
 }
 
-// The bedroom, as a box of card open towards the camera: wallpaper behind, planks below.
-function Bedroom() {
-  const textures = useMemo(
+type RoomTextures = { wall: Texture; floor: Texture; door: Texture };
+
+// A room as a box of card open towards the camera: wallpaper behind, a floor below, side walls of
+// thick cardboard, and the door painted flat on one of them.
+function RoomShell({
+  walls,
+  doorSide,
+  textures,
+}: {
+  walls: { left: number; right: number };
+  doorSide: 'left' | 'right';
+  textures: RoomTextures;
+}) {
+  const edges = useMemo(
     () => ({
-      wall: texture(drawWallpaper()),
-      floor: texture(drawPlanks()),
-      edge: texture(drawCorrugatedEdge()),
+      front: texture(drawCorrugatedEdge()),
       upright: texture(drawUprightCorrugatedEdge(112)),
-      shadow: texture(drawShadowBlob()),
-      bed: texture(cutOut(320, 140, drawBed, 9, 41)),
-      bookcase: texture(cutOut(170, 230, drawBookcase, 9, 42)),
-      plant: texture(cutOut(240, 330, drawBigPlant, 9, 45)),
-      door: texture(
-        paint(Math.round(DOOR_WIDTH * 100), Math.round(DOOR_HEIGHT * 100), drawDoor, 46),
-      ),
-      desk: texture(cutOut(230, 128, drawDesk, 9, 43)),
-      chair: texture(cutOut(95, 150, drawChair, 8, 44)),
     }),
     [],
   );
-  const { bed, desk, chair, bookcase, plant } = BEDROOM_FURNITURE;
+  const width = walls.right - walls.left;
+  const centerX = (walls.left + walls.right) / 2;
+  const doorSign = doorSide === 'right' ? 1 : -1;
   return (
     <>
-      <mesh position={[ROOM_CENTER_X, WALL_HEIGHT / 2, WALL_Z]}>
-        <planeGeometry args={[ROOM_WIDTH, WALL_HEIGHT]} />
+      <mesh position={[centerX, WALL_HEIGHT / 2, WALL_Z]}>
+        <planeGeometry args={[width, WALL_HEIGHT]} />
         <meshBasicMaterial map={textures.wall} />
       </mesh>
       {[-1, 1].map((side) => (
@@ -236,7 +254,7 @@ function Bedroom() {
         <mesh
           key={side}
           position={[
-            (side > 0 ? BEDROOM_WALLS.right : BEDROOM_WALLS.left) + (side * WALL_THICKNESS) / 2,
+            (side > 0 ? walls.right : walls.left) + (side * WALL_THICKNESS) / 2,
             WALL_HEIGHT / 2,
             WALL_Z + ROOM_DEPTH / 2,
           ]}
@@ -249,29 +267,66 @@ function Bedroom() {
               {...(face === (side > 0 ? 1 : 0)
                 ? { map: textures.wall, color: '#d8c7ab' }
                 : face === 4
-                  ? { map: textures.upright }
+                  ? { map: edges.upright }
                   : { color: '#b88b55' })}
             />
           ))}
         </mesh>
       ))}
-      <BedroomWindow />
-      {/* The way out, on the right wall. It stays shut until the places outside are rebuilt. */}
       <mesh
-        position={[BEDROOM_WALLS.right - 0.01, DOOR_HEIGHT / 2, DOOR_Z]}
-        rotation={[0, -Math.PI / 2, 0]}
+        position={[
+          (doorSide === 'right' ? walls.right : walls.left) - doorSign * 0.01,
+          DOOR_HEIGHT / 2,
+          DOOR_Z,
+        ]}
+        rotation={[0, -doorSign * (Math.PI / 2), 0]}
       >
         <planeGeometry args={[DOOR_WIDTH, DOOR_HEIGHT]} />
         <meshBasicMaterial map={textures.door} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[ROOM_CENTER_X, 0, WALL_Z + ROOM_DEPTH / 2]}>
-        <planeGeometry args={[ROOM_WIDTH, ROOM_DEPTH]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[centerX, 0, WALL_Z + ROOM_DEPTH / 2]}>
+        <planeGeometry args={[width, ROOM_DEPTH]} />
         <meshBasicMaterial map={textures.floor} />
       </mesh>
-      <mesh position={[ROOM_CENTER_X, -0.18, FRONT_Z]}>
-        <boxGeometry args={[ROOM_WIDTH + 0.3, 0.36, 0.14]} />
-        <meshBasicMaterial map={textures.edge} />
+      <mesh position={[centerX, -0.18, FRONT_Z]}>
+        <boxGeometry args={[width + 0.3, 0.36, 0.14]} />
+        <meshBasicMaterial map={edges.front} />
       </mesh>
+    </>
+  );
+}
+
+function doorTexture(seed: number): Texture {
+  return texture(
+    paint(
+      Math.round(DOOR_WIDTH * PIXELS_PER_UNIT),
+      Math.round(DOOR_HEIGHT * PIXELS_PER_UNIT),
+      drawDoor,
+      seed,
+    ),
+  );
+}
+
+// The bedroom: the bed against the left wall, the desk under the window, the bookcase and a plant,
+// and the door out in the right wall.
+function Bedroom() {
+  const textures = useMemo(
+    () => ({
+      room: { wall: texture(drawWallpaper()), floor: texture(drawPlanks()), door: doorTexture(46) },
+      shadow: texture(drawShadowBlob()),
+      bed: texture(cutOut(320, 140, drawBed, 9, 41)),
+      bookcase: texture(cutOut(170, 230, drawBookcase, 9, 42)),
+      plant: texture(cutOut(240, 330, drawBigPlant, 9, 45)),
+      desk: texture(cutOut(230, 128, drawDesk, 9, 43)),
+      chair: texture(cutOut(95, 150, drawChair, 8, 44)),
+    }),
+    [],
+  );
+  const { bed, desk, chair, bookcase, plant } = BEDROOM_FURNITURE;
+  return (
+    <>
+      <RoomShell walls={BEDROOM_WALLS} doorSide="right" textures={textures.room} />
+      <BedroomWindow />
       <Furniture
         map={textures.bookcase}
         x={bookcase.x}
@@ -283,6 +338,104 @@ function Bedroom() {
       <Furniture map={textures.bed} x={bed.x} z={-0.7} height={1.5} shadow={textures.shadow} />
       <Furniture map={textures.desk} x={desk.x} z={-1.15} height={1.42} shadow={textures.shadow} />
       <Furniture map={textures.chair} x={chair.x} z={-0.45} height={1.4} shadow={textures.shadow} />
+    </>
+  );
+}
+
+const SELLER_HEIGHT = 2.8;
+const SELLER_Z = -1;
+
+// Records where the top of each character's drawing is, for its speech bubble.
+function SpeakerTopsOf({
+  speakerTops,
+  speakers,
+}: {
+  speakerTops: RefObject<SpeakerTops>;
+  speakers: { interaction: Interaction; map: Texture; height: number; z: number }[];
+}) {
+  useEffect(() => {
+    for (const { interaction, map, height, z } of speakers) {
+      speakerTops.current[interaction] = {
+        y: height * (1 - solidTop(map.image as HTMLCanvasElement)),
+        z,
+      };
+    }
+  }, [speakerTops, speakers]);
+  return null;
+}
+
+// The Card Den: shelves of boosters along the back, and a counter for each raccoon, with the
+// theme she sells on a sign above her.
+function Shop({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
+  const fontsReady = useFontsReady();
+  const textures = useMemo(
+    () => ({
+      room: {
+        wall: texture(drawWallpaper('#d9ece3', 'rgb(90 150 125 / 18%)')),
+        floor: texture(drawPlanks()),
+        door: doorTexture(47),
+      },
+      shadow: texture(drawShadowBlob()),
+      shelves: texture(paint(360, 170, drawBoosterShelves, 48)),
+      sellers: SHOP_COUNTERS.map(({ stock }) =>
+        texture(
+          cutOut(RACCOON_SIZE.width, RACCOON_SIZE.height, drawRaccoon(SELLERS[stock].look), 9, 70),
+        ),
+      ),
+      counters: SHOP_COUNTERS.map(({ stock }) =>
+        texture(cutOut(260, 150, drawCounter(SELLERS[stock].color), 8, 71)),
+      ),
+    }),
+    [],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const boards = useMemo(
+    () =>
+      SHOP_COUNTERS.map(({ stock }) =>
+        texture(paint(300, 74, drawSign(signs[stock], SELLERS[stock].color), 72)),
+      ),
+    [fontsReady, signs.latest, signs.thisYear, signs.older],
+  );
+  return (
+    <>
+      <RoomShell walls={SHOP_WALLS} doorSide="left" textures={textures.room} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={SHOP_COUNTERS.map(({ stock }, index) => ({
+          interaction: stock,
+          map: textures.sellers[index],
+          height: SELLER_HEIGHT,
+          z: SELLER_Z,
+        }))}
+      />
+      {SHOP_COUNTERS.map(({ stock, x }, index) => (
+        <group key={stock}>
+          <mesh position={[x, 1.85, WALL_Z + 0.01]}>
+            <planeGeometry args={[3.6, 1.7]} />
+            <meshBasicMaterial map={textures.shelves} />
+          </mesh>
+          <mesh position={[x, 3.4, WALL_Z + 0.02]}>
+            <planeGeometry args={[2.5, 0.62]} />
+            {/* Cut along its rounded corners. */}
+            <meshBasicMaterial map={boards[index]} alphaTest={0.5} />
+          </mesh>
+          <Furniture
+            map={textures.sellers[index]}
+            // The drawing leaves room for the tail on its right, so it moves right to stay centred.
+            x={x + 0.3}
+            z={SELLER_Z}
+            height={SELLER_HEIGHT}
+            shadow={textures.shadow}
+          />
+          <Furniture
+            map={textures.counters[index]}
+            x={x}
+            z={-0.35}
+            height={1.1}
+            shadow={textures.shadow}
+          />
+        </group>
+      ))}
     </>
   );
 }
@@ -305,8 +458,8 @@ const HILL_ROWS = [
   { z: -4, color: '#579552', hatch: '#3b7238', bumps: 9, height: 1.8, seed: 3 },
 ];
 
-// The street: a wide sky, rows of hills, our house and the shop, which hasn't opened yet.
-function Town({ signs }: { signs: TownSigns }) {
+// The street: a wide sky, rows of hills, our house and the shop.
+function Town({ signs }: { signs: SceneSigns }) {
   const look = skyLook('day', 'fewClouds');
   const fontsReady = useFontsReady();
   const textures = useMemo(
@@ -325,8 +478,8 @@ function Town({ signs }: { signs: TownSigns }) {
   );
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const shop = useMemo(
-    () => texture(cutOut(480, 380, drawShop(signs.shop, signs.closed), 9, 62)),
-    [fontsReady, signs.shop, signs.closed],
+    () => texture(cutOut(480, 380, drawShop(signs.shop), 9, 62)),
+    [fontsReady, signs.shop],
   );
   const sky = useMemo(() => texture(drawSkyGradient(look)), [look]);
   const cloud = useMemo(() => texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)), [look]);
@@ -409,12 +562,16 @@ function Pip({
   input,
   room,
   arrival,
+  bubble,
+  speakerTops,
   onInteractionChange,
   onExit,
 }: {
   input: RefObject<MovementInput>;
   room: SideRoom;
   arrival: { x: number; facing: Facing };
+  bubble: RefObject<HTMLElement | null>;
+  speakerTops: RefObject<SpeakerTops>;
   onInteractionChange: (interaction: Interaction | null) => void;
   onExit: (exit: SideExit) => void;
 }) {
@@ -425,8 +582,10 @@ function Pip({
   const bouncer = useRef<Group>(null);
   const shadow = useRef<Mesh>(null);
   const walker = useRef<Walker>({ x: arrival.x, velocity: 0, facing: arrival.facing });
-  const interaction = useRef<Interaction | null>(null);
+  // Undefined until the first frame, which always tells the game what can be done here.
+  const interaction = useRef<Interaction | null | undefined>(undefined);
   const hasPlacedCamera = useRef(false);
+  const bubbleSpot = useMemo(() => new Vector3(), []);
   const dash = useRef<DashState>(NO_DASH);
   const turn = useRef({
     from: arrival.facing > 0 ? 0 : Math.PI,
@@ -521,6 +680,17 @@ function Pip({
     hasPlacedCamera.current = true;
     camera.position.set(cameraX, LOOK_HEIGHT + distance * 0.1, distance);
     camera.lookAt(cameraX, LOOK_HEIGHT, 0);
+    camera.updateMatrixWorld();
+
+    // The speech bubble floats just above the head of the character the player can talk to.
+    const speaker = speakerAlong(room, x);
+    const head = speaker && speakerTops.current[speaker.interaction];
+    if (speaker && head && bubble.current) {
+      bubbleSpot.set(speaker.x, head.y + BUBBLE_GAP, head.z).project(camera);
+      const left = ((bubbleSpot.x + 1) / 2) * size.width;
+      const top = ((1 - bubbleSpot.y) / 2) * size.height;
+      bubble.current.style.transform = `translate(${left}px, ${top}px) translate(-50%, -100%)`;
+    }
   });
 
   return (
@@ -544,7 +714,9 @@ function Pip({
 type Props = {
   input: RefObject<MovementInput>;
   webglUnavailable: string;
-  townSigns: TownSigns;
+  signs: SceneSigns;
+  // The speech bubble offering what the player can do, which the scene moves over its place.
+  bubble: RefObject<HTMLElement | null>;
   onInteractionChange: (interaction: Interaction | null) => void;
 };
 
@@ -553,13 +725,14 @@ const FADE_MILLISECONDS = 300;
 
 // The paper world, seen from the side. Every visit starts afresh, so that the character arrives
 // at the door it came through.
-export function PaperScene({ input, webglUnavailable, townSigns, onInteractionChange }: Props) {
+export function PaperScene({ input, webglUnavailable, signs, bubble, onInteractionChange }: Props) {
   const [visit, setVisit] = useState<{
     number: number;
     place: SidePlaceId;
     arrival: { x: number; facing: Facing };
   }>({ number: 0, place: 'bedroom', arrival: { x: BEDROOM.start, facing: 1 } });
   const [isFading, setIsFading] = useState(false);
+  const speakerTops = useRef<SpeakerTops>({});
   const fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => () => clearTimeout(fadeTimer.current), []);
@@ -593,11 +766,15 @@ export function PaperScene({ input, webglUnavailable, townSigns, onInteractionCh
         <ambientLight intensity={1.6} color="#fff4e4" />
         <directionalLight position={[-4, 8, 10]} intensity={1.2} />
         <group key={visit.number}>
-          {visit.place === 'bedroom' ? <Bedroom /> : <Town signs={townSigns} />}
+          {visit.place === 'bedroom' && <Bedroom />}
+          {visit.place === 'town' && <Town signs={signs} />}
+          {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
           <Pip
             input={input}
             room={SIDE_PLACES[visit.place]}
             arrival={visit.arrival}
+            bubble={bubble}
+            speakerTops={speakerTops}
             onInteractionChange={onInteractionChange}
             onExit={goThrough}
           />

@@ -201,7 +201,9 @@ export type Interaction =
   | 'binder'
   | 'basketball'
   | 'leaveHome'
-  | 'goHome';
+  | 'goHome'
+  | 'enterShop'
+  | 'leaveShop';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);

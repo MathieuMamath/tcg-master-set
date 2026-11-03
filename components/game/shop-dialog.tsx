@@ -6,6 +6,7 @@ import type { SetId } from '@/game/card-sets';
 import type { ShopkeeperLine, ShopkeeperStock } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 import { moveThroughChoices } from './menu-focus';
+import { SellerPortrait } from './seller-portrait';
 
 // A choice is a small scrap of paper, each one tilted the other way from the one before.
 export const CHOICE_CLASS =
@@ -14,12 +15,15 @@ export const CHOICE_CLASS =
 type SpeechBoxProps = {
   nameId: string;
   name: string;
+  // What the speaker does, written small beside the name.
+  title?: string;
+  // The speaker's face, or her initial while she has no drawing.
+  portrait?: ReactNode;
   children: ReactNode;
 };
 
-// The scrap of torn paper where a character talks, with a round portrait on its left. The
-// portraits are blank until the characters get their drawings.
-export function SpeechBox({ nameId, name, children }: SpeechBoxProps) {
+// The scrap of torn paper where a character talks, with a round portrait on its left.
+export function SpeechBox({ nameId, name, title, portrait, children }: SpeechBoxProps) {
   return (
     <div className="relative -rotate-[0.5deg] drop-shadow-[4px_5px_0_var(--ui-shadow)]">
       <span
@@ -29,13 +33,19 @@ export function SpeechBox({ nameId, name, children }: SpeechBoxProps) {
       <div className="ui-torn grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 bg-ui-paper px-4 pt-4 pb-5 sm:gap-[1.125rem] sm:px-6 sm:pt-5 sm:pb-6">
         <span
           aria-hidden="true"
-          className="grid size-14 place-items-center rounded-full border-3 border-ui-paper bg-[#e7d9bc] font-display text-2xl text-ui-ink/40 ring-2 ring-[#8e6b3e] sm:size-26 sm:text-5xl"
+          className="grid size-14 place-items-center overflow-hidden rounded-full border-3 border-ui-paper bg-[#e7d9bc] font-display text-2xl text-ui-ink/40 ring-2 ring-[#8e6b3e] sm:size-26 sm:text-5xl"
         >
-          {name.charAt(0)}
+          {portrait ?? name.charAt(0)}
         </span>
         <div className="min-w-0">
           <h2 id={nameId} className="font-display text-lg">
             {name}
+            {title && (
+              <>
+                {' '}
+                <small className="ml-1 font-game text-base text-ui-ink/65">{title}</small>
+              </>
+            )}
           </h2>
           {children}
         </div>
@@ -114,7 +124,12 @@ export function ShopDialog({ stock, choices, onBuy, onClose }: Props) {
       onKeyDown={moveThroughChoices}
       className="ui-pop-in mx-auto mt-auto mb-4 w-[min(41.25rem,calc(100%-2rem))] max-w-none overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-transparent"
     >
-      <SpeechBox nameId="shopkeeper-name" name={t(`names.${stock}`)}>
+      <SpeechBox
+        nameId="shopkeeper-name"
+        name={stock === 'binderSeller' ? t('names.binderSeller') : t(`sellers.${stock}`)}
+        title={stock === 'binderSeller' ? undefined : t(`titles.${stock}`)}
+        portrait={stock === 'binderSeller' ? undefined : <SellerPortrait stock={stock} />}
+      >
         <TypedLine
           key={speech.turn}
           text={speech.line === 'greeting' ? t(`greetings.${stock}`) : t(speech.line)}

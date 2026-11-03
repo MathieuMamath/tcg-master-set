@@ -5,7 +5,13 @@ import {
   BEDROOM_WALLS,
   exitAlong,
   interactionAlong,
+  isDoorInteraction,
+  SHOP,
+  SHOP_COUNTER_WIDTH,
+  SHOP_COUNTERS,
+  SHOP_WALLS,
   SIDE_PLACES,
+  speakerAlong,
   TOWN,
   TOWN_BUILDINGS,
   TOWN_ENDS,
@@ -76,8 +82,56 @@ describe('the street', () => {
     expect(house.x + house.width / 2).toBeLessThan(shop.x - shop.width / 2);
   });
 
-  test('our house can be entered, but the shop is closed', () => {
+  test('our house and the shop can both be entered', () => {
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.house.doorX)).toBe('goHome');
-    expect(interactionAlong(TOWN, TOWN_BUILDINGS.shop.doorX)).toBeNull();
+    expect(interactionAlong(TOWN, TOWN_BUILDINGS.shop.doorX)).toBe('enterShop');
+  });
+});
+
+describe('the shop', () => {
+  test('each triplet can be talked to at her own counter', () => {
+    for (const { stock, x } of SHOP_COUNTERS) {
+      expect(interactionAlong(SHOP, x)).toBe(stock);
+    }
+  });
+
+  test('the counters stand apart, between the walls', () => {
+    for (const [index, { x }] of SHOP_COUNTERS.entries()) {
+      expect(x - SHOP_COUNTER_WIDTH / 2).toBeGreaterThan(SHOP_WALLS.left);
+      expect(x + SHOP_COUNTER_WIDTH / 2).toBeLessThan(SHOP_WALLS.right);
+      const next = SHOP_COUNTERS[index + 1];
+      if (next) {
+        expect(x + SHOP_COUNTER_WIDTH / 2).toBeLessThan(next.x - SHOP_COUNTER_WIDTH / 2);
+      }
+    }
+  });
+
+  test('each seller stands at her counter, for the bubble over her head', () => {
+    for (const { stock, x } of SHOP_COUNTERS) {
+      expect(speakerAlong(SHOP, x)).toEqual({ interaction: stock, x });
+    }
+  });
+
+  test('doors and furniture have no speaker', () => {
+    expect(speakerAlong(SHOP, SHOP.bounds.minX)).toBeNull();
+    expect(speakerAlong(BEDROOM, BEDROOM_FURNITURE.bookcase.x)).toBeNull();
+  });
+
+  test('the newest sets are always at the first counter', () => {
+    expect(SHOP_COUNTERS[0].stock).toBe('latest');
+  });
+
+  test('arriving from the street, the player is at the door, not at a counter', () => {
+    const arrival = TOWN.exits.find(({ to }) => to === 'shop')?.arrival;
+
+    expect(arrival && interactionAlong(SHOP, arrival.x)).toBe('leaveShop');
+  });
+});
+
+describe('isDoorInteraction', () => {
+  test('tells doors from other interactions', () => {
+    expect(isDoorInteraction('enterShop')).toBe(true);
+    expect(isDoorInteraction('latest')).toBe(false);
+    expect(isDoorInteraction(null)).toBe(false);
   });
 });
