@@ -13,6 +13,18 @@ const TOWN_SCALE = 3;
 
 // Measured from the model files, before scaling: [width, depth].
 const FOOTPRINTS = {
+  'arcade/air-hockey': [1, 0.7],
+  'arcade/arcade-machine': [0.4, 0.537],
+  'arcade/basketball-game': [0.65, 1.013],
+  'arcade/cash-register': [0.9, 0.5],
+  'arcade/claw-machine': [0.653, 0.69],
+  'arcade/dance-machine': [0.723, 1.025],
+  'arcade/gambling-machine': [0.524, 0.488],
+  'arcade/pinball': [0.5, 0.75],
+  'arcade/prize-wheel': [0.6, 0.302],
+  'arcade/prizes': [0.8, 0.4],
+  'arcade/ticket-machine': [0.4, 0.396],
+  'arcade/vending-machine': [0.5, 0.475],
   'furniture/bear': [0.39, 0.247],
   'furniture/bedSingle': [0.571, 1.125],
   'furniture/bookcaseOpen': [0.4, 0.25],
@@ -55,7 +67,7 @@ export type NpcModel = (typeof NPC_MODELS)[number];
 
 export type QuestGiver = 'grandma' | 'grandpa' | 'boy';
 
-export type PlaceId = 'bedroom' | 'town' | 'shop' | 'library' | 'apartment' | 'park';
+export type PlaceId = 'bedroom' | 'town' | 'shop' | 'library' | 'apartment' | 'park' | 'arcade';
 
 export type PlaceItem = {
   model: ModelName;
@@ -101,6 +113,8 @@ export type Place = {
   exitMarkers: readonly ExitMarker[];
   npcs: readonly Npc[];
   binderArea?: Rect;
+  // Where the player can play the arcade's basketball machine.
+  basketballArea?: Rect;
   // A body of water, drawn by the place's decoration, which stops the character at its shore.
   water?: Rect;
   groundHeight: number;
@@ -180,12 +194,15 @@ export function npcInReach(place: Place, position: Position): Npc | undefined {
   return place.npcs.find(({ talkArea }) => isInside(position, talkArea));
 }
 
-export type Interaction = ShopkeeperStock | 'binderSeller' | QuestGiver | 'binder';
+export type Interaction = ShopkeeperStock | 'binderSeller' | QuestGiver | 'binder' | 'basketball';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);
   if (npc) {
     return npc.stock;
+  }
+  if (place.basketballArea && isInside(position, place.basketballArea)) {
+    return 'basketball';
   }
   return place.binderArea && isInside(position, place.binderArea) ? 'binder' : null;
 }

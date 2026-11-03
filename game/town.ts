@@ -1,4 +1,5 @@
 import { APARTMENT_FROM_TOWN } from './apartment';
+import { ARCADE_FROM_TOWN } from './arcade';
 import { BEDROOM_FROM_TOWN } from './bedroom';
 import type { Rect } from './collision';
 import { LIBRARY_FROM_TOWN } from './library';
@@ -10,20 +11,25 @@ const TILE_SIZE = 3;
 const GROUND_HEIGHT = 0.02 * TILE_SIZE;
 const HALF_LENGTH = 13.5;
 
+// The road goes further on this side, to reach the arcade.
+const WEST_END = -19.5;
+
 const HOUSE_X = -3.5;
 const SHOP_X = 3.5;
 const SHOP_DOOR_X = 2.9;
 const BUILDINGS_Z = -3;
 
 export const APARTMENT_X = -10;
+export const ARCADE_X = -16.5;
+const ARCADE_DOOR_X = ARCADE_X - 0.6;
 export const LIBRARY_X = 10;
 export const LIBRARY_FRONT_Z = -1.42;
 export const PARK_SIGN = { x: 12.3, z: 0.1 };
 
 // Stops the character from walking behind the buildings, out of sight.
-const BOUNDS: Rect = { minX: -HALF_LENGTH, maxX: HALF_LENGTH, minZ: -1.4, maxZ: 3.5 };
+const BOUNDS: Rect = { minX: WEST_END, maxX: HALF_LENGTH, minZ: -1.4, maxZ: 3.5 };
 
-const ROAD_COLUMNS = [-12, -9, -6, -3, 0, 3, 6, 9, 12];
+const ROAD_COLUMNS = [-18, -15, -12, -9, -6, -3, 0, 3, 6, 9, 12];
 
 const GROUND: PlaceItem[] = ROAD_COLUMNS.flatMap((x) => [
   { model: 'town/roads/road-straight' as const, x, z: 2, height: 0 },
@@ -50,6 +56,16 @@ const BUILDINGS: PlaceItem[] = [
     blocksMovement: true,
     tint: '#f0b8c8',
   },
+  // The same model as the shop, tinted for the arcade, with its storefront facing the street too.
+  {
+    model: 'town/commercial/building-a',
+    x: ARCADE_X,
+    z: BUILDINGS_Z,
+    quarterTurns: 2,
+    blocksMovement: true,
+    tint: '#c9a6ff',
+  },
+  { model: 'town/commercial/detail-awning', x: ARCADE_X + 0.5, z: -1.38, quarterTurns: 2 },
   // The same small model as the house, tinted so that it doesn't look like home.
   {
     model: 'town/suburban/building-type-a',
@@ -61,6 +77,8 @@ const BUILDINGS: PlaceItem[] = [
 ];
 
 const DECOR: PlaceItem[] = [
+  { model: 'town/suburban/tree-large', x: -19.1, z: -1, blocksMovement: true },
+  { model: 'town/suburban/planter', x: -14.4, z: -1.25, blocksMovement: true },
   { model: 'town/suburban/tree-large', x: -13.1, z: -1, blocksMovement: true },
   { model: 'town/suburban/planter', x: -7.9, z: -1.25, blocksMovement: true },
   { model: 'town/suburban/tree-large', x: -6.6, z: -1, blocksMovement: true },
@@ -99,6 +117,11 @@ export const TOWN: Place = {
       to: 'apartment',
       arrival: APARTMENT_FROM_TOWN,
     },
+    {
+      area: { minX: ARCADE_DOOR_X - 0.45, maxX: ARCADE_DOOR_X + 0.45, minZ: -1.4, maxZ: -1.05 },
+      to: 'arcade',
+      arrival: ARCADE_FROM_TOWN,
+    },
     // The road's far end leads out of town.
     {
       area: { minX: HALF_LENGTH - 0.45, maxX: HALF_LENGTH, minZ: 0.5, maxZ: 3.5 },
@@ -111,6 +134,7 @@ export const TOWN: Place = {
     { x: SHOP_DOOR_X, z: -1.2, quarterTurns: 0 },
     { x: LIBRARY_X, z: -1.2, quarterTurns: 0 },
     { x: APARTMENT_X, z: -1.2, quarterTurns: 0 },
+    { x: ARCADE_DOOR_X, z: -1.2, quarterTurns: 0 },
     { x: HALF_LENGTH - 0.5, z: 2, quarterTurns: 3 },
   ],
   npcs: [],

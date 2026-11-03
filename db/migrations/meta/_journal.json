@@ -50,6 +50,13 @@
       "when": 1793649562839,
       "tag": "0006_organic_clint_barton",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793665643848,
+      "tag": "0007_nice_jazinda",
+      "breakpoints": true
     }
   ]
 }

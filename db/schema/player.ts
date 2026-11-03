@@ -103,3 +103,17 @@ export const playerQuests = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.questId] })],
 );
+
+// Each player's best score on each arcade game.
+export const playerHighScores = pgTable(
+  'player_high_scores',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    game: text('game').notNull(),
+    score: integer('score').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.game] })],
+);

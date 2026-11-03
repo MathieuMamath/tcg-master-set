@@ -16,6 +16,7 @@ import {
   Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { ARCADE_NEON, ARCADE_WALL_Z, BASKETBALL_MACHINE } from '@/game/arcade';
 import { DESK_TOP } from '@/game/bedroom';
 import type { Rect } from '@/game/collision';
 import {
@@ -39,7 +40,7 @@ import {
   SHOP_WIDTH,
 } from '@/game/shop';
 import type { ShopkeeperStock } from '@/game/shop-dialogue';
-import { APARTMENT_X, LIBRARY_FRONT_Z, LIBRARY_X, PARK_SIGN } from '@/game/town';
+import { APARTMENT_X, ARCADE_X, LIBRARY_FRONT_Z, LIBRARY_X, PARK_SIGN } from '@/game/town';
 import {
   type ExitMarker as ExitMarkerData,
   MODEL_NAMES,
@@ -293,7 +294,10 @@ function NeonBar({
 }
 
 type Station = (typeof SHOP_STATIONS)[number];
-export type ShopSigns = Record<ShopkeeperStock | 'library' | 'grandma' | 'park', string>;
+export type ShopSigns = Record<
+  ShopkeeperStock | 'library' | 'grandma' | 'park' | 'arcade' | 'basketball',
+  string
+>;
 
 const SIGN_WIDTH = 1.6;
 const SIGN_HEIGHT = 0.34;
@@ -511,6 +515,25 @@ function LibraryDecoration() {
   );
 }
 
+// Neon along the walls, and a sign that makes the basketball machine easy to find.
+function ArcadeDecoration({ signs }: { signs: ShopSigns }) {
+  return (
+    <>
+      <NeonBar
+        position={[0, 1.75, ARCADE_WALL_Z + 0.02]}
+        size={[9, 0.04, 0.02]}
+        color={ARCADE_NEON}
+      />
+      <NeonBar position={[-4.52, 1.75, 0]} size={[0.02, 0.04, 6]} color={ARCADE_NEON} />
+      <TextSign
+        position={[BASKETBALL_MACHINE.x, 1.92, ARCADE_WALL_Z + 0.04]}
+        color="#ffc83d"
+        text={signs.basketball}
+      />
+    </>
+  );
+}
+
 // The sign above the library's door, since it shares its model with the shop.
 function TownDecoration({ signs }: { signs: ShopSigns }) {
   return (
@@ -525,6 +548,7 @@ function TownDecoration({ signs }: { signs: ShopSigns }) {
         color="#f6dbe3"
         text={signs.grandma}
       />
+      <TextSign position={[ARCADE_X, 1.9, LIBRARY_FRONT_Z]} color="#e3c9ff" text={signs.arcade} />
       <TextSign position={[PARK_SIGN.x, 1.4, PARK_SIGN.z]} color="#bfe3a6" text={signs.park} />
       {[-0.6, 0.6].map((offset) => (
         <mesh key={offset} castShadow position={[PARK_SIGN.x + offset, 0.6, PARK_SIGN.z - 0.03]}>
@@ -789,6 +813,7 @@ export function Place({ place, signs }: { place: PlaceData; signs: ShopSigns }) 
       {place.id === 'bedroom' && <BedroomDecoration />}
       {place.id === 'shop' && <ShopDecoration signs={signs} />}
       {place.id === 'library' && <LibraryDecoration />}
+      {place.id === 'arcade' && <ArcadeDecoration signs={signs} />}
       {place.npcs
         .filter(({ stock }) => stock === 'grandma')
         .map(({ x, z }) => (

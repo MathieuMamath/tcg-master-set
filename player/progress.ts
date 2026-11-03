@@ -6,10 +6,20 @@ import {
   playerBinders,
   playerBoosters,
   playerCards,
+  playerHighScores,
   playerQuests,
   playerSpots,
   playerWallets,
 } from '@/db/schema';
+import {
+  BASKETBALL_COINS,
+  BASKETBALL_GAME,
+  BASKETBALL_QUEST,
+  type BasketballReward,
+  basketballReward,
+  canFinishBasketball,
+  scoreOfShots,
+} from '@/game/basketball';
 import { type Collection, firstCopies, slotKey } from '@/game/binder';
 import { boosterRecipe, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
@@ -47,6 +57,9 @@ export type PlayerProgress = {
   binders: SetId[];
   collection: Collection;
   spot: PlayerSpot | null;
+  basketballHighScore: number;
+  // The day of the last reward, so that the machine can say when it's already been paid.
+  basketballRewardedOn: string | null;
 };
 
 export type OpenedBooster = {
@@ -79,6 +92,22 @@ async function loadWallet(database: Reader, userId: string): Promise<Wallet> {
       boosters.flatMap(({ setId, count }) => (isPlayableSet(setId) ? [[setId, count]] : [])),
     ),
   };
+}
+
+async function loadBasketballHighScore(database: Reader, userId: string): Promise<number> {
+  const [best] = await database
+    .select({ score: playerHighScores.score })
+    .from(playerHighScores)
+    .where(and(eq(playerHighScores.userId, userId), eq(playerHighScores.game, BASKETBALL_GAME)));
+  return best?.score ?? 0;
+}
+
+async function loadBasketballRewardDay(database: Reader, userId: string): Promise<string | null> {
+  const [attempt] = await database
+    .select({ completedOn: playerQuests.completedOn })
+    .from(playerQuests)
+    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, BASKETBALL_QUEST)));
+  return attempt?.completedOn ?? null;
 }
 
 async function loadBinders(database: Reader, userId: string): Promise<SetId[]> {
@@ -120,6 +149,8 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
       cards.map(({ cardId, variant, count }) => [slotKey(cardId, variant), count]),
     ),
     spot: parseSpot(spots[0]),
+    basketballHighScore: await loadBasketballHighScore(getDb(), userId),
+    basketballRewardedOn: await loadBasketballRewardDay(getDb(), userId),
   };
 }
 
@@ -264,6 +295,107 @@ export async function flipGrandpaCard(
   });
 }
 
+// The machine can always be played for the high score, so this keeps the day of the last reward.
+export async function startBasketball(userId: string): Promise<void> {
+  const startedAt = new Date();
+  await getDb()
+    .insert(playerQuests)
+    .values({ userId, questId: BASKETBALL_QUEST, startedAt })
+    .onConflictDoUpdate({
+      target: [playerQuests.userId, playerQuests.questId],
+      set: { startedAt },
+    });
+}
+
+export type BasketballResult = {
+  score: number;
+  highScore: number;
+  isNewHighScore: boolean;
+  reward: BasketballReward;
+  // The score earned a reward, but the day's reward was already paid.
+  wasAlreadyPaid: boolean;
+  boosterSetId: SetId | null;
+  wallet: Wallet;
+};
+
+// Null when no game is under way, or when its shots can't have happened. The row is locked, and the
+// game is used up with the reward, so that it can only pay once. A game that earns nothing leaves
+// the day's reward to be won.
+export async function finishBasketball(
+  userId: string,
+  shots: unknown,
+): Promise<BasketballResult | null> {
+  const latestSetId = await loadLatestSoldSetId();
+
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    await loadWallet(transaction, userId);
+    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, BASKETBALL_QUEST));
+    const [attempt] = await transaction
+      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(quest)
+      .for('update');
+    const score = scoreOfShots(shots);
+    if (!attempt?.startedAt || score === null || !canFinishBasketball(attempt.startedAt, now)) {
+      return null;
+    }
+
+    const earned = basketballReward(score);
+    const wasAlreadyPaid = earned !== 'none' && !canStartQuest(attempt, now);
+    const reward = wasAlreadyPaid ? 'none' : earned;
+    await transaction
+      .update(playerQuests)
+      .set({
+        startedAt: null,
+        ...(reward === 'none' ? {} : { completedOn: questDay(now) }),
+      })
+      .where(quest);
+
+    const boosterSetId = reward === 'booster' ? latestSetId : null;
+    if (boosterSetId) {
+      await addBooster(transaction, userId, boosterSetId);
+    } else if (reward !== 'none') {
+      await transaction
+        .update(playerWallets)
+        .set({ coins: sql`${playerWallets.coins} + ${BASKETBALL_COINS}`, updatedAt: new Date() })
+        .where(eq(playerWallets.userId, userId));
+    }
+
+    const previousBest = await loadBasketballHighScore(transaction, userId);
+    const isNewHighScore = score > previousBest;
+    if (isNewHighScore) {
+      await transaction
+        .insert(playerHighScores)
+        .values({ userId, game: BASKETBALL_GAME, score })
+        .onConflictDoUpdate({
+          target: [playerHighScores.userId, playerHighScores.game],
+          set: { score, updatedAt: new Date() },
+        });
+    }
+
+    return {
+      score,
+      highScore: Math.max(score, previousBest),
+      isNewHighScore,
+      reward: boosterSetId ? 'booster' : reward === 'none' ? 'none' : 'coins',
+      wasAlreadyPaid,
+      boosterSetId,
+      wallet: await loadWallet(transaction, userId),
+    };
+  });
+}
+
+async function addBooster(database: Pick<Database, 'insert'>, userId: string, setId: SetId) {
+  await database
+    .insert(playerBoosters)
+    .values({ userId, setId, count: 1 })
+    .onConflictDoUpdate({
+      target: [playerBoosters.userId, playerBoosters.setId],
+      set: { count: sql`${playerBoosters.count} + 1` },
+    });
+}
+
 export type FishingCatch = {
   // Null when no attempt is under way.
   fish: Fish | null;
@@ -296,13 +428,7 @@ export async function reelInFish(userId: string): Promise<FishingCatch> {
     const fish = catchFish();
     const boosterSetId = fish === 'shiny' ? latestSetId : null;
     if (boosterSetId) {
-      await transaction
-        .insert(playerBoosters)
-        .values({ userId, setId: boosterSetId, count: 1 })
-        .onConflictDoUpdate({
-          target: [playerBoosters.userId, playerBoosters.setId],
-          set: { count: sql`${playerBoosters.count} + 1` },
-        });
+      await addBooster(transaction, userId, boosterSetId);
     } else {
       await transaction
         .update(playerWallets)

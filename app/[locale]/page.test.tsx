@@ -18,6 +18,8 @@ vi.mock('@/player/progress', () => ({
     binders: [],
     collection: {},
     spot: null,
+    basketballHighScore: 0,
+    basketballRewardedOn: null,
   }),
 }));
 
@@ -34,6 +36,8 @@ function renderHome(locale: Locale, messages: typeof en) {
           binders: [],
           collection: {},
           spot: null,
+          basketballHighScore: 0,
+          basketballRewardedOn: null,
         }}
       />
     </NextIntlClientProvider>,
