@@ -92,7 +92,7 @@ Text lives in `messages/en.json` and `messages/fr.json`, which must define the s
 
 Game rules live in `game/` as plain tested functions, without React or Three.js. `components/game/` displays them, and the scene loads only in the browser.
 
-The world is made of paper cut-outs, seen from the side like a diorama: characters only walk left and right. The drawings are made by code on canvases in `components/game/paper-art.ts`, so the repository holds no images. The player is Pip, a fox. The old 3D town is disconnected while its places come back one by one in paper, so `components/game/paper-scene.tsx` only holds an empty stage for now, and the quests, shops and library can't be reached.
+The world is made of paper cut-outs, seen from the side like a diorama: characters only walk left and right. The drawings are made by code on canvases in `components/game/paper-art.ts`, so the repository holds no images. The player is Pip, a fox. The old 3D town is disconnected while its places come back one by one in paper, so `components/game/paper-scene.tsx` only holds the bedroom for now, and the quests, shops and library can't be reached. A place's layout along its floor, and the stretches where the player can do something, live in `game/side-rooms.ts`. The sky through windows comes from `game/sky.ts`, ready to follow the time of day and the weather.
 
 Desktop comes first: comfort, polish and effects are designed for it. Phones must still work, with every screen usable and the game playable, but they don't need to match it, and a choice between the two goes to desktop.
 

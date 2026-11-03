@@ -55,8 +55,7 @@ type Props = {
 export function Game({ player, sets, progress }: Props) {
   const t = useTranslations('Game');
   const input = useRef<MovementInput>({ keyboard: STILL, joystick: STILL, wantsDash: false });
-  // Nothing can be reached until the places come back in paper.
-  const [interaction] = useState<Interaction | null>(null);
+  const [interaction, setInteraction] = useState<Interaction | null>(null);
   const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | QuestGiver | null>(
     null,
   );
@@ -412,7 +411,11 @@ export function Game({ player, sets, progress }: Props) {
 
   return (
     <div className="absolute inset-0">
-      <PaperScene input={input} webglUnavailable={t('webglUnavailable')} />
+      <PaperScene
+        input={input}
+        webglUnavailable={t('webglUnavailable')}
+        onInteractionChange={setInteraction}
+      />
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
