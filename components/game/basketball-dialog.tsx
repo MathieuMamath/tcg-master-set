@@ -16,7 +16,7 @@ import {
 import type { PlayableSet } from '@/game/card-sets';
 import type { BasketballResult } from '@/player/progress';
 import { moveThroughChoices } from './menu-focus';
-import { CHOICE_CLASS, ChoiceMarker } from './shop-dialog';
+import { CHOICE_CLASS } from './shop-dialog';
 
 const GAME_MS = GAME_SECONDS * 1000;
 const FLIGHT_MS = 450;
@@ -156,9 +156,9 @@ export function BasketballDialog({ sets, highScore, isRewardTaken, onFinish, onC
       aria-labelledby="basketball-title"
       onClose={onClose}
       onKeyDown={moveThroughChoices}
-      className="ui-pop-in m-auto max-h-dvh w-[calc(100%-2rem)] max-w-md overflow-auto rounded-2xl border-4 border-ui-ink bg-ui-paper p-3 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-black/50"
+      className="ui-pop-in m-auto max-h-dvh w-[calc(100%-2rem)] max-w-md overflow-auto ui-scrap p-3 font-game text-ui-ink backdrop:bg-black/50"
     >
-      <h2 id="basketball-title" className="text-lg font-semibold">
+      <h2 id="basketball-title" className="font-display text-lg">
         {t('title')}
       </h2>
       <dl className="mt-1 grid grid-cols-3 gap-2 text-center text-xs font-semibold">
@@ -179,7 +179,7 @@ export function BasketballDialog({ sets, highScore, isRewardTaken, onFinish, onC
       </dl>
 
       {isRewardTaken && result?.reward !== 'coins' && result?.reward !== 'booster' && (
-        <p className="mt-2 rounded-lg border-3 border-ui-ink bg-ui-accent px-2 py-1 text-center text-sm font-semibold">
+        <p className="mt-2 ui-scrap bg-ui-accent px-2 py-1 text-center text-sm font-semibold">
           {t('alreadyPaid')}
         </p>
       )}
@@ -278,7 +278,6 @@ export function BasketballDialog({ sets, highScore, isRewardTaken, onFinish, onC
           }}
           className={`${CHOICE_CLASS} touch-manipulation select-none`}
         >
-          <ChoiceMarker />
           {isPlaying || step === 'finishing'
             ? t('shoot')
             : step === 'ready'
@@ -286,7 +285,6 @@ export function BasketballDialog({ sets, highScore, isRewardTaken, onFinish, onC
               : t('playAgain')}
         </button>
         <button type="submit" className={CHOICE_CLASS}>
-          <ChoiceMarker />
           {t('leave')}
         </button>
       </form>

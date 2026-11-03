@@ -75,7 +75,7 @@ export function AnimatedCount({ value, format }: Props) {
         <span
           key={`change-${change.id}`}
           aria-hidden="true"
-          className={`ui-count-change pointer-events-none absolute top-full left-3 z-10 mt-1 flex items-center gap-1 rounded-full border-3 border-ui-ink bg-ui-paper px-2 text-xs font-bold whitespace-nowrap ${
+          className={`ui-count-change pointer-events-none absolute top-full left-3 z-10 mt-1 flex items-center gap-1 ui-scrap px-2 text-xs font-bold whitespace-nowrap ${
             isUp ? 'text-ui-gain' : 'text-ui-danger'
           }`}
         >

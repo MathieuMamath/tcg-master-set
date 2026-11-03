@@ -1,16 +1,24 @@
 @import "tailwindcss";
-@import "@fontsource-variable/fredoka";
+@import "@fontsource/bagel-fat-one";
+@import "@fontsource/patrick-hand";
+@import "@fontsource/courier-prime";
+@import "@fontsource/courier-prime/700.css";
 
 :root {
-  /* The game's interface keeps one palette, whatever the system theme. */
-  --ui-ink: #2b2340;
-  --ui-paper: #fff6e0;
-  --ui-accent: #ffc83d;
-  --ui-accent-dark: #c9711a;
-  --ui-danger: #c81e3a;
-  --ui-gain: #15803d;
-  --background: #ffffff;
-  --foreground: #171717;
+  /* The game's interface keeps one palette, whatever the system theme: scraps of paper and tape
+     on kraft cardboard. */
+  --ui-ink: #2c2a35;
+  --ui-paper: #fbf6ea;
+  --ui-accent: #f3c14b;
+  --ui-accent-dark: #b8861f;
+  --ui-stamp: #c8453a;
+  --ui-kraft: #c8a574;
+  --ui-tape: rgb(238 224 160 / 80%);
+  --ui-shadow: rgb(44 42 53 / 28%);
+  --ui-danger: #c8453a;
+  --ui-gain: #3f7d48;
+  --background: var(--ui-kraft);
+  --foreground: var(--ui-ink);
 }
 
 @theme inline {
@@ -18,38 +26,123 @@
   --color-ui-paper: var(--ui-paper);
   --color-ui-accent: var(--ui-accent);
   --color-ui-accent-dark: var(--ui-accent-dark);
+  --color-ui-stamp: var(--ui-stamp);
+  --color-ui-kraft: var(--ui-kraft);
   --color-ui-danger: var(--ui-danger);
   --color-ui-gain: var(--ui-gain);
-  --font-game: "Fredoka Variable", ui-rounded, sans-serif;
+  --font-game: "Patrick Hand", "Comic Sans MS", system-ui, sans-serif;
+  --font-display: "Bagel Fat One", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-digits: "Courier Prime", "Courier New", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-game);
+}
+
+/* A scrap of paper lying on the cardboard, with its shadow off to one side. */
+@utility ui-scrap {
+  background-color: var(--ui-paper);
+  border-radius: 0.125rem;
+  box-shadow: 3px 4px 0 var(--ui-shadow);
+}
+
+/* A scrap that lifts when pointed at and flattens when pressed. */
+@utility ui-paper-button {
+  border-radius: 0.125rem;
+  box-shadow: 3px 4px 0 var(--ui-shadow);
+  transition:
+    translate 150ms ease,
+    box-shadow 150ms ease;
+  &:hover:not([aria-disabled="true"]) {
+    translate: 0 -3px;
+    box-shadow: 5px 7px 0 var(--ui-shadow);
+  }
+  &:active:not([aria-disabled="true"]) {
+    translate: 0 1px;
+    box-shadow: 1px 2px 0 var(--ui-shadow);
+  }
+}
+
+/* Paper torn by hand along its top and bottom edges. It also clips any shadow, so a torn scrap
+   gets its shadow from a `drop-shadow` on its parent. */
+@utility ui-torn {
+  clip-path: polygon(
+    0.0% 1.9px,
+    4.5% 0.9px,
+    9.1% 3.9px,
+    13.6% 0.4px,
+    18.2% 3.2px,
+    22.7% 2.2px,
+    27.3% 0.3px,
+    31.8% 3px,
+    36.4% 0.2px,
+    40.9% 2.6px,
+    45.5% 0.4px,
+    50.0% 0.5px,
+    54.5% 2.5px,
+    59.1% 5px,
+    63.6% 0.7px,
+    68.2% 1.3px,
+    72.7% 3.8px,
+    77.3% 5.7px,
+    81.8% 3.5px,
+    86.4% 2.4px,
+    90.9% 5.9px,
+    95.5% 0.3px,
+    100.0% 5.2px,
+    100.0% calc(100% - 2px),
+    95.5% calc(100% - 1px),
+    90.9% calc(100% - 0.8px),
+    86.4% calc(100% - 2.2px),
+    81.8% calc(100% - 5.7px),
+    77.3% calc(100% - 1.3px),
+    72.7% calc(100% - 4.1px),
+    68.2% calc(100% - 4.5px),
+    63.6% calc(100% - 2.6px),
+    59.1% calc(100% - 3.8px),
+    54.5% calc(100% - 0.4px),
+    50.0% calc(100% - 0.4px),
+    45.5% calc(100% - 1.4px),
+    40.9% calc(100% - 4.8px),
+    36.4% calc(100% - 3px),
+    31.8% calc(100% - 2.2px),
+    27.3% calc(100% - 4.1px),
+    22.7% calc(100% - 3.2px),
+    18.2% calc(100% - 2.1px),
+    13.6% calc(100% - 5.6px),
+    9.1% calc(100% - 4.9px),
+    4.5% calc(100% - 1.7px),
+    0.0% calc(100% - 4px)
+  );
+}
+
+/* A strip of tape holding a scrap from above. */
+@utility ui-tape {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    top: -0.6rem;
+    left: 50%;
+    z-index: 1;
+    width: 3.6rem;
+    height: 1.2rem;
+    background: var(--ui-tape);
+    transform: translateX(-50%) rotate(-5deg);
+    pointer-events: none;
+  }
 }
 
 @keyframes ui-pop-in {
   from {
     opacity: 0;
     transform: translateY(1.5rem) scale(0.96);
-  }
-}
-
-@keyframes ui-nudge {
-  50% {
-    transform: translateX(0.2rem);
   }
 }
 
@@ -339,10 +432,6 @@ body {
   animation: ui-pop-in 180ms ease-out;
 }
 
-.ui-nudge {
-  animation: ui-nudge 700ms ease-in-out infinite;
-}
-
 .ui-bob {
   animation: ui-bob 1200ms ease-in-out infinite;
 }
@@ -356,7 +445,6 @@ body {
   .ui-god-pack-glow,
   .ui-god-pack-banner,
   .ui-pop-in,
-  .ui-nudge,
   .ui-bob,
   .ui-pull-rays,
   .ui-pull-beam,

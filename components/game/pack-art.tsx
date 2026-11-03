@@ -78,7 +78,7 @@ export function PackBody({
         background: packBackground(setId),
         clipPath: cut > 0 ? cutOutline(cut) : undefined,
       }}
-      className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]"
+      className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink text-center text-ui-paper shadow-[4px_6px_0_var(--ui-shadow)]"
     >
       <span className="absolute inset-x-3 top-[13%] bottom-[7%] flex items-center justify-center">
         <SetLogo setName={setName} logoUrl={logoUrl} />

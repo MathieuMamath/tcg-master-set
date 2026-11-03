@@ -475,15 +475,15 @@ export function Game({ player, sets, progress }: Props) {
           basketball: tShopkeeper('names.basketball'),
         }}
       />
-      <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
-        <div className="flex min-w-0 flex-wrap gap-2">
-          <p className="max-w-40 truncate rounded-full border-3 border-ui-ink bg-ui-paper px-3 py-0.5">
+      <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
             {player.username}
           </p>
-          <p className="relative flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-1.5">
+          <p className="relative flex rotate-1 items-center gap-1.5 ui-scrap px-3 py-1 font-digits text-base font-bold">
             <span
               aria-hidden="true"
-              className="size-4 rounded-full border-2 border-ui-ink bg-ui-accent"
+              className="size-3.5 rounded-full border-2 border-ui-accent-dark bg-ui-accent"
             />
             <AnimatedCount value={wallet.coins} format={(count) => t('coins', { count })} />
           </p>
@@ -492,22 +492,19 @@ export function Game({ player, sets, progress }: Props) {
             disabled={boosterTotal === 0}
             aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
             onClick={openBag}
-            className="relative flex items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2 enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="relative flex -rotate-1 items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <span
-              aria-hidden="true"
-              className="h-4 w-3 rounded-xs border-2 border-ui-ink bg-[#7b5ea7]"
-            />
+            <span aria-hidden="true" className="h-3.5 w-2.5 rounded-xs bg-ui-stamp" />
             <AnimatedCount value={boosterTotal} format={(count) => t('boosters', { count })} />
           </button>
           <button
             type="button"
             onClick={openBinder}
-            className="flex cursor-pointer items-center gap-1.5 rounded-full border-3 border-ui-ink bg-ui-paper py-0.5 pr-3 pl-2"
+            className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 text-lg leading-tight"
           >
             <span
               aria-hidden="true"
-              className="h-4 w-3.5 rounded-xs border-2 border-l-4 border-ui-ink bg-[#2e86ab]"
+              className="h-4 w-3.5 rounded-xs border-l-4 border-ui-ink/60 bg-[#e6ece8]"
             />
             {t('binderButton')}
           </button>
@@ -516,7 +513,7 @@ export function Game({ player, sets, progress }: Props) {
           type="button"
           aria-label={tSettings('open')}
           onClick={openSettings}
-          className="shrink-0 cursor-pointer rounded-full border-3 border-ui-ink bg-ui-paper p-1"
+          className="shrink-0 rotate-2 cursor-pointer ui-paper-button bg-ui-paper p-1.5"
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
             {[0, 45, 90, 135].map((angle) => (
@@ -537,9 +534,9 @@ export function Game({ player, sets, progress }: Props) {
         <button
           type="button"
           onClick={interact}
-          className="ui-bob absolute inset-x-0 bottom-16 mx-auto flex w-fit cursor-pointer items-center gap-2 rounded-full border-4 border-ui-ink bg-ui-paper py-1 pr-4 pl-1.5 font-game text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
+          className="ui-bob absolute inset-x-0 bottom-16 mx-auto flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
         >
-          <kbd className="rounded-full border-3 border-ui-ink bg-ui-accent px-2 font-game text-sm pointer-coarse:hidden">
+          <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
             E
           </kbd>
           {t(interaction)}
