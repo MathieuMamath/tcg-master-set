@@ -9,7 +9,7 @@ import { addToCollection } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
-import { pickStains, type Stain } from '@/game/quests';
+import { pickStains, questDay, type Stain } from '@/game/quests';
 import {
   BINDER_PRICE,
   BOOSTER_PRICE,
@@ -22,8 +22,9 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import type { Interaction, QuestGiver } from '@/game/world';
-import type { FishingCatch, PlayerProgress } from '@/player/progress';
+import type { BasketballResult, FishingCatch, PlayerProgress } from '@/player/progress';
 import { AnimatedCount } from './animated-count';
+import { BasketballDialog } from './basketball-dialog';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
@@ -63,6 +64,9 @@ export function Game({ player, sets, progress }: Props) {
   const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
   const [isFishing, setIsFishing] = useState(false);
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
+  const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
+  const [highScore, setHighScore] = useState(progress.basketballHighScore);
+  const [basketballRewardedOn, setBasketballRewardedOn] = useState(progress.basketballRewardedOn);
   const [binders, setBinders] = useState(progress.binders);
   const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(progress.wallet);
@@ -87,7 +91,8 @@ export function Game({ player, sets, progress }: Props) {
     isSettingsOpen ||
     opening !== null ||
     memoryCards !== null ||
-    isFishing;
+    isFishing ||
+    isPlayingBasketball;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
@@ -126,6 +131,8 @@ export function Game({ player, sets, progress }: Props) {
         releaseKeys();
         if (controls.current.interaction === 'binder') {
           setIsBinderOpen(true);
+        } else if (controls.current.interaction === 'basketball') {
+          setIsPlayingBasketball(true);
         } else {
           setTalkingTo(controls.current.interaction);
         }
@@ -170,6 +177,8 @@ export function Game({ player, sets, progress }: Props) {
     stopWalking();
     if (interaction === 'binder') {
       setIsBinderOpen(true);
+    } else if (interaction === 'basketball') {
+      setIsPlayingBasketball(true);
     } else if (interaction) {
       setTalkingTo(interaction);
     }
@@ -364,6 +373,31 @@ export function Game({ player, sets, progress }: Props) {
     setTalkingTo('grandpa');
   };
 
+  // The server works out the score from the shots, and pays for it. This only shows the result.
+  const finishBasketball = async (shots: readonly number[]): Promise<BasketballResult | null> => {
+    try {
+      const response = await fetch('/api/quests/basketball/finish', {
+        method: 'POST',
+        body: JSON.stringify({ shots }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const result: BasketballResult = await response.json();
+      setWallet(result.wallet);
+      setHighScore(result.highScore);
+      if (result.reward !== 'none') {
+        setBasketballRewardedOn(questDay(new Date()));
+      }
+      if (result.isNewHighScore || result.reward !== 'none') {
+        showSaveNotice();
+      }
+      return result;
+    } catch {
+      return null;
+    }
+  };
+
   const startFishing = async (): Promise<QuestLine | null> => {
     try {
       const response = await fetch('/api/quests/fishing/start', { method: 'POST' });
@@ -437,6 +471,8 @@ export function Game({ player, sets, progress }: Props) {
           library: tShopkeeper('names.binderSeller'),
           grandma: tQuest('grandma.name'),
           park: tShopkeeper('names.park'),
+          arcade: tShopkeeper('names.arcade'),
+          basketball: tShopkeeper('names.basketball'),
         }}
       />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2 font-game text-sm font-semibold text-ui-ink">
@@ -509,7 +545,7 @@ export function Game({ player, sets, progress }: Props) {
           {t(interaction)}
         </button>
       )}
-      {!isTalking && memoryCards === null && !isFishing && (
+      {!isTalking && memoryCards === null && !isFishing && !isPlayingBasketball && (
         <>
           <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
             {t('keyboardHint')}
@@ -588,6 +624,15 @@ export function Game({ player, sets, progress }: Props) {
           cards={memoryCards}
           onEnd={endMemoryGame}
           onGiveUp={() => setMemoryCards(null)}
+        />
+      )}
+      {isPlayingBasketball && (
+        <BasketballDialog
+          sets={sets}
+          highScore={highScore}
+          isRewardTaken={basketballRewardedOn === questDay(new Date())}
+          onFinish={finishBasketball}
+          onClose={() => setIsPlayingBasketball(false)}
         />
       )}
       {talkingTo === 'boy' && (

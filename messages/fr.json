@@ -22,7 +22,8 @@
     "dash": "Dash",
     "grandma": "Parler (mamie)",
     "grandpa": "Parler (papy)",
-    "boy": "Parler (petit garçon)"
+    "boy": "Parler (petit garçon)",
+    "basketball": "Jouer (basket)"
   },
   "Shopkeeper": {
     "names": {
@@ -30,7 +31,9 @@
       "thisYear": "Cette année",
       "older": "Collections précédentes",
       "binderSeller": "Bibliothèque",
-      "park": "Parc"
+      "park": "Parc",
+      "arcade": "Arcade",
+      "basketball": "Basket"
     },
     "greetings": {
       "latest": "Bonjour ! Voici nos trois dernières collections.",
@@ -199,5 +202,29 @@
       "shownCard": "Carte {number} : {name}",
       "foundCard": "Carte {number} : {name}, paire trouvée"
     }
+  },
+  "Basketball": {
+    "title": "Panier de basket",
+    "rules": "Appuie quand le curseur arrive au milieu de la jauge. Tu as {seconds} secondes !",
+    "rewardCoins": "{score} points : {coins} pièces",
+    "rewardBooster": "{score} points : un booster de la dernière série",
+    "oncePerDay": "Une récompense par jour : la première partie qui en gagne une. Tu peux ensuite continuer à jouer pour le record.",
+    "play": "Jouer",
+    "shoot": "Tirer !",
+    "score": "Score",
+    "time": "Temps",
+    "highScore": "Record",
+    "newHighScore": "Nouveau record !",
+    "result": "Score final : {score}",
+    "noReward": "Pas de récompense cette fois. Continue de t'entraîner !",
+    "coins": "+{coins} pièces",
+    "booster": "+1 booster {set}",
+    "alreadyPaid": "La récompense du jour est déjà gagnée : cette partie ne compte que pour le record. Reviens demain pour la prochaine !",
+    "playAgain": "Rejouer",
+    "leave": "Partir",
+    "error": "La borne est en panne. Réessaie.",
+    "swish": "Parfait ! +3",
+    "basket": "Panier ! +2",
+    "miss": "Raté !"
   }
 }

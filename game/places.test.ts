@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { APARTMENT, APARTMENT_FROM_TOWN } from './apartment';
+import { ARCADE, ARCADE_FROM_TOWN, BASKETBALL_MACHINE } from './arcade';
 import { BEDROOM, BEDROOM_FROM_TOWN, BEDROOM_START } from './bedroom';
 import { isBlocked } from './collision';
 import { LIBRARY, LIBRARY_FROM_TOWN } from './library';
@@ -375,6 +376,27 @@ describe('the park', () => {
 
   test('the little boy can be reached from the path round the lake', () => {
     expect(interactionAt(PARK, { x: BOY_POSITION.x, z: LAKE.maxZ + 1 })).toBe('boy');
+  });
+});
+
+describe('the arcade', () => {
+  test('its door in town leads inside', () => {
+    const exit = exitReachedWalking(TOWN, standingAt({ x: -17.1, z: 0 }), { x: 0, z: -1 });
+
+    expect(exit?.to).toBe('arcade');
+  });
+
+  test('its exit leads back to the town', () => {
+    const exit = exitReachedWalking(ARCADE, standingAt(ARCADE_FROM_TOWN), { x: -1, z: 0 });
+
+    expect(exit?.to).toBe('town');
+  });
+
+  test('the basketball machine can be played from in front of it', () => {
+    const state = walk(ARCADE, standingAt({ x: BASKETBALL_MACHINE.x, z: 0 }), { x: 0, z: -1 }, 300);
+
+    expect(interactionAt(ARCADE, state)).toBe('basketball');
+    expect(interactionAt(ARCADE, ARCADE_FROM_TOWN)).toBeNull();
   });
 });
 

@@ -78,6 +78,8 @@ The grandfather's memory game is in `game/memory-game.ts`. Its board stays in `p
 
 The little boy's fishing quest is in `game/fishing.ts`, at the park's lake (`LAKE` in `game/park.ts`). The server draws the fish when it is reeled in, in the transaction that uses up the attempt, so backing out can't be used to draw again. A common fish pays coins, and a shiny one pays a booster of the newest set on sale. The wait for a bite is only for show. The fish is a simple drawing of our own, not a third-party image.
 
+The arcade's basketball machine is in `game/basketball.ts`. The browser only sends when each shot left, and the server replays them with the same rules to get the score, after checking that the game lasted its full time. It can always be played, and `player_high_scores` keeps the best score, but only one game a day pays: the first to earn a reward. A game that earns nothing leaves it to be won. The other machines are decoration.
+
 ## Accounts
 
 Playing requires an account: pages and API routes check `getPlayer()` from `auth/session.ts` on the server. [Better Auth](https://www.better-auth.com/) handles sign-up, sign-in, sessions and password hashing through `auth/server.ts`. Only the email, username and hashed password are collected. Show players `auth/rules.ts` error keys, never the library's messages.

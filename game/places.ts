@@ -1,4 +1,5 @@
 import { APARTMENT } from './apartment';
+import { ARCADE } from './arcade';
 import { BEDROOM } from './bedroom';
 import { isBlocked } from './collision';
 import { LIBRARY } from './library';
@@ -14,6 +15,7 @@ export const PLACES: Record<PlaceId, Place> = {
   library: LIBRARY,
   apartment: APARTMENT,
   park: PARK,
+  arcade: ARCADE,
 };
 
 export type PlayerSpot = Arrival & { place: PlaceId };

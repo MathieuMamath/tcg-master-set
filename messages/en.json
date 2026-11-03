@@ -22,7 +22,8 @@
     "dash": "Dash",
     "grandma": "Talk (Grandma)",
     "grandpa": "Talk (Grandpa)",
-    "boy": "Talk (little boy)"
+    "boy": "Talk (little boy)",
+    "basketball": "Play (basketball)"
   },
   "Shopkeeper": {
     "names": {
@@ -30,7 +31,9 @@
       "thisYear": "This year",
       "older": "Earlier sets",
       "binderSeller": "Library",
-      "park": "Park"
+      "park": "Park",
+      "arcade": "Arcade",
+      "basketball": "Basketball"
     },
     "greetings": {
       "latest": "Hello! Here are our three newest sets.",
@@ -199,5 +202,29 @@
       "shownCard": "Card {number}: {name}",
       "foundCard": "Card {number}: {name}, pair found"
     }
+  },
+  "Basketball": {
+    "title": "Basketball",
+    "rules": "Press when the cursor reaches the middle of the meter. You have {seconds} seconds!",
+    "rewardCoins": "{score} points: {coins} coins",
+    "rewardBooster": "{score} points: a booster of the latest set",
+    "oncePerDay": "One reward a day: the first game that earns one. You can then keep playing for the high score.",
+    "play": "Play",
+    "shoot": "Shoot!",
+    "score": "Score",
+    "time": "Time",
+    "highScore": "High score",
+    "newHighScore": "New high score!",
+    "result": "Final score: {score}",
+    "noReward": "No reward this time. Keep practising!",
+    "coins": "+{coins} coins",
+    "booster": "+1 {set} booster",
+    "alreadyPaid": "Today's reward is already yours: this game only counts for the high score. Come back tomorrow for another one!",
+    "playAgain": "Play again",
+    "leave": "Leave",
+    "error": "The machine is out of order. Please try again.",
+    "swish": "Swish! +3",
+    "basket": "Basket! +2",
+    "miss": "Missed!"
   }
 }
