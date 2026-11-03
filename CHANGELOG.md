@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.43](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.42...v0.1.43) (2026-11-03)
+
+### Features
+
+* **city:** rebuild the bedroom in paper ([#43](https://github.com/MathieuMamath/tcg-master-set/issues/43)) ([ebec2f4](https://github.com/MathieuMamath/tcg-master-set/commit/ebec2f415faa9d615d5073c172162d3e5fe1253f))
+
 ## [0.1.42](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.41...v0.1.42) (2026-11-03)
 
 ### Features
