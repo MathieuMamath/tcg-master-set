@@ -165,7 +165,7 @@ function SealedPack({
         <span
           aria-hidden="true"
           style={{ left: `${progress * 100}%` }}
-          className="absolute top-[13%] -translate-x-1/2 -translate-y-1/2 rounded-full border-3 border-ui-ink bg-ui-paper px-1.5 text-lg text-ui-ink"
+          className="absolute top-[13%] -translate-x-1/2 -translate-y-1/2 ui-scrap px-1.5 text-lg text-ui-ink"
         >
           ✂
         </span>
@@ -178,7 +178,7 @@ function SealedPack({
         <button
           type="button"
           onClick={onCancel}
-          className="fixed top-4 right-4 cursor-pointer rounded-full border-4 border-ui-ink bg-ui-paper px-4 py-1 font-semibold text-ui-ink"
+          className="fixed top-4 right-4 cursor-pointer ui-paper-button bg-ui-paper px-4 py-1 font-semibold text-ui-ink"
         >
           {t('cancel')}
         </button>
@@ -215,7 +215,7 @@ function GodPackBanner() {
   const t = useTranslations('Booster');
 
   return (
-    <p className="ui-god-pack-banner rounded-full border-4 border-ui-ink bg-ui-accent px-5 py-0.5 text-2xl font-bold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]">
+    <p className="ui-god-pack-banner ui-paper-button bg-ui-accent px-5 py-0.5 text-2xl font-bold text-ui-ink">
       {t('godPack')}
     </p>
   );
@@ -326,7 +326,7 @@ function Reveal({
       <button
         type="button"
         onClick={() => (isLast ? onFinished() : setRevealed(revealed + 1))}
-        className={`cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)] ${
+        className={`cursor-pointer ui-paper-button bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink ${
           isTeasing ? 'ui-pull-tease' : ''
         }`}
       >
@@ -390,7 +390,7 @@ function EnlargedCard({ card, onClose }: { card: RevealedCard; onClose: () => vo
         ref={back}
         type="button"
         onClick={onClose}
-        className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
+        className="cursor-pointer ui-paper-button bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink"
       >
         {t('back')}
       </button>
@@ -414,7 +414,7 @@ function Summary({
   return (
     <div className="relative flex h-full flex-col items-center justify-center gap-4">
       {isGodPack && <GodPackBanner />}
-      <h2 className="text-2xl font-semibold text-ui-paper">{t('summaryTitle')}</h2>
+      <h2 className="font-display text-2xl text-ui-paper">{t('summaryTitle')}</h2>
       <ul inert={enlarged !== null} className="grid w-full max-w-3xl grid-cols-5 gap-1.5 sm:gap-2">
         {cards.map((card) => (
           <li key={card.id} className="ui-pop-in aspect-[5/7]">
@@ -453,7 +453,7 @@ function Summary({
         type="button"
         inert={enlarged !== null}
         onClick={onClose}
-        className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)]"
+        className="cursor-pointer ui-paper-button bg-ui-accent px-6 py-1.5 text-lg font-semibold text-ui-ink"
       >
         {t('done')}
       </button>
@@ -534,14 +534,14 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
             <button
               type="button"
               onClick={onCut}
-              className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-5 py-1.5 font-semibold text-ui-ink"
+              className="cursor-pointer ui-paper-button bg-ui-accent px-5 py-1.5 font-semibold text-ui-ink"
             >
               {t('retry')}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="cursor-pointer rounded-full border-4 border-ui-paper px-5 py-1.5 font-semibold"
+              className="cursor-pointer ui-paper-button border-2 border-ui-paper px-5 py-1.5 font-semibold"
             >
               {t('back')}
             </button>

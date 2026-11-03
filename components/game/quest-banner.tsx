@@ -31,7 +31,7 @@ export function QuestBanner({ startedAt, stainsLeft, onTimeUp }: Props) {
 
   return (
     <p
-      className={`pointer-events-none absolute inset-x-0 top-16 mx-auto flex w-fit items-center gap-3 rounded-full border-3 border-ui-ink bg-ui-paper px-4 py-1 font-game font-semibold tabular-nums ${
+      className={`pointer-events-none absolute inset-x-0 top-16 mx-auto flex w-fit items-center gap-3 ui-scrap px-4 py-1 font-game font-semibold tabular-nums ${
         left <= URGENT_SECONDS ? 'text-ui-danger' : 'text-ui-ink'
       }`}
     >

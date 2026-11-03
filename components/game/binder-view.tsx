@@ -30,10 +30,10 @@ import { TiltCard } from './tilt-card';
 import { useWideScreen } from './use-wide-screen';
 
 const CLOSE_BUTTON_CLASS =
-  'cursor-pointer rounded-full border-4 border-ui-ink bg-ui-paper px-4 py-1 font-semibold text-ui-ink';
+  'cursor-pointer ui-paper-button bg-ui-paper px-4 py-1 font-semibold text-ui-ink';
 const POCKET_CLASS = 'relative aspect-[5/7] rounded-[4.5%/3.2%]';
 const NAV_BUTTON_CLASS =
-  'cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-4 py-1 font-semibold text-ui-ink shadow-[0_4px_0_var(--ui-ink)] aria-disabled:cursor-default aria-disabled:opacity-40';
+  'cursor-pointer ui-paper-button bg-ui-accent px-4 py-1 font-semibold text-ui-ink aria-disabled:cursor-default aria-disabled:opacity-40';
 
 type Catalogue = { setName: string; cards: BinderCard[] };
 
@@ -48,7 +48,7 @@ function VariantTag({ variant }: { variant: string }) {
     return null;
   }
   return (
-    <span className="absolute inset-x-0 bottom-1 mx-auto w-fit rounded-full border-2 border-ui-ink bg-ui-accent px-1.5 text-[0.65rem] leading-4 font-semibold text-ui-ink">
+    <span className="absolute inset-x-0 bottom-1 mx-auto w-fit ui-scrap bg-ui-accent px-1.5 text-[0.65rem] leading-4 font-semibold text-ui-ink">
       {t(variant)}
     </span>
   );
@@ -79,7 +79,7 @@ function Pocket({ slot, count, onOpen }: { slot: BinderSlot; count: number; onOp
       <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="low" />
       <VariantTag variant={slot.variant} />
       {count > 1 && (
-        <span className="absolute -top-1 -right-1 rounded-full border-2 border-ui-ink bg-ui-paper px-1.5 text-xs font-semibold text-ui-ink">
+        <span className="absolute -top-1 -right-1 ui-scrap px-1.5 text-xs font-semibold text-ui-ink">
           ×{count}
         </span>
       )}
@@ -198,7 +198,7 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
       className="flex h-full flex-col items-center gap-3"
     >
       <div className="text-center text-ui-paper">
-        <h2 className="text-xl font-semibold">{catalogue.setName}</h2>
+        <h2 className="font-display text-xl">{catalogue.setName}</h2>
         <p>{t('progress', { owned: ownedSlotCount(slots, collection), total: slots.length })}</p>
       </div>
       <div inert={detail !== null} className="flex min-h-0 w-full justify-center gap-2">
@@ -390,7 +390,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
       {!chosenSet && (
         <div className="flex h-full flex-col items-center gap-5 overflow-y-auto pt-10 sm:pt-0">
           <div className="my-auto flex w-full flex-col items-center gap-5 py-2">
-            <h2 className="text-center text-2xl font-semibold text-ui-paper">
+            <h2 className="text-center font-display text-2xl text-ui-paper">
               {sets.length > 0 ? t('chooseBinder') : t('noBinderYet')}
             </h2>
             {sets.length > 0 && binders.every(({ owned }) => owned === 0) && (

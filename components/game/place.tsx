@@ -301,7 +301,7 @@ export type ShopSigns = Record<
 
 const SIGN_WIDTH = 1.6;
 const SIGN_HEIGHT = 0.34;
-const SIGN_FONT = '"Fredoka Variable", sans-serif';
+const SIGN_FONT = '"Bagel Fat One", sans-serif';
 
 // A lit panel on a wall, saying what is sold there.
 function TextSign({
@@ -316,7 +316,7 @@ function TextSign({
   const [fontIsReady, setFontIsReady] = useState(false);
 
   useEffect(() => {
-    document.fonts.load(`600 72px ${SIGN_FONT}`).then(() => setFontIsReady(true));
+    document.fonts.load(`72px ${SIGN_FONT}`).then(() => setFontIsReady(true));
   }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontIsReady exists to draw it again.
@@ -333,7 +333,7 @@ function TextSign({
       context.textBaseline = 'middle';
       let size = 120;
       do {
-        context.font = `600 ${size}px ${SIGN_FONT}`;
+        context.font = `${size}px ${SIGN_FONT}`;
         size -= 4;
       } while (context.measureText(text).width > canvas.width - 80 && size > 24);
       context.fillText(text, canvas.width / 2, canvas.height / 2 + 6);

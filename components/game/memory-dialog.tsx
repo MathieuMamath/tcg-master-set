@@ -14,7 +14,7 @@ import type { Wallet } from '@/game/shop-dialogue';
 import type { MemoryFlipAnswer } from '@/player/progress';
 import { CardBack } from './card-back';
 import { CardPicture } from './card-picture';
-import { CHOICE_CLASS, ChoiceMarker } from './shop-dialog';
+import { CHOICE_CLASS } from './shop-dialog';
 
 const COLUMNS = 4;
 // Long enough to remember two different cards before they turn back.
@@ -133,10 +133,10 @@ export function MemoryDialog({ cards, onEnd, onGiveUp }: Props) {
       ref={dialog}
       aria-labelledby="memory-title"
       onClose={onGiveUp}
-      className="ui-pop-in m-auto max-h-dvh w-[min(100%,calc(54dvh+2rem))] overflow-auto rounded-2xl border-4 border-ui-ink bg-ui-paper p-3 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-black/50"
+      className="ui-pop-in m-auto max-h-dvh w-[min(100%,calc(54dvh+2rem))] overflow-auto ui-scrap p-3 font-game text-ui-ink backdrop:bg-black/50"
     >
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3">
-        <h2 id="memory-title" className="text-lg font-semibold">
+        <h2 id="memory-title" className="font-display text-lg">
           {t('title')}
         </h2>
         <p aria-live="polite" className="text-sm font-semibold tabular-nums">
@@ -184,7 +184,6 @@ export function MemoryDialog({ cards, onEnd, onGiveUp }: Props) {
       </div>
       <form method="dialog" className="mt-2">
         <button type="submit" className={CHOICE_CLASS}>
-          <ChoiceMarker />
           {t('giveUp')}
         </button>
       </form>

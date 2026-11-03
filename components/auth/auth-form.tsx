@@ -16,7 +16,7 @@ import {
 import { Link } from '@/i18n/navigation';
 
 const INPUT_CLASS =
-  'w-full rounded-lg border-3 border-ui-ink bg-white px-3 py-2 text-lg text-ui-ink outline-none focus:bg-ui-accent/20';
+  'w-full rounded-sm border-2 border-ui-ink/30 bg-white px-3 py-2 text-lg text-ui-ink outline-none focus:border-ui-ink focus:bg-ui-accent/20';
 
 function Field({
   label,
@@ -81,8 +81,8 @@ export function AuthForm({ mode }: Props) {
 
   return (
     <main className="flex flex-1 items-center justify-center p-4 font-game">
-      <div className="ui-pop-in w-full max-w-md rounded-2xl border-4 border-ui-ink bg-ui-paper p-6 text-ui-ink shadow-[0_6px_0_var(--ui-ink)]">
-        <h1 className="text-2xl font-semibold">{t(isSignup ? 'signupTitle' : 'loginTitle')}</h1>
+      <div className="ui-pop-in w-full max-w-md ui-scrap p-6 text-ui-ink">
+        <h1 className="font-display text-3xl">{t(isSignup ? 'signupTitle' : 'loginTitle')}</h1>
         <p className="mt-1 opacity-80">{t(isSignup ? 'signupIntro' : 'loginIntro')}</p>
         <form onSubmit={onSubmit} className="mt-5 flex flex-col gap-4">
           {isSignup && (
@@ -116,7 +116,7 @@ export function AuthForm({ mode }: Props) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="cursor-pointer rounded-full border-4 border-ui-ink bg-ui-accent px-5 py-2 text-lg font-semibold shadow-[0_4px_0_var(--ui-ink)] disabled:cursor-wait disabled:opacity-60"
+            className="cursor-pointer ui-paper-button bg-ui-accent px-5 py-2 text-lg font-semibold disabled:cursor-wait disabled:opacity-60"
           >
             {t(isSignup ? 'signupAction' : 'loginAction')}
           </button>

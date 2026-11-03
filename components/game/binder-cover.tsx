@@ -8,7 +8,7 @@ export function BinderCover({ set, owned }: { set: PlayableSet; owned: number })
   return (
     <span
       style={{ background: packBackground(set.id) }}
-      className="absolute inset-0 overflow-hidden rounded-xl border-4 border-ui-ink text-center text-ui-paper shadow-[0_8px_0_var(--ui-ink)]"
+      className="absolute inset-0 overflow-hidden rounded-xl border-4 border-ui-ink text-center text-ui-paper shadow-[4px_6px_0_var(--ui-shadow)]"
     >
       <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[13%] bg-ui-ink/70">
         {RINGS.map((position) => (
@@ -55,7 +55,7 @@ function WideOpening({ set, owned }: { set: PlayableSet; owned: number }) {
   return (
     <div className="flex h-full flex-col items-center gap-3">
       <div className="text-center text-ui-paper">
-        <h2 className="text-xl font-semibold">{set.name}</h2>
+        <h2 className="font-display text-xl">{set.name}</h2>
         <p aria-hidden="true">&nbsp;</p>
       </div>
       <div className="flex min-h-0 w-full justify-center gap-2">

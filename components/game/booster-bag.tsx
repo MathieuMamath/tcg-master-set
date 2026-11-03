@@ -26,9 +26,9 @@ export function BoosterBag({ boosters, onPick, onClose }: Props) {
       aria-labelledby="booster-bag-title"
       onClose={onClose}
       onKeyDown={moveThroughChoices}
-      className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-2xl border-4 border-ui-ink bg-ui-paper p-5 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-ui-ink/50"
+      className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto ui-scrap p-5 font-game text-ui-ink backdrop:bg-ui-ink/50"
     >
-      <h2 id="booster-bag-title" className="text-center text-xl font-semibold">
+      <h2 id="booster-bag-title" className="text-center font-display text-xl">
         {t('bagTitle')}
       </h2>
       <div className="mt-4 flex flex-wrap justify-center gap-5 pt-1 pr-1">
@@ -48,7 +48,7 @@ export function BoosterBag({ boosters, onPick, onClose }: Props) {
             />
             <span
               aria-hidden="true"
-              className="absolute -top-2 -right-2 rounded-full border-3 border-ui-ink bg-ui-accent px-2 font-semibold"
+              className="absolute -top-2 -right-2 ui-scrap bg-ui-accent px-2 font-semibold"
             >
               ×{count}
             </span>

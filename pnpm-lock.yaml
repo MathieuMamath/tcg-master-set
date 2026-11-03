@@ -8,8 +8,14 @@ importers:
 
   .:
     dependencies:
-      '@fontsource-variable/fredoka':
-        specifier: ^5.3.0
+      '@fontsource/bagel-fat-one':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/courier-prime':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/patrick-hand':
+        specifier: 5.3.0
         version: 5.3.0
       '@react-three/fiber':
         specifier: ^9.8.2
@@ -714,8 +720,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fontsource-variable/fredoka@5.3.0':
-    resolution: {integrity: sha512-13w98iw2RcmYfZQRZPLSu+0YJK3HHm5A2XrpU26moFIAePmfiKfvkmEJUgkc8r5GNR+pbDijOueS1KdGAMAWmQ==}
+  '@fontsource/bagel-fat-one@5.3.0':
+    resolution: {integrity: sha512-rT3HoY0O7+rfK8WA4ddkIc+6ushm/yjbdoc5l7jo58Si6S2XPUae8whLdLqFcrcXF9DGLaxin9FNAUaAKX5N+A==}
+
+  '@fontsource/courier-prime@5.3.0':
+    resolution: {integrity: sha512-KIi1k4VG1Wv+/CGpb1AUpLkUuOAQA6zmvthqxOZGN0AV8BEgQgbK7qAtquv14zsBJAY1bb5BHIEbWVFLgENh0w==}
+
+  '@fontsource/patrick-hand@5.3.0':
+    resolution: {integrity: sha512-V8C38IlIFfdWg0Xtri3F7sLCVpm069rUwn6w4n+oyn38gt7H4arOJmuReg3tAw1Q6jHqZp89wTnAAJagq4Atxw==}
 
   '@formatjs/fast-memoize@3.1.7':
     resolution: {integrity: sha512-zXfhLpvA6T7+efdt9JLbBwZ00tT7NsBMDVnDu8rpHeNNv8KfRZAMo2gkG0k9lK/Nzc//3kJ9pImsfuJxk3KhUA==}
@@ -3083,7 +3095,11 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@fontsource-variable/fredoka@5.3.0': {}
+  '@fontsource/bagel-fat-one@5.3.0': {}
+
+  '@fontsource/courier-prime@5.3.0': {}
+
+  '@fontsource/patrick-hand@5.3.0': {}
 
   '@formatjs/fast-memoize@3.1.7': {}
 

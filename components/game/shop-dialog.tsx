@@ -1,23 +1,46 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import type { SetId } from '@/game/card-sets';
 import type { ShopkeeperLine, ShopkeeperStock } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 import { moveThroughChoices } from './menu-focus';
 
+// A choice is a small scrap of paper, each one tilted the other way from the one before.
 export const CHOICE_CLASS =
-  'group flex w-full cursor-pointer items-center aria-disabled:cursor-wait gap-2 rounded-lg px-2 py-1.5 text-left text-lg font-medium outline-none hover:bg-ui-accent/40 focus-visible:bg-ui-accent/70';
+  'inline-flex cursor-pointer items-center rounded-xs bg-[#e6ece8] px-3.5 pt-1.5 pb-1 text-left text-lg text-ui-ink shadow-[2px_3px_0_var(--ui-shadow)] outline-none transition-transform odd:-rotate-[0.8deg] even:rotate-[0.8deg] hover:-translate-y-0.5 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-dashed focus-visible:outline-ui-stamp aria-disabled:cursor-wait';
 
-export function ChoiceMarker() {
+type SpeechBoxProps = {
+  nameId: string;
+  name: string;
+  children: ReactNode;
+};
+
+// The scrap of torn paper where a character talks, with a round portrait on its left. The
+// portraits are blank until the characters get their drawings.
+export function SpeechBox({ nameId, name, children }: SpeechBoxProps) {
   return (
-    <span
-      aria-hidden="true"
-      className="ui-nudge text-ui-accent-dark opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
-    >
-      ▶
-    </span>
+    <div className="relative -rotate-[0.5deg] drop-shadow-[4px_5px_0_var(--ui-shadow)]">
+      <span
+        aria-hidden="true"
+        className="absolute -top-2.5 left-[28%] z-10 h-5 w-[4.4rem] -rotate-[4deg] bg-(--ui-tape)"
+      />
+      <div className="ui-torn grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 bg-ui-paper px-4 pt-4 pb-5 sm:gap-[1.125rem] sm:px-6 sm:pt-5 sm:pb-6">
+        <span
+          aria-hidden="true"
+          className="grid size-14 place-items-center rounded-full border-3 border-ui-paper bg-[#e7d9bc] font-display text-2xl text-ui-ink/40 ring-2 ring-[#8e6b3e] sm:size-26 sm:text-5xl"
+        >
+          {name.charAt(0)}
+        </span>
+        <div className="min-w-0">
+          <h2 id={nameId} className="font-display text-lg">
+            {name}
+          </h2>
+          {children}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -45,7 +68,7 @@ export function TypedLine({ text }: { text: string }) {
 
   return (
     // Phones keep room for two lines, so that the dialog doesn't change size from one line to the next.
-    <p className="min-h-14 text-xl leading-7 sm:min-h-0">
+    <p className="mt-1 min-h-14 text-xl leading-snug sm:min-h-[3.5em]">
       <span className="sr-only" aria-live="polite">
         {text}
       </span>
@@ -89,21 +112,15 @@ export function ShopDialog({ stock, choices, onBuy, onClose }: Props) {
       aria-labelledby="shopkeeper-name"
       onClose={onClose}
       onKeyDown={moveThroughChoices}
-      className="ui-pop-in mx-auto mt-auto mb-4 w-[calc(100%-2rem)] max-w-2xl overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-transparent"
+      className="ui-pop-in mx-auto mt-auto mb-4 w-[min(41.25rem,calc(100%-2rem))] max-w-none overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-transparent"
     >
-      <h2
-        id="shopkeeper-name"
-        className="relative z-10 ml-5 w-fit -rotate-1 rounded-lg border-4 border-ui-ink bg-ui-accent px-4 py-0.5 text-lg font-semibold"
-      >
-        {t(`names.${stock}`)}
-      </h2>
-      <div className="-mt-3 rounded-2xl border-4 border-ui-ink bg-ui-paper px-5 pt-6 pb-3 shadow-[0_6px_0_var(--ui-ink)]">
+      <SpeechBox nameId="shopkeeper-name" name={t(`names.${stock}`)}>
         <TypedLine
           key={speech.turn}
           text={speech.line === 'greeting' ? t(`greetings.${stock}`) : t(speech.line)}
         />
-        <form method="dialog" className="mt-2 border-ui-ink/20 border-t-2 pt-2">
-          <div className="max-h-[35dvh] overflow-y-auto">
+        <form method="dialog" className="mt-2.5">
+          <div className="-m-1 flex max-h-[35dvh] flex-wrap gap-2.5 overflow-y-auto p-1">
             {choices.map(({ setId, label, isUnavailable = false }) => (
               <button
                 key={setId}
@@ -121,17 +138,15 @@ export function ShopDialog({ stock, choices, onBuy, onClose }: Props) {
                   setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
                 }}
               >
-                <ChoiceMarker />
                 {label}
               </button>
             ))}
+            <button type="submit" className={CHOICE_CLASS}>
+              {t('leave')}
+            </button>
           </div>
-          <button type="submit" className={CHOICE_CLASS}>
-            <ChoiceMarker />
-            {t('leave')}
-          </button>
         </form>
-      </div>
+      </SpeechBox>
     </dialog>
   );
 }

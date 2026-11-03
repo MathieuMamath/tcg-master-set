@@ -36,9 +36,9 @@ export function SettingsMenu({ onClose }: Props) {
       aria-labelledby="settings-title"
       onClose={onClose}
       onKeyDown={moveThroughChoices}
-      className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-sm overflow-y-auto rounded-2xl border-4 border-ui-ink bg-ui-paper p-5 font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-ui-ink/50"
+      className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-sm overflow-y-auto ui-scrap p-5 font-game text-ui-ink backdrop:bg-ui-ink/50"
     >
-      <h2 id="settings-title" className="text-center text-xl font-semibold">
+      <h2 id="settings-title" className="text-center font-display text-xl">
         {t('title')}
       </h2>
       <fieldset className="mt-4">
@@ -48,7 +48,7 @@ export function SettingsMenu({ onClose }: Props) {
             <label
               key={language}
               lang={language}
-              className="cursor-pointer rounded-full border-3 border-ui-ink py-1 text-center font-semibold outline-offset-2 hover:bg-ui-accent/40 has-checked:bg-ui-accent has-focus-visible:outline-2"
+              className="cursor-pointer ui-paper-button bg-ui-paper py-1 text-center font-semibold outline-offset-2 hover:bg-ui-accent/40 has-checked:bg-ui-accent has-focus-visible:outline-2"
             >
               <input
                 type="radio"
@@ -65,7 +65,7 @@ export function SettingsMenu({ onClose }: Props) {
       <button
         type="button"
         onClick={signOut}
-        className="mt-5 w-full cursor-pointer rounded-full border-3 border-ui-ink py-1 font-semibold hover:bg-ui-ink/10"
+        className="mt-5 w-full cursor-pointer ui-paper-button bg-ui-paper py-1 font-semibold hover:bg-ui-ink/10"
       >
         {t('signOut')}
       </button>

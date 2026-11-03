@@ -8,7 +8,7 @@ import type { Wallet } from '@/game/shop-dialogue';
 import type { FishingCatch } from '@/player/progress';
 import { moveThroughChoices } from './menu-focus';
 import type { QuestLine } from './quest-dialog';
-import { CHOICE_CLASS, ChoiceMarker } from './shop-dialog';
+import { CHOICE_CLASS } from './shop-dialog';
 
 const FISH_COLORS: Record<Fish, { body: string; belly: string; fin: string }> = {
   common: { body: '#e4572e', belly: '#f7d7b5', fin: '#f2efe6' },
@@ -110,9 +110,9 @@ export function FishingDialog({ sets, onReelIn, onEnd }: Props) {
       aria-labelledby="fishing-title"
       onClose={() => (caught ? giveFish() : onEnd('failed'))}
       onKeyDown={moveThroughChoices}
-      className="ui-pop-in m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl border-4 border-ui-ink bg-ui-paper font-game text-ui-ink shadow-[0_6px_0_var(--ui-ink)] backdrop:bg-black/40"
+      className="ui-pop-in m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden ui-scrap font-game text-ui-ink backdrop:bg-black/40"
     >
-      <h2 id="fishing-title" className="px-4 pt-2 text-lg font-semibold">
+      <h2 id="fishing-title" className="px-4 pt-2 font-display text-lg">
         {t('title')}
       </h2>
       <div
@@ -167,12 +167,10 @@ export function FishingDialog({ sets, onReelIn, onEnd }: Props) {
           onClick={pressMain}
           className={CHOICE_CLASS}
         >
-          <ChoiceMarker />
           {mainLabel}
         </button>
         {!fish && step !== 'reeling' && (
           <button type="submit" className={CHOICE_CLASS}>
-            <ChoiceMarker />
             {t('giveUp')}
           </button>
         )}

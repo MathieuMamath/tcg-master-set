@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type { QuestGiver } from '@/game/world';
 import { moveThroughChoices } from './menu-focus';
-import { CHOICE_CLASS, ChoiceMarker, TypedLine } from './shop-dialog';
+import { CHOICE_CLASS, SpeechBox, TypedLine } from './shop-dialog';
 
 export type QuestLine =
   | 'greeting'
@@ -46,15 +46,9 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
       aria-labelledby="quest-speaker"
       onClose={onClose}
       onKeyDown={moveThroughChoices}
-      className="ui-pop-in mx-auto mt-auto mb-4 w-[calc(100%-2rem)] max-w-2xl overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-transparent"
+      className="ui-pop-in mx-auto mt-auto mb-4 w-[min(41.25rem,calc(100%-2rem))] max-w-none overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-transparent"
     >
-      <h2
-        id="quest-speaker"
-        className="relative z-10 ml-5 w-fit -rotate-1 rounded-lg border-4 border-ui-ink bg-ui-accent px-4 py-0.5 text-lg font-semibold"
-      >
-        {t(`${giver}.name`)}
-      </h2>
-      <div className="-mt-3 rounded-2xl border-4 border-ui-ink bg-ui-paper px-5 pt-6 pb-3 shadow-[0_6px_0_var(--ui-ink)]">
+      <SpeechBox nameId="quest-speaker" name={t(`${giver}.name`)}>
         <TypedLine
           key={speech.turn}
           text={
@@ -62,13 +56,13 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
             t(`${giver}.lines.${speech.line}` as 'grandma.lines.greeting')
           }
         />
-        <form method="dialog" className="mt-2 border-ui-ink/20 border-t-2 pt-2">
+        <form method="dialog" className="mt-2.5 flex flex-wrap gap-2.5">
           {canAccept && (
             <button
               type="button"
               // Not `disabled`, which would take the focus away from the keyboard.
               aria-disabled={isAsking}
-              className={CHOICE_CLASS}
+              className={`${CHOICE_CLASS} bg-ui-stamp text-ui-paper`}
               onClick={async () => {
                 if (isAsking) {
                   return;
@@ -83,16 +77,14 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
                 }
               }}
             >
-              <ChoiceMarker />
               {speech.line === 'failed' ? t('retry') : t(`${giver}.accept`)}
             </button>
           )}
           <button type="submit" className={CHOICE_CLASS}>
-            <ChoiceMarker />
             {t('leave')}
           </button>
         </form>
-      </div>
+      </SpeechBox>
     </dialog>
   );
 }
