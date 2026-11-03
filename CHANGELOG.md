@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.44](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.43...v0.1.44) (2026-11-03)
+
+### Features
+
+* **city:** add the street in paper with our house and the closed shop ([#44](https://github.com/MathieuMamath/tcg-master-set/issues/44)) ([2efd1d8](https://github.com/MathieuMamath/tcg-master-set/commit/2efd1d8fdd4cd4abae8d6325715c8ae25a5f11ef))
+
 ## [0.1.43](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.42...v0.1.43) (2026-11-03)
 
 ### Features
