@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.39](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.38...v0.1.39) (2026-11-03)
+
+### Documentation
+
+* state that desktop comes first and phones only need to work ([#39](https://github.com/MathieuMamath/tcg-master-set/issues/39)) ([b8b8016](https://github.com/MathieuMamath/tcg-master-set/commit/b8b801677523c4febf1a430e9b4ff6b368d37201))
+
 ## [0.1.38](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.37...v0.1.38) (2026-11-03)
 
 ### Features
