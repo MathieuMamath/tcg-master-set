@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.38](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.37...v0.1.38) (2026-11-03)
+
+### Features
+
+* **quests:** add an arcade with a basketball machine and a high score ([#38](https://github.com/MathieuMamath/tcg-master-set/issues/38)) ([6119c8c](https://github.com/MathieuMamath/tcg-master-set/commit/6119c8ce6cef9e94d00fbe71293311a1533a9f4c))
+
 ## [0.1.37](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.36...v0.1.37) (2026-11-02)
 
 ### Features
