@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.42](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.41...v0.1.42) (2026-11-03)
+
+### Features
+
+* **city:** disconnect the 3D map and add Pip, a paper fox ([#42](https://github.com/MathieuMamath/tcg-master-set/issues/42)) ([11c38a7](https://github.com/MathieuMamath/tcg-master-set/commit/11c38a74283cd402af065d921f16a5c2ae07c568))
+
 ## [0.1.41](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.40...v0.1.41) (2026-11-03)
 
 ### Features
