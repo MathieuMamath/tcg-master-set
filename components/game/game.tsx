@@ -21,6 +21,7 @@ import {
   totalBoosters,
   type Wallet,
 } from '@/game/shop-dialogue';
+import { isDoorInteraction } from '@/game/side-rooms';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type { BasketballResult, FishingCatch, PlayerProgress } from '@/player/progress';
 import { AnimatedCount } from './animated-count';
@@ -44,6 +45,16 @@ const PaperScene = dynamic(() => import('./paper-scene').then((module) => module
 });
 
 const INTERACT_KEY = 'KeyE';
+
+type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver;
+
+// Talking to someone gets a speech bubble over their head, and everything else a prompt at the
+// bottom of the screen.
+function isTalk(interaction: Interaction): interaction is Talk {
+  return (
+    !isDoorInteraction(interaction) && interaction !== 'binder' && interaction !== 'basketball'
+  );
+}
 const DASH_KEY = 'Space';
 
 type Props = {
@@ -90,6 +101,7 @@ export function Game({ player, sets, progress }: Props) {
   const tSettings = useTranslations('Settings');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tTown = useTranslations('Town');
+  const tHails = useTranslations('Hails');
   const isDialogOpen =
     isTalking ||
     isBinderOpen ||
@@ -103,6 +115,7 @@ export function Game({ player, sets, progress }: Props) {
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
   const boosterTotal = totalBoosters(wallet);
+  const bubble = useRef<HTMLButtonElement>(null);
   const controls = useRef({ interaction, isDialogOpen });
   controls.current = { interaction, isDialogOpen };
 
@@ -137,10 +150,7 @@ export function Game({ player, sets, progress }: Props) {
         releaseKeys();
         if (controls.current.interaction === 'binder') {
           setIsBinderOpen(true);
-        } else if (
-          controls.current.interaction === 'leaveHome' ||
-          controls.current.interaction === 'goHome'
-        ) {
+        } else if (isDoorInteraction(controls.current.interaction)) {
           input.current.wantsDoor = true;
         } else if (controls.current.interaction === 'basketball') {
           setIsPlayingBasketball(true);
@@ -188,7 +198,7 @@ export function Game({ player, sets, progress }: Props) {
     stopWalking();
     if (interaction === 'binder') {
       setIsBinderOpen(true);
-    } else if (interaction === 'leaveHome' || interaction === 'goHome') {
+    } else if (isDoorInteraction(interaction)) {
       input.current.wantsDoor = true;
     } else if (interaction === 'basketball') {
       setIsPlayingBasketball(true);
@@ -426,8 +436,14 @@ export function Game({ player, sets, progress }: Props) {
     <div className="absolute inset-0">
       <PaperScene
         input={input}
+        bubble={bubble}
         webglUnavailable={t('webglUnavailable')}
-        townSigns={{ shop: tTown('shop'), closed: tTown('closed') }}
+        signs={{
+          shop: tTown('shop'),
+          latest: tShopkeeper('names.latest'),
+          thisYear: tShopkeeper('names.thisYear'),
+          older: tShopkeeper('names.older'),
+        }}
         onInteractionChange={setInteraction}
       />
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
@@ -485,7 +501,31 @@ export function Game({ player, sets, progress }: Props) {
           </svg>
         </button>
       </div>
-      {interaction && !isDialogOpen && (
+      {interaction && !isDialogOpen && isTalk(interaction) && (
+        // A speech bubble that the scene moves just above the head of who the player can talk to.
+        <button
+          ref={bubble}
+          type="button"
+          aria-label={t(interaction)}
+          onClick={interact}
+          style={{ transform: 'translate(-200vw, 0)' }}
+          className="group absolute top-0 left-0 cursor-pointer pb-2.5 font-game text-xl text-ui-ink"
+        >
+          <span className="ui-pop-in flex items-center gap-2 rounded-[50%] bg-ui-paper px-9 py-3 shadow-[3px_4px_0_var(--ui-shadow)] transition-transform group-hover:-translate-y-0.5">
+            <kbd className="rounded-full bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
+              E
+            </kbd>
+            {/* What the character says, while the button's name says what pressing it does. */}
+            <span aria-hidden="true">{tHails(interaction)}</span>
+          </span>
+          {/* The bubble's tail, pointing down at the speaker. */}
+          <span
+            aria-hidden="true"
+            className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
+          />
+        </button>
+      )}
+      {interaction && !isDialogOpen && !isTalk(interaction) && (
         <button
           type="button"
           onClick={interact}

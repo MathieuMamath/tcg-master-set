@@ -25,7 +25,9 @@
     "boy": "Talk (little boy)",
     "basketball": "Play (basketball)",
     "leaveHome": "Go outside",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "enterShop": "Go into the shop",
+    "leaveShop": "Go outside"
   },
   "Shopkeeper": {
     "names": {
@@ -52,7 +54,17 @@
     "alreadyOwned": "You already have this binder.",
     "buyBinder": "Buy the {set} binder ({price} coins)",
     "binderOwned": "{set}: binder already bought",
-    "buyNeedsBinder": "{set}: binder needed first"
+    "buyNeedsBinder": "{set}: binder needed first",
+    "sellers": {
+      "latest": "Filou",
+      "thisYear": "Frimousse",
+      "older": "Fripouille"
+    },
+    "titles": {
+      "latest": "the eldest of the triplets",
+      "thisYear": "the middle triplet",
+      "older": "the youngest of the triplets"
+    }
   },
   "Booster": {
     "title": "Open a booster",
@@ -230,7 +242,15 @@
     "miss": "Missed!"
   },
   "Town": {
-    "shop": "Shop",
-    "closed": "Opening soon"
+    "shop": "The Card Den"
+  },
+  "Hails": {
+    "latest": "Welcome to the Den!",
+    "thisYear": "Hello, hello!",
+    "older": "Psst… come and see!",
+    "binderSeller": "Hello, little reader!",
+    "grandma": "Hello, dear!",
+    "grandpa": "Fancy a game?",
+    "boy": "Hey! Over here!"
   }
 }
