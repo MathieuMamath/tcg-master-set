@@ -15,7 +15,7 @@ import { isTearComplete, tearProgress } from '@/game/booster';
 import type { SetId } from '@/game/card-sets';
 import { type PullTier, packTier } from '@/game/pull-tier';
 import { CardBack } from './card-back';
-import { CardPicture } from './card-picture';
+import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
 import { moveThroughChoices } from './menu-focus';
 import { PackBody, packCrimpStyle } from './pack-art';
 import { PullRays, PullScene, tierColor, tierColors } from './pull-scene';
@@ -375,10 +375,10 @@ function EnlargedCard({ card, onClose }: { card: RevealedCard; onClose: () => vo
   }, [onClose]);
 
   return (
-    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
-      <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
+    <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
+      <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
         <TiltCard isSpecial={isSpecial(card)}>
-          <CardPicture name={card.name} imageUrl={card.imageUrl} quality="high" />
+          <CardPicture name={card.name} imageUrl={card.imageUrl} quality="max" />
           {card.isNew && <NewMark />}
         </TiltCard>
       </div>

@@ -24,7 +24,7 @@ import {
   WIDE_OPENING_MILLISECONDS,
   WIDE_PAGE_WIDTH_CLASS,
 } from './binder-cover';
-import { CardPicture } from './card-picture';
+import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
 import { isFocusLost, moveThroughChoices, moveThroughChoicesVertically } from './menu-focus';
 import { TiltCard } from './tilt-card';
 import { useWideScreen } from './use-wide-screen';
@@ -124,9 +124,9 @@ function CardDetail({
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
-      <div className="ui-pop-in aspect-[5/7] w-[min(100%,50vh,24rem)]">
+      <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
         <TiltCard isSpecial={slot.variant !== 'normal'}>
-          <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="high" />
+          <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="max" />
         </TiltCard>
       </div>
       <p className="text-center text-lg font-semibold text-ui-paper">
