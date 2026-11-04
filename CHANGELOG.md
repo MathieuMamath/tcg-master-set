@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.59](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.58...v0.1.59) (2026-11-04)
+
+### Features
+
+* **quests:** add Bérénice's raffle stand, a sixth daily quest ([#61](https://github.com/MathieuMamath/tcg-master-set/issues/61)) ([02e3e83](https://github.com/MathieuMamath/tcg-master-set/commit/02e3e83dfbdb96500de784d0853e06ff9e21ea1d))
+
 ## [0.1.58](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.57...v0.1.58) (2026-11-04)
 
 ### Features
