@@ -95,6 +95,15 @@ EOF
 
 A test plan that only says "ran the gate" verified nothing a reviewer could not have assumed.
 
-## 7. Report
+## 7. Turn on Auto-fix
 
-Give the PR URL as a markdown link, a one-line recap, and anything a reviewer should look at first. The merge itself is the user's. Once they say it's merged, `/sync` closes the loop.
+The owner wants Auto-fix on every PR, so turn it on without asking whenever this session can. In the Claude desktop app, that is the `ccd_pr` tools:
+
+1. `get_status`. If it doesn't report this PR, bind it with `bind_pr` and its URL.
+2. `set_monitor` with `auto_fix: true`, `address_comments: true` and the PR's URL.
+
+Elsewhere, such as in a terminal session without these tools, skip this step and say in the report that Auto-fix is off. If it fails, report the error rather than polling CI as a stand-in.
+
+## 8. Report
+
+Give the PR URL as a markdown link, a one-line recap, whether Auto-fix is on, and anything a reviewer should look at first. The merge itself is the user's. Once they say it's merged, `/sync` closes the loop.
