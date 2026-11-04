@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.47](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.46...v0.1.47) (2026-11-04)
+
+### Features
+
+* **boosters:** draw the packs and the bag in paper ([#47](https://github.com/MathieuMamath/tcg-master-set/issues/47)) ([2dbb045](https://github.com/MathieuMamath/tcg-master-set/commit/2dbb045fd9f5919b5feac0807d0d2688953cb486))
+
 ## [0.1.46](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.45...v0.1.46) (2026-11-04)
 
 ### Bug Fixes
