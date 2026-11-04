@@ -12,6 +12,7 @@ import {
 import { horizontalStep, verticalStep } from '@/game/menu-keys';
 import type { Wallet } from '@/game/shop-dialogue';
 import type { MemoryFlipAnswer } from '@/player/progress';
+import { CardBack } from './card-back';
 import { CardPicture } from './card-picture';
 import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
@@ -22,38 +23,6 @@ const SHOWN_MILLISECONDS = 1100;
 
 // Moves left from which the counter turns red.
 const FEW_MOVES = 5;
-
-// The back of Papy Caillou's cards: cream paper with the plates of a tortoise's shell.
-function ShellBack() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 50 70"
-      preserveAspectRatio="none"
-      className="block size-full rounded-[6%/4.5%]"
-    >
-      <rect width="50" height="70" rx="3" fill="#fbf6ea" />
-      <rect x="3" y="3" width="44" height="64" rx="2" fill="#8dba7a" />
-      <g fill="#b07a45" stroke="#8a5a35" strokeWidth="1.2">
-        <path d="M25 22 l7 4 v8 l-7 4 l-7 -4 v-8z" />
-        <path d="M25 6 l6 3.5 v6 l-6 3.5 l-6 -3.5 v-6z" />
-        <path d="M25 48 l6 3.5 v6 l-6 3.5 l-6 -3.5 v-6z" />
-        <path d="M11 28 l5 3 v6 l-5 3 l-5 -3 v-6z" />
-        <path d="M39 28 l5 3 v6 l-5 3 l-5 -3 v-6z" />
-      </g>
-      <rect
-        x="3"
-        y="3"
-        width="44"
-        height="64"
-        rx="2"
-        fill="none"
-        stroke="#fbf6ea"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
-}
 
 const POSITIONS = Array.from({ length: MEMORY_CARD_COUNT }, (_, position) => position);
 
@@ -237,7 +206,7 @@ export function MemoryDialog({ cards, onEnd, onGiveUp }: Props) {
                 } ${isFound ? 'cursor-default' : ''}`}
               >
                 <span className="absolute inset-0 backface-hidden">
-                  <ShellBack />
+                  <CardBack />
                 </span>
                 {/* The fade is on the picture alone: on the button, it would flatten the 3D turn. */}
                 <span

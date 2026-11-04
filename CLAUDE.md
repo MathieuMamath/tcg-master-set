@@ -12,6 +12,7 @@
 
 - **Never commit card data or card images**, nor any other third-party asset whose license allows no redistribution. They are imported at runtime or deploy time from outside the repository. The repository runs on placeholder cards.
 - **Keep the product name, domain, logos and repository metadata generic**, without third-party trademarks.
+  - **Temporary exception, decided by the owner**: the card back in `components/game/card-back.tsx`, used when opening boosters and in Papy Caillou's memory game, imitates the real cards' back. The owner allows it for now, knowing the consequences, and it is to be replaced by a back of our own later. Don't add other third-party designs on the strength of it.
 - **The server decides.** Booster draws, balances, duplicate coins and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. Coins, boosters and the collection live in the database and only change through `player/progress.ts`.
 - **No real money**: no payments, donations or ads.
 - **Single-player only.**
