@@ -3,6 +3,10 @@ import {
   BEDROOM,
   BEDROOM_FURNITURE,
   BEDROOM_WALLS,
+  BOOKSHOP,
+  BOOKSHOP_FURNITURE,
+  BOOKSHOP_SELLER_X,
+  BOOKSHOP_WALLS,
   exitAlong,
   interactionAlong,
   isDoorInteraction,
@@ -74,17 +78,19 @@ describe('the bedroom', () => {
 });
 
 describe('the street', () => {
-  test('both buildings stand on it, without overlapping', () => {
-    const { house, shop } = TOWN_BUILDINGS;
+  test('every building stands on it, without overlapping the next', () => {
+    const { house, shop, bookshop } = TOWN_BUILDINGS;
 
     expect(house.x - house.width / 2).toBeGreaterThan(TOWN_ENDS.left);
-    expect(shop.x + shop.width / 2).toBeLessThan(TOWN_ENDS.right);
+    expect(bookshop.x + bookshop.width / 2).toBeLessThan(TOWN_ENDS.right);
     expect(house.x + house.width / 2).toBeLessThan(shop.x - shop.width / 2);
+    expect(shop.x + shop.width / 2).toBeLessThan(bookshop.x - bookshop.width / 2);
   });
 
-  test('our house and the shop can both be entered', () => {
+  test('our house, the shop and the bookshop can all be entered', () => {
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.house.doorX)).toBe('goHome');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.shop.doorX)).toBe('enterShop');
+    expect(interactionAlong(TOWN, TOWN_BUILDINGS.bookshop.doorX)).toBe('enterBookshop');
   });
 });
 
@@ -125,6 +131,38 @@ describe('the shop', () => {
     const arrival = TOWN.exits.find(({ to }) => to === 'shop')?.arrival;
 
     expect(arrival && interactionAlong(SHOP, arrival.x)).toBe('leaveShop');
+  });
+});
+
+describe('the bookshop', () => {
+  test('Mamie Noisette sells binders in front of her pile of books', () => {
+    const { pile } = BOOKSHOP_FURNITURE;
+
+    // Standing in front of its left end, so that the pile and the till show beside her.
+    expect(Math.abs(BOOKSHOP_SELLER_X - pile.x)).toBeLessThan(pile.width);
+    expect(interactionAlong(BOOKSHOP, BOOKSHOP_SELLER_X)).toBe('binderSeller');
+    expect(speakerAlong(BOOKSHOP, BOOKSHOP_SELLER_X)).toEqual({
+      interaction: 'binderSeller',
+      x: BOOKSHOP_SELLER_X,
+    });
+  });
+
+  test('its furniture fits between the walls without overlapping', () => {
+    const pieces = Object.values(BOOKSHOP_FURNITURE).sort((a, b) => a.x - b.x);
+    for (const [index, { x, width }] of pieces.entries()) {
+      expect(x - width / 2).toBeGreaterThan(BOOKSHOP_WALLS.left);
+      expect(x + width / 2).toBeLessThan(BOOKSHOP_WALLS.right);
+      const next = pieces[index + 1];
+      if (next) {
+        expect(x + width / 2).toBeLessThan(next.x - next.width / 2);
+      }
+    }
+  });
+
+  test('arriving from the street, the player is at the door, not at the till', () => {
+    const arrival = TOWN.exits.find(({ to }) => to === 'bookshop')?.arrival;
+
+    expect(arrival && interactionAlong(BOOKSHOP, arrival.x)).toBe('leaveBookshop');
   });
 });
 

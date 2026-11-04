@@ -440,6 +440,7 @@ export function Game({ player, sets, progress }: Props) {
         webglUnavailable={t('webglUnavailable')}
         signs={{
           shop: tTown('shop'),
+          bookshop: tTown('bookshop'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),

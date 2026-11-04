@@ -27,14 +27,16 @@
     "leaveHome": "Sortir",
     "goHome": "Rentrer à la maison",
     "enterShop": "Entrer dans la boutique",
-    "leaveShop": "Sortir"
+    "leaveShop": "Sortir",
+    "enterBookshop": "Entrer dans la librairie",
+    "leaveBookshop": "Sortir"
   },
   "Shopkeeper": {
     "names": {
       "latest": "Nouveautés",
       "thisYear": "Cette année",
       "older": "Collections précédentes",
-      "binderSeller": "Bibliothèque",
+      "binderSeller": "Mamie Noisette",
       "park": "Parc",
       "arcade": "Arcade",
       "basketball": "Basket"
@@ -43,14 +45,14 @@
       "latest": "Bonjour ! Voici nos trois dernières collections.",
       "thisYear": "Bonjour ! J'ai les autres collections de cette année.",
       "older": "Bonjour ! Je garde toutes les collections précédentes.",
-      "binderSeller": "Bonjour ! Il te faut un classeur pour commencer une collection."
+      "binderSeller": "Oh, te revoilà mon petit ! Tu viens chercher un classeur pour ta collection ?"
     },
     "thanks": "Merci, et bonne chance pour tes cartes !",
     "notEnoughCoins": "Oups, il te manque des pièces.",
     "unavailable": "Oups, la caisse ne marche pas pour l'instant. Réessaie.",
     "buy": "Acheter un booster {set} ({price} pièces)",
     "leave": "Au revoir",
-    "needsBinder": "Il te faut d'abord son classeur. La bibliothèque d'à côté en vend.",
+    "needsBinder": "Il te faut d'abord son classeur. Mamie Noisette en vend à la librairie, juste après.",
     "alreadyOwned": "Tu as déjà ce classeur.",
     "buyBinder": "Acheter le classeur {set} ({price} pièces)",
     "binderOwned": "{set} : classeur déjà acheté",
@@ -63,7 +65,8 @@
     "titles": {
       "latest": "l’aînée des triplées",
       "thisYear": "la cadette des triplées",
-      "older": "la benjamine des triplées"
+      "older": "la benjamine des triplées",
+      "binderSeller": "la libraire du quartier"
     }
   },
   "Booster": {
@@ -114,7 +117,7 @@
       "firstEdition": "1re éd.",
       "wPromo": "Promo"
     },
-    "noBinderYet": "Achète ton premier classeur à la bibliothèque, après la boutique."
+    "noBinderYet": "Achète ton premier classeur chez Mamie Noisette, à la librairie après la boutique."
   },
   "Settings": {
     "open": "Réglages",
@@ -242,13 +245,14 @@
     "miss": "Raté !"
   },
   "Town": {
-    "shop": "La Tanière aux Cartes"
+    "shop": "La Tanière aux Cartes",
+    "bookshop": "Le Coin des Pages"
   },
   "Hails": {
     "latest": "Bienvenue à la Tanière !",
     "thisYear": "Bonjour, bonjour !",
     "older": "Psst… viens voir !",
-    "binderSeller": "Bonjour, petit lecteur !",
+    "binderSeller": "Te revoilà, mon petit !",
     "grandma": "Coucou, mon petit !",
     "grandpa": "Une petite partie ?",
     "boy": "Hé ! Par ici !"

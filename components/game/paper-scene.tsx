@@ -18,6 +18,9 @@ import {
   BEDROOM,
   BEDROOM_FURNITURE,
   BEDROOM_WALLS,
+  BOOKSHOP_FURNITURE,
+  BOOKSHOP_SELLER_X,
+  BOOKSHOP_WALLS,
   exitAlong,
   interactionAlong,
   SHOP_COUNTERS,
@@ -30,7 +33,14 @@ import {
   TOWN_BUILDINGS,
   TOWN_ENDS,
 } from '@/game/side-rooms';
-import { type Facing, sidePush, stepWalker, WALKING_SPEED, type Walker } from '@/game/side-walk';
+import {
+  cameraX as cameraTarget,
+  type Facing,
+  sidePush,
+  stepWalker,
+  WALKING_SPEED,
+  type Walker,
+} from '@/game/side-walk';
 import { skyLook } from '@/game/sky';
 import type { Interaction } from '@/game/world';
 import {
@@ -38,6 +48,9 @@ import {
   drawBed,
   drawBigPlant,
   drawBookcase,
+  drawBookPile,
+  drawBookshop,
+  drawBookWall,
   drawBoosterShelves,
   drawChair,
   drawCloud,
@@ -45,8 +58,10 @@ import {
   drawCounter,
   drawDesk,
   drawDoor,
+  drawHedgehog,
   drawHills,
   drawHouse,
+  drawMagazineRack,
   drawPip,
   drawPlanks,
   drawRaccoon,
@@ -55,10 +70,12 @@ import {
   drawSign,
   drawSky,
   drawSkyGradient,
+  drawStationeryTable,
   drawStreet,
   drawUprightCorrugatedEdge,
   drawWallpaper,
   drawWindowFrame,
+  HEDGEHOG_SIZE,
   paint,
   RACCOON_SIZE,
   SELLERS,
@@ -76,12 +93,17 @@ export type MovementInput = {
 };
 
 // The words painted in the scene, in the player's language.
-export type SceneSigns = { shop: string; latest: string; thisYear: string; older: string };
+export type SceneSigns = {
+  shop: string;
+  bookshop: string;
+  latest: string;
+  thisYear: string;
+  older: string;
+};
 
 const PIP_Z = 1.25;
 const PIP_HEIGHT = 1.75;
 const LOOK_HEIGHT = 2;
-const CAMERA_FOLLOW = 0.55;
 const FIELD_OF_VIEW = 28;
 // The width of the world the camera keeps in view, wider on a landscape screen.
 const VIEW_WIDTH_WIDE = 11.5;
@@ -440,6 +462,84 @@ function Shop({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
   );
 }
 
+const BOOK_WALL = { margin: 0.35, height: 2.95, centerY: 1.95 };
+const BOOKSELLER_HEIGHT = 3;
+const BOOKSELLER_Z = -0.5;
+const BOOK_WALL_WIDTH = BOOKSHOP_WALLS.right - BOOKSHOP_WALLS.left - BOOK_WALL.margin * 2;
+
+// The Page Nook: books from floor to ceiling, a rack of magazines, a table of notebooks and pens,
+// and Mamie Noisette in front of her pile of books, with the binders she sells on the shelves behind.
+function Bookshop({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
+  const { magazines, pile, table } = BOOKSHOP_FURNITURE;
+  const textures = useMemo(() => {
+    const pixels = BOOK_WALL_WIDTH * PIXELS_PER_UNIT;
+    const sellerOnWall =
+      (BOOKSHOP_SELLER_X - BOOKSHOP_WALLS.left - BOOK_WALL.margin) * PIXELS_PER_UNIT;
+    return {
+      room: {
+        wall: texture(drawWallpaper('#f1e2c6', 'rgb(160 110 60 / 16%)')),
+        floor: texture(drawPlanks()),
+        door: doorTexture(81),
+      },
+      shadow: texture(drawShadowBlob()),
+      books: texture(
+        paint(
+          pixels,
+          BOOK_WALL.height * PIXELS_PER_UNIT,
+          drawBookWall({ from: sellerOnWall - 120, to: sellerOnWall + 120 }),
+          82,
+        ),
+      ),
+      seller: texture(cutOut(HEDGEHOG_SIZE.width, HEDGEHOG_SIZE.height, drawHedgehog, 9, 83)),
+      pile: texture(cutOut(340, 220, drawBookPile, 8, 84)),
+      magazines: texture(cutOut(160, 190, drawMagazineRack, 8, 85)),
+      table: texture(cutOut(240, 150, drawStationeryTable, 8, 86)),
+    };
+  }, []);
+  return (
+    <>
+      <RoomShell walls={BOOKSHOP_WALLS} doorSide="left" textures={textures.room} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[
+          {
+            interaction: 'binderSeller',
+            map: textures.seller,
+            height: BOOKSELLER_HEIGHT,
+            z: BOOKSELLER_Z,
+          },
+        ]}
+      />
+      <mesh
+        position={[
+          (BOOKSHOP_WALLS.left + BOOKSHOP_WALLS.right) / 2,
+          BOOK_WALL.centerY,
+          WALL_Z + 0.01,
+        ]}
+      >
+        <planeGeometry args={[BOOK_WALL_WIDTH, BOOK_WALL.height]} />
+        <meshBasicMaterial map={textures.books} />
+      </mesh>
+      <Furniture
+        map={textures.magazines}
+        x={magazines.x}
+        z={-0.9}
+        height={1.95}
+        shadow={textures.shadow}
+      />
+      <Furniture map={textures.pile} x={pile.x} z={-1.2} height={1.6} shadow={textures.shadow} />
+      <Furniture
+        map={textures.seller}
+        x={BOOKSHOP_SELLER_X}
+        z={BOOKSELLER_Z}
+        height={BOOKSELLER_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture map={textures.table} x={table.x} z={-0.8} height={1.6} shadow={textures.shadow} />
+    </>
+  );
+}
+
 const STREET_FRONT_Z = 3;
 const CLOUD_SPAN = 50;
 const CLOUD_SPEED = 25;
@@ -458,7 +558,7 @@ const HILL_ROWS = [
   { z: -4, color: '#579552', hatch: '#3b7238', bumps: 9, height: 1.8, seed: 3 },
 ];
 
-// The street: a wide sky, rows of hills, our house and the shop.
+// The street: a wide sky, rows of hills, our house, the shop and the bookshop.
 function Town({ signs }: { signs: SceneSigns }) {
   const look = skyLook('day', 'fewClouds');
   const fontsReady = useFontsReady();
@@ -481,6 +581,11 @@ function Town({ signs }: { signs: SceneSigns }) {
     () => texture(cutOut(480, 380, drawShop(signs.shop), 9, 62)),
     [fontsReady, signs.shop],
   );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const bookshop = useMemo(
+    () => texture(cutOut(480, 380, drawBookshop(signs.bookshop), 9, 64)),
+    [fontsReady, signs.bookshop],
+  );
   const sky = useMemo(() => texture(drawSkyGradient(look)), [look]);
   const cloud = useMemo(() => texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)), [look]);
   const clouds = useRef<(Group | null)[]>([]);
@@ -497,8 +602,9 @@ function Town({ signs }: { signs: SceneSigns }) {
     }
   });
 
-  const { house, shop: shopPlace } = TOWN_BUILDINGS;
+  const { house, shop: shopPlace, bookshop: bookshopPlace } = TOWN_BUILDINGS;
   const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
+  const streetCenter = (TOWN_ENDS.left + TOWN_ENDS.right) / 2;
   return (
     <>
       <mesh position={[0, 7, -10]}>
@@ -517,15 +623,15 @@ function Town({ signs }: { signs: SceneSigns }) {
         </group>
       ))}
       {HILL_ROWS.map(({ z, height }, index) => (
-        <group key={z} position={[0, -0.15, z]}>
-          <CutOut map={textures.hills[index]} height={(height * 100 + 24) / 100} width={40} />
+        <group key={z} position={[streetCenter, -0.15, z]}>
+          <CutOut map={textures.hills[index]} height={(height * 100 + 24) / 100} width={56} />
         </group>
       ))}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -1]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[streetCenter, 0, -1]}>
         <planeGeometry args={[streetWidth, 8]} />
         <meshBasicMaterial map={textures.street} />
       </mesh>
-      <mesh position={[0, -0.18, STREET_FRONT_Z]}>
+      <mesh position={[streetCenter, -0.18, STREET_FRONT_Z]}>
         <boxGeometry args={[streetWidth, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
       </mesh>
@@ -539,6 +645,13 @@ function Town({ signs }: { signs: SceneSigns }) {
       <Furniture
         map={shop}
         x={shopPlace.x}
+        z={BUILDINGS_Z}
+        height={4.06}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={bookshop}
+        x={bookshopPlace.x}
         z={BUILDINGS_Z}
         height={4.06}
         shadow={textures.shadow}
@@ -674,9 +787,10 @@ function Pip({
     const viewWidth = aspect < 1 ? VIEW_WIDTH_TALL : VIEW_WIDTH_WIDE;
     const distance = Math.max(MIN_CAMERA_DISTANCE, viewWidth / 2 / (halfAngle * aspect));
     // On arriving somewhere, the camera starts where it belongs rather than sliding there.
+    const target = cameraTarget(room.bounds, x, viewWidth);
     const cameraX = hasPlacedCamera.current
-      ? camera.position.x + (x * CAMERA_FOLLOW - camera.position.x) * Math.min(1, delta * 3)
-      : x * CAMERA_FOLLOW;
+      ? camera.position.x + (target - camera.position.x) * Math.min(1, delta * 3)
+      : target;
     hasPlacedCamera.current = true;
     camera.position.set(cameraX, LOOK_HEIGHT + distance * 0.1, distance);
     camera.lookAt(cameraX, LOOK_HEIGHT, 0);
@@ -769,6 +883,7 @@ export function PaperScene({ input, webglUnavailable, signs, bubble, onInteracti
           {visit.place === 'bedroom' && <Bedroom />}
           {visit.place === 'town' && <Town signs={signs} />}
           {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
+          {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
           <Pip
             input={input}
             room={SIDE_PLACES[visit.place]}
