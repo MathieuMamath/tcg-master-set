@@ -141,7 +141,11 @@ export function drawPip(drawing: CanvasRenderingContext2D, width: number, height
   ellipse(x, cx - 34, by - 8, 26, 11);
   ellipse(x, cx + 40, by - 8, 26, 11);
 
-  // Ears, with their pale inside.
+  // Ears. They are drawn mirrored around the body's middle, so that the taller, lighter ear stands
+  // on the left and the darker one on the right.
+  x.save();
+  x.translate(2 * (cx + 4), 0);
+  x.scale(-1, 1);
   x.fillStyle = '#e2914c';
   x.beginPath();
   x.moveTo(cx - 60, by - 168);
@@ -158,19 +162,15 @@ export function drawPip(drawing: CanvasRenderingContext2D, width: number, height
   x.lineTo(cx + 46, by - 160);
   x.closePath();
   x.fill();
+  // Only the near ear shows its pale inside: the far one is seen from behind.
   x.fillStyle = '#f6c6a0';
-  x.beginPath();
-  x.moveTo(cx - 50, by - 182);
-  x.quadraticCurveTo(cx - 46, by - 224, cx - 36, by - 244);
-  x.quadraticCurveTo(cx - 24, by - 222, cx - 16, by - 196);
-  x.closePath();
-  x.fill();
   x.beginPath();
   x.moveTo(cx + 36, by - 196);
   x.quadraticCurveTo(cx + 48, by - 226, cx + 64, by - 246);
   x.quadraticCurveTo(cx + 70, by - 216, cx + 64, by - 182);
   x.closePath();
   x.fill();
+  x.restore();
 
   // Body and pale muzzle.
   x.fillStyle = '#f2a95b';
