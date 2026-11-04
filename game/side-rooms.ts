@@ -66,8 +66,8 @@ export const BEDROOM_FURNITURE = {
 } as const;
 
 // The street: Léa's block of flats on the far left, our house, Gaspard's dalgona stand out in the
-// open, then the shop, the bookshop, the arcade, and the bus stop at the far right, where the bus
-// waits.
+// open, then the shop, the bookshop, Bérénice's raffle stand, the arcade, and the bus stop at the
+// far right, where the bus waits.
 export const TOWN_ENDS = { left: -20, right: 38 };
 export const TOWN_BUILDINGS = {
   flats: { x: -13.5, width: 4.6, doorX: -12.6 },
@@ -76,6 +76,8 @@ export const TOWN_BUILDINGS = {
   dalgona: { x: -0.1, width: 3.2, gaspardX: 0 },
   shop: { x: 5, width: 4.8, doorX: 5.9 },
   bookshop: { x: 13.5, width: 4.8, doorX: 14.4 },
+  // Bérénice stands behind her counter, its raffle drum on top.
+  raffle: { x: 17.7, width: 3.2, bereniceX: 17.2 },
   arcade: { x: 22, width: 5, doorX: 23 },
   // The shelter, its sign by the kerb, and the bus parked past it.
   busStop: { x: 28.9, width: 3.6, signX: 27.4 },
@@ -206,6 +208,12 @@ export const TOWN: SideRoom = {
       minX: TOWN_BUILDINGS.dalgona.gaspardX - 1.3,
       maxX: TOWN_BUILDINGS.dalgona.gaspardX + 1.3,
       speaker: { x: TOWN_BUILDINGS.dalgona.gaspardX },
+    },
+    {
+      interaction: 'berenice',
+      minX: TOWN_BUILDINGS.raffle.bereniceX - 1.3,
+      maxX: TOWN_BUILDINGS.raffle.bereniceX + 1.3,
+      speaker: { x: TOWN_BUILDINGS.raffle.bereniceX },
     },
     {
       interaction: 'busStop',

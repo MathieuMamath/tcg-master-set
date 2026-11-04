@@ -22,6 +22,7 @@ vi.mock('@/player/progress', () => ({
     basketballRewardedOn: null,
     memoryWonOn: null,
     cleanedOn: null,
+    raffleDrawnOn: null,
   }),
 }));
 
@@ -42,6 +43,7 @@ function renderHome(locale: Locale, messages: typeof en) {
           basketballRewardedOn: null,
           memoryWonOn: null,
           cleanedOn: null,
+          raffleDrawnOn: null,
         }}
       />
     </NextIntlClientProvider>,

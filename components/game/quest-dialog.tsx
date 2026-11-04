@@ -13,6 +13,8 @@ export type QuestLine =
   | 'rewarded'
   | 'rewardedShiny'
   | 'failed'
+  // A draw that won nothing, which can't be tried again until tomorrow.
+  | 'lost'
   | 'alreadyDone'
   | 'unavailable';
 
@@ -35,6 +37,7 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
     onAccept !== null &&
     speech.line !== 'rewarded' &&
     speech.line !== 'rewardedShiny' &&
+    speech.line !== 'lost' &&
     speech.line !== 'alreadyDone';
 
   useEffect(() => {

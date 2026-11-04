@@ -30,6 +30,7 @@ import type {
   DalgonaResult,
   FishingCatch,
   PlayerProgress,
+  RaffleDraw,
 } from '@/player/progress';
 import { AnimatedCount } from './animated-count';
 import { BasketballDialog } from './basketball-dialog';
@@ -45,6 +46,7 @@ import { MemoryDialog } from './memory-dialog';
 import type { MovementInput } from './paper-scene';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
+import { RaffleDialog } from './raffle-dialog';
 import { SaveNotice, useSaveNotice } from './save-notice';
 import { SettingsMenu } from './settings-menu';
 import { ShopDialog } from './shop-dialog';
@@ -114,6 +116,9 @@ export function Game({ player, sets, progress }: Props) {
   // The shape Gaspard handed over, while the player carves it.
   const [dalgonaShape, setDalgonaShape] = useState<DalgonaShape | null>(null);
   const [gaspardLine, setGaspardLine] = useState<QuestLine>('greeting');
+  const [isRaffling, setIsRaffling] = useState(false);
+  const [bereniceLine, setBereniceLine] = useState<QuestLine>('greeting');
+  const [raffleDrawnOn, setRaffleDrawnOn] = useState(progress.raffleDrawnOn);
   const [isBusMapOpen, setIsBusMapOpen] = useState(false);
   // Where the character is, for the bus map to know which stop it is read at.
   const [place, setPlace] = useState<SidePlaceId>(progress.spot?.place ?? 'bedroom');
@@ -153,6 +158,7 @@ export function Game({ player, sets, progress }: Props) {
     isFishing ||
     isPlayingBasketball ||
     dalgonaShape !== null ||
+    isRaffling ||
     isBusMapOpen;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
@@ -554,6 +560,44 @@ export function Game({ player, sets, progress }: Props) {
     setTalkingTo('gaspard');
   };
 
+  // One turn of the drum a day: once drawn, Bérénice only says to come back tomorrow.
+  const startRaffle = async (): Promise<QuestLine | null> => {
+    if (raffleDrawnOn === questDay(new Date())) {
+      return 'alreadyDone';
+    }
+    setIsRaffling(true);
+    return null;
+  };
+
+  // The server draws the ball and pays for it. This only shows the result.
+  const drawRaffle = async (): Promise<RaffleDraw | null> => {
+    try {
+      const response = await fetch('/api/quests/raffle/draw', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const draw: RaffleDraw = await response.json();
+      setRaffleDrawnOn(questDay(new Date()));
+      if (draw.hasDrawn && draw.coins > 0) {
+        showSaveNotice();
+      }
+      return draw;
+    } catch {
+      return null;
+    }
+  };
+
+  const endRaffle = (line: QuestLine | null, draw?: RaffleDraw) => {
+    setIsRaffling(false);
+    if (draw) {
+      setWallet(draw.wallet);
+    }
+    if (line) {
+      setBereniceLine(line);
+      setTalkingTo('berenice');
+    }
+  };
+
   const startFishing = async (): Promise<QuestLine | null> => {
     try {
       const response = await fetch('/api/quests/fishing/start', { method: 'POST' });
@@ -621,6 +665,7 @@ export function Game({ player, sets, progress }: Props) {
           busLine: tBus('line'),
           parkStop: tBus('stops.park'),
           dalgona: tTown('dalgona'),
+          raffle: tTown('raffle'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
@@ -744,7 +789,8 @@ export function Game({ player, sets, progress }: Props) {
         memoryCards === null &&
         !isFishing &&
         !isPlayingBasketball &&
-        dalgonaShape === null && (
+        dalgonaShape === null &&
+        !isRaffling && (
           <>
             <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
               {t('keyboardHint')}
@@ -865,6 +911,22 @@ export function Game({ player, sets, progress }: Props) {
           }}
         />
       )}
+      {talkingTo === 'berenice' && (
+        <QuestDialog
+          giver="berenice"
+          line={bereniceLine}
+          onAccept={startRaffle}
+          onClose={() => {
+            setTalkingTo(null);
+            setBereniceLine((line) =>
+              line === 'rewarded' || line === 'rewardedShiny' || line === 'lost'
+                ? 'alreadyDone'
+                : line,
+            );
+          }}
+        />
+      )}
+      {isRaffling && !isTalking && <RaffleDialog onDraw={drawRaffle} onEnd={endRaffle} />}
       {dalgonaShape && !isTalking && (
         <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
       )}
@@ -872,7 +934,8 @@ export function Game({ player, sets, progress }: Props) {
         talkingTo !== 'grandma' &&
         talkingTo !== 'grandpa' &&
         talkingTo !== 'boy' &&
-        talkingTo !== 'gaspard' && (
+        talkingTo !== 'gaspard' &&
+        talkingTo !== 'berenice' && (
           <ShopDialog
             stock={talkingTo}
             items={(talkingTo === 'binderSeller'

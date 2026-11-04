@@ -12,8 +12,8 @@ import type { QuestLine } from './quest-dialog';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
 // How many sparkles twinkle round the treasure box, each starting a little after the last.
-const SPARKLE_COUNT = 6;
-const SPARKLE_STAGGER_MS = 270;
+export const SPARKLE_COUNT = 6;
+export const SPARKLE_STAGGER_MS = 270;
 
 // Somewhere in the bands on either side of the box and its text, never behind them.
 function sparkleSpot() {
@@ -26,7 +26,7 @@ function sparkleSpot() {
 }
 
 // A four-pointed star that twinkles, then lights up somewhere else.
-function Sparkle({ delay }: { delay: number }) {
+export function Sparkle({ delay }: { delay: number }) {
   const [spot, setSpot] = useState(sparkleSpot);
   return (
     <svg
