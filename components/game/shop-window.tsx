@@ -6,6 +6,7 @@ import type { PlayableSet, SetId } from '@/game/card-sets';
 import { gridStep } from '@/game/menu-keys';
 import { affordableBoosters, type ShopkeeperLine } from '@/game/shop-dialogue';
 import { BinderCover } from './binder-cover';
+import { CoinIcon } from './hud-icons';
 import { PackBody, PackEdge, packEdgeStyle } from './pack-art';
 import { SellerPortrait } from './seller-portrait';
 import { TornPaper } from './shop-dialog';
@@ -58,15 +59,6 @@ function BoosterArt({ set }: { set: PlayableSet }) {
 
 function ItemArt({ kind, set }: { kind: ShopKind; set: PlayableSet }) {
   return kind === 'binder' ? <BinderArt set={set} /> : <BoosterArt set={set} />;
-}
-
-function Coin() {
-  return (
-    <span
-      aria-hidden="true"
-      className="size-3.5 shrink-0 rounded-full border-2 border-ui-accent-dark bg-ui-accent"
-    />
-  );
 }
 
 // What a seller has for sale: every item in a grid on the left, and the one chosen on the right,
@@ -184,7 +176,7 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
           </p>
         </div>
         <p className="ml-auto flex shrink-0 rotate-1 items-center gap-1.5 ui-scrap px-3 py-1 font-digits text-sm font-bold sm:text-base">
-          <Coin />
+          <CoinIcon />
           {t('window.coins', { count: coins })}
         </p>
         <button
@@ -239,7 +231,7 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
                 </span>
                 <span className="flex min-h-[2.1em] items-center leading-tight">{set.name}</span>
                 <span className="flex items-center gap-1 font-digits text-sm font-bold">
-                  <Coin />
+                  <CoinIcon />
                   {price}
                 </span>
                 {itemRefusal && (
@@ -337,7 +329,7 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
               </fieldset>
             )}
             <span className="flex items-center gap-1.5 font-digits text-lg font-bold">
-              <Coin />
+              <CoinIcon />
               {t('window.coins', { count: total })}
             </span>
             <button
