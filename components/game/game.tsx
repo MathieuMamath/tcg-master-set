@@ -28,6 +28,7 @@ import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { FishingDialog } from './fishing-dialog';
+import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
 import { Joystick } from './joystick';
 import { MemoryDialog } from './memory-dialog';
 import type { MovementInput } from './paper-scene';
@@ -453,10 +454,7 @@ export function Game({ player, sets, progress }: Props) {
             {player.username}
           </p>
           <p className="relative flex rotate-1 items-center gap-1.5 ui-scrap px-3 py-1 font-digits text-base font-bold">
-            <span
-              aria-hidden="true"
-              className="size-3.5 rounded-full border-2 border-ui-accent-dark bg-ui-accent"
-            />
+            <CoinIcon />
             <AnimatedCount value={wallet.coins} format={(count) => t('coins', { count })} />
           </p>
           <button
@@ -474,10 +472,7 @@ export function Game({ player, sets, progress }: Props) {
             onClick={openBinder}
             className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
           >
-            <span
-              aria-hidden="true"
-              className="h-4 w-3.5 rounded-xs border-l-4 border-ui-ink/60 bg-[#e6ece8]"
-            />
+            <BinderIcon />
             {t('binderButton')}
           </button>
         </div>
@@ -674,41 +669,5 @@ export function Game({ player, sets, progress }: Props) {
       )}
       <SaveNotice isSaving={isSaving} />
     </div>
-  );
-}
-
-// A small booster like the ones in the bag: crimped at both ends, striped, with a star.
-function BoosterIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 16 22" className="h-5.5 w-4 shrink-0 -rotate-6">
-      <defs>
-        <linearGradient id="booster-icon-paper" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#5e4ba8" />
-          <stop offset="0.5" stopColor="#3c8fb4" />
-          <stop offset="1" stopColor="#7e63be" />
-        </linearGradient>
-        <clipPath id="booster-icon-outline">
-          <path d="M0 1.5 2 0 4 1.5 6 0 8 1.5 10 0 12 1.5 14 0 16 1.5V20.5L14 22 12 20.5 10 22 8 20.5 6 22 4 20.5 2 22 0 20.5Z" />
-        </clipPath>
-      </defs>
-      <g clipPath="url(#booster-icon-outline)">
-        <rect width="16" height="22" fill="url(#booster-icon-paper)" />
-        <path
-          d="M-4 22 8 4M2 26 18 2M10 26 22 8"
-          stroke="#fff"
-          strokeOpacity="0.2"
-          strokeWidth="2.5"
-        />
-        <rect width="16" height="3.5" fill="#000" fillOpacity="0.25" />
-        <rect y="18.5" width="16" height="3.5" fill="#000" fillOpacity="0.25" />
-      </g>
-      <path
-        d="M8 6.8 9.2 9.4 12 9.7 9.9 11.6 10.5 14.4 8 13 5.5 14.4 6.1 11.6 4 9.7 6.8 9.4Z"
-        fill="var(--ui-accent)"
-        stroke="var(--ui-paper)"
-        strokeWidth="0.8"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
