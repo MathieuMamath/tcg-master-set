@@ -65,15 +65,18 @@ export const BEDROOM_FURNITURE = {
   plant: { x: 5.6, width: 1.3 },
 } as const;
 
-// The street: Léa's block of flats on the far left, our house, then the shop, the bookshop, and
-// the arcade at the far right.
-export const TOWN_ENDS = { left: -20, right: 28 };
+// The street: Léa's block of flats on the far left, our house, then the shop, the bookshop, the
+// arcade, and the bus stop at the far right, where the bus waits.
+export const TOWN_ENDS = { left: -20, right: 38 };
 export const TOWN_BUILDINGS = {
   flats: { x: -13.5, width: 4.6, doorX: -12.6 },
   house: { x: -5, width: 4.2, doorX: -5 },
   shop: { x: 5, width: 4.8, doorX: 5.9 },
   bookshop: { x: 13.5, width: 4.8, doorX: 14.4 },
   arcade: { x: 22, width: 5, doorX: 23 },
+  // The shelter, its sign by the kerb, and the bus parked past it.
+  busStop: { x: 28.9, width: 3.6, signX: 27.4 },
+  bus: { x: 34.2, width: 5.6 },
 } as const;
 
 // The shop, the Card Den: the raccoon triplets each have a counter, from the newest sets on the
@@ -177,7 +180,14 @@ export const TOWN: SideRoom = {
     maxX: TOWN_ENDS.right - CHARACTER_HALF_WIDTH,
   },
   start: TOWN_BUILDINGS.house.doorX,
-  interactions: [],
+  // The bus stop's sign opens the map of the stops the bus serves.
+  interactions: [
+    {
+      interaction: 'busStop',
+      minX: TOWN_BUILDINGS.busStop.signX - DOOR_REACH,
+      maxX: TOWN_BUILDINGS.busStop.signX + DOOR_REACH,
+    },
+  ],
   exits: [
     {
       interaction: 'enterShop',

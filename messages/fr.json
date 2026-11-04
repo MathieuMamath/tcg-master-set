@@ -34,7 +34,8 @@
     "leaveFlat": "Sortir",
     "scrub": "Frotter la poussière",
     "enterArcade": "Entrer dans la salle d’arcade",
-    "leaveArcade": "Sortir"
+    "leaveArcade": "Sortir",
+    "busStop": "Lire le plan du bus"
   },
   "Shopkeeper": {
     "names": {
@@ -298,5 +299,17 @@
     "grandma": "Ah, Pip ! Tu tombes bien !",
     "grandpa": "Une petite partie ?",
     "boy": "Hé ! Par ici !"
+  },
+  "Bus": {
+    "title": "Plan du bus",
+    "line": "Ligne 1",
+    "stops": {
+      "mainStreet": "Grand-Rue",
+      "park": "Parc des Tilleuls"
+    },
+    "here": "Tu es ici",
+    "closed": "En travaux",
+    "parkClosed": "Le parc est en travaux. Le bus pourra t’y emmener dès qu’il rouvrira.",
+    "close": "Fermer"
   }
 }

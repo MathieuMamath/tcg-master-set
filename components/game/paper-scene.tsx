@@ -64,6 +64,8 @@ import {
   drawBookshop,
   drawBookWall,
   drawBoosterShelves,
+  drawBus,
+  drawBusShelter,
   drawChair,
   drawClawMachine,
   drawCloud,
@@ -118,6 +120,9 @@ export type SceneSigns = {
   shop: string;
   bookshop: string;
   arcade: string;
+  // The name of the street's bus stop, and the line shown on the bus.
+  busStop: string;
+  busLine: string;
   latest: string;
   thisYear: string;
   older: string;
@@ -711,15 +716,17 @@ function Arcade() {
 }
 
 const STREET_FRONT_Z = 3;
-const CLOUD_SPAN = 50;
+// The clouds drift across the whole street, from one end of this span to the other, around its
+// middle.
+const CLOUD_SPAN = 84;
 const CLOUD_SPEED = 25;
 const CLOUDS = [
-  { x: -14, y: 5.8, size: 1.3 },
-  { x: -6, y: 6.6, size: 1.6 },
-  { x: 2, y: 5.6, size: 1.2 },
-  { x: 9, y: 6.9, size: 1.5 },
-  { x: 17, y: 6, size: 1.3 },
-  { x: 23, y: 6.8, size: 1.1 },
+  { x: -36, y: 5.8, size: 1.3 },
+  { x: -22, y: 6.6, size: 1.6 },
+  { x: -8, y: 5.6, size: 1.2 },
+  { x: 6, y: 6.9, size: 1.5 },
+  { x: 20, y: 6, size: 1.3 },
+  { x: 34, y: 6.8, size: 1.1 },
 ];
 const BUILDINGS_Z = -1.4;
 const HILL_ROWS = [
@@ -762,12 +769,25 @@ function Town({ signs }: { signs: SceneSigns }) {
     () => texture(cutOut(500, 400, drawArcade(signs.arcade), 9, 66)),
     [fontsReady, signs.arcade],
   );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const busTextures = useMemo(
+    () => ({
+      shelter: texture(cutOut(360, 320, drawBusShelter(signs.busStop), 9, 67)),
+      bus: texture(cutOut(560, 250, drawBus(signs.busLine), 9, 68)),
+    }),
+    [fontsReady, signs.busStop, signs.busLine],
+  );
+  const idlingBus = useRef<Group>(null);
   const sky = useMemo(() => texture(drawSkyGradient(look)), [look]);
   const cloud = useMemo(() => texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)), [look]);
   const clouds = useRef<(Group | null)[]>([]);
 
-  // The clouds drift along, and come back round from the other side.
-  useFrame((_, delta) => {
+  // The clouds drift along, and come back round from the other side. The bus shakes a little,
+  // its engine running while it waits.
+  useFrame(({ clock }, delta) => {
+    if (idlingBus.current) {
+      idlingBus.current.position.y = Math.abs(Math.sin(clock.elapsedTime * 18)) * 0.012;
+    }
     for (const group of clouds.current) {
       if (group) {
         group.position.x += delta * look.drift * CLOUD_SPEED;
@@ -784,29 +804,38 @@ function Town({ signs }: { signs: SceneSigns }) {
     shop: shopPlace,
     bookshop: bookshopPlace,
     arcade: arcadePlace,
+    busStop,
+    bus,
   } = TOWN_BUILDINGS;
   const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
   const streetCenter = (TOWN_ENDS.left + TOWN_ENDS.right) / 2;
   return (
     <>
-      <mesh position={[0, 7, -10]}>
-        <planeGeometry args={[80, 26]} />
+      {/* Wider than the street, as far away it fills more of the view at both ends. */}
+      <mesh position={[streetCenter, 7, -10]}>
+        <planeGeometry args={[streetWidth + 70, 26]} />
         <meshBasicMaterial map={sky} />
       </mesh>
-      {CLOUDS.slice(0, look.cloudCount + 2).map(({ x, y, size }, index) => (
-        <group
-          key={x}
-          ref={(group) => {
-            clouds.current[index] = group;
-          }}
-          position={[x, y, -8]}
-        >
-          <CutOut map={cloud} height={size} />
-        </group>
-      ))}
+      <group position={[streetCenter, 0, 0]}>
+        {CLOUDS.slice(0, look.cloudCount + 2).map(({ x, y, size }, index) => (
+          <group
+            key={x}
+            ref={(group) => {
+              clouds.current[index] = group;
+            }}
+            position={[x, y, -8]}
+          >
+            <CutOut map={cloud} height={size} />
+          </group>
+        ))}
+      </group>
       {HILL_ROWS.map(({ z, height }, index) => (
         <group key={z} position={[streetCenter, -0.15, z]}>
-          <CutOut map={textures.hills[index]} height={(height * 100 + 24) / 100} width={56} />
+          <CutOut
+            map={textures.hills[index]}
+            height={(height * 100 + 24) / 100}
+            width={streetWidth + 30}
+          />
         </group>
       ))}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[streetCenter, 0, -1]}>
@@ -838,6 +867,16 @@ function Town({ signs }: { signs: SceneSigns }) {
         height={4.06}
         shadow={textures.shadow}
       />
+      <Furniture
+        map={busTextures.shelter}
+        x={busStop.x}
+        z={-0.7}
+        height={3}
+        shadow={textures.shadow}
+      />
+      <group ref={idlingBus}>
+        <Furniture map={busTextures.bus} x={bus.x} z={-0.2} height={2.6} shadow={textures.shadow} />
+      </group>
       <Furniture
         map={arcade}
         x={arcadePlace.x}

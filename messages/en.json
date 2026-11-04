@@ -34,7 +34,8 @@
     "leaveFlat": "Go outside",
     "scrub": "Rub off the dust",
     "enterArcade": "Go into the arcade",
-    "leaveArcade": "Go outside"
+    "leaveArcade": "Go outside",
+    "busStop": "Read the bus map"
   },
   "Shopkeeper": {
     "names": {
@@ -298,5 +299,17 @@
     "grandma": "Ah, Pip! Just in time!",
     "grandpa": "Fancy a game?",
     "boy": "Hey! Over here!"
+  },
+  "Bus": {
+    "title": "Bus map",
+    "line": "Line 1",
+    "stops": {
+      "mainStreet": "High Street",
+      "park": "Linden Park"
+    },
+    "here": "You are here",
+    "closed": "Closed for works",
+    "parkClosed": "The park is closed for works. The bus will take you there as soon as it reopens.",
+    "close": "Close"
   }
 }

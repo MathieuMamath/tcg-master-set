@@ -27,6 +27,7 @@ import { BasketballDialog } from './basketball-dialog';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
+import { BusMap } from './bus-map';
 import { FishingDialog } from './fishing-dialog';
 import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
 import { Joystick } from './joystick';
@@ -54,7 +55,8 @@ function isTalk(interaction: Interaction): interaction is Talk {
     !isDoorInteraction(interaction) &&
     interaction !== 'binder' &&
     interaction !== 'basketball' &&
-    interaction !== 'scrub'
+    interaction !== 'scrub' &&
+    interaction !== 'busStop'
   );
 }
 const DASH_KEY = 'Space';
@@ -85,6 +87,7 @@ export function Game({ player, sets, progress }: Props) {
   const [isFishing, setIsFishing] = useState(false);
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
+  const [isBusMapOpen, setIsBusMapOpen] = useState(false);
   const [highScore, setHighScore] = useState(progress.basketballHighScore);
   const [basketballRewardedOn, setBasketballRewardedOn] = useState(progress.basketballRewardedOn);
   const [binders, setBinders] = useState(progress.binders);
@@ -105,6 +108,7 @@ export function Game({ player, sets, progress }: Props) {
   const tShopkeeper = useTranslations('Shopkeeper');
   const tTown = useTranslations('Town');
   const tHails = useTranslations('Hails');
+  const tBus = useTranslations('Bus');
   const isDialogOpen =
     isTalking ||
     isBinderOpen ||
@@ -113,7 +117,8 @@ export function Game({ player, sets, progress }: Props) {
     opening !== null ||
     memoryCards !== null ||
     isFishing ||
-    isPlayingBasketball;
+    isPlayingBasketball ||
+    isBusMapOpen;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
@@ -160,6 +165,8 @@ export function Game({ player, sets, progress }: Props) {
           setIsPlayingBasketball(true);
         } else if (controls.current.interaction === 'scrub') {
           input.current.wantsScrub = true;
+        } else if (controls.current.interaction === 'busStop') {
+          setIsBusMapOpen(true);
         } else {
           setTalkingTo(controls.current.interaction);
         }
@@ -210,6 +217,8 @@ export function Game({ player, sets, progress }: Props) {
       setIsPlayingBasketball(true);
     } else if (interaction === 'scrub') {
       input.current.wantsScrub = true;
+    } else if (interaction === 'busStop') {
+      setIsBusMapOpen(true);
     } else if (interaction) {
       setTalkingTo(interaction);
     }
@@ -495,6 +504,8 @@ export function Game({ player, sets, progress }: Props) {
           shop: tTown('shop'),
           bookshop: tTown('bookshop'),
           arcade: tTown('arcade'),
+          busStop: tBus('stops.mainStreet'),
+          busLine: tBus('line'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
@@ -723,6 +734,7 @@ export function Game({ player, sets, progress }: Props) {
           onClose={() => setTalkingTo(null)}
         />
       )}
+      {isBusMapOpen && <BusMap here="mainStreet" onClose={() => setIsBusMapOpen(false)} />}
       <SaveNotice isSaving={isSaving} />
     </div>
   );
