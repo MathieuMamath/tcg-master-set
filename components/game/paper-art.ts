@@ -111,8 +111,40 @@ export function cutOut(
   return result;
 }
 
+// Characters with eyes that can be seen blink now and then: each is drawn twice, eyes open and
+// shut, and the scene swaps the two.
+export type Eyes = 'open' | 'shut';
+
+// A round black eye with a glint, or, shut, a curved lid.
+function drawEye(
+  x: CanvasRenderingContext2D,
+  eyeX: number,
+  eyeY: number,
+  eyes: Eyes,
+  { color = '#2c2a35', width = 10 }: { color?: string; width?: number } = {},
+) {
+  if (eyes === 'shut') {
+    x.strokeStyle = color;
+    x.lineWidth = 5;
+    x.lineCap = 'round';
+    x.beginPath();
+    x.arc(eyeX, eyeY - 4, 10, 0.2 * Math.PI, 0.8 * Math.PI);
+    x.stroke();
+    return;
+  }
+  x.fillStyle = color;
+  ellipse(x, eyeX, eyeY, width, 14);
+  x.fillStyle = '#ffffff';
+  ellipse(x, eyeX + 3, eyeY - 5, 3.4, 4.4);
+}
+
 // Pip, the player's fox, facing right with a scarf and a satchel of cards.
-export function drawPip(drawing: CanvasRenderingContext2D, width: number, height: number) {
+export function drawPip(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eyes: Eyes = 'open',
+) {
   const x = drawing;
   const cx = width / 2 - 6;
   const by = height - 10;
@@ -184,12 +216,8 @@ export function drawPip(drawing: CanvasRenderingContext2D, width: number, height
   x.restore();
 
   // Face.
-  x.fillStyle = '#2c2a35';
-  ellipse(x, cx + 16, by - 138, 9.5, 14);
-  ellipse(x, cx + 60, by - 138, 9.5, 14);
-  x.fillStyle = '#ffffff';
-  ellipse(x, cx + 19, by - 143, 3.4, 4.4);
-  ellipse(x, cx + 63, by - 143, 3.4, 4.4);
+  drawEye(x, cx + 16, by - 138, eyes, { width: 9.5 });
+  drawEye(x, cx + 60, by - 138, eyes, { width: 9.5 });
   x.fillStyle = 'rgb(240 110 100 / 55%)';
   ellipse(x, cx - 2, by - 114, 11, 7);
   ellipse(x, cx + 78, by - 114, 9, 6);
@@ -995,7 +1023,12 @@ export const RACCOON_FACE = { x: 140, y: 168, size: 210 };
 // One of the raccoon triplets behind her counter: grey fur, a black mask round the eyes, round
 // ears and a ringed tail. They look alike, so each wears something of her own on her head.
 export function drawRaccoon({ accessory }: SellerLook) {
-  return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
+  return (
+    drawing: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    eyes: Eyes = 'open',
+  ) => {
     const x = drawing;
     // Off centre, to leave room on the right for the whole tail.
     const cx = width / 2 - 40;
@@ -1043,12 +1076,10 @@ export function drawRaccoon({ accessory }: SellerLook) {
     x.fillStyle = '#e8e6ec';
     ellipse(x, cx, eyesY + 22, 22, 16);
     // Eyes, nose and smile.
-    x.fillStyle = '#111111';
-    ellipse(x, cx - 26, eyesY, 10, 14);
-    ellipse(x, cx + 26, eyesY, 10, 14);
-    x.fillStyle = '#ffffff';
-    ellipse(x, cx - 23, eyesY - 5, 3.4, 4.4);
-    ellipse(x, cx + 29, eyesY - 5, 3.4, 4.4);
+    // Shut, the lids are pale, or they would vanish into the mask.
+    const eyeColor = eyes === 'shut' ? '#c9c7d0' : '#111111';
+    drawEye(x, cx - 26, eyesY, eyes, { color: eyeColor });
+    drawEye(x, cx + 26, eyesY, eyes, { color: eyeColor });
     x.fillStyle = 'rgb(240 110 100 / 50%)';
     ellipse(x, cx - 50, eyesY + 22, 11, 7);
     ellipse(x, cx + 50, eyesY + 22, 11, 7);
@@ -1832,6 +1863,22 @@ export function drawLea(drawing: CanvasRenderingContext2D, width: number, height
 
 // Léa's block of flats: three storeys of pastel brick, window boxes of flowers, and a door at the
 // bottom right.
+// A drop of sweat, for someone overworked.
+export function drawSweatDrop(drawing: CanvasRenderingContext2D, width: number, height: number) {
+  const x = drawing;
+  const cx = width / 2;
+  const radius = width / 2;
+  x.fillStyle = '#8cc8ee';
+  x.beginPath();
+  x.moveTo(cx, 0);
+  x.quadraticCurveTo(cx + radius * 0.9, height * 0.45, cx + radius, height - radius);
+  x.arc(cx, height - radius, radius, 0, Math.PI);
+  x.quadraticCurveTo(cx - radius * 0.9, height * 0.45, cx, 0);
+  x.fill();
+  x.fillStyle = 'rgb(255 255 255 / 75%)';
+  ellipse(x, cx - radius * 0.35, height - radius * 1.1, radius * 0.22, radius * 0.38);
+}
+
 export function drawFlats(drawing: CanvasRenderingContext2D, width: number, height: number) {
   const x = drawing;
   const random = seededRandom(31);
@@ -2711,7 +2758,12 @@ export const LUCAS_FACE = { x: 108, y: 200, size: 160 };
 
 // Lucas, the little otter who keeps dropping his things in the lake: a cap on backwards, and his
 // fishing rod held out over the water.
-export function drawLucas(drawing: CanvasRenderingContext2D, width: number, height: number) {
+export function drawLucas(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eyes: Eyes = 'open',
+) {
   const x = drawing;
   const cx = 110;
   const bottom = height - 6;
@@ -2731,12 +2783,8 @@ export function drawLucas(drawing: CanvasRenderingContext2D, width: number, heig
   // A pale muzzle, eyes, nose and whiskers.
   x.fillStyle = '#e9d3b4';
   ellipse(x, cx, eyesY + 20, 40, 26);
-  x.fillStyle = '#2c2a35';
-  ellipse(x, cx - 26, eyesY, 10, 14);
-  ellipse(x, cx + 26, eyesY, 10, 14);
-  x.fillStyle = '#ffffff';
-  ellipse(x, cx - 23, eyesY - 5, 3.4, 4.4);
-  ellipse(x, cx + 29, eyesY - 5, 3.4, 4.4);
+  drawEye(x, cx - 26, eyesY, eyes);
+  drawEye(x, cx + 26, eyesY, eyes);
   x.fillStyle = '#3a2a20';
   ellipse(x, cx, eyesY + 8, 9, 6);
   x.strokeStyle = '#2c2a35';

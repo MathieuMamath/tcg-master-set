@@ -1,12 +1,13 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { type Ref, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CanvasTexture,
   DoubleSide,
   type Group,
   type Mesh,
+  type MeshBasicMaterial,
   RepeatWrapping,
   SRGBColorSpace,
   type Texture,
@@ -101,10 +102,12 @@ import {
   drawSofa,
   drawStationeryTable,
   drawStreet,
+  drawSweatDrop,
   drawTree,
   drawUprightCorrugatedEdge,
   drawWallpaper,
   drawWindowFrame,
+  type Eyes,
   HEDGEHOG_SIZE,
   LEA_SIZE,
   LUCAS_SIZE,
@@ -183,14 +186,134 @@ function easeBack(progress: number): number {
 }
 
 // A flat cut-out standing on the ground. Its only shadow is the one on the ground below it.
-function CutOut({ map, height, width }: { map: Texture; height: number; width?: number }) {
+function CutOut({
+  map,
+  height,
+  width,
+  material,
+}: {
+  map: Texture;
+  height: number;
+  width?: number;
+  material?: Ref<MeshBasicMaterial>;
+}) {
   const image = map.image as HTMLCanvasElement;
   const shownWidth = width ?? (height * image.width) / image.height;
   return (
     <mesh position={[0, height / 2, 0]}>
       <planeGeometry args={[shownWidth, height]} />
-      <meshBasicMaterial map={map} alphaTest={0.5} side={DoubleSide} />
+      <meshBasicMaterial ref={material} map={map} alphaTest={0.5} side={DoubleSide} />
     </mesh>
+  );
+}
+
+// A character drawn twice, eyes open and shut, so that it can blink.
+type Blinker = { open: Texture; shut: Texture };
+
+function blinker(
+  width: number,
+  height: number,
+  draw: (drawing: CanvasRenderingContext2D, width: number, height: number, eyes: Eyes) => void,
+  border: number,
+  seed: number,
+): Blinker {
+  return {
+    open: texture(cutOut(width, height, (art, w, h) => draw(art, w, h, 'open'), border, seed)),
+    // The same seed gives the same grain, so that only the eyes change.
+    shut: texture(cutOut(width, height, (art, w, h) => draw(art, w, h, 'shut'), border, seed)),
+  };
+}
+
+const BLINK_SECONDS = 0.13;
+// Now and then a blink comes twice, quickly.
+const DOUBLE_BLINK_CHANCE = 0.2;
+const DOUBLE_BLINK_GAP_SECONDS = 0.12;
+
+function secondsUntilBlink() {
+  return 2 + Math.random() * 4;
+}
+
+// Shuts the eyes for a moment every few seconds, each character on its own rhythm.
+function useBlink(material: RefObject<MeshBasicMaterial | null>, look: Blinker | undefined) {
+  const blink = useRef({ wait: secondsUntilBlink(), shut: 0, again: false });
+  useFrame((_, delta) => {
+    if (!look || !material.current) {
+      return;
+    }
+    const state = blink.current;
+    if (state.shut > 0) {
+      state.shut -= delta;
+      if (state.shut <= 0) {
+        state.wait = state.again ? DOUBLE_BLINK_GAP_SECONDS : secondsUntilBlink();
+        state.again = false;
+      }
+    } else {
+      state.wait -= Math.min(delta, MAX_FRAME_SECONDS);
+      if (state.wait <= 0) {
+        state.shut = BLINK_SECONDS;
+        state.again = state.wait > -1 && Math.random() < DOUBLE_BLINK_CHANCE;
+      }
+    }
+    const map = state.shut > 0 ? look.shut : look.open;
+    if (material.current.map !== map) {
+      material.current.map = map;
+    }
+  });
+}
+
+// Breathing while standing still: the cut-out swells and settles from its feet, and sways a little.
+const BREATH_SPEED = 2.4;
+const BREATH_SWELL = 0.024;
+const SWAY_SPEED = 1.1;
+const SWAY_ANGLE = 0.012;
+
+function breathe(group: Group, time: number) {
+  const breath = Math.sin(time * BREATH_SPEED);
+  group.scale.set(1 - breath * BREATH_SWELL * 0.4, 1 + breath * BREATH_SWELL, 1);
+  group.rotation.z = Math.sin(time * SWAY_SPEED) * SWAY_ANGLE;
+}
+
+// Someone standing in a place, alive: breathing, and blinking if their eyes can be seen. A pace
+// above one makes them breathe faster, out of breath.
+function Character({
+  map,
+  blinks,
+  x,
+  z,
+  height,
+  shadow,
+  pace = 1,
+}: {
+  map: Texture;
+  blinks?: Blinker;
+  x: number;
+  z: number;
+  height: number;
+  shadow: Texture;
+  pace?: number;
+}) {
+  const body = useRef<Group>(null);
+  const material = useRef<MeshBasicMaterial>(null);
+  // Each starts at a different point of its breath, so that they don't breathe together.
+  const time = useRef(Math.random() * 20);
+  useBlink(material, blinks);
+  useFrame((_, delta) => {
+    // Its own clock, so that a change of pace doesn't jump in the middle of a breath.
+    time.current += Math.min(delta, MAX_FRAME_SECONDS) * pace;
+    if (body.current) {
+      breathe(body.current, time.current);
+    }
+  });
+  const image = map.image as HTMLCanvasElement;
+  return (
+    <>
+      <group position={[x, 0, z]}>
+        <group ref={body}>
+          <CutOut map={map} height={height} material={material} />
+        </group>
+      </group>
+      <FloorShadow x={x} z={z} width={(height * image.width) / image.height} map={shadow} />
+    </>
   );
 }
 
@@ -446,9 +569,7 @@ function Shop({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       shadow: texture(drawShadowBlob()),
       shelves: texture(paint(360, 170, drawBoosterShelves, 48)),
       sellers: SHOP_COUNTERS.map(({ stock }) =>
-        texture(
-          cutOut(RACCOON_SIZE.width, RACCOON_SIZE.height, drawRaccoon(SELLERS[stock].look), 9, 70),
-        ),
+        blinker(RACCOON_SIZE.width, RACCOON_SIZE.height, drawRaccoon(SELLERS[stock].look), 9, 70),
       ),
       counters: SHOP_COUNTERS.map(({ stock }) =>
         texture(cutOut(260, 150, drawCounter(SELLERS[stock].color), 8, 71)),
@@ -471,7 +592,7 @@ function Shop({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         speakerTops={speakerTops}
         speakers={SHOP_COUNTERS.map(({ stock }, index) => ({
           interaction: stock,
-          map: textures.sellers[index],
+          map: textures.sellers[index].open,
           height: SELLER_HEIGHT,
           z: SELLER_Z,
         }))}
@@ -487,8 +608,9 @@ function Shop({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
             {/* Cut along its rounded corners. */}
             <meshBasicMaterial map={boards[index]} alphaTest={0.5} />
           </mesh>
-          <Furniture
-            map={textures.sellers[index]}
+          <Character
+            map={textures.sellers[index].open}
+            blinks={textures.sellers[index]}
             // The drawing leaves room for the tail on its right, so it moves right to stay centred.
             x={x + 0.3}
             z={SELLER_Z}
@@ -574,7 +696,7 @@ function Bookshop({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
         shadow={textures.shadow}
       />
       <Furniture map={textures.pile} x={pile.x} z={-1.2} height={1.6} shadow={textures.shadow} />
-      <Furniture
+      <Character
         map={textures.seller}
         x={BOOKSHOP_SELLER_X}
         z={BOOKSELLER_Z}
@@ -588,6 +710,52 @@ function Bookshop({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
 
 const LEA_HEIGHT = 3.5;
 const LEA_Z = -0.6;
+// Until her walls are dusted, Léa breathes this much faster, and sweats.
+const LEA_HURRIED_PACE = 2.6;
+// Her temples, on either side of her head, from her feet.
+const LEA_TEMPLES = { side: 0.74, y: 1.95 };
+const SWEAT_DROP = { width: 0.22, fallSeconds: 1.3, fall: 0.45 };
+
+// Drops of sweat that bead on a temple, slide down and fade, one side after the other.
+function SweatDrops({ x, z, map }: { x: number; z: number; map: Texture }) {
+  const drops = useRef<(Mesh | null)[]>([]);
+  useFrame(({ clock }) => {
+    drops.current.forEach((drop, index) => {
+      if (!drop) {
+        return;
+      }
+      const cycle = (clock.elapsedTime / SWEAT_DROP.fallSeconds + index * 0.5) % 1;
+      const side = index % 2 === 0 ? -1 : 1;
+      // Swells for the first fifth, then slides down and away from the face.
+      const swell = Math.min(1, cycle * 5);
+      const slide = Math.max(0, cycle - 0.2) / 0.8;
+      drop.position.set(
+        x + side * (LEA_TEMPLES.side + slide * 0.12),
+        LEA_TEMPLES.y - slide * slide * SWEAT_DROP.fall,
+        z,
+      );
+      drop.scale.setScalar(0.4 + swell * 0.6);
+      (drop.material as MeshBasicMaterial).opacity = 1 - slide * slide;
+    });
+  });
+  const image = map.image as HTMLCanvasElement;
+  const height = (SWEAT_DROP.width * image.height) / image.width;
+  return (
+    <>
+      {[0, 1].map((index) => (
+        <mesh
+          key={index}
+          ref={(drop) => {
+            drops.current[index] = drop;
+          }}
+        >
+          <planeGeometry args={[SWEAT_DROP.width, height]} />
+          <meshBasicMaterial map={map} transparent depthWrite={false} />
+        </mesh>
+      ))}
+    </>
+  );
+}
 const DUST_SIZE = { width: 0.95, height: 0.75 };
 
 // Léa's flat: a shelf, a sofa under pictures, a window, and Léa at her desk. During her quest,
@@ -595,9 +763,12 @@ const DUST_SIZE = { width: 0.95, height: 0.75 };
 function Flat({
   speakerTops,
   stains,
+  isLeaCalm,
 }: {
   speakerTops: RefObject<SpeakerTops>;
   stains: readonly Stain[];
+  // Once her walls are dusted for the day.
+  isLeaCalm: boolean;
 }) {
   const { shelf, sofa } = FLAT_FURNITURE;
   const textures = useMemo(
@@ -609,6 +780,7 @@ function Flat({
       },
       shadow: texture(drawShadowBlob()),
       lea: texture(cutOut(LEA_SIZE.width, LEA_SIZE.height, drawLea, 9, 92)),
+      sweat: texture(cutOut(40, 58, drawSweatDrop, 5, 98)),
       shelf: texture(cutOut(170, 230, drawBookcase, 9, 93)),
       sofa: texture(cutOut(300, 150, drawSofa, 9, 94)),
       frames: ['#78ae6c', '#9a7bd6'].map((color, index) =>
@@ -648,13 +820,15 @@ function Flat({
       ))}
       <Furniture map={textures.shelf} x={shelf.x} z={-1.3} height={2.51} shadow={textures.shadow} />
       <Furniture map={textures.sofa} x={sofa.x} z={-1} height={1.45} shadow={textures.shadow} />
-      <Furniture
+      <Character
         map={textures.lea}
         x={LEA_X}
         z={LEA_Z}
         height={LEA_HEIGHT}
         shadow={textures.shadow}
+        pace={isLeaCalm ? 1 : LEA_HURRIED_PACE}
       />
+      {!isLeaCalm && <SweatDrops x={LEA_X} z={LEA_Z + 0.05} map={textures.sweat} />}
     </>
   );
 }
@@ -948,7 +1122,7 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       bench: texture(cutOut(260, 150, drawBench, 8, 116)),
       reeds: texture(cutOut(220, 110, drawReeds, 6, 117)),
       papy: texture(cutOut(PAPY_SIZE.width, PAPY_SIZE.height, drawPapy, 9, 118)),
-      lucas: texture(cutOut(LUCAS_SIZE.width, LUCAS_SIZE.height, drawLucas, 9, 119)),
+      lucas: blinker(LUCAS_SIZE.width, LUCAS_SIZE.height, drawLucas, 9, 119),
     }),
     [look],
   );
@@ -966,7 +1140,7 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         speakerTops={speakerTops}
         speakers={[
           { interaction: 'grandpa', map: textures.papy, height: PAPY_HEIGHT, z: PARK_PEOPLE_Z },
-          { interaction: 'boy', map: textures.lucas, height: LUCAS_HEIGHT, z: PARK_PEOPLE_Z },
+          { interaction: 'boy', map: textures.lucas.open, height: LUCAS_HEIGHT, z: PARK_PEOPLE_Z },
         ]}
       />
       <mesh position={[center, 7, -10]}>
@@ -1016,7 +1190,7 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       ))}
       <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
       <Furniture map={textures.bench} x={bench.x} z={-1.1} height={1.4} shadow={textures.shadow} />
-      <Furniture
+      <Character
         map={textures.papy}
         // The drawing leaves room for the cane on its right, so it moves right to stay centred.
         x={papy.x + 0.25}
@@ -1030,9 +1204,10 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       <group position={[lake.right - 0.8, 0, -0.3]}>
         <CutOut map={textures.reeds} height={1.2} />
       </group>
-      <Furniture
+      <Character
         // The drawing leaves room for the rod on its right, so it moves right to stay centred.
-        map={textures.lucas}
+        map={textures.lucas.open}
+        blinks={textures.lucas}
         x={lucas.x + 0.7}
         z={PARK_PEOPLE_Z}
         height={LUCAS_HEIGHT}
@@ -1077,7 +1252,9 @@ function Pip({
   onExit: (travel: Travel) => void;
   onScrub: (id: number) => void;
 }) {
-  const pip = useMemo(() => texture(cutOut(240, 300, drawPip, 10, 21)), []);
+  const pip = useMemo(() => blinker(240, 300, drawPip, 10, 21), []);
+  const pipMaterial = useRef<MeshBasicMaterial>(null);
+  useBlink(pipMaterial, pip);
   const blob = useMemo(() => texture(drawShadowBlob()), []);
   const root = useRef<Group>(null);
   const flipper = useRef<Group>(null);
@@ -1170,10 +1347,12 @@ function Pip({
       flipper.current.rotation.y =
         turn.current.from + (turn.current.to - turn.current.from) * turnProgress;
       bouncer.current.position.y = bounce;
-      bouncer.current.scale.y = isWalking
-        ? 1 - Math.abs(Math.cos(walk.current.phase)) * 0.05
-        : 1 + Math.sin(walk.current.time * 2.4) * 0.016;
-      bouncer.current.rotation.z = isWalking ? Math.sin(walk.current.phase) * 0.05 : 0;
+      if (isWalking) {
+        bouncer.current.scale.set(1, 1 - Math.abs(Math.cos(walk.current.phase)) * 0.05, 1);
+        bouncer.current.rotation.z = Math.sin(walk.current.phase) * 0.05;
+      } else {
+        breathe(bouncer.current, walk.current.time);
+      }
       // Leaning into a dash.
       bouncer.current.rotation.z += isDashing ? -0.12 : 0;
     }
@@ -1213,7 +1392,7 @@ function Pip({
       <group ref={root} position={[0, 0, PIP_Z]}>
         <group ref={flipper}>
           <group ref={bouncer} position={[0, -0.06, 0]}>
-            <CutOut map={pip} height={PIP_HEIGHT} />
+            <CutOut map={pip.open} height={PIP_HEIGHT} material={pipMaterial} />
           </group>
         </group>
       </group>
@@ -1233,6 +1412,8 @@ type Props = {
   // The speech bubble offering what the player can do, which the scene moves over its place.
   bubble: RefObject<HTMLElement | null>;
   stains: readonly Stain[];
+  // Léa is out of breath until her walls are dusted for the day.
+  isLeaCalm: boolean;
   onInteractionChange: (interaction: Interaction | null) => void;
   onScrub: (id: number) => void;
   // Where the character starts: where it was left last time, or else the bedroom.
@@ -1254,6 +1435,7 @@ export function PaperScene({
   signs,
   bubble,
   stains,
+  isLeaCalm,
   onInteractionChange,
   onScrub,
   startSpot,
@@ -1313,7 +1495,9 @@ export function PaperScene({
           {visit.place === 'town' && <Town signs={signs} />}
           {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
           {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
-          {visit.place === 'flat' && <Flat speakerTops={speakerTops} stains={stains} />}
+          {visit.place === 'flat' && (
+            <Flat speakerTops={speakerTops} stains={stains} isLeaCalm={isLeaCalm} />
+          )}
           {visit.place === 'arcade' && <Arcade />}
           {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
           <Pip
