@@ -240,10 +240,20 @@ body {
   animation: ui-god-pack-banner 500ms ease-in-out infinite alternate;
 }
 
-.ui-pack-crimp {
+/* The dark bands at both ends of a booster, crimped with fine lines. */
+.ui-pack-band {
   background:
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 10%) 0 2px, rgb(0 0 0 / 22%) 2px 4px),
-    var(--pack-crimp);
+    repeating-linear-gradient(90deg, transparent 0 calc(2.5% - 1px), rgb(255 255 255 / 25%) 0 2.5%)
+    center / 100% 70% no-repeat,
+    rgb(0 0 0 / 20%);
+}
+
+/* The grain of printed paper, over a drawing made in CSS. */
+.ui-paper-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 @keyframes ui-pull-spin {

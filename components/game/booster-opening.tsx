@@ -17,7 +17,7 @@ import { type PullTier, packTier } from '@/game/pull-tier';
 import { CardBack } from './card-back';
 import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
 import { moveThroughChoices } from './menu-focus';
-import { PackBody, packCrimpStyle } from './pack-art';
+import { PackBody, PackEdge, packEdgeStyle } from './pack-art';
 import { PullRays, PullScene, tierColor, tierColors } from './pull-scene';
 import { SparksCanvas, useSparks } from './pull-sparks';
 import { TiltCard } from './tilt-card';
@@ -129,18 +129,13 @@ function SealedPack({
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
         onClick={onClick}
-        style={packCrimpStyle(setId)}
+        style={packEdgeStyle(setId)}
         className="ui-pop-in relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)] cursor-grab touch-none select-none outline-offset-4 active:cursor-grabbing"
       >
         <PackBody setId={setId} setName={setName} logoUrl={logoUrl} cut={progress} />
         {/* The edge in two parts: what is still attached, and what lifts from the scissors. */}
-        <span
-          aria-hidden="true"
-          style={{ clipPath: `inset(0 0 0 ${progress * 100}%)` }}
-          className="ui-pack-crimp absolute inset-x-0 top-0 h-[13%] rounded-t-md border-4 border-b-0 border-ui-ink"
-        />
-        <span
-          aria-hidden="true"
+        <PackEdge style={{ clipPath: `inset(-50% -50% -50% ${progress * 100}%)` }} />
+        <PackEdge
           style={{
             clipPath: `inset(-50% ${(1 - progress) * 100}% -50% -50%)`,
             transformOrigin: isTorn ? '100% 100%' : `${progress * 100}% 100%`,
@@ -149,9 +144,7 @@ function SealedPack({
               : `rotate(${progress * LIFTED_EDGE_DEGREES}deg)`,
             opacity: isTorn ? 0 : 1,
           }}
-          className={`ui-pack-crimp absolute inset-x-0 top-0 h-[13%] rounded-t-md border-4 border-ui-ink ${
-            isTorn ? 'transition-[transform,opacity] duration-300' : ''
-          }`}
+          className={isTorn ? 'transition-[transform,opacity] duration-300' : ''}
         />
         <span
           aria-hidden="true"
@@ -200,7 +193,7 @@ function CutPack({
   return (
     <div className="flex flex-col items-center gap-6">
       <div
-        style={packCrimpStyle(setId)}
+        style={packEdgeStyle(setId)}
         className="relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)]"
       >
         <PackBody setId={setId} setName={setName} logoUrl={logoUrl} cut={1} />

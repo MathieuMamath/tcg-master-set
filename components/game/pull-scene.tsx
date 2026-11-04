@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import type { SetId } from '@/game/card-sets';
 import { type PullTier, stageCount, stageDuration } from '@/game/pull-tier';
-import { PackBody, packCrimpStyle } from './pack-art';
+import { PackBody, packEdgeStyle } from './pack-art';
 import { SparksCanvas, useSparks } from './pull-sparks';
 
 const RAINBOW = ['#ff5f6d', '#ffc83d', '#6fe08a', '#5fb7ff', '#b57bff', '#ff5f9e'];
@@ -106,7 +106,7 @@ export function PullScene({ setId, setName, logoUrl, tier, isGodPack, onDone }: 
         {
           '--pull-color': tierColor(stageTier),
           '--pull-shake': `${stage * 1.5}px`,
-          ...packCrimpStyle(setId),
+          ...packEdgeStyle(setId),
         } as CSSProperties
       }
       className="fixed inset-0 z-10 overflow-hidden"
