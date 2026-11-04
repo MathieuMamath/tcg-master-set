@@ -66,7 +66,7 @@ const DASH_KEY = 'Space';
 
 // Where the character stands gives no advantage, so a save that fails is simply let go.
 function saveSpot(spot: PlayerSpot) {
-  fetch('/api/player/spot', {
+  return fetch('/api/player/spot', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(spot),
@@ -410,18 +410,21 @@ export function Game({ player, sets, progress }: Props) {
 
   // Stepping out of Léa's flat gives up on the quest, since the dust stays inside.
   // Saved at each change of place, rather than at every step, so as not to flood the server.
-  const changePlace = useCallback((arrived: PlayerSpot) => {
-    const next = arrived.place;
-    saveSpot(arrived);
-    setPlace(next);
-    if (next === 'park') {
-      setProverb((previous) => nextProverb(previous));
-    }
-    if (next !== 'flat') {
-      setQuest(null);
-      setQuestLine((line) => (line === 'hurry' ? 'greeting' : line));
-    }
-  }, []);
+  const changePlace = useCallback(
+    (arrived: PlayerSpot) => {
+      const next = arrived.place;
+      showSaveNotice(saveSpot(arrived));
+      setPlace(next);
+      if (next === 'park') {
+        setProverb((previous) => nextProverb(previous));
+      }
+      if (next !== 'flat') {
+        setQuest(null);
+        setQuestLine((line) => (line === 'hurry' ? 'greeting' : line));
+      }
+    },
+    [showSaveNotice],
+  );
 
   // Stable, so that the banner's timer isn't restarted at each render.
   const timeUp = useCallback(() => {
