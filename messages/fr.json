@@ -32,7 +32,9 @@
     "leaveBookshop": "Sortir",
     "enterFlat": "Entrer chez Léa",
     "leaveFlat": "Sortir",
-    "scrub": "Frotter la poussière"
+    "scrub": "Frotter la poussière",
+    "enterArcade": "Entrer dans la salle d’arcade",
+    "leaveArcade": "Sortir"
   },
   "Shopkeeper": {
     "names": {
@@ -285,7 +287,8 @@
   },
   "Town": {
     "shop": "La Tanière aux Cartes",
-    "bookshop": "Le Coin des Pages"
+    "bookshop": "Le Coin des Pages",
+    "arcade": "Arcade"
   },
   "Hails": {
     "latest": "Bienvenue à la Tanière !",

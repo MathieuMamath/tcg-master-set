@@ -208,6 +208,8 @@ export type Interaction =
   | 'leaveBookshop'
   | 'enterFlat'
   | 'leaveFlat'
+  | 'enterArcade'
+  | 'leaveArcade'
   // Scrubbing the dust off a wall, during Léa's quest.
   | 'scrub';
 
