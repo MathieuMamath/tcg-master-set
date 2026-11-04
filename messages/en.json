@@ -35,7 +35,8 @@
     "scrub": "Rub off the dust",
     "enterArcade": "Go into the arcade",
     "leaveArcade": "Go outside",
-    "busStop": "Read the bus map"
+    "busStop": "Read the bus map",
+    "gaspard": "Talk (Gaspard)"
   },
   "Shopkeeper": {
     "names": {
@@ -389,6 +390,39 @@
       "hiddenCard": "Card {number}, face down",
       "shownCard": "Card {number}: {name}",
       "foundCard": "Card {number}: {name}, pair found"
+    },
+    "gaspard": {
+      "name": "Gaspard",
+      "lines": {
+        "greeting": "Step right up! A caramel biscuit, a needle, and a shape to cut out without breaking a thing. Child’s play! I pay by the shape… which I pick myself, of course. Heh heh.",
+        "rewarded": "Not a single crack?! … Hmph. A deal’s a deal, here’s your reward. But I’ll get you tomorrow, you’ll see.",
+        "failed": "Crack! Oh, what a shame… I’ll keep the pieces, mind, it’d be a waste. Another biscuit?",
+        "alreadyDone": "You again? No, no, one biscuit a day, or you’ll ruin me. Come back tomorrow!",
+        "unavailable": "Oops, my caramel burnt. Come back in a moment!"
+      },
+      "accept": "I’ll try my luck",
+      "title": "the fox of the dalgona stand"
+    },
+    "dalgona": {
+      "title": "Gaspard’s biscuit",
+      "shape": "{shape} · {count} coins",
+      "shapes": {
+        "triangle": "Triangle",
+        "star": "Star",
+        "umbrella": "Umbrella"
+      },
+      "carve": "Carve",
+      "carving": "Carving…",
+      "keyHint": "Hold Space or E to carve, and let go before it cracks.",
+      "pressure": "Pressure on the biscuit",
+      "timeLeft": "{seconds} s",
+      "giveUp": "Give up",
+      "checking": "Gaspard is inspecting your biscuit…",
+      "carved": "Cut out without a single crack!",
+      "broken": "Crack! The biscuit broke.",
+      "timeUp": "Too late, the caramel has set.",
+      "coins": "+{count} coins",
+      "showGaspard": "Show Gaspard"
     }
   },
   "Basketball": {
@@ -418,7 +452,8 @@
   "Town": {
     "shop": "The Card Den",
     "bookshop": "The Page Nook",
-    "arcade": "Arcade"
+    "arcade": "Arcade",
+    "dalgona": "Dalgona"
   },
   "Hails": {
     "latest": "Welcome to the Den!",
@@ -427,7 +462,8 @@
     "binderSeller": "There you are, dear!",
     "grandma": "Ah, Pip! Just in time!",
     "grandpa": "Fancy a game?",
-    "boy": "Hey! Can you help me?"
+    "boy": "Hey! Can you help me?",
+    "gaspard": "Psst… fancy a little challenge?"
   },
   "Bus": {
     "title": "Bus map",

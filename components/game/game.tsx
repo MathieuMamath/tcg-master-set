@@ -8,6 +8,7 @@ import type { MemoryCard } from '@/cards/memory-cards';
 import { addToCollection } from '@/game/binder';
 import { stopAt } from '@/game/bus';
 import type { PlayableSet, SetId } from '@/game/card-sets';
+import type { DalgonaShape, Press } from '@/game/dalgona';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import { nextProverb, pickProverb } from '@/game/proverbs';
@@ -24,13 +25,19 @@ import {
 import { isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
-import type { BasketballResult, FishingCatch, PlayerProgress } from '@/player/progress';
+import type {
+  BasketballResult,
+  DalgonaResult,
+  FishingCatch,
+  PlayerProgress,
+} from '@/player/progress';
 import { AnimatedCount } from './animated-count';
 import { BasketballDialog } from './basketball-dialog';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { BusMap } from './bus-map';
+import { DalgonaDialog } from './dalgona-dialog';
 import { FishingDialog } from './fishing-dialog';
 import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
 import { Joystick } from './joystick';
@@ -104,6 +111,9 @@ export function Game({ player, sets, progress }: Props) {
   const [isFishing, setIsFishing] = useState(false);
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
+  // The shape Gaspard handed over, while the player carves it.
+  const [dalgonaShape, setDalgonaShape] = useState<DalgonaShape | null>(null);
+  const [gaspardLine, setGaspardLine] = useState<QuestLine>('greeting');
   const [isBusMapOpen, setIsBusMapOpen] = useState(false);
   // Where the character is, for the bus map to know which stop it is read at.
   const [place, setPlace] = useState<SidePlaceId>(progress.spot?.place ?? 'bedroom');
@@ -142,6 +152,7 @@ export function Game({ player, sets, progress }: Props) {
     memoryCards !== null ||
     isFishing ||
     isPlayingBasketball ||
+    dalgonaShape !== null ||
     isBusMapOpen;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
@@ -496,6 +507,53 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
+  // The server picks the shape and remembers when the game started.
+  const startDalgona = async (): Promise<QuestLine | null> => {
+    try {
+      const response = await fetch('/api/quests/dalgona/start', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const answer: { hasStarted: boolean; shape?: DalgonaShape } = await response.json();
+      if (!answer.hasStarted || !answer.shape) {
+        return 'alreadyDone';
+      }
+      setDalgonaShape(answer.shape);
+      return null;
+    } catch {
+      return 'unavailable';
+    }
+  };
+
+  // The server replays the presses and pays for a shape carved whole. This only shows the result.
+  const finishDalgona = async (presses: readonly Press[]): Promise<DalgonaResult | null> => {
+    try {
+      const response = await fetch('/api/quests/dalgona/finish', {
+        method: 'POST',
+        body: JSON.stringify({ presses }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const result: DalgonaResult = await response.json();
+      if (result.coins > 0) {
+        showSaveNotice();
+      }
+      return result;
+    } catch {
+      return null;
+    }
+  };
+
+  const endDalgona = (line: QuestLine, result?: DalgonaResult) => {
+    setDalgonaShape(null);
+    if (result) {
+      setWallet(result.wallet);
+    }
+    setGaspardLine(line);
+    setTalkingTo('gaspard');
+  };
+
   const startFishing = async (): Promise<QuestLine | null> => {
     try {
       const response = await fetch('/api/quests/fishing/start', { method: 'POST' });
@@ -562,6 +620,7 @@ export function Game({ player, sets, progress }: Props) {
           busStop: tBus('stops.mainStreet'),
           busLine: tBus('line'),
           parkStop: tBus('stops.park'),
+          dalgona: tTown('dalgona'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
@@ -681,29 +740,33 @@ export function Game({ player, sets, progress }: Props) {
           {t(interaction)}
         </button>
       )}
-      {!isTalking && memoryCards === null && !isFishing && !isPlayingBasketball && (
-        <>
-          <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
-            {t('keyboardHint')}
-          </p>
-          <Joystick
-            onChange={(direction) => {
-              input.current.joystick = direction;
-            }}
-          />
-          <button
-            type="button"
-            aria-hidden="true"
-            tabIndex={-1}
-            onPointerDown={() => {
-              input.current.wantsDash = true;
-            }}
-            className="absolute right-8 bottom-20 hidden size-20 touch-none select-none items-center justify-center rounded-full border border-current/30 bg-current/10 font-game font-semibold pointer-coarse:flex"
-          >
-            {t('dash')}
-          </button>
-        </>
-      )}
+      {!isTalking &&
+        memoryCards === null &&
+        !isFishing &&
+        !isPlayingBasketball &&
+        dalgonaShape === null && (
+          <>
+            <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
+              {t('keyboardHint')}
+            </p>
+            <Joystick
+              onChange={(direction) => {
+                input.current.joystick = direction;
+              }}
+            />
+            <button
+              type="button"
+              aria-hidden="true"
+              tabIndex={-1}
+              onPointerDown={() => {
+                input.current.wantsDash = true;
+              }}
+              className="absolute right-8 bottom-20 hidden size-20 touch-none select-none items-center justify-center rounded-full border border-current/30 bg-current/10 font-game font-semibold pointer-coarse:flex"
+            >
+              {t('dash')}
+            </button>
+          </>
+        )}
       {isBinderOpen && (
         <BinderView
           sets={sets.filter(({ id }) => binders.includes(id))}
@@ -789,32 +852,52 @@ export function Game({ player, sets, progress }: Props) {
       {isFishing && !isTalking && (
         <FishingDialog sets={sets} onReelIn={reelIn} onEnd={endFishing} />
       )}
-      {talkingTo && talkingTo !== 'grandma' && talkingTo !== 'grandpa' && talkingTo !== 'boy' && (
-        <ShopDialog
-          stock={talkingTo}
-          items={(talkingTo === 'binderSeller'
-            ? bindersForSale(sets)
-            : setsSoldBy(talkingTo, sets, new Date().getFullYear())
-          ).map((set) => {
-            const hasBinder = binders.includes(set.id);
-            return {
-              set,
-              refusal:
-                talkingTo === 'binderSeller'
-                  ? hasBinder
-                    ? 'alreadyOwned'
-                    : null
-                  : hasBinder
-                    ? null
-                    : 'needsBinder',
-              inBag: boosterCount(wallet, set.id),
-            };
-          })}
-          coins={wallet.coins}
-          onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
-          onClose={() => setTalkingTo(null)}
+      {talkingTo === 'gaspard' && (
+        <QuestDialog
+          giver="gaspard"
+          line={gaspardLine}
+          onAccept={startDalgona}
+          onClose={() => {
+            setTalkingTo(null);
+            setGaspardLine((line) =>
+              line === 'rewarded' || line === 'failed' ? 'greeting' : line,
+            );
+          }}
         />
       )}
+      {dalgonaShape && !isTalking && (
+        <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
+      )}
+      {talkingTo &&
+        talkingTo !== 'grandma' &&
+        talkingTo !== 'grandpa' &&
+        talkingTo !== 'boy' &&
+        talkingTo !== 'gaspard' && (
+          <ShopDialog
+            stock={talkingTo}
+            items={(talkingTo === 'binderSeller'
+              ? bindersForSale(sets)
+              : setsSoldBy(talkingTo, sets, new Date().getFullYear())
+            ).map((set) => {
+              const hasBinder = binders.includes(set.id);
+              return {
+                set,
+                refusal:
+                  talkingTo === 'binderSeller'
+                    ? hasBinder
+                      ? 'alreadyOwned'
+                      : null
+                    : hasBinder
+                      ? null
+                      : 'needsBinder',
+                inBag: boosterCount(wallet, set.id),
+              };
+            })}
+            coins={wallet.coins}
+            onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
+            onClose={() => setTalkingTo(null)}
+          />
+        )}
       {isBusMapOpen && stopAt(place) && (
         <BusMap
           here={stopAt(place)?.id ?? 'mainStreet'}

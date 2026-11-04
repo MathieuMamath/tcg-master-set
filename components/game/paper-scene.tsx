@@ -76,11 +76,14 @@ import {
   drawCloud,
   drawCorrugatedEdge,
   drawCounter,
+  drawDalgonaAwning,
+  drawDalgonaCart,
   drawDesk,
   drawDoor,
   drawDust,
   drawFlats,
   drawFrame,
+  drawGaspard,
   drawHedgehog,
   drawHills,
   drawHouse,
@@ -108,6 +111,7 @@ import {
   drawWallpaper,
   drawWindowFrame,
   type Eyes,
+  GASPARD_SIZE,
   HEDGEHOG_SIZE,
   LEA_SIZE,
   LUCAS_SIZE,
@@ -145,6 +149,8 @@ export type SceneSigns = {
   busLine: string;
   // The name of the park's bus stop, on its sign.
   parkStop: string;
+  // Painted on Gaspard's cart.
+  dalgona: string;
   latest: string;
   thisYear: string;
   older: string;
@@ -928,8 +934,12 @@ const HILL_ROWS = [
   { z: -4, color: '#579552', hatch: '#3b7238', bumps: 9, height: 1.8, seed: 3 },
 ];
 
-// The street: a wide sky, rows of hills, our house, the shop and the bookshop.
-function Town({ signs }: { signs: SceneSigns }) {
+const GASPARD_HEIGHT = 3.3;
+// The awning stands behind Gaspard, and his cart in front, hiding his legs.
+const DALGONA_Z = { awning: -1.1, gaspard: -0.85, cart: -0.45 };
+
+// The street: a wide sky, rows of hills, our house, Gaspard's stand, the shop and the bookshop.
+function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
   const look = skyLook('day', 'fewClouds');
   const fontsReady = useFontsReady();
   const textures = useMemo(
@@ -939,6 +949,8 @@ function Town({ signs }: { signs: SceneSigns }) {
       shadow: texture(drawShadowBlob()),
       house: texture(cutOut(420, 380, drawHouse, 9, 61)),
       flats: texture(cutOut(440, 420, drawFlats, 9, 65)),
+      awning: texture(cutOut(320, 380, drawDalgonaAwning, 8, 121)),
+      gaspard: blinker(GASPARD_SIZE.width, GASPARD_SIZE.height, drawGaspard, 9, 122),
       hills: HILL_ROWS.map(({ color, hatch, bumps, seed, height }) =>
         texture(
           cutOut(1600, Math.round(height * 100), drawHills(color, hatch, bumps, seed), 8, seed),
@@ -956,6 +968,11 @@ function Town({ signs }: { signs: SceneSigns }) {
   const bookshop = useMemo(
     () => texture(cutOut(480, 380, drawBookshop(signs.bookshop), 9, 64)),
     [fontsReady, signs.bookshop],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const cart = useMemo(
+    () => texture(cutOut(320, 190, drawDalgonaCart(signs.dalgona), 8, 123)),
+    [fontsReady, signs.dalgona],
   );
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const arcade = useMemo(
@@ -999,6 +1016,7 @@ function Town({ signs }: { signs: SceneSigns }) {
     arcade: arcadePlace,
     busStop,
     bus,
+    dalgona,
   } = TOWN_BUILDINGS;
   const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
   const streetCenter = (TOWN_ENDS.left + TOWN_ENDS.right) / 2;
@@ -1051,6 +1069,39 @@ function Town({ signs }: { signs: SceneSigns }) {
         x={house.x}
         z={BUILDINGS_Z}
         height={4.06}
+        shadow={textures.shadow}
+      />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[
+          {
+            interaction: 'gaspard',
+            map: textures.gaspard.open,
+            height: GASPARD_HEIGHT,
+            z: DALGONA_Z.gaspard,
+          },
+        ]}
+      />
+      <Furniture
+        map={textures.awning}
+        x={dalgona.x}
+        z={DALGONA_Z.awning}
+        height={3.9}
+        shadow={textures.shadow}
+      />
+      <Character
+        map={textures.gaspard.open}
+        blinks={textures.gaspard}
+        x={dalgona.gaspardX}
+        z={DALGONA_Z.gaspard}
+        height={GASPARD_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={cart}
+        x={dalgona.x}
+        z={DALGONA_Z.cart}
+        height={1.6}
         shadow={textures.shadow}
       />
       <Furniture
@@ -1492,7 +1543,7 @@ export function PaperScene({
         <directionalLight position={[-4, 8, 10]} intensity={1.2} />
         <group key={visit.number}>
           {visit.place === 'bedroom' && <Bedroom />}
-          {visit.place === 'town' && <Town signs={signs} />}
+          {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
           {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
           {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
           {visit.place === 'flat' && (

@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import type { QuestGiver } from '@/game/world';
 import {
+  drawGaspard,
   drawHedgehog,
   drawLea,
   drawLucas,
   drawPapy,
   drawRaccoon,
+  GASPARD_FACE,
+  GASPARD_SIZE,
   HEDGEHOG_FACE,
   HEDGEHOG_SIZE,
   LEA_FACE,
@@ -23,7 +27,7 @@ import {
 const PORTRAIT_SIZE = 208;
 
 // The characters with a portrait: the sellers, and the quest givers.
-type Character = keyof typeof SELLERS | 'binderSeller' | 'grandma' | 'grandpa' | 'boy';
+type Character = keyof typeof SELLERS | 'binderSeller' | QuestGiver;
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -35,6 +39,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'boy') {
     return { draw: drawLucas, size: LUCAS_SIZE, face: LUCAS_FACE };
+  }
+  if (stock === 'gaspard') {
+    return { draw: drawGaspard, size: GASPARD_SIZE, face: GASPARD_FACE };
   }
   return stock === 'binderSeller'
     ? { draw: drawHedgehog, size: HEDGEHOG_SIZE, face: HEDGEHOG_FACE }
