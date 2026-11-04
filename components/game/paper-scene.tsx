@@ -55,14 +55,17 @@ import { skyLook } from '@/game/sky';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction } from '@/game/world';
 import {
+  BERENICE_SIZE,
   cutOut,
   drawArcade,
   drawArcadeCabinet,
   drawArcadeCarpet,
   drawArcadeDoor,
+  drawBalloon,
   drawBasketballMachine,
   drawBed,
   drawBench,
+  drawBerenice,
   drawBigPlant,
   drawBookcase,
   drawBookPile,
@@ -96,6 +99,8 @@ import {
   drawPip,
   drawPlanks,
   drawRaccoon,
+  drawRaffleBooth,
+  drawRaffleCounter,
   drawReeds,
   drawShadowBlob,
   drawShop,
@@ -151,6 +156,8 @@ export type SceneSigns = {
   parkStop: string;
   // Painted on Gaspard's cart.
   dalgona: string;
+  // On the board over Bérénice's stand.
+  raffle: string;
   latest: string;
   thisYear: string;
   older: string;
@@ -934,6 +941,64 @@ const HILL_ROWS = [
   { z: -4, color: '#579552', hatch: '#3b7238', bumps: 9, height: 1.8, seed: 3 },
 ];
 
+const BERENICE_HEIGHT = 3.05;
+// The booth stands behind Bérénice, and her counter in front, hiding her feet.
+const RAFFLE_Z = { booth: -1.1, balloons: -1.15, berenice: -0.85, counter: -0.45 };
+const RAFFLE_BOOTH_HEIGHT = 4;
+// Where the balloons are tied: the tops of the booth's posts, either side of its middle.
+const BALLOONS = [
+  { color: '#e8645a', post: -1, offset: -0.12, lean: 0.12, height: 1.6 },
+  { color: '#f3c14b', post: -1, offset: 0, lean: -0.05, height: 1.85 },
+  { color: '#9a7bd6', post: -1, offset: 0.1, lean: -0.18, height: 1.5 },
+  { color: '#3a86c8', post: 1, offset: -0.05, lean: 0.1, height: 1.75 },
+  { color: '#5b9c4e', post: 1, offset: 0.1, lean: -0.12, height: 1.55 },
+] as const;
+const BALLOON_POST = { side: 1.32, y: 3.25 };
+// Each balloon a little behind the last, so that overlapping ones never fight for the same
+// depth and flicker.
+const BALLOON_GAP_Z = 0.03;
+
+// Balloons tied to the stand, swaying on their strings in the breeze, each at its own pace.
+function Balloons({ x, z }: { x: number; z: number }) {
+  const maps = useMemo(
+    () =>
+      BALLOONS.map(({ color }, index) =>
+        texture(cutOut(70, 230, drawBalloon(color), 5, 130 + index)),
+      ),
+    [],
+  );
+  const strings = useRef<(Group | null)[]>([]);
+  useFrame(({ clock }) => {
+    for (const [index, group] of strings.current.entries()) {
+      if (group) {
+        const time = clock.elapsedTime * (0.8 + index * 0.13) + index * 1.7;
+        group.rotation.z = BALLOONS[index].lean + Math.sin(time) * 0.07;
+        group.position.y = BALLOON_POST.y + Math.sin(time * 1.3) * 0.03;
+      }
+    }
+  });
+  return (
+    <>
+      {BALLOONS.map(({ post, offset, height }, index) => (
+        <group
+          // biome-ignore lint/suspicious/noArrayIndexKey: the balloons never change.
+          key={index}
+          ref={(group) => {
+            strings.current[index] = group;
+          }}
+          position={[
+            x + post * BALLOON_POST.side + offset,
+            BALLOON_POST.y,
+            z - index * BALLOON_GAP_Z,
+          ]}
+        >
+          <CutOut map={maps[index]} height={height} />
+        </group>
+      ))}
+    </>
+  );
+}
+
 const GASPARD_HEIGHT = 3.3;
 // The awning stands behind Gaspard, and his cart in front, hiding his legs.
 const DALGONA_Z = { awning: -1.1, gaspard: -0.85, cart: -0.45 };
@@ -951,6 +1016,8 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       flats: texture(cutOut(440, 420, drawFlats, 9, 65)),
       awning: texture(cutOut(320, 380, drawDalgonaAwning, 8, 121)),
       gaspard: blinker(GASPARD_SIZE.width, GASPARD_SIZE.height, drawGaspard, 9, 122),
+      berenice: blinker(BERENICE_SIZE.width, BERENICE_SIZE.height, drawBerenice, 9, 124),
+      raffleCounter: texture(cutOut(340, 200, drawRaffleCounter, 8, 126)),
       hills: HILL_ROWS.map(({ color, hatch, bumps, seed, height }) =>
         texture(
           cutOut(1600, Math.round(height * 100), drawHills(color, hatch, bumps, seed), 8, seed),
@@ -973,6 +1040,11 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
   const cart = useMemo(
     () => texture(cutOut(320, 190, drawDalgonaCart(signs.dalgona), 8, 123)),
     [fontsReady, signs.dalgona],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const raffleBooth = useMemo(
+    () => texture(cutOut(340, 420, drawRaffleBooth(signs.raffle), 8, 125)),
+    [fontsReady, signs.raffle],
   );
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const arcade = useMemo(
@@ -1017,6 +1089,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
     busStop,
     bus,
     dalgona,
+    raffle,
   } = TOWN_BUILDINGS;
   const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
   const streetCenter = (TOWN_ENDS.left + TOWN_ENDS.right) / 2;
@@ -1080,7 +1153,36 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
             height: GASPARD_HEIGHT,
             z: DALGONA_Z.gaspard,
           },
+          {
+            interaction: 'berenice',
+            map: textures.berenice.open,
+            height: BERENICE_HEIGHT,
+            z: RAFFLE_Z.berenice,
+          },
         ]}
+      />
+      <Balloons x={raffle.x} z={RAFFLE_Z.balloons} />
+      <Furniture
+        map={raffleBooth}
+        x={raffle.x}
+        z={RAFFLE_Z.booth}
+        height={RAFFLE_BOOTH_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Character
+        map={textures.berenice.open}
+        blinks={textures.berenice}
+        x={raffle.bereniceX}
+        z={RAFFLE_Z.berenice}
+        height={BERENICE_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={textures.raffleCounter}
+        x={raffle.x}
+        z={RAFFLE_Z.counter}
+        height={1.7}
+        shadow={textures.shadow}
       />
       <Furniture
         map={textures.awning}

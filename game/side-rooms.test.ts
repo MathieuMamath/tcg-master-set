@@ -96,6 +96,16 @@ describe('the street', () => {
     expect(shop.x + shop.width / 2).toBeLessThan(bookshop.x - bookshop.width / 2);
   });
 
+  test("Bérénice's stand fits between the bookshop and the arcade, clear of their doors", () => {
+    const { bookshop, arcade, raffle } = TOWN_BUILDINGS;
+
+    expect(bookshop.x + bookshop.width / 2).toBeLessThan(raffle.x - raffle.width / 2);
+    expect(raffle.x + raffle.width / 2).toBeLessThan(arcade.x - arcade.width / 2);
+    expect(interactionAlong(TOWN, raffle.bereniceX)).toBe('berenice');
+    expect(interactionAlong(TOWN, bookshop.doorX)).toBe('enterBookshop');
+    expect(interactionAlong(TOWN, arcade.doorX)).toBe('enterArcade');
+  });
+
   test("Gaspard's stand fits between our house and the shop, clear of their doors", () => {
     const { house, shop, dalgona } = TOWN_BUILDINGS;
 

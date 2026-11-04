@@ -36,7 +36,8 @@
     "enterArcade": "Go into the arcade",
     "leaveArcade": "Go outside",
     "busStop": "Read the bus map",
-    "gaspard": "Talk (Gaspard)"
+    "gaspard": "Talk (Gaspard)",
+    "berenice": "Talk (Bérénice)"
   },
   "Shopkeeper": {
     "names": {
@@ -423,6 +424,34 @@
       "timeUp": "Too late, the caramel has set.",
       "coins": "+{count} coins",
       "showGaspard": "Show Gaspard"
+    },
+    "berenice": {
+      "name": "Bérénice",
+      "lines": {
+        "greeting": "Roll up, roll up! Bérénice’s grand raffle! One free turn of the crank a day: the red ball wins 300 coins, and the golden ball… the 3,000-coin jackpot!",
+        "rewarded": "A red ball! Well done, here are your 300 coins. Ding, ding!",
+        "rewardedShiny": "THE GOLDEN BALL!!! The jackpot! 3,000 coins all for you! Ding, ding, ding!!!",
+        "lost": "Oh, a white ball… Not your day, but tomorrow your luck will turn, just like my drum!",
+        "alreadyDone": "You’ve already turned the crank today! Come back tomorrow to try your luck.",
+        "unavailable": "Oh dear, my drum is stuck! Try again in a moment."
+      },
+      "accept": "Try my luck",
+      "title": "the goat of the raffle"
+    },
+    "raffle": {
+      "title": "Bérénice’s raffle",
+      "jackpotOdds": "Golden ball: {count, number} coins (3%)",
+      "prizeOdds": "Red ball: {count, number} coins (10%)",
+      "spin": "Turn the crank",
+      "spinning": "Spinning…",
+      "later": "Later",
+      "results": {
+        "jackpot": "The jackpot!",
+        "prize": "A red ball!",
+        "none": "A white ball…"
+      },
+      "coins": "+{count, number} coins",
+      "showBerenice": "Show Bérénice"
     }
   },
   "Basketball": {
@@ -453,7 +482,8 @@
     "shop": "The Card Den",
     "bookshop": "The Page Nook",
     "arcade": "Arcade",
-    "dalgona": "Dalgona"
+    "dalgona": "Dalgona",
+    "raffle": "Raffle"
   },
   "Hails": {
     "latest": "Welcome to the Den!",
@@ -463,7 +493,8 @@
     "grandma": "Ah, Pip! Just in time!",
     "grandpa": "Fancy a game?",
     "boy": "Hey! Can you help me?",
-    "gaspard": "Psst… fancy a little challenge?"
+    "gaspard": "Psst… fancy a little challenge?",
+    "berenice": "Try your luck!"
   },
   "Bus": {
     "title": "Bus map",

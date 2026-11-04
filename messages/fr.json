@@ -36,7 +36,8 @@
     "enterArcade": "Entrer dans la salle d’arcade",
     "leaveArcade": "Sortir",
     "busStop": "Lire le plan du bus",
-    "gaspard": "Parler (Gaspard)"
+    "gaspard": "Parler (Gaspard)",
+    "berenice": "Parler (Bérénice)"
   },
   "Shopkeeper": {
     "names": {
@@ -423,6 +424,34 @@
       "timeUp": "Trop tard, le caramel a durci.",
       "coins": "+{count} pièces",
       "showGaspard": "Montrer à Gaspard"
+    },
+    "berenice": {
+      "name": "Bérénice",
+      "lines": {
+        "greeting": "Approchez, approchez ! La grande tombola de Bérénice ! Un tour de manivelle gratuit par jour : la boule rouge rapporte 300 pièces, et la boule dorée… le gros lot de 3 000 pièces !",
+        "rewarded": "Une boule rouge ! Bravo, voilà tes 300 pièces. Ding, ding !",
+        "rewardedShiny": "LA BOULE DORÉE !!! Le gros lot ! 3 000 pièces rien que pour toi ! Ding, ding, ding !!!",
+        "lost": "Oh, une boule blanche… Ce n’est pas ton jour, mais demain la chance tourne, comme mon tambour !",
+        "alreadyDone": "Tu as déjà tourné la manivelle aujourd’hui ! Reviens demain tenter ta chance.",
+        "unavailable": "Oh là, mon tambour est coincé ! Réessaie dans un instant."
+      },
+      "accept": "Tenter ma chance",
+      "title": "la chèvre de la tombola"
+    },
+    "raffle": {
+      "title": "La tombola de Bérénice",
+      "jackpotOdds": "Boule dorée : {count, number} pièces (3 %)",
+      "prizeOdds": "Boule rouge : {count, number} pièces (10 %)",
+      "spin": "Tourner la manivelle",
+      "spinning": "Ça tourne…",
+      "later": "Plus tard",
+      "results": {
+        "jackpot": "Le gros lot !",
+        "prize": "Une boule rouge !",
+        "none": "Une boule blanche…"
+      },
+      "coins": "+{count, number} pièces",
+      "showBerenice": "Montrer à Bérénice"
     }
   },
   "Basketball": {
@@ -453,7 +482,8 @@
     "shop": "La Tanière aux Cartes",
     "bookshop": "Le Coin des Pages",
     "arcade": "Arcade",
-    "dalgona": "Dalgona"
+    "dalgona": "Dalgona",
+    "raffle": "Tombola"
   },
   "Hails": {
     "latest": "Bienvenue à la Tanière !",
@@ -463,7 +493,8 @@
     "grandma": "Ah, Pip ! Tu tombes bien !",
     "grandpa": "Une petite partie ?",
     "boy": "Hé ! Tu peux m’aider ?",
-    "gaspard": "Psst… un petit défi ?"
+    "gaspard": "Psst… un petit défi ?",
+    "berenice": "Tentez votre chance !"
   },
   "Bus": {
     "title": "Plan du bus",

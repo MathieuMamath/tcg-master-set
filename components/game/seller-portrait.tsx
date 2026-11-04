@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import type { QuestGiver } from '@/game/world';
 import {
+  BERENICE_FACE,
+  BERENICE_SIZE,
+  drawBerenice,
   drawGaspard,
   drawHedgehog,
   drawLea,
@@ -39,6 +42,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'boy') {
     return { draw: drawLucas, size: LUCAS_SIZE, face: LUCAS_FACE };
+  }
+  if (stock === 'berenice') {
+    return { draw: drawBerenice, size: BERENICE_SIZE, face: BERENICE_FACE };
   }
   if (stock === 'gaspard') {
     return { draw: drawGaspard, size: GASPARD_SIZE, face: GASPARD_FACE };
