@@ -110,7 +110,20 @@ export function BusMap({ here, onTravel, onClose }: Props) {
                 strokeWidth="5"
               />
               {id === here && (
-                <circle cx={MAP_SPOTS[id].x} cy={MAP_SPOTS[id].y} r="5" fill="#c8453a" />
+                <>
+                  <circle cx={MAP_SPOTS[id].x} cy={MAP_SPOTS[id].y} r="5" fill="#c8453a" />
+                  {/* A little flag planted on the stop where the player is. */}
+                  <g transform={`translate(${MAP_SPOTS[id].x} ${MAP_SPOTS[id].y})`}>
+                    <path d="M0 0 V-34" stroke="#5a3e2a" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d="M1 -34 L22 -27 L1 -19Z" fill="#c8453a" />
+                    <path
+                      d="M1 -34 L22 -27 L1 -19Z"
+                      fill="#fff"
+                      fillOpacity="0.2"
+                      transform="translate(0 -3) scale(1 0.6)"
+                    />
+                  </g>
+                </>
               )}
             </g>
           ))}
@@ -132,7 +145,7 @@ export function BusMap({ here, onTravel, onClose }: Props) {
                   <button
                     type="button"
                     onClick={() => onTravel(stop)}
-                    className={`${CHOICE_CLASS} bg-[#3f8a6a] text-ui-paper`}
+                    className={`${CHOICE_CLASS} bg-[#3f8a6a]! text-ui-paper`}
                   >
                     {t('goTo')}
                   </button>
