@@ -85,6 +85,8 @@ Bérénice's raffle is in `game/raffle.ts`. She is a jolly goat with a stand out
 
 The arcade's basketball machine is in `game/basketball.ts`. The browser only sends when each shot left, and the server replays them with the same rules to get the score, after checking that the game lasted its full time. It can always be played, and `player_high_scores` keeps the best score, but only one game a day pays: the first to earn a reward. A game that earns nothing leaves it to be won. The other machines are decoration.
 
+The activity tracker, under the settings button, opens `components/game/activity-dialog.tsx`, whose first tab lists the day's quests from `game/activity.ts`. A quest counts as done once it is used up for the day, its `completed_on` set to today: paid for most, drawn for the raffle, won or not. Doing all six earns a daily bonus of 600 coins, which the player claims with a button, and which the server pays once a day under its own quest row, `daily-bonus`, after checking every quest. The game reads the day's activity again whenever a dialog closes.
+
 ## Accounts
 
 Playing requires an account: pages and API routes check `getPlayer()` from `auth/session.ts` on the server. [Better Auth](https://www.better-auth.com/) handles sign-up, sign-in, sessions and password hashing through `auth/server.ts`. Only the email, username and hashed password are collected. Show players `auth/rules.ts` error keys, never the library's messages.

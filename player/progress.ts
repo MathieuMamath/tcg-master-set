@@ -12,6 +12,13 @@ import {
   playerWallets,
 } from '@/db/schema';
 import {
+  canClaimDailyBonus,
+  DAILY_BONUS_COINS,
+  DAILY_BONUS_QUEST,
+  type DailyActivity,
+  dailyActivity,
+} from '@/game/activity';
+import {
   BASKETBALL_COINS,
   BASKETBALL_GAME,
   BASKETBALL_QUEST,
@@ -77,6 +84,8 @@ export type PlayerProgress = {
   cleanedOn: string | null;
   // The day of the last turn of Bérénice's drum, after which she says to come back tomorrow.
   raffleDrawnOn: string | null;
+  // Today's quests done, for the activity tracker.
+  activity: DailyActivity;
 };
 
 export type OpenedBooster = {
@@ -132,6 +141,58 @@ async function loadRewardDay(
   return attempt?.completedOn ?? null;
 }
 
+// Every quest's last day at once, read into today's activity.
+async function loadDailyActivity(database: Reader, userId: string): Promise<DailyActivity> {
+  const rows = await database
+    .select({ questId: playerQuests.questId, completedOn: playerQuests.completedOn })
+    .from(playerQuests)
+    .where(eq(playerQuests.userId, userId));
+  return dailyActivity(
+    new Map(rows.map(({ questId, completedOn }) => [questId, completedOn])),
+    new Date(),
+  );
+}
+
+export function loadPlayerActivity(userId: string): Promise<DailyActivity> {
+  return loadDailyActivity(getDb(), userId);
+}
+
+export type DailyBonusClaim = { isClaimed: boolean; activity: DailyActivity; wallet: Wallet };
+
+// Pays the day's bonus once every daily quest is done. The bonus's row is locked and used up with
+// the payment, so that it pays once a day.
+export async function claimDailyBonus(userId: string): Promise<DailyBonusClaim> {
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    await loadWallet(transaction, userId);
+    await transaction
+      .select({ completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, DAILY_BONUS_QUEST)))
+      .for('update');
+    const activity = await loadDailyActivity(transaction, userId);
+    if (!canClaimDailyBonus(activity)) {
+      return { isClaimed: false, activity, wallet: await loadWallet(transaction, userId) };
+    }
+    await transaction
+      .insert(playerQuests)
+      .values({ userId, questId: DAILY_BONUS_QUEST, completedOn: questDay(now) })
+      .onConflictDoUpdate({
+        target: [playerQuests.userId, playerQuests.questId],
+        set: { completedOn: questDay(now) },
+      });
+    await transaction
+      .update(playerWallets)
+      .set({ coins: sql`${playerWallets.coins} + ${DAILY_BONUS_COINS}`, updatedAt: new Date() })
+      .where(eq(playerWallets.userId, userId));
+    return {
+      isClaimed: true,
+      activity: { ...activity, isBonusClaimed: true },
+      wallet: await loadWallet(transaction, userId),
+    };
+  });
+}
+
 async function loadBinders(database: Reader, userId: string): Promise<SetId[]> {
   const binders = await database
     .select({ setId: playerBinders.setId })
@@ -175,6 +236,7 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     memoryWonOn: await loadRewardDay(getDb(), userId, GRANDPA_QUEST),
     cleanedOn: await loadRewardDay(getDb(), userId, GRANDMA_QUEST),
     raffleDrawnOn: await loadRewardDay(getDb(), userId, RAFFLE_QUEST),
+    activity: await loadDailyActivity(getDb(), userId),
   };
 }
 
