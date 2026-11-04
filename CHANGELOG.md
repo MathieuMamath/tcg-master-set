@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.57](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.56...v0.1.57) (2026-11-04)
+
+### Features
+
+* **npc:** make the characters breathe and blink ([#58](https://github.com/MathieuMamath/tcg-master-set/issues/58)) ([0e5dab8](https://github.com/MathieuMamath/tcg-master-set/commit/0e5dab8be7552fef0a2105b4ba7395b9b2e7cb64))
+
 ## [0.1.56](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.55...v0.1.56) (2026-11-04)
 
 ### Bug Fixes
