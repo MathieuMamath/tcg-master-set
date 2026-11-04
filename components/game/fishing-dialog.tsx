@@ -216,7 +216,8 @@ export function FishingDialog({ sets, onReelIn, onEnd }: Props) {
             aria-disabled={step === 'waiting' || step === 'reeling'}
             aria-live="polite"
             onClick={pressMain}
-            className={`${CHOICE_CLASS} ${step === 'biting' || step === 'caught' ? 'bg-ui-stamp text-ui-paper' : ''}`}
+            // Kept on one line, so that the buttons don't jump when its text changes.
+            className={`${CHOICE_CLASS} whitespace-nowrap ${step === 'biting' || step === 'caught' ? 'bg-ui-stamp text-ui-paper' : ''}`}
           >
             {mainLabel}
           </button>

@@ -242,9 +242,9 @@
     "stainsLeft": "{count, plural, one {# patch of dust} other {# patches of dust}}",
     "fishing": {
       "title": "Fishing",
-      "waiting": "Something’s bound to catch on…",
-      "reel": "Something’s pulling! Reel it in!",
-      "reeling": "Reeling in...",
+      "waiting": "Wait for it…",
+      "reel": "It’s pulling! Reel in!",
+      "reeling": "Reeling in…",
       "giveUp": "Stop fishing",
       "giveToBoy": "Give it back to Lucas",
       "coins": "+{count} coins",

@@ -242,9 +242,9 @@
     "stainsLeft": "{count, plural, one {# tache de poussière} other {# taches de poussière}}",
     "fishing": {
       "title": "Pêche",
-      "waiting": "Quelque chose va bien finir par accrocher…",
-      "reel": "Ça tire ! Remonte la ligne !",
-      "reeling": "Ça remonte...",
+      "waiting": "Patience…",
+      "reel": "Ça tire ! Remonte !",
+      "reeling": "Ça remonte…",
       "giveUp": "Arrêter de pêcher",
       "giveToBoy": "Le rendre à Lucas",
       "coins": "+{count} pièces",
