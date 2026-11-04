@@ -134,8 +134,8 @@ export function ShopDialog({ stock, choices, onBuy, onClose }: Props) {
       <SpeechBox
         nameId="shopkeeper-name"
         name={stock === 'binderSeller' ? t('names.binderSeller') : t(`sellers.${stock}`)}
-        title={stock === 'binderSeller' ? undefined : t(`titles.${stock}`)}
-        portrait={stock === 'binderSeller' ? undefined : <SellerPortrait stock={stock} />}
+        title={t(`titles.${stock}`)}
+        portrait={<SellerPortrait stock={stock} />}
       >
         <TypedLine
           key={speech.turn}

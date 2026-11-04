@@ -1,9 +1,16 @@
 import type { Facing } from './side-walk';
 import type { Interaction } from './world';
 
-export type SidePlaceId = 'bedroom' | 'town' | 'shop';
+export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop';
 
-export const DOOR_INTERACTIONS = ['leaveHome', 'goHome', 'enterShop', 'leaveShop'] as const;
+export const DOOR_INTERACTIONS = [
+  'leaveHome',
+  'goHome',
+  'enterShop',
+  'leaveShop',
+  'enterBookshop',
+  'leaveBookshop',
+] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
 
@@ -54,11 +61,12 @@ export const BEDROOM_FURNITURE = {
   plant: { x: 5.6, width: 1.3 },
 } as const;
 
-// The street: our house on the left, and the shop on the right.
-export const TOWN_ENDS = { left: -12, right: 12 };
+// The street: our house on the left, then the shop, and the bookshop past it.
+export const TOWN_ENDS = { left: -12, right: 20 };
 export const TOWN_BUILDINGS = {
   house: { x: -5, width: 4.2, doorX: -5 },
   shop: { x: 5, width: 4.8, doorX: 5.9 },
+  bookshop: { x: 13.5, width: 4.8, doorX: 14.4 },
 } as const;
 
 // The shop, the Card Den: the raccoon triplets each have a counter, from the newest sets on the
@@ -70,6 +78,22 @@ export const SHOP_COUNTERS = [
   { stock: 'older', x: 4.6 },
 ] as const;
 export const SHOP_COUNTER_WIDTH = 2.7;
+
+// The bookshop, small and cosy: books everywhere, but only binders for sale. Mamie Noisette stands
+// in front of the pile of books she uses as a counter, her till on top, and the door is in the left
+// wall.
+export const BOOKSHOP_WALLS = { left: -4.6, right: 4.6 };
+export const BOOKSHOP_FURNITURE = {
+  magazines: { x: -2.5, width: 1.4 },
+  pile: { x: 1.15, width: 2 },
+  table: { x: 3.2, width: 1.6 },
+} as const;
+export const BOOKSHOP_SELLER_X = -0.1;
+
+const BOOKSHOP_BOUNDS = {
+  minX: BOOKSHOP_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: BOOKSHOP_WALLS.right - CHARACTER_HALF_WIDTH,
+};
 
 const SHOP_BOUNDS = {
   minX: SHOP_WALLS.left + CHARACTER_HALF_WIDTH,
@@ -121,6 +145,13 @@ export const TOWN: SideRoom = {
       arrival: { x: SHOP_BOUNDS.minX, facing: 1 },
     },
     {
+      interaction: 'enterBookshop',
+      minX: TOWN_BUILDINGS.bookshop.doorX - DOOR_REACH,
+      maxX: TOWN_BUILDINGS.bookshop.doorX + DOOR_REACH,
+      to: 'bookshop',
+      arrival: { x: BOOKSHOP_BOUNDS.minX, facing: 1 },
+    },
+    {
       interaction: 'goHome',
       minX: TOWN_BUILDINGS.house.doorX - DOOR_REACH,
       maxX: TOWN_BUILDINGS.house.doorX + DOOR_REACH,
@@ -151,10 +182,34 @@ export const SHOP: SideRoom = {
   ],
 };
 
+export const BOOKSHOP: SideRoom = {
+  id: 'bookshop',
+  bounds: BOOKSHOP_BOUNDS,
+  start: BOOKSHOP_BOUNDS.minX,
+  interactions: [
+    {
+      interaction: 'binderSeller',
+      minX: BOOKSHOP_SELLER_X - 1,
+      maxX: BOOKSHOP_SELLER_X + 1,
+      speaker: { x: BOOKSHOP_SELLER_X },
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveBookshop',
+      minX: BOOKSHOP_BOUNDS.minX,
+      maxX: BOOKSHOP_BOUNDS.minX + DOOR_REACH,
+      to: 'town',
+      arrival: { x: TOWN_BUILDINGS.bookshop.doorX, facing: -1 },
+    },
+  ],
+};
+
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bedroom: BEDROOM,
   town: TOWN,
   shop: SHOP,
+  bookshop: BOOKSHOP,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

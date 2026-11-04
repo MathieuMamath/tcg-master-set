@@ -35,3 +35,15 @@ export function stepWalker(
   const isBlocked = x !== walker.x + velocity * delta;
   return { x, velocity: isBlocked ? 0 : velocity, facing };
 }
+
+// The camera lags behind the character, so that the place seems to slide by, but follows closely
+// enough on a long street that the character never walks off the side of the screen.
+const CAMERA_LAG = 0.45;
+const CAMERA_MARGIN = 1;
+
+export function cameraX(bounds: { minX: number; maxX: number }, x: number, viewWidth: number) {
+  const middle = (bounds.minX + bounds.maxX) / 2;
+  const halfLength = (bounds.maxX - bounds.minX) / 2;
+  const roomToLag = Math.max(0, viewWidth / 2 - CAMERA_MARGIN) / halfLength;
+  return middle + (x - middle) * (1 - Math.min(CAMERA_LAG, roomToLag));
+}

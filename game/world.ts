@@ -203,7 +203,9 @@ export type Interaction =
   | 'leaveHome'
   | 'goHome'
   | 'enterShop'
-  | 'leaveShop';
+  | 'leaveShop'
+  | 'enterBookshop'
+  | 'leaveBookshop';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);

@@ -27,14 +27,16 @@
     "leaveHome": "Go outside",
     "goHome": "Go home",
     "enterShop": "Go into the shop",
-    "leaveShop": "Go outside"
+    "leaveShop": "Go outside",
+    "enterBookshop": "Go into the bookshop",
+    "leaveBookshop": "Go outside"
   },
   "Shopkeeper": {
     "names": {
       "latest": "New releases",
       "thisYear": "This year",
       "older": "Earlier sets",
-      "binderSeller": "Library",
+      "binderSeller": "Granny Hazel",
       "park": "Park",
       "arcade": "Arcade",
       "basketball": "Basketball"
@@ -43,14 +45,14 @@
       "latest": "Hello! Here are our three newest sets.",
       "thisYear": "Hello! I have the other sets from this year.",
       "older": "Hello! I keep all the earlier sets.",
-      "binderSeller": "Hello! You need a binder to start a collection."
+      "binderSeller": "Oh, there you are, dear! Have you come for a binder for your collection?"
     },
     "thanks": "Thank you, and good luck with your cards!",
     "notEnoughCoins": "Sorry, you don't have enough coins.",
     "unavailable": "Sorry, the till isn't working right now. Please try again.",
     "buy": "Buy a {set} booster ({price} coins)",
     "leave": "Goodbye",
-    "needsBinder": "You need its binder first. The library next door sells them.",
+    "needsBinder": "You need its binder first. Granny Hazel sells them at the bookshop, just past here.",
     "alreadyOwned": "You already have this binder.",
     "buyBinder": "Buy the {set} binder ({price} coins)",
     "binderOwned": "{set}: binder already bought",
@@ -63,7 +65,8 @@
     "titles": {
       "latest": "the eldest of the triplets",
       "thisYear": "the middle triplet",
-      "older": "the youngest of the triplets"
+      "older": "the youngest of the triplets",
+      "binderSeller": "the neighbourhood bookseller"
     }
   },
   "Booster": {
@@ -114,7 +117,7 @@
       "firstEdition": "1st ed.",
       "wPromo": "Promo"
     },
-    "noBinderYet": "Buy your first binder at the library, past the shop."
+    "noBinderYet": "Buy your first binder from Granny Hazel, at the bookshop past the shop."
   },
   "Settings": {
     "open": "Settings",
@@ -242,13 +245,14 @@
     "miss": "Missed!"
   },
   "Town": {
-    "shop": "The Card Den"
+    "shop": "The Card Den",
+    "bookshop": "The Page Nook"
   },
   "Hails": {
     "latest": "Welcome to the Den!",
     "thisYear": "Hello, hello!",
     "older": "Psst… come and see!",
-    "binderSeller": "Hello, little reader!",
+    "binderSeller": "There you are, dear!",
     "grandma": "Hello, dear!",
     "grandpa": "Fancy a game?",
     "boy": "Hey! Over here!"

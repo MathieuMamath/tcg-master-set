@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { DASH_SPEED_FACTOR } from './dash';
-import { sidePush, stepWalker, WALK_SPEED, type Walker } from './side-walk';
+import { cameraX, sidePush, stepWalker, WALK_SPEED, type Walker } from './side-walk';
 
 const BOUNDS = { minX: -10, maxX: 10 };
 const STANDING: Walker = { x: 0, velocity: 0, facing: 1 };
@@ -58,5 +58,21 @@ describe('stepWalker', () => {
 
     expect(dashed.velocity).toBe(-WALK_SPEED * DASH_SPEED_FACTOR);
     expect(dashed.x).toBeCloseTo(-WALK_SPEED * DASH_SPEED_FACTOR * 0.1);
+  });
+});
+
+describe('cameraX', () => {
+  test('lags behind the character in a room that nearly fits on screen', () => {
+    expect(cameraX({ minX: -5, maxX: 5 }, 0, 11.5)).toBe(0);
+    expect(cameraX({ minX: -5, maxX: 5 }, 5, 11.5)).toBeCloseTo(2.75);
+  });
+
+  test('keeps the character on screen at both ends of a long street', () => {
+    const bounds = { minX: -11, maxX: 19 };
+    for (const viewWidth of [8, 11.5]) {
+      for (const x of [bounds.minX, bounds.maxX]) {
+        expect(Math.abs(x - cameraX(bounds, x, viewWidth))).toBeLessThanOrEqual(viewWidth / 2 - 1);
+      }
+    }
   });
 });
