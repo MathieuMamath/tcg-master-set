@@ -6,8 +6,11 @@ import { POST } from './route';
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/player/progress', () => ({ buyBooster: vi.fn() }));
 
-function buy(set: string) {
-  return POST(new Request(`http://test.invalid/api/shop/buy?set=${set}`, { method: 'POST' }));
+function buy(set: string, quantity?: string) {
+  const query = quantity === undefined ? '' : `&quantity=${quantity}`;
+  return POST(
+    new Request(`http://test.invalid/api/shop/buy?set=${set}${query}`, { method: 'POST' }),
+  );
 }
 
 beforeEach(() => {
@@ -24,7 +27,7 @@ test('buys for the signed-in player and returns the new wallet', async () => {
 
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual(result);
-  expect(buyBooster).toHaveBeenCalledWith('player-1', 'swsh3');
+  expect(buyBooster).toHaveBeenCalledWith('player-1', 'swsh3', 1);
 });
 
 test('refuses a visitor who is not signed in', async () => {
@@ -50,5 +53,22 @@ test('refuses a set that has a binder but is not for sale', async () => {
   const response = await buy('base1');
 
   expect(response.status).toBe(400);
+  expect(buyBooster).not.toHaveBeenCalled();
+});
+
+test('buys several boosters at once', async () => {
+  vi.mocked(buyBooster).mockResolvedValue({
+    wallet: { coins: 700, boosters: { swsh3: 3 } },
+    line: 'thanks',
+  });
+
+  expect((await buy('swsh3', '3')).status).toBe(200);
+  expect(buyBooster).toHaveBeenCalledWith('player-1', 'swsh3', 3);
+});
+
+test('refuses a quantity out of range', async () => {
+  expect((await buy('swsh3', '0')).status).toBe(400);
+  expect((await buy('swsh3', '100')).status).toBe(400);
+  expect((await buy('swsh3', '1e9')).status).toBe(400);
   expect(buyBooster).not.toHaveBeenCalled();
 });

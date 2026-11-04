@@ -404,7 +404,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
                   disabled={owned === 0}
                   aria-label={`${set.name}. ${t('progress', { owned, total: set.slotTotal })}`}
                   onClick={() => choose(set)}
-                  className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,11rem)] rounded-xl outline-offset-4 transition-transform enabled:cursor-pointer enabled:hover:-translate-y-1 enabled:focus-visible:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-45 disabled:grayscale"
+                  className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,11rem)] rounded-md outline-offset-4 transition-transform enabled:cursor-pointer enabled:hover:-translate-y-1 enabled:focus-visible:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-45 disabled:grayscale"
                 >
                   <BinderCover set={set} owned={owned} />
                 </button>

@@ -3,6 +3,26 @@ import { isSoldSet } from './card-sets';
 
 export const BOOSTER_PRICE = 100;
 export const BINDER_PRICE = 500;
+// The most boosters one purchase can take, kept under a hundred. The player's coins are the real
+// limit: this one only stops a request made by hand from asking for an absurd number.
+export const MAX_BOOSTER_QUANTITY = 99;
+
+// The most boosters the player can buy at once, at least one so that the picker always shows a
+// number, while the coins decide whether the purchase goes through.
+export function affordableBoosters(coins: number): number {
+  return Math.max(1, Math.min(MAX_BOOSTER_QUANTITY, Math.floor(coins / BOOSTER_PRICE)));
+}
+
+// How many boosters a purchase asks for. Anything but a whole number in range is refused.
+export function parseBoosterQuantity(value: string | null): number | null {
+  if (value === null) {
+    return 1;
+  }
+  const quantity = Number(value);
+  return Number.isInteger(quantity) && quantity >= 1 && quantity <= MAX_BOOSTER_QUANTITY
+    ? quantity
+    : null;
+}
 
 export type Wallet = {
   coins: number;

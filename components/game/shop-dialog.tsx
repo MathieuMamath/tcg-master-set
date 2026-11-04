@@ -3,10 +3,16 @@
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import type { SetId } from '@/game/card-sets';
-import type { ShopkeeperLine, ShopkeeperStock } from '@/game/shop-dialogue';
+import {
+  BINDER_PRICE,
+  BOOSTER_PRICE,
+  type ShopkeeperLine,
+  type ShopkeeperStock,
+} from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 import { moveThroughChoices } from './menu-focus';
 import { SellerPortrait } from './seller-portrait';
+import { type ShopItem, ShopWindow } from './shop-window';
 
 // A choice is a small scrap of paper, each one tilted the other way from the one before.
 export const CHOICE_CLASS =
@@ -97,78 +103,107 @@ export function TypedLine({ text }: { text: string }) {
   );
 }
 
-export type ShopChoice = { setId: SetId; label: string; isUnavailable?: boolean };
-
 type Props = {
   stock: ShopkeeperStock | 'binderSeller';
-  choices: readonly ShopChoice[];
-  onBuy: (setId: SetId) => Promise<ShopkeeperLine>;
+  items: readonly ShopItem[];
+  coins: number;
+  onBuy: (setId: SetId, quantity: number) => Promise<ShopkeeperLine>;
   onClose: () => void;
 };
 
-// Mounted only while talking, so every conversation starts with a greeting.
-export function ShopDialog({ stock, choices, onBuy, onClose }: Props) {
+// Mounted only while talking, so every conversation starts with a greeting. The seller offers to
+// show what she sells, which opens her shop window in the same dialog.
+export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
   const t = useTranslations('Shopkeeper');
   const dialog = useRef<HTMLDialogElement>(null);
   const [speech, setSpeech] = useState<{ line: ShopkeeperLine; turn: number }>({
     line: 'greeting',
     turn: 0,
   });
-
-  const [isBuying, setIsBuying] = useState(false);
+  const [isBrowsing, setIsBrowsing] = useState(false);
+  const hasBought = useRef(false);
+  const kind = stock === 'binderSeller' ? 'binder' : 'booster';
+  const name = stock === 'binderSeller' ? t('names.binderSeller') : t(`sellers.${stock}`);
+  const title = t(`titles.${stock}`);
 
   useEffect(() => {
     dialog.current?.showModal();
-    // The first choice that can be pressed, past any binder already bought.
-    dialog.current?.querySelector<HTMLElement>('button[aria-disabled="false"]')?.focus();
   }, []);
+
+  // Back from the window to the conversation, where the seller thanks the player if they bought
+  // something.
+  const stopBrowsing = () => {
+    setIsBrowsing(false);
+    setSpeech(({ turn }) => ({ line: hasBought.current ? 'thanks' : 'greeting', turn: turn + 1 }));
+    requestAnimationFrame(() => dialog.current?.querySelector<HTMLElement>('button')?.focus());
+  };
 
   return (
     <dialog
       ref={dialog}
-      aria-labelledby="shopkeeper-name"
+      aria-labelledby={isBrowsing ? 'shop-window-title' : 'shopkeeper-name'}
       onClose={onClose}
-      onKeyDown={moveThroughChoices}
-      className="ui-pop-in mx-auto mt-auto mb-4 w-[min(41.25rem,calc(100%-2rem))] max-w-none overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-transparent"
+      onCancel={(event) => {
+        // Escape closes the window first, then the conversation.
+        if (isBrowsing) {
+          event.preventDefault();
+          stopBrowsing();
+        }
+      }}
+      onKeyDown={isBrowsing ? undefined : moveThroughChoices}
+      className={`ui-pop-in max-w-none overflow-visible bg-transparent font-game text-ui-ink ${
+        isBrowsing
+          ? 'm-auto w-[min(60rem,calc(100%-1rem))] backdrop:bg-ui-ink/50'
+          : 'mx-auto mt-auto mb-4 w-[min(41.25rem,calc(100%-2rem))] backdrop:bg-transparent'
+      }`}
     >
-      <SpeechBox
-        nameId="shopkeeper-name"
-        name={stock === 'binderSeller' ? t('names.binderSeller') : t(`sellers.${stock}`)}
-        title={t(`titles.${stock}`)}
-        portrait={<SellerPortrait stock={stock} />}
-      >
-        <TypedLine
-          key={speech.turn}
-          text={speech.line === 'greeting' ? t(`greetings.${stock}`) : t(speech.line)}
+      {isBrowsing ? (
+        <ShopWindow
+          kind={kind}
+          seller={{ stock, name, title }}
+          items={items}
+          coins={coins}
+          price={kind === 'binder' ? BINDER_PRICE : BOOSTER_PRICE}
+          onBuy={async (setId, quantity) => {
+            const line = await onBuy(setId, quantity);
+            if (line === 'thanks') {
+              hasBought.current = true;
+            }
+            return line;
+          }}
+          onBack={stopBrowsing}
         />
-        <form method="dialog" className="mt-2.5">
-          <div className="-m-1 flex max-h-[35dvh] flex-wrap gap-2.5 overflow-y-auto p-1">
-            {choices.map(({ setId, label, isUnavailable = false }) => (
-              <button
-                key={setId}
-                type="button"
-                className={`${CHOICE_CLASS} ${isUnavailable ? 'opacity-50' : ''}`}
-                // Not `disabled`, which would take the focus away from the keyboard.
-                aria-disabled={isBuying || isUnavailable}
-                onClick={async () => {
-                  if (isBuying || isUnavailable) {
-                    return;
-                  }
-                  setIsBuying(true);
-                  const line = await onBuy(setId);
-                  setIsBuying(false);
-                  setSpeech(({ turn }) => ({ line, turn: turn + 1 }));
-                }}
-              >
-                {label}
-              </button>
-            ))}
-            <button type="submit" className={CHOICE_CLASS}>
-              {t('leave')}
+      ) : (
+        <SpeechBox
+          nameId="shopkeeper-name"
+          name={name}
+          title={title}
+          portrait={<SellerPortrait stock={stock} />}
+        >
+          <TypedLine
+            key={speech.turn}
+            text={
+              speech.line === 'greeting' || speech.line === 'thanks'
+                ? t(`${speech.line === 'greeting' ? 'greetings' : 'thanks'}.${stock}`)
+                : t(speech.line)
+            }
+          />
+          <form method="dialog" className="mt-2.5 flex flex-wrap gap-2.5">
+            <button
+              type="button"
+              // biome-ignore lint/a11y/noAutofocus: the conversation is answered with the keyboard.
+              autoFocus
+              onClick={() => setIsBrowsing(true)}
+              className={`${CHOICE_CLASS} bg-ui-stamp text-ui-paper`}
+            >
+              {t(`browse.${stock}`)}
             </button>
-          </div>
-        </form>
-      </SpeechBox>
+            <button type="submit" className={CHOICE_CLASS}>
+              {t(`nothing.${stock}`)}
+            </button>
+          </form>
+        </SpeechBox>
+      )}
     </dialog>
   );
 }

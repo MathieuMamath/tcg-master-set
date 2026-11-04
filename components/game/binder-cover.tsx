@@ -1,29 +1,24 @@
 import type { PlayableSet } from '@/game/card-sets';
-import { packBackground } from './pack-art';
+import { packPaper } from './pack-art';
 import { SetLogo } from './set-logo';
 
-const RINGS = ['top-[18%]', 'top-[47%]', 'top-[76%]'];
-
-export function BinderCover({ set, owned }: { set: PlayableSet; owned: number }) {
+// A binder's cover, as Mamie Noisette sells it: the set's striped paper, a dark spine and the
+// set's logo. In the player's own binders, it also shows how many of its cards they have.
+export function BinderCover({ set, owned }: { set: PlayableSet; owned?: number }) {
   return (
     <span
-      style={{ background: packBackground(set.id) }}
-      className="absolute inset-0 overflow-hidden rounded-xl border-4 border-ui-ink text-center text-ui-paper shadow-[4px_6px_0_var(--ui-shadow)]"
+      style={{ background: packPaper(set.id) }}
+      className="absolute inset-0 overflow-hidden rounded-md text-center text-ui-paper shadow-[3px_4px_0_var(--ui-shadow)]"
     >
-      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[13%] bg-ui-ink/70">
-        {RINGS.map((position) => (
-          <span
-            key={position}
-            className={`absolute left-1/2 h-[6%] w-3/5 -translate-x-1/2 rounded-full border-2 border-ui-paper/80 bg-ui-ink ${position}`}
-          />
-        ))}
-      </span>
-      <span className="absolute inset-y-3 right-3 left-[18%] flex items-center justify-center">
+      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[15%] bg-ui-ink/60" />
+      <span className="absolute inset-y-[14%] right-[6%] left-[21%] flex items-center justify-center text-sm">
         <SetLogo setName={set.name} logoUrl={set.logoUrl} />
       </span>
-      <span className="absolute right-0 bottom-[3%] left-[13%] text-sm font-semibold text-ui-paper/75">
-        {owned} / {set.slotTotal}
-      </span>
+      {owned !== undefined && (
+        <span className="absolute right-0 bottom-[4%] left-[15%] text-sm font-semibold text-ui-paper [text-shadow:1px_1px_0_var(--ui-ink)]">
+          {owned} / {set.slotTotal}
+        </span>
+      )}
     </span>
   );
 }

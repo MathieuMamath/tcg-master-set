@@ -11,8 +11,6 @@ import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
 import { pickStains, questDay, type Stain } from '@/game/quests';
 import {
-  BINDER_PRICE,
-  BOOSTER_PRICE,
   bindersForSale,
   boosterCount,
   type ShopkeeperLine,
@@ -259,9 +257,11 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
-  const buy = async (setId: SetId): Promise<ShopkeeperLine> => {
+  const buy = async (setId: SetId, quantity: number): Promise<ShopkeeperLine> => {
     try {
-      const response = await fetch(`/api/shop/buy?set=${setId}`, { method: 'POST' });
+      const response = await fetch(`/api/shop/buy?set=${setId}&quantity=${quantity}`, {
+        method: 'POST',
+      });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -649,25 +649,25 @@ export function Game({ player, sets, progress }: Props) {
       {talkingTo && talkingTo !== 'grandma' && talkingTo !== 'grandpa' && talkingTo !== 'boy' && (
         <ShopDialog
           stock={talkingTo}
-          choices={
-            talkingTo === 'binderSeller'
-              ? bindersForSale(sets).map(({ id, name }) => {
-                  const isOwned = binders.includes(id);
-                  return {
-                    setId: id,
-                    label: isOwned
-                      ? tShopkeeper('binderOwned', { set: name })
-                      : tShopkeeper('buyBinder', { set: name, price: BINDER_PRICE }),
-                    isUnavailable: isOwned,
-                  };
-                })
-              : setsSoldBy(talkingTo, sets, new Date().getFullYear()).map(({ id, name }) => ({
-                  setId: id,
-                  label: binders.includes(id)
-                    ? tShopkeeper('buy', { set: name, price: BOOSTER_PRICE })
-                    : tShopkeeper('buyNeedsBinder', { set: name }),
-                }))
-          }
+          items={(talkingTo === 'binderSeller'
+            ? bindersForSale(sets)
+            : setsSoldBy(talkingTo, sets, new Date().getFullYear())
+          ).map((set) => {
+            const hasBinder = binders.includes(set.id);
+            return {
+              set,
+              refusal:
+                talkingTo === 'binderSeller'
+                  ? hasBinder
+                    ? 'alreadyOwned'
+                    : null
+                  : hasBinder
+                    ? null
+                    : 'needsBinder',
+              inBag: boosterCount(wallet, set.id),
+            };
+          })}
+          coins={wallet.coins}
           onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
           onClose={() => setTalkingTo(null)}
         />

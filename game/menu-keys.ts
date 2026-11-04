@@ -22,3 +22,22 @@ export function nextChoice(current: number, step: -1 | 1, count: number): number
   }
   return (current + step + count) % count;
 }
+
+// In a grid, the left and right keys move one item, and the up and down keys a whole row. Nothing
+// goes round: a step past an edge stays where it is.
+export function gridStep(
+  current: number,
+  code: string,
+  columns: number,
+  count: number,
+): number | undefined {
+  const step = horizontalStep(code) ?? (verticalStep(code) ?? 0) * columns;
+  if (step === 0) {
+    return undefined;
+  }
+  if (current < 0) {
+    return 0;
+  }
+  const next = current + step;
+  return next < 0 || next >= count ? current : next;
+}
