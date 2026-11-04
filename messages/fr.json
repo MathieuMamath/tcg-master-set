@@ -20,7 +20,7 @@
     "older": "Parler (précédentes)",
     "binderSeller": "Parler (classeurs)",
     "dash": "Dash",
-    "grandma": "Parler (mamie)",
+    "grandma": "Parler (Léa)",
     "grandpa": "Parler (papy)",
     "boy": "Parler (petit garçon)",
     "basketball": "Jouer (basket)",
@@ -29,7 +29,10 @@
     "enterShop": "Entrer dans la boutique",
     "leaveShop": "Sortir",
     "enterBookshop": "Entrer dans la librairie",
-    "leaveBookshop": "Sortir"
+    "leaveBookshop": "Sortir",
+    "enterFlat": "Entrer chez Léa",
+    "leaveFlat": "Sortir",
+    "scrub": "Frotter la poussière"
   },
   "Shopkeeper": {
     "names": {
@@ -193,16 +196,17 @@
   },
   "Quest": {
     "grandma": {
-      "name": "Mamie",
+      "name": "Léa",
       "lines": {
-        "greeting": "Oh, ce sol est dans un état ! Tu peux nettoyer toutes les taches en 30 secondes ? Je te donnerai 100 pièces.",
-        "hurry": "Vite, il reste des taches !",
-        "rewarded": "Quelle propreté ! Voici tes 100 pièces, mon petit.",
-        "failed": "Oh, tu n'as pas eu le temps. On recommence ?",
-        "alreadyDone": "Tu en as assez fait pour aujourd'hui, mon petit. Reviens demain !",
-        "unavailable": "Oh là là, quelque chose s'est mal passé. Réessaie."
+        "greeting": "Désolée Pip, je croule sous le travail… Tu pourrais dépoussiérer mes murs à ma place ? J’ai une visio dans 30 secondes ! Je te donnerai 100 pièces.",
+        "hurry": "Vite, ma visio va commencer !",
+        "rewarded": "Tout brille ! Tu m’as sauvé la vie. Voici tes 100 pièces.",
+        "failed": "Oh non, la visio a commencé… On réessaie ?",
+        "alreadyDone": "Tu m’as déjà sauvée aujourd’hui. Reviens demain, j’aurai encore plein de poussière !",
+        "unavailable": "Aïe, mon ordi a planté… Réessaie dans un instant."
       },
-      "accept": "Je m'en occupe"
+      "accept": "Je m’en occupe !",
+      "title": "la voisine débordée"
     },
     "grandpa": {
       "name": "Papy",
@@ -230,7 +234,7 @@
     "retry": "Réessayer",
     "leave": "Au revoir",
     "timeLeft": "{seconds} s",
-    "stainsLeft": "{count, plural, one {# tache restante} other {# taches restantes}}",
+    "stainsLeft": "{count, plural, one {# tache de poussière} other {# taches de poussière}}",
     "fishing": {
       "title": "Pêche",
       "waiting": "Ça va bien finir par mordre...",
@@ -288,7 +292,7 @@
     "thisYear": "Bonjour, bonjour !",
     "older": "Psst… viens voir !",
     "binderSeller": "Te revoilà, mon petit !",
-    "grandma": "Coucou, mon petit !",
+    "grandma": "Ah, Pip ! Tu tombes bien !",
     "grandpa": "Une petite partie ?",
     "boy": "Hé ! Par ici !"
   }

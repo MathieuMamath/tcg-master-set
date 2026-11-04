@@ -9,7 +9,7 @@ import { addToCollection } from '@/game/binder';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
-import { pickStains, questDay, type Stain } from '@/game/quests';
+import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests';
 import {
   bindersForSale,
   boosterCount,
@@ -19,7 +19,7 @@ import {
   totalBoosters,
   type Wallet,
 } from '@/game/shop-dialogue';
-import { isDoorInteraction } from '@/game/side-rooms';
+import { isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type { BasketballResult, FishingCatch, PlayerProgress } from '@/player/progress';
 import { AnimatedCount } from './animated-count';
@@ -51,7 +51,10 @@ type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver;
 // bottom of the screen.
 function isTalk(interaction: Interaction): interaction is Talk {
   return (
-    !isDoorInteraction(interaction) && interaction !== 'binder' && interaction !== 'basketball'
+    !isDoorInteraction(interaction) &&
+    interaction !== 'binder' &&
+    interaction !== 'basketball' &&
+    interaction !== 'scrub'
   );
 }
 const DASH_KEY = 'Space';
@@ -68,6 +71,7 @@ export function Game({ player, sets, progress }: Props) {
     keyboard: STILL,
     joystick: STILL,
     wantsDash: false,
+    wantsScrub: false,
     wantsDoor: false,
   });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
@@ -115,6 +119,7 @@ export function Game({ player, sets, progress }: Props) {
     .filter(({ count }) => count > 0);
   const boosterTotal = totalBoosters(wallet);
   const bubble = useRef<HTMLButtonElement>(null);
+  const isFinishingQuest = useRef(false);
   const controls = useRef({ interaction, isDialogOpen });
   controls.current = { interaction, isDialogOpen };
 
@@ -153,6 +158,8 @@ export function Game({ player, sets, progress }: Props) {
           input.current.wantsDoor = true;
         } else if (controls.current.interaction === 'basketball') {
           setIsPlayingBasketball(true);
+        } else if (controls.current.interaction === 'scrub') {
+          input.current.wantsScrub = true;
         } else {
           setTalkingTo(controls.current.interaction);
         }
@@ -201,6 +208,8 @@ export function Game({ player, sets, progress }: Props) {
       input.current.wantsDoor = true;
     } else if (interaction === 'basketball') {
       setIsPlayingBasketball(true);
+    } else if (interaction === 'scrub') {
+      input.current.wantsScrub = true;
     } else if (interaction) {
       setTalkingTo(interaction);
     }
@@ -306,6 +315,7 @@ export function Game({ player, sets, progress }: Props) {
       if (!hasStarted) {
         return 'alreadyDone';
       }
+      isFinishingQuest.current = false;
       setQuest({ startedAt: Date.now(), stains: pickStains() });
       setQuestLine('hurry');
       return null;
@@ -313,6 +323,48 @@ export function Game({ player, sets, progress }: Props) {
       return 'unavailable';
     }
   };
+
+  const finishQuest = async () => {
+    setQuest(null);
+    stopWalking();
+    try {
+      const response = await fetch('/api/quests/grandma/finish', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const { isRewarded, wallet: updated } = await response.json();
+      setWallet(updated);
+      if (isRewarded) {
+        showSaveNotice();
+      }
+      setQuestLine(isRewarded ? 'rewarded' : 'failed');
+    } catch {
+      setQuestLine('unavailable');
+    }
+    setTalkingTo('grandma');
+  };
+
+  // One rub on a patch of dust. The last patch gone finishes the quest, only once.
+  const scrub = (id: number) => {
+    if (!quest || isFinishingQuest.current) {
+      return;
+    }
+    const left = scrubStain(quest.stains, id);
+    if (left.length === 0) {
+      isFinishingQuest.current = true;
+      finishQuest();
+    } else {
+      setQuest({ ...quest, stains: left });
+    }
+  };
+
+  // Stepping out of Léa's flat gives up on the quest, since the dust stays inside.
+  const changePlace = useCallback((place: SidePlaceId) => {
+    if (place !== 'flat') {
+      setQuest(null);
+      setQuestLine((line) => (line === 'hurry' ? 'greeting' : line));
+    }
+  }, []);
 
   // Stable, so that the banner's timer isn't restarted at each render.
   const timeUp = useCallback(() => {
@@ -446,7 +498,10 @@ export function Game({ player, sets, progress }: Props) {
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
         }}
+        stains={quest?.stains ?? []}
         onInteractionChange={setInteraction}
+        onScrub={scrub}
+        onPlaceChange={changePlace}
       />
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
         <div className="flex min-w-0 flex-wrap items-center gap-3">

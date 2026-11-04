@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type { QuestGiver } from '@/game/world';
 import { moveThroughChoices } from './menu-focus';
+import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, SpeechBox, TypedLine } from './shop-dialog';
 
 export type QuestLine =
@@ -48,7 +49,13 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
       onKeyDown={moveThroughChoices}
       className="ui-pop-in mx-auto mt-auto mb-4 w-[min(41.25rem,calc(100%-2rem))] max-w-none overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-transparent"
     >
-      <SpeechBox nameId="quest-speaker" name={t(`${giver}.name`)}>
+      <SpeechBox
+        nameId="quest-speaker"
+        name={t(`${giver}.name`)}
+        // Only Léa is drawn in paper yet, so only she has a title and a portrait.
+        title={giver === 'grandma' ? t('grandma.title') : undefined}
+        portrait={giver === 'grandma' ? <SellerPortrait stock="grandma" /> : undefined}
+      >
         <TypedLine
           key={speech.turn}
           text={

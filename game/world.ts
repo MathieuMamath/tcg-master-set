@@ -205,7 +205,11 @@ export type Interaction =
   | 'enterShop'
   | 'leaveShop'
   | 'enterBookshop'
-  | 'leaveBookshop';
+  | 'leaveBookshop'
+  | 'enterFlat'
+  | 'leaveFlat'
+  // Scrubbing the dust off a wall, during Léa's quest.
+  | 'scrub';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);

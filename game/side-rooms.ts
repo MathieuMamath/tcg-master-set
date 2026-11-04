@@ -1,7 +1,7 @@
 import type { Facing } from './side-walk';
 import type { Interaction } from './world';
 
-export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop';
+export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop' | 'flat';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -10,6 +10,8 @@ export const DOOR_INTERACTIONS = [
   'leaveShop',
   'enterBookshop',
   'leaveBookshop',
+  'enterFlat',
+  'leaveFlat',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -61,9 +63,11 @@ export const BEDROOM_FURNITURE = {
   plant: { x: 5.6, width: 1.3 },
 } as const;
 
-// The street: our house on the left, then the shop, and the bookshop past it.
-export const TOWN_ENDS = { left: -12, right: 20 };
+// The street: Léa's block of flats on the far left, our house, then the shop, and the bookshop past
+// it.
+export const TOWN_ENDS = { left: -20, right: 20 };
 export const TOWN_BUILDINGS = {
+  flats: { x: -13.5, width: 4.6, doorX: -12.6 },
   house: { x: -5, width: 4.2, doorX: -5 },
   shop: { x: 5, width: 4.8, doorX: 5.9 },
   bookshop: { x: 13.5, width: 4.8, doorX: 14.4 },
@@ -94,6 +98,25 @@ const BOOKSHOP_BOUNDS = {
   minX: BOOKSHOP_WALLS.left + CHARACTER_HALF_WIDTH,
   maxX: BOOKSHOP_WALLS.right - CHARACTER_HALF_WIDTH,
 };
+
+// Léa's flat: she works at her desk on the right, too busy to dust, and the door is in the left
+// wall.
+export const FLAT_WALLS = { left: -5.5, right: 5.5 };
+export const FLAT_FURNITURE = {
+  shelf: { x: -2.6, width: 1.7 },
+  sofa: { x: -0.2, width: 2.6 },
+  desk: { x: 3.4, width: 2.8 },
+} as const;
+// The window over the sofa, and Léa at her desk.
+export const FLAT_WINDOW_X = FLAT_FURNITURE.sofa.x;
+export const LEA_X = FLAT_FURNITURE.desk.x;
+
+export const FLAT_BOUNDS = {
+  minX: FLAT_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: FLAT_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+// How far from the door dust can settle, so that arriving never lands on a stain.
+export const FLAT_DOOR_REACH = DOOR_REACH;
 
 const SHOP_BOUNDS = {
   minX: SHOP_WALLS.left + CHARACTER_HALF_WIDTH,
@@ -152,6 +175,13 @@ export const TOWN: SideRoom = {
       arrival: { x: BOOKSHOP_BOUNDS.minX, facing: 1 },
     },
     {
+      interaction: 'enterFlat',
+      minX: TOWN_BUILDINGS.flats.doorX - DOOR_REACH,
+      maxX: TOWN_BUILDINGS.flats.doorX + DOOR_REACH,
+      to: 'flat',
+      arrival: { x: FLAT_BOUNDS.minX, facing: 1 },
+    },
+    {
       interaction: 'goHome',
       minX: TOWN_BUILDINGS.house.doorX - DOOR_REACH,
       maxX: TOWN_BUILDINGS.house.doorX + DOOR_REACH,
@@ -205,11 +235,35 @@ export const BOOKSHOP: SideRoom = {
   ],
 };
 
+export const FLAT: SideRoom = {
+  id: 'flat',
+  bounds: FLAT_BOUNDS,
+  start: FLAT_BOUNDS.minX,
+  interactions: [
+    {
+      interaction: 'grandma',
+      minX: LEA_X - 1.1,
+      maxX: LEA_X + 1.1,
+      speaker: { x: LEA_X },
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveFlat',
+      minX: FLAT_BOUNDS.minX,
+      maxX: FLAT_BOUNDS.minX + DOOR_REACH,
+      to: 'town',
+      arrival: { x: TOWN_BUILDINGS.flats.doorX, facing: 1 },
+    },
+  ],
+};
+
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bedroom: BEDROOM,
   town: TOWN,
   shop: SHOP,
   bookshop: BOOKSHOP,
+  flat: FLAT,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

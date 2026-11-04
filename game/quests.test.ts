@@ -1,49 +1,72 @@
 import { describe, expect, test } from 'vitest';
-import { APARTMENT } from './apartment';
-import { isBlocked } from './collision';
 import {
   canFinishQuest,
   canStartQuest,
   pickStains,
   QUEST_SECONDS,
   questDay,
+  SCRUBS_PER_STAIN,
   STAIN_COUNT,
+  scrubStain,
   secondsLeft,
+  stainAlong,
   stainSpots,
-  stainsReached,
 } from './quests';
-import { CHARACTER_RADIUS, isInside, obstaclesOf } from './world';
+import { FLAT, interactionAlong, LEA_X } from './side-rooms';
 
 const NOW = new Date('2026-11-02T12:00:00Z');
 const secondsAgo = (seconds: number) => new Date(NOW.getTime() - seconds * 1000);
 
-describe('stains', () => {
-  test('there are enough free spots for every stain', () => {
-    expect(stainSpots().length).toBeGreaterThanOrEqual(STAIN_COUNT * 2);
-  });
-
-  test('every spot can be walked on', () => {
-    for (const spot of stainSpots()) {
-      expect(isInside(spot, APARTMENT.bounds)).toBe(true);
-      expect(isBlocked(spot, obstaclesOf(APARTMENT), CHARACTER_RADIUS)).toBe(false);
+describe('dust on the walls', () => {
+  test('every spot can be walked to, and none is at the door', () => {
+    for (const x of stainSpots()) {
+      expect(x).toBeGreaterThanOrEqual(FLAT.bounds.minX);
+      expect(x).toBeLessThanOrEqual(FLAT.bounds.maxX);
+      expect(interactionAlong(FLAT, x)).not.toBe('leaveFlat');
+      // Léa and her desk would hide the wall behind them.
+      expect(interactionAlong(FLAT, x)).not.toBe('grandma');
+      expect(x).toBeLessThan(LEA_X);
     }
   });
 
-  test('a quest gets all its stains, each in its own spot', () => {
-    const stains = pickStains();
-    const spots = new Set(stains.map(({ x, z }) => `${x},${z}`));
+  test('a quest gets all its patches, spread apart along the wall', () => {
+    for (let seed = 0; seed < 20; seed++) {
+      let state = seed;
+      const random = () => {
+        state = (state * 9301 + 49297) % 233280;
+        return state / 233280;
+      };
+      const stains = pickStains(random);
+      const xs = stains.map(({ x }) => x).sort((a, b) => a - b);
 
-    expect(stains).toHaveLength(STAIN_COUNT);
-    expect(spots.size).toBe(STAIN_COUNT);
+      expect(stains).toHaveLength(STAIN_COUNT);
+      for (let index = 1; index < xs.length; index++) {
+        expect(xs[index] - xs[index - 1]).toBeGreaterThanOrEqual(0.7);
+      }
+    }
   });
 
-  test('walking over a stain reaches it, and a distant one does not', () => {
+  test('standing below a patch reaches it, and a distant one does not', () => {
     const stains = [
-      { id: 0, x: 0, z: 0 },
-      { id: 1, x: 2, z: 2 },
+      { id: 0, x: 0, height: 2, scrubsLeft: 3 },
+      { id: 1, x: 2, height: 2, scrubsLeft: 3 },
     ];
 
-    expect(stainsReached(stains, { x: 0.2, z: 0.1 }).map(({ id }) => id)).toEqual([0]);
+    expect(stainAlong(stains, 0.3)?.id).toBe(0);
+    expect(stainAlong(stains, 1)).toBeNull();
+  });
+
+  test('a patch goes after its rubs, and only that one', () => {
+    let stains = [
+      { id: 0, x: 0, height: 2, scrubsLeft: SCRUBS_PER_STAIN },
+      { id: 1, x: 2, height: 2, scrubsLeft: SCRUBS_PER_STAIN },
+    ];
+    for (let rub = 1; rub < SCRUBS_PER_STAIN; rub++) {
+      stains = scrubStain(stains, 0);
+    }
+
+    expect(stains.map(({ id }) => id)).toEqual([0, 1]);
+    expect(scrubStain(stains, 0).map(({ id }) => id)).toEqual([1]);
   });
 });
 
