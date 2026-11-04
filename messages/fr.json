@@ -35,7 +35,8 @@
     "scrub": "Frotter la poussière",
     "enterArcade": "Entrer dans la salle d’arcade",
     "leaveArcade": "Sortir",
-    "busStop": "Lire le plan du bus"
+    "busStop": "Lire le plan du bus",
+    "gaspard": "Parler (Gaspard)"
   },
   "Shopkeeper": {
     "names": {
@@ -389,6 +390,39 @@
       "hiddenCard": "Carte {number}, face cachée",
       "shownCard": "Carte {number} : {name}",
       "foundCard": "Carte {number} : {name}, paire trouvée"
+    },
+    "gaspard": {
+      "name": "Gaspard",
+      "lines": {
+        "greeting": "Approche, approche ! Un biscuit au caramel, une aiguille, et une forme à découper sans rien casser. Un jeu d’enfant ! Je te paie selon la forme… que je choisis moi-même, bien sûr. Hé hé.",
+        "rewarded": "Pas une seule fissure ?! … Hmph. Un marché est un marché, voilà ta récompense. Mais je t’aurai demain, tu verras.",
+        "failed": "Crac ! Oh, quel dommage… Je garde les morceaux, hein, ce serait du gâchis. Un autre biscuit ?",
+        "alreadyDone": "Encore toi ? Non, non, un biscuit par jour, sinon tu vas me ruiner. Reviens demain !",
+        "unavailable": "Oups, mon caramel a brûlé. Repasse dans un instant !"
+      },
+      "accept": "Je tente ma chance",
+      "title": "le renard du stand de dalgona"
+    },
+    "dalgona": {
+      "title": "Le biscuit de Gaspard",
+      "shape": "{shape} · {count} pièces",
+      "shapes": {
+        "triangle": "Triangle",
+        "star": "Étoile",
+        "umbrella": "Parapluie"
+      },
+      "carve": "Graver",
+      "carving": "Ça grave…",
+      "keyHint": "Maintiens Espace ou E pour graver, et relâche avant que ça craque.",
+      "pressure": "Pression sur le biscuit",
+      "timeLeft": "{seconds} s",
+      "giveUp": "Abandonner",
+      "checking": "Gaspard inspecte ton biscuit…",
+      "carved": "Découpé sans une fissure !",
+      "broken": "Crac ! Le biscuit s’est brisé.",
+      "timeUp": "Trop tard, le caramel a durci.",
+      "coins": "+{count} pièces",
+      "showGaspard": "Montrer à Gaspard"
     }
   },
   "Basketball": {
@@ -418,7 +452,8 @@
   "Town": {
     "shop": "La Tanière aux Cartes",
     "bookshop": "Le Coin des Pages",
-    "arcade": "Arcade"
+    "arcade": "Arcade",
+    "dalgona": "Dalgona"
   },
   "Hails": {
     "latest": "Bienvenue à la Tanière !",
@@ -427,7 +462,8 @@
     "binderSeller": "Te revoilà, mon petit !",
     "grandma": "Ah, Pip ! Tu tombes bien !",
     "grandpa": "Une petite partie ?",
-    "boy": "Hé ! Tu peux m’aider ?"
+    "boy": "Hé ! Tu peux m’aider ?",
+    "gaspard": "Psst… un petit défi ?"
   },
   "Bus": {
     "title": "Plan du bus",

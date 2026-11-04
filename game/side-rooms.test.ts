@@ -96,6 +96,18 @@ describe('the street', () => {
     expect(shop.x + shop.width / 2).toBeLessThan(bookshop.x - bookshop.width / 2);
   });
 
+  test("Gaspard's stand fits between our house and the shop, clear of their doors", () => {
+    const { house, shop, dalgona } = TOWN_BUILDINGS;
+
+    expect(house.x + house.width / 2).toBeLessThan(dalgona.x - dalgona.width / 2);
+    expect(dalgona.x + dalgona.width / 2).toBeLessThan(shop.x - shop.width / 2);
+    expect(interactionAlong(TOWN, dalgona.gaspardX)).toBe('gaspard');
+    expect(speakerAlong(TOWN, dalgona.gaspardX)).toEqual({
+      interaction: 'gaspard',
+      x: dalgona.gaspardX,
+    });
+  });
+
   test('our house, the shop and the bookshop can all be entered', () => {
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.house.doorX)).toBe('goHome');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.shop.doorX)).toBe('enterShop');

@@ -65,12 +65,15 @@ export const BEDROOM_FURNITURE = {
   plant: { x: 5.6, width: 1.3 },
 } as const;
 
-// The street: Léa's block of flats on the far left, our house, then the shop, the bookshop, the
-// arcade, and the bus stop at the far right, where the bus waits.
+// The street: Léa's block of flats on the far left, our house, Gaspard's dalgona stand out in the
+// open, then the shop, the bookshop, the arcade, and the bus stop at the far right, where the bus
+// waits.
 export const TOWN_ENDS = { left: -20, right: 38 };
 export const TOWN_BUILDINGS = {
   flats: { x: -13.5, width: 4.6, doorX: -12.6 },
   house: { x: -5, width: 4.2, doorX: -5 },
+  // Gaspard stands behind his cart, under its awning.
+  dalgona: { x: -0.1, width: 3.2, gaspardX: 0 },
   shop: { x: 5, width: 4.8, doorX: 5.9 },
   bookshop: { x: 13.5, width: 4.8, doorX: 14.4 },
   arcade: { x: 22, width: 5, doorX: 23 },
@@ -198,6 +201,12 @@ export const TOWN: SideRoom = {
   start: TOWN_BUILDINGS.house.doorX,
   // The bus stop's sign opens the map of the stops the bus serves.
   interactions: [
+    {
+      interaction: 'gaspard',
+      minX: TOWN_BUILDINGS.dalgona.gaspardX - 1.3,
+      maxX: TOWN_BUILDINGS.dalgona.gaspardX + 1.3,
+      speaker: { x: TOWN_BUILDINGS.dalgona.gaspardX },
+    },
     {
       interaction: 'busStop',
       minX: TOWN_BUILDINGS.busStop.signX - DOOR_REACH,

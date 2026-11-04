@@ -1,8 +1,8 @@
 import type { ShopkeeperStock } from './shop-dialogue';
 
 // Who gives a quest: Léa, Papy Caillou and Lucas, under the ids they had in the old town, as
-// players' progress is stored under them.
-export type QuestGiver = 'grandma' | 'grandpa' | 'boy';
+// players' progress is stored under them, and Gaspard.
+export type QuestGiver = 'grandma' | 'grandpa' | 'boy' | 'gaspard';
 
 // Everything the character can do where it stands, from talking to going through a door.
 export type Interaction =
