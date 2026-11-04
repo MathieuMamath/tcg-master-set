@@ -30,7 +30,7 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm build
 
 **This is the only place the gate is defined.** `.github/workflows/ci.yml` and `lefthook.yml` mirror it: a check added here must be added there too.
 
-If the change touches the UI or the 3D scene, the gate proves none of what matters. Also check it in the browser: no console errors, and the changed behaviour observed rather than assumed. Check the phone layout when the change is visible on mobile.
+If the change touches the UI or the paper scene, the gate proves none of what matters. Also check it in the browser: no console errors, and the changed behaviour observed rather than assumed. Check the phone layout when the change is visible on mobile.
 
 ## 3. Documentation
 

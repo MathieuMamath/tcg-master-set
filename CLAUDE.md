@@ -45,6 +45,8 @@ Work reaches `main` through a squashed PR, never a direct push. Lefthook refuses
 | `pnpm db:generate` | Create a migration from `db/schema` |
 | `pnpm db:migrate` | Apply the migrations |
 | `pnpm db:reset` | **Delete the local data**, then recreate the database |
+| `pnpm db:studio` | Browse the local database in Drizzle Studio |
+| `pnpm db:logs` | Follow the local PostgreSQL's logs |
 | `pnpm cards:import <set id>` | Copy a card set from TCGdex into the database |
 
 ## Data
@@ -73,7 +75,9 @@ A card's `rarity` column is in English, because game rules compare it. Translate
 
 ## Quests
 
-Quest rules live in `game/quests.ts`, and rewards are paid in `player/progress.ts`. Léa, the overworked rabbit next door, asks Pip to dust the walls of her flat: each patch of dust takes a few rubs with the interact key. The dusting happens in the browser, so the server records when an attempt starts and only pays if the time adds up. Her quest keeps the id and giver it had as the grandmother's (`grandma-cleaning`, `grandma`), because players' progress is stored under them. A quest pays once a day, by UTC date, so that it can't be repeated for endless coins. Until her walls are dusted for the day, Léa breathes fast and sweats.
+Six quests are daily. Each one's rules live in its own file under `game/`, and every reward is paid in `player/progress.ts`. A quest pays once a day, by UTC date, so that it can't be repeated for endless coins. Its row in `player_quests` keeps when an attempt started and the day it was last done.
+
+Léa's quest is in `game/quests.ts`, with the timing rules the others share. Léa, the overworked rabbit next door, asks Pip to dust the walls of her flat: each patch of dust takes a few rubs with the interact key. The dusting happens in the browser, so the server records when an attempt starts and only pays if the time adds up. Her quest keeps the id and giver it had as the grandmother's (`grandma-cleaning`, `grandma`), because players' progress is stored under them. Until her walls are dusted for the day, Léa breathes fast and sweats.
 
 Papy Caillou's memory game is in `game/memory-game.ts`. He is the old tortoise of the park, and his quest keeps the id it had as the grandfather's. Its board stays in `player_quests.memory_game`, and each flipped card is a request to the server, which alone counts the moves and pays. The game's pictures go to the browser at the start, without their positions.
 
