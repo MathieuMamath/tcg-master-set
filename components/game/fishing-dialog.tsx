@@ -11,13 +11,43 @@ import { moveThroughChoices } from './menu-focus';
 import type { QuestLine } from './quest-dialog';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
-const SPARKLES = [
-  'top-4 left-8',
-  'top-10 right-10',
-  'bottom-6 left-14',
-  'bottom-10 right-6',
-  'top-2 right-24',
-];
+// How many sparkles twinkle round the treasure box, each starting a little after the last.
+const SPARKLE_COUNT = 6;
+const SPARKLE_STAGGER_MS = 270;
+
+// Somewhere in the bands on either side of the box and its text, never behind them.
+function sparkleSpot() {
+  const isLeft = Math.random() < 0.5;
+  return {
+    left: `${(isLeft ? 4 : 78) + Math.random() * 18}%`,
+    top: `${6 + Math.random() * 82}%`,
+    size: 0.7 + Math.random() * 0.6,
+  };
+}
+
+// A four-pointed star that twinkles, then lights up somewhere else.
+function Sparkle({ delay }: { delay: number }) {
+  const [spot, setSpot] = useState(sparkleSpot);
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      onAnimationIteration={() => setSpot(sparkleSpot())}
+      style={{
+        left: spot.left,
+        top: spot.top,
+        width: `${spot.size}rem`,
+        animationDelay: `${delay}ms`,
+      }}
+      className="ui-twinkle absolute aspect-square"
+    >
+      <path
+        d="M10 0 Q11.4 8.6 20 10 Q11.4 11.4 10 20 Q8.6 11.4 0 10 Q8.6 8.6 10 0Z"
+        fill="#f3c14b"
+      />
+    </svg>
+  );
+}
 
 type Step = 'waiting' | 'biting' | 'reeling' | 'caught';
 
@@ -200,12 +230,9 @@ export function FishingDialog({ sets, onReelIn, onEnd }: Props) {
             </>
           )}
           {item === 'treasure' &&
-            SPARKLES.map((place) => (
-              <span
-                key={place}
-                aria-hidden="true"
-                className={`absolute size-3 animate-ping rounded-full bg-[#f5c542] ${place}`}
-              />
+            Array.from({ length: SPARKLE_COUNT }, (_, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: the sparkles are all alike.
+              <Sparkle key={index} delay={index * SPARKLE_STAGGER_MS} />
             ))}
         </div>
         <form method="dialog" className="mt-4 flex flex-wrap gap-2.5">
