@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.55](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.54...v0.1.55) (2026-11-04)
+
+### Refactoring
+
+* **city:** remove the old 3D town and save the spot in the paper places ([#56](https://github.com/MathieuMamath/tcg-master-set/issues/56)) ([f940374](https://github.com/MathieuMamath/tcg-master-set/commit/f9403747b9565e16a3ca1d57fbc8db4d740dea1b))
+
 ## [0.1.54](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.53...v0.1.54) (2026-11-04)
 
 ### Features
