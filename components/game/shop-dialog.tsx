@@ -22,35 +22,42 @@ type SpeechBoxProps = {
   children: ReactNode;
 };
 
-// The scrap of torn paper where a character talks, with a round portrait on its left.
-export function SpeechBox({ nameId, name, title, portrait, children }: SpeechBoxProps) {
+// A scrap of torn paper taped down, the look of every dialog.
+export function TornPaper({ className, children }: { className: string; children: ReactNode }) {
   return (
     <div className="relative -rotate-[0.5deg] drop-shadow-[4px_5px_0_var(--ui-shadow)]">
       <span
         aria-hidden="true"
         className="absolute -top-2.5 left-[28%] z-10 h-5 w-[4.4rem] -rotate-[4deg] bg-(--ui-tape)"
       />
-      <div className="ui-torn grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 bg-ui-paper px-4 pt-4 pb-5 sm:gap-[1.125rem] sm:px-6 sm:pt-5 sm:pb-6">
-        <span
-          aria-hidden="true"
-          className="grid size-14 place-items-center overflow-hidden rounded-full border-3 border-ui-paper bg-[#e7d9bc] font-display text-2xl text-ui-ink/40 ring-2 ring-[#8e6b3e] sm:size-26 sm:text-5xl"
-        >
-          {portrait ?? name.charAt(0)}
-        </span>
-        <div className="min-w-0">
-          <h2 id={nameId} className="font-display text-lg">
-            {name}
-            {title && (
-              <>
-                {' '}
-                <small className="ml-1 font-game text-base text-ui-ink/65">{title}</small>
-              </>
-            )}
-          </h2>
-          {children}
-        </div>
-      </div>
+      <div className={`ui-torn bg-ui-paper ${className}`}>{children}</div>
     </div>
+  );
+}
+
+// The scrap of torn paper where a character talks, with a round portrait on its left.
+export function SpeechBox({ nameId, name, title, portrait, children }: SpeechBoxProps) {
+  return (
+    <TornPaper className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 px-4 pt-4 pb-5 sm:gap-[1.125rem] sm:px-6 sm:pt-5 sm:pb-6">
+      <span
+        aria-hidden="true"
+        className="grid size-14 place-items-center overflow-hidden rounded-full border-3 border-ui-paper bg-[#e7d9bc] font-display text-2xl text-ui-ink/40 ring-2 ring-[#8e6b3e] sm:size-26 sm:text-5xl"
+      >
+        {portrait ?? name.charAt(0)}
+      </span>
+      <div className="min-w-0">
+        <h2 id={nameId} className="font-display text-lg">
+          {name}
+          {title && (
+            <>
+              {' '}
+              <small className="ml-1 font-game text-base text-ui-ink/65">{title}</small>
+            </>
+          )}
+        </h2>
+        {children}
+      </div>
+    </TornPaper>
   );
 }
 

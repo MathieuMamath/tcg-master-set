@@ -4,7 +4,8 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import { moveThroughChoices } from './menu-focus';
-import { PackBody, packCrimpStyle } from './pack-art';
+import { PackBody, PackEdge, packEdgeStyle } from './pack-art';
+import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
 type Props = {
   boosters: readonly (PlayableSet & { count: number })[];
@@ -26,40 +27,39 @@ export function BoosterBag({ boosters, onPick, onClose }: Props) {
       aria-labelledby="booster-bag-title"
       onClose={onClose}
       onKeyDown={moveThroughChoices}
-      className="ui-pop-in m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto ui-scrap p-5 font-game text-ui-ink backdrop:bg-ui-ink/50"
+      className="ui-pop-in m-auto w-[min(42rem,calc(100%-2rem))] max-w-none overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-ui-ink/50"
     >
-      <h2 id="booster-bag-title" className="text-center font-display text-xl">
-        {t('bagTitle')}
-      </h2>
-      <div className="mt-4 flex flex-wrap justify-center gap-5 pt-1 pr-1">
-        {boosters.map(({ id, name, logoUrl, count }) => (
-          <button
-            key={id}
-            type="button"
-            aria-label={t('bagCount', { name, count })}
-            onClick={() => onPick(id)}
-            style={packCrimpStyle(id)}
-            className="relative aspect-[5/7.6] w-[min(40%,7.5rem)] cursor-pointer rounded-md outline-offset-4 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
-          >
-            <PackBody setId={id} setName={name} logoUrl={logoUrl} />
-            <span
-              aria-hidden="true"
-              className="ui-pack-crimp absolute inset-x-0 top-0 h-[13%] rounded-t-md border-4 border-b-0 border-ui-ink"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute -top-2 -right-2 ui-scrap bg-ui-accent px-2 font-semibold"
+      <TornPaper className="px-4 pt-5 pb-6 sm:px-6">
+        <h2 id="booster-bag-title" className="text-center font-display text-xl">
+          {t('bagTitle')}
+        </h2>
+        <div className="mt-3 flex max-h-[calc(100dvh-14rem)] flex-wrap justify-center gap-6 overflow-y-auto px-2 pt-4 pb-3">
+          {boosters.map(({ id, name, logoUrl, count }) => (
+            <button
+              key={id}
+              type="button"
+              aria-label={t('bagCount', { name, count })}
+              onClick={() => onPick(id)}
+              style={packEdgeStyle(id)}
+              className="relative aspect-[5/7.6] w-[min(40%,7.5rem)] cursor-pointer outline-none transition-transform hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-dashed focus-visible:outline-ui-stamp"
             >
-              ×{count}
-            </span>
+              <PackBody setId={id} setName={name} logoUrl={logoUrl} />
+              <PackEdge />
+              <span
+                aria-hidden="true"
+                className="absolute -top-2 -right-3 rotate-[4deg] ui-scrap bg-ui-accent px-2 font-semibold"
+              >
+                ×{count}
+              </span>
+            </button>
+          ))}
+        </div>
+        <form method="dialog" className="mt-3 flex justify-center">
+          <button type="submit" className={CHOICE_CLASS}>
+            {t('back')}
           </button>
-        ))}
-      </div>
-      <form method="dialog" className="mt-5 text-center">
-        <button type="submit" className="cursor-pointer font-semibold underline">
-          {t('back')}
-        </button>
-      </form>
+        </form>
+      </TornPaper>
     </dialog>
   );
 }

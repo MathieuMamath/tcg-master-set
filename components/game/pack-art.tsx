@@ -6,11 +6,12 @@ import { SetLogo } from './set-logo';
 function theme(glow: string, middle: string, dark: string, edge: string) {
   return {
     background: `radial-gradient(circle at 50% 78%, ${glow} 0%, ${middle} 32%, ${dark} 62%, ${edge} 100%)`,
-    crimp: dark,
+    glow,
+    middle,
   };
 }
 
-type PackTheme = { background: string; crimp: string };
+type PackTheme = { background: string; glow: string; middle: string };
 
 const PACK_THEMES: Partial<Record<SetId, PackTheme>> = {
   '30th': theme('#6d7cff', '#3a2f9e', '#1f1a5e', '#0d0b2e'),
@@ -43,20 +44,56 @@ function packTheme(setId: SetId): PackTheme {
   );
 }
 
+// For the binder covers, which keep the glow of the sets.
 export function packBackground(setId: SetId) {
   return packTheme(setId).background;
 }
 
-// For the element around the pack, so that its top edge gets the same colour as the rest.
-export function packCrimpStyle(setId: SetId) {
-  return { '--pack-crimp': packTheme(setId).crimp } as CSSProperties;
+// The pack's printed paper, like the prototype's: a diagonal gradient in the set's colours, crossed
+// by pale stripes.
+function packPaper(setId: SetId) {
+  const { glow, middle } = packTheme(setId);
+  return [
+    'repeating-linear-gradient(135deg, rgb(255 255 255 / 16%) 0 4.8%, transparent 4.8% 11%)',
+    `linear-gradient(135deg, ${middle}, color-mix(in oklab, ${glow} 45%, ${middle}), ${middle})`,
+  ].join(', ');
 }
 
+// For the element around the pack, so that its top edge, drawn apart, gets the same paper.
+export function packEdgeStyle(setId: SetId) {
+  return { '--pack-paper': packPaper(setId) } as CSSProperties;
+}
+
+const TEETH = 20;
+
+// A crimped edge of sharp teeth, as a list of points from left to right.
+function teeth(edge: (isTip: boolean) => string) {
+  return Array.from(
+    { length: TEETH + 1 },
+    (_, index) => `${(index * 100) / TEETH}% ${edge(index % 2 === 1)}`,
+  );
+}
+
+// The teeth go this deep into the pack, as a share of its height.
+const TEETH_DEPTH = 2.7;
+// The top edge, which the player cuts off, takes this share of the pack's height.
+export const EDGE_HEIGHT = 13;
+
+const PACK_OUTLINE = `polygon(${[
+  ...teeth((isTip) => (isTip ? '0%' : `${TEETH_DEPTH}%`)),
+  ...teeth((isTip) => (isTip ? '100%' : `${100 - TEETH_DEPTH}%`)).reverse(),
+].join(', ')})`;
+
+const EDGE_OUTLINE = `polygon(${[
+  ...teeth((isTip) => (isTip ? '0%' : `${(TEETH_DEPTH * 100) / EDGE_HEIGHT}%`)),
+  '100% 100%',
+  '0% 100%',
+].join(', ')})`;
+
 // Removes what the cut has already gone past, so that nothing stays behind the edge being torn off.
-// It goes below the pack too, to keep the shadow there.
 function cutOutline(cut: number) {
   const reached = `${cut * 100}%`;
-  return `polygon(0 13%, ${reached} 13%, ${reached} 0, 100% 0, 100% calc(100% + 1rem), 0 calc(100% + 1rem))`;
+  return `polygon(0 ${EDGE_HEIGHT}%, ${reached} ${EDGE_HEIGHT}%, ${reached} 0, 100% 0, 100% 100%, 0 100%)`;
 }
 
 // Everything but the top edge, which the opening animates on its own.
@@ -73,18 +110,45 @@ export function PackBody({
   cut?: number;
 }) {
   return (
-    <span
-      style={{
-        background: packBackground(setId),
-        clipPath: cut > 0 ? cutOutline(cut) : undefined,
-      }}
-      className="absolute inset-0 overflow-hidden rounded-md border-4 border-ui-ink text-center text-ui-paper shadow-[4px_6px_0_var(--ui-shadow)]"
-    >
-      <span className="absolute inset-x-3 top-[13%] bottom-[7%] flex items-center justify-center">
-        <SetLogo setName={setName} logoUrl={logoUrl} />
+    <span className="absolute inset-0 drop-shadow-[4px_6px_0_var(--ui-shadow)]">
+      <span
+        style={{ clipPath: cut > 0 ? cutOutline(cut) : undefined }}
+        className="absolute inset-0"
+      >
+        <span
+          style={{ background: packPaper(setId), clipPath: PACK_OUTLINE }}
+          className="absolute inset-0 text-center text-ui-paper"
+        >
+          <span className="ui-pack-band absolute inset-x-0 top-0 h-[13%]" />
+          <span className="absolute inset-x-[7%] top-[13%] bottom-[7%] flex items-center justify-center">
+            <SetLogo setName={setName} logoUrl={logoUrl} />
+          </span>
+          <span className="ui-pack-band absolute inset-x-0 bottom-0 h-[7%]" />
+          <span className="ui-paper-grain absolute inset-0" />
+        </span>
       </span>
-      <span className="ui-shine absolute inset-0" />
-      <span aria-hidden="true" className="ui-pack-crimp absolute inset-x-0 bottom-0 h-[7%]" />
+    </span>
+  );
+}
+
+// The crimped top edge, which the player cuts off. The element around it must have the pack's
+// `packEdgeStyle`.
+export function PackEdge({ style, className = '' }: { style?: CSSProperties; className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={style}
+      className={`absolute inset-x-0 top-0 h-[13%] drop-shadow-[4px_3px_0_var(--ui-shadow)] ${className}`}
+    >
+      <span style={{ clipPath: EDGE_OUTLINE }} className="absolute inset-0 overflow-hidden">
+        {/* The whole pack's paper, of which only the top shows. */}
+        <span
+          style={{ height: `${10000 / EDGE_HEIGHT}%`, background: 'var(--pack-paper)' }}
+          className="absolute inset-x-0 top-0"
+        />
+        <span className="ui-pack-band absolute inset-0" />
+        <span className="ui-paper-grain absolute inset-0" />
+      </span>
     </span>
   );
 }
