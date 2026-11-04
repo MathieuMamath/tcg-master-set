@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.51](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.50...v0.1.51) (2026-11-04)
+
+### Bug Fixes
+
+* **binder:** move between cards with the arrows, turn pages with Page Up and Down ([#51](https://github.com/MathieuMamath/tcg-master-set/issues/51)) ([7225e4e](https://github.com/MathieuMamath/tcg-master-set/commit/7225e4ef1a45efe563d5d22616a8510c7f7ffee8))
+
 ## [0.1.50](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.49...v0.1.50) (2026-11-04)
 
 ### Features
