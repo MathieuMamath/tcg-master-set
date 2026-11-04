@@ -53,7 +53,7 @@ The schema lives in `db/schema`, and every change goes through a migration in `d
 
 `player_cards` deliberately has no foreign key to `cards`, because `pnpm cards:import` replaces a set's card rows.
 
-`player_spots` keeps where the character stands, saved from the browser and checked by `parseSpot` in `game/places.ts`. A spot gives no advantage, so it isn't checked for how the player got there. A spot that a map change has made invalid is ignored, and the player starts in the bedroom. Nothing saves it for now: the places are being rebuilt in paper, and saving comes back with them.
+`player_spots` keeps where the character stands, its place, how far along the floor and which way it faces, saved from the browser at each change of place and when the page is left, and checked by `parseSpot` in `game/spot.ts`. A spot gives no advantage, so it isn't checked for how the player got there. A spot that a change of the places has made invalid is ignored, and the player starts in the bedroom.
 
 ## Cards
 
@@ -93,13 +93,13 @@ Text lives in `messages/en.json` and `messages/fr.json`, which must define the s
 
 Game rules live in `game/` as plain tested functions, without React or Three.js. `components/game/` displays them, and the scene loads only in the browser.
 
-The world is made of paper cut-outs, seen from the side like a diorama: characters only walk left and right. The drawings are made by code on canvases in `components/game/paper-art.ts`, so the repository holds no images. The player is Pip, a fox. The old 3D town is disconnected while its places come back one by one in paper, so `components/game/paper-scene.tsx` only holds the bedroom, the street with our house, the shop, the Card Den, run by raccoon triplets, the bookshop, the Page Nook, which sells nothing but binders, Léa's flat in the block at the far left, the arcade, and the bus stop at the far right. The stop's sign opens the map of the stops the bus serves, from `game/bus.ts`, and the bus takes the player to the other stop: Linden Park, with Papy Caillou and Lucas. A place's layout along its floor, the stretches where the player can do something, and its doors with where each one leads, live in `game/side-rooms.ts`. A door is used with the interact key, rather than by walking into it. Talking to a character is offered in a speech bubble just above its head, placed from the top of its drawing so that it fits any size. Everything else is offered at the bottom of the screen. The sky through windows comes from `game/sky.ts`, ready to follow the time of day and the weather.
+The world is made of paper cut-outs, seen from the side like a diorama: characters only walk left and right. The drawings are made by code on canvases in `components/game/paper-art.ts`, so the repository holds no images. The player is Pip, a fox. `components/game/paper-scene.tsx` holds every place: the bedroom, the street with our house, the shop, the Card Den, run by raccoon triplets, the bookshop, the Page Nook, which sells nothing but binders, Léa's flat in the block at the far left, the arcade, and the bus stop at the far right. The stop's sign opens the map of the stops the bus serves, from `game/bus.ts`, and the bus takes the player to the other stop: Linden Park, with Papy Caillou and Lucas. A place's layout along its floor, the stretches where the player can do something, and its doors with where each one leads, live in `game/side-rooms.ts`. A door is used with the interact key, rather than by walking into it. Talking to a character is offered in a speech bubble just above its head, placed from the top of its drawing so that it fits any size. Everything else is offered at the bottom of the screen. The sky through windows comes from `game/sky.ts`, ready to follow the time of day and the weather.
 
 Desktop comes first: comfort, polish and effects are designed for it. Phones must still work, with every screen usable and the game playable, but they don't need to match it, and a choice between the two goes to desktop.
 
 The game must stay playable with the keyboard alone. Every screen puts the focus on something that can be pressed, and menus follow the movement keys through `components/game/menu-focus.ts`. Don't use `disabled` on a button that can have the focus, because the browser takes the focus away and no key reaches the dialog any more. Use `aria-disabled` instead.
 
-3D models live in `public/models/`, with their license next to them. Only commit the files the game uses. The Kenney models of the old 3D town go with the place that used them, once it is rebuilt in paper.
+The game was first a 3D town of Kenney models, rebuilt place by place in paper. Its code and models are gone: don't bring 3D models back without asking.
 
 ## Next.js
 

@@ -1,6 +1,6 @@
 # TCG Master Set
 
-A cozy single-player 3D game about collecting. You live in a small modern town, earn coins through daily quests, buy binders at the bookshop and booster packs at the shop, and fill your binders until every master set is complete. Duplicates turn into more coins, depending on their rarity.
+A cozy single-player game about collecting, in a world of paper cut-outs. You play Pip, a little fox in a small town, earn coins through daily quests, buy binders at the bookshop and booster packs at the shop, and fill your binders until every master set is complete. Duplicates turn into more coins, depending on their rarity.
 
 There are no duels and no real money.
 
@@ -29,4 +29,4 @@ pnpm dev
 
 This is an unofficial, non-commercial fan project. It isn't produced, endorsed, supported by or affiliated with Nintendo, Creatures, GAME FREAK or The Pokémon Company, who own their respective names and artwork.
 
-This repository contains no card data or card images. The 3D models come from Kenney's [Mini Characters](https://kenney.nl/assets/mini-characters), [Furniture Kit](https://kenney.nl/assets/furniture-kit) and City Kits ([Suburban](https://kenney.nl/assets/city-kit-suburban), [Commercial](https://kenney.nl/assets/city-kit-commercial), [Roads](https://kenney.nl/assets/city-kit-roads)), under the CC0 license. The interface uses the [Bagel Fat One](https://fonts.google.com/specimen/Bagel+Fat+One), [Patrick Hand](https://fonts.google.com/specimen/Patrick+Hand) and [Courier Prime](https://fonts.google.com/specimen/Courier+Prime) fonts, under the SIL Open Font License. To report a rights issue, please [open an issue](https://github.com/MathieuMamath/tcg-master-set/issues).
+This repository contains no card data or card images. Every drawing in the game is made by code, so the repository holds no images either. The interface uses the [Bagel Fat One](https://fonts.google.com/specimen/Bagel+Fat+One), [Patrick Hand](https://fonts.google.com/specimen/Patrick+Hand) and [Courier Prime](https://fonts.google.com/specimen/Courier+Prime) fonts, under the SIL Open Font License. To report a rights issue, please [open an issue](https://github.com/MathieuMamath/tcg-master-set/issues).

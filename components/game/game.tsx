@@ -22,6 +22,7 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import { isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
+import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type { BasketballResult, FishingCatch, PlayerProgress } from '@/player/progress';
 import { AnimatedCount } from './animated-count';
@@ -63,6 +64,15 @@ function isTalk(interaction: Interaction): interaction is Talk {
 }
 const DASH_KEY = 'Space';
 
+// Where the character stands gives no advantage, so a save that fails is simply let go.
+function saveSpot(spot: PlayerSpot) {
+  fetch('/api/player/spot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(spot),
+  }).catch(() => {});
+}
+
 type Props = {
   player: Player;
   sets: readonly PlayableSet[];
@@ -95,7 +105,9 @@ export function Game({ player, sets, progress }: Props) {
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
   const [isBusMapOpen, setIsBusMapOpen] = useState(false);
   // Where the character is, for the bus map to know which stop it is read at.
-  const [place, setPlace] = useState<SidePlaceId>('bedroom');
+  const [place, setPlace] = useState<SidePlaceId>(progress.spot?.place ?? 'bedroom');
+  // Where the character stands, kept by the scene, for saving it when the page is left.
+  const spot = useRef<PlayerSpot | null>(progress.spot);
   const [highScore, setHighScore] = useState(progress.basketballHighScore);
   const [basketballRewardedOn, setBasketballRewardedOn] = useState(progress.basketballRewardedOn);
   const [binders, setBinders] = useState(progress.binders);
@@ -348,6 +360,20 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
+  // Leaving the page saves where the character stands, by a beacon that outlives the page.
+  useEffect(() => {
+    const saveOnLeave = () => {
+      if (spot.current) {
+        navigator.sendBeacon(
+          '/api/player/spot',
+          new Blob([JSON.stringify(spot.current)], { type: 'application/json' }),
+        );
+      }
+    };
+    window.addEventListener('pagehide', saveOnLeave);
+    return () => window.removeEventListener('pagehide', saveOnLeave);
+  }, []);
+
   const finishQuest = async () => {
     setQuest(null);
     stopWalking();
@@ -383,7 +409,10 @@ export function Game({ player, sets, progress }: Props) {
   };
 
   // Stepping out of Léa's flat gives up on the quest, since the dust stays inside.
-  const changePlace = useCallback((next: SidePlaceId) => {
+  // Saved at each change of place, rather than at every step, so as not to flood the server.
+  const changePlace = useCallback((arrived: PlayerSpot) => {
+    const next = arrived.place;
+    saveSpot(arrived);
     setPlace(next);
     if (next === 'park') {
       setProverb((previous) => nextProverb(previous));
@@ -534,6 +563,8 @@ export function Game({ player, sets, progress }: Props) {
         stains={quest?.stains ?? []}
         onInteractionChange={setInteraction}
         onScrub={scrub}
+        startSpot={progress.spot}
+        spot={spot}
         onPlaceChange={changePlace}
       />
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">

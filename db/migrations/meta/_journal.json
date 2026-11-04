@@ -57,6 +57,20 @@
       "when": 1793665643848,
       "tag": "0007_nice_jazinda",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793796250913,
+      "tag": "0008_cultured_tyrannus",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793796252284,
+      "tag": "0009_cuddly_luke_cage",
+      "breakpoints": true
     }
   ]
 }

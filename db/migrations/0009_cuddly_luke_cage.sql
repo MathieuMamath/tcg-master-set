@@ -1,0 +1,1 @@
+ALTER TABLE "player_spots" ADD COLUMN "facing" smallint DEFAULT 1 NOT NULL;

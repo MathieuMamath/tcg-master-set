@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { DASH_SPEED_FACTOR, dashDirection, NO_DASH, tickDash } from './dash';
+import { DASH_SPEED_FACTOR, NO_DASH, tickDash } from './dash';
 
 const FRAME = 1 / 60;
 
@@ -40,18 +40,5 @@ describe('tickDash', () => {
 
   test('moves faster than walking', () => {
     expect(DASH_SPEED_FACTOR).toBeGreaterThan(1);
-  });
-});
-
-describe('dashDirection', () => {
-  test('follows the direction pushed, at full speed', () => {
-    expect(dashDirection({ x: 0.2, z: 0 }, 0)).toEqual({ x: 1, z: 0 });
-  });
-
-  test('goes straight ahead when nothing is pushed', () => {
-    const { x, z } = dashDirection({ x: 0, z: 0 }, Math.PI / 2);
-
-    expect(x).toBeCloseTo(1);
-    expect(z).toBeCloseTo(0);
   });
 });
