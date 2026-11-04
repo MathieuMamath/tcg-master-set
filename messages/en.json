@@ -32,7 +32,9 @@
     "leaveBookshop": "Go outside",
     "enterFlat": "Go into Léa’s flat",
     "leaveFlat": "Go outside",
-    "scrub": "Rub off the dust"
+    "scrub": "Rub off the dust",
+    "enterArcade": "Go into the arcade",
+    "leaveArcade": "Go outside"
   },
   "Shopkeeper": {
     "names": {
@@ -285,7 +287,8 @@
   },
   "Town": {
     "shop": "The Card Den",
-    "bookshop": "The Page Nook"
+    "bookshop": "The Page Nook",
+    "arcade": "Arcade"
   },
   "Hails": {
     "latest": "Welcome to the Den!",

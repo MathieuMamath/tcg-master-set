@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
+  ARCADE,
+  ARCADE_MACHINES,
+  ARCADE_WALLS,
   BEDROOM,
   BEDROOM_FURNITURE,
   BEDROOM_WALLS,
@@ -83,11 +86,12 @@ describe('the bedroom', () => {
 
 describe('the street', () => {
   test('every building stands on it, without overlapping the next', () => {
-    const { flats, house, shop, bookshop } = TOWN_BUILDINGS;
+    const { flats, house, shop, bookshop, arcade } = TOWN_BUILDINGS;
 
     expect(flats.x - flats.width / 2).toBeGreaterThan(TOWN_ENDS.left);
     expect(flats.x + flats.width / 2).toBeLessThan(house.x - house.width / 2);
-    expect(bookshop.x + bookshop.width / 2).toBeLessThan(TOWN_ENDS.right);
+    expect(bookshop.x + bookshop.width / 2).toBeLessThan(arcade.x - arcade.width / 2);
+    expect(arcade.x + arcade.width / 2).toBeLessThan(TOWN_ENDS.right);
     expect(house.x + house.width / 2).toBeLessThan(shop.x - shop.width / 2);
     expect(shop.x + shop.width / 2).toBeLessThan(bookshop.x - bookshop.width / 2);
   });
@@ -97,6 +101,7 @@ describe('the street', () => {
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.shop.doorX)).toBe('enterShop');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.bookshop.doorX)).toBe('enterBookshop');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.flats.doorX)).toBe('enterFlat');
+    expect(interactionAlong(TOWN, TOWN_BUILDINGS.arcade.doorX)).toBe('enterArcade');
   });
 });
 
@@ -194,6 +199,31 @@ describe("Léa's flat", () => {
     const arrival = TOWN.exits.find(({ to }) => to === 'flat')?.arrival;
 
     expect(arrival && interactionAlong(FLAT, arrival.x)).toBe('leaveFlat');
+  });
+});
+
+describe('the arcade', () => {
+  test('the basketball machine can be played in front of it', () => {
+    expect(interactionAlong(ARCADE, ARCADE_MACHINES.basketball.x)).toBe('basketball');
+    expect(interactionAlong(ARCADE, ARCADE_MACHINES.claw.x)).toBeNull();
+  });
+
+  test('its machines fit between the walls without overlapping', () => {
+    const machines = Object.values(ARCADE_MACHINES).sort((a, b) => a.x - b.x);
+    for (const [index, { x, width }] of machines.entries()) {
+      expect(x - width / 2).toBeGreaterThan(ARCADE_WALLS.left);
+      expect(x + width / 2).toBeLessThan(ARCADE_WALLS.right);
+      const next = machines[index + 1];
+      if (next) {
+        expect(x + width / 2).toBeLessThan(next.x - next.width / 2);
+      }
+    }
+  });
+
+  test('arriving from the street, the player is at the door', () => {
+    const arrival = TOWN.exits.find(({ to }) => to === 'arcade')?.arrival;
+
+    expect(arrival && interactionAlong(ARCADE, arrival.x)).toBe('leaveArcade');
   });
 });
 

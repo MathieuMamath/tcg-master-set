@@ -1,7 +1,7 @@
 import type { Facing } from './side-walk';
 import type { Interaction } from './world';
 
-export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop' | 'flat';
+export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop' | 'flat' | 'arcade';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -12,6 +12,8 @@ export const DOOR_INTERACTIONS = [
   'leaveBookshop',
   'enterFlat',
   'leaveFlat',
+  'enterArcade',
+  'leaveArcade',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -63,14 +65,15 @@ export const BEDROOM_FURNITURE = {
   plant: { x: 5.6, width: 1.3 },
 } as const;
 
-// The street: Léa's block of flats on the far left, our house, then the shop, and the bookshop past
-// it.
-export const TOWN_ENDS = { left: -20, right: 20 };
+// The street: Léa's block of flats on the far left, our house, then the shop, the bookshop, and
+// the arcade at the far right.
+export const TOWN_ENDS = { left: -20, right: 28 };
 export const TOWN_BUILDINGS = {
   flats: { x: -13.5, width: 4.6, doorX: -12.6 },
   house: { x: -5, width: 4.2, doorX: -5 },
   shop: { x: 5, width: 4.8, doorX: 5.9 },
   bookshop: { x: 13.5, width: 4.8, doorX: 14.4 },
+  arcade: { x: 22, width: 5, doorX: 23 },
 } as const;
 
 // The shop, the Card Den: the raccoon triplets each have a counter, from the newest sets on the
@@ -117,6 +120,22 @@ export const FLAT_BOUNDS = {
 };
 // How far from the door dust can settle, so that arriving never lands on a stain.
 export const FLAT_DOOR_REACH = DOOR_REACH;
+
+// The arcade: rows of machines under neon lights. Only the basketball machine can be played, and
+// the door is in the left wall.
+export const ARCADE_WALLS = { left: -6, right: 6 };
+export const ARCADE_MACHINES = {
+  cabinetA: { x: -3.6, width: 1.1 },
+  cabinetB: { x: -2.3, width: 1.1 },
+  basketball: { x: 0.4, width: 2.2 },
+  claw: { x: 3, width: 1.5 },
+  cabinetC: { x: 4.6, width: 1.1 },
+} as const;
+
+const ARCADE_BOUNDS = {
+  minX: ARCADE_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: ARCADE_WALLS.right - CHARACTER_HALF_WIDTH,
+};
 
 const SHOP_BOUNDS = {
   minX: SHOP_WALLS.left + CHARACTER_HALF_WIDTH,
@@ -173,6 +192,13 @@ export const TOWN: SideRoom = {
       maxX: TOWN_BUILDINGS.bookshop.doorX + DOOR_REACH,
       to: 'bookshop',
       arrival: { x: BOOKSHOP_BOUNDS.minX, facing: 1 },
+    },
+    {
+      interaction: 'enterArcade',
+      minX: TOWN_BUILDINGS.arcade.doorX - DOOR_REACH,
+      maxX: TOWN_BUILDINGS.arcade.doorX + DOOR_REACH,
+      to: 'arcade',
+      arrival: { x: ARCADE_BOUNDS.minX, facing: 1 },
     },
     {
       interaction: 'enterFlat',
@@ -258,12 +284,37 @@ export const FLAT: SideRoom = {
   ],
 };
 
+const { basketball } = ARCADE_MACHINES;
+
+export const ARCADE: SideRoom = {
+  id: 'arcade',
+  bounds: ARCADE_BOUNDS,
+  start: ARCADE_BOUNDS.minX,
+  interactions: [
+    {
+      interaction: 'basketball',
+      minX: basketball.x - basketball.width / 2,
+      maxX: basketball.x + basketball.width / 2,
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveArcade',
+      minX: ARCADE_BOUNDS.minX,
+      maxX: ARCADE_BOUNDS.minX + DOOR_REACH,
+      to: 'town',
+      arrival: { x: TOWN_BUILDINGS.arcade.doorX, facing: -1 },
+    },
+  ],
+};
+
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bedroom: BEDROOM,
   town: TOWN,
   shop: SHOP,
   bookshop: BOOKSHOP,
   flat: FLAT,
+  arcade: ARCADE,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

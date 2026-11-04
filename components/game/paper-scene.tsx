@@ -16,6 +16,8 @@ import { type DashState, NO_DASH, tickDash } from '@/game/dash';
 import { type Direction, STILL } from '@/game/movement';
 import { SCRUBS_PER_STAIN, type Stain, stainAlong } from '@/game/quests';
 import {
+  ARCADE_MACHINES,
+  ARCADE_WALLS,
   BEDROOM,
   BEDROOM_FURNITURE,
   BEDROOM_WALLS,
@@ -50,6 +52,11 @@ import { skyLook } from '@/game/sky';
 import type { Interaction } from '@/game/world';
 import {
   cutOut,
+  drawArcade,
+  drawArcadeCabinet,
+  drawArcadeCarpet,
+  drawArcadeDoor,
+  drawBasketballMachine,
   drawBed,
   drawBigPlant,
   drawBookcase,
@@ -58,6 +65,7 @@ import {
   drawBookWall,
   drawBoosterShelves,
   drawChair,
+  drawClawMachine,
   drawCloud,
   drawCorrugatedEdge,
   drawCounter,
@@ -109,6 +117,7 @@ export type MovementInput = {
 export type SceneSigns = {
   shop: string;
   bookshop: string;
+  arcade: string;
   latest: string;
   thisYear: string;
   older: string;
@@ -626,6 +635,81 @@ function Flat({
   );
 }
 
+const MACHINES_Z = -1.1;
+const NEON_STRIPS = [
+  { y: 3.7, color: '#ff4fa3' },
+  { y: 3.55, color: '#4fd8ff' },
+];
+
+// The arcade: neon strips along a dark wall, a carpet of bright shapes, and a row of machines, of
+// which only the basketball one can be played.
+function Arcade() {
+  const { cabinetA, cabinetB, basketball, claw, cabinetC } = ARCADE_MACHINES;
+  const textures = useMemo(
+    () => ({
+      room: {
+        wall: texture(drawWallpaper('#3f3a63', 'rgb(255 79 163 / 14%)')),
+        floor: texture(drawArcadeCarpet()),
+        door: texture(
+          paint(
+            Math.round(DOOR_WIDTH * PIXELS_PER_UNIT),
+            Math.round(DOOR_HEIGHT * PIXELS_PER_UNIT),
+            drawArcadeDoor,
+            101,
+          ),
+        ),
+      },
+      shadow: texture(drawShadowBlob()),
+      cabinets: [
+        ['#6a5acd', '#7cff9a'],
+        ['#d9655a', '#4fd8ff'],
+        ['#3fa08a', '#ffd84f'],
+      ].map(([color, screen], index) =>
+        texture(cutOut(120, 260, drawArcadeCabinet(color, screen), 8, 102 + index)),
+      ),
+      basketball: texture(cutOut(260, 360, drawBasketballMachine, 9, 105)),
+      claw: texture(cutOut(170, 270, drawClawMachine, 9, 106)),
+    }),
+    [],
+  );
+  const width = ARCADE_WALLS.right - ARCADE_WALLS.left;
+  return (
+    <>
+      <RoomShell walls={ARCADE_WALLS} doorSide="left" textures={textures.room} />
+      {NEON_STRIPS.map(({ y, color }) => (
+        <mesh key={color} position={[0, y, WALL_Z + 0.02]}>
+          <planeGeometry args={[width - 0.4, 0.06]} />
+          <meshBasicMaterial color={color} />
+        </mesh>
+      ))}
+      {[cabinetA, cabinetB, cabinetC].map(({ x }, index) => (
+        <Furniture
+          key={x}
+          map={textures.cabinets[index]}
+          x={x}
+          z={MACHINES_Z}
+          height={2.45}
+          shadow={textures.shadow}
+        />
+      ))}
+      <Furniture
+        map={textures.basketball}
+        x={basketball.x}
+        z={MACHINES_Z}
+        height={3.2}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={textures.claw}
+        x={claw.x}
+        z={MACHINES_Z}
+        height={2.6}
+        shadow={textures.shadow}
+      />
+    </>
+  );
+}
+
 const STREET_FRONT_Z = 3;
 const CLOUD_SPAN = 50;
 const CLOUD_SPEED = 25;
@@ -673,6 +757,11 @@ function Town({ signs }: { signs: SceneSigns }) {
     () => texture(cutOut(480, 380, drawBookshop(signs.bookshop), 9, 64)),
     [fontsReady, signs.bookshop],
   );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const arcade = useMemo(
+    () => texture(cutOut(500, 400, drawArcade(signs.arcade), 9, 66)),
+    [fontsReady, signs.arcade],
+  );
   const sky = useMemo(() => texture(drawSkyGradient(look)), [look]);
   const cloud = useMemo(() => texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)), [look]);
   const clouds = useRef<(Group | null)[]>([]);
@@ -689,7 +778,13 @@ function Town({ signs }: { signs: SceneSigns }) {
     }
   });
 
-  const { flats, house, shop: shopPlace, bookshop: bookshopPlace } = TOWN_BUILDINGS;
+  const {
+    flats,
+    house,
+    shop: shopPlace,
+    bookshop: bookshopPlace,
+    arcade: arcadePlace,
+  } = TOWN_BUILDINGS;
   const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
   const streetCenter = (TOWN_ENDS.left + TOWN_ENDS.right) / 2;
   return (
@@ -741,6 +836,13 @@ function Town({ signs }: { signs: SceneSigns }) {
         x={shopPlace.x}
         z={BUILDINGS_Z}
         height={4.06}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={arcade}
+        x={arcadePlace.x}
+        z={BUILDINGS_Z}
+        height={4.2}
         shadow={textures.shadow}
       />
       <Furniture
@@ -1007,6 +1109,7 @@ export function PaperScene({
           {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
           {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
           {visit.place === 'flat' && <Flat speakerTops={speakerTops} stains={stains} />}
+          {visit.place === 'arcade' && <Arcade />}
           <Pip
             input={input}
             room={SIDE_PLACES[visit.place]}

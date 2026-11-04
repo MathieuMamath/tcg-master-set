@@ -494,6 +494,7 @@ export function Game({ player, sets, progress }: Props) {
         signs={{
           shop: tTown('shop'),
           bookshop: tTown('bookshop'),
+          arcade: tTown('arcade'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
