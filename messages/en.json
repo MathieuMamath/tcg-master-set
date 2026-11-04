@@ -506,5 +506,51 @@
     "here": "You are here",
     "close": "Close",
     "goTo": "Go there"
+  },
+  "Activity": {
+    "open": "Activities: {done} of {total} daily quests",
+    "title": "Activities",
+    "close": "Close",
+    "tabs": {
+      "daily": "Daily quests"
+    },
+    "bonus": {
+      "title": "Daily reward",
+      "reward": "{count, number} coins for finishing every quest of the day",
+      "progress": "{done} / {total} quests",
+      "claim": "Claim",
+      "claimed": "Claimed!"
+    },
+    "quests": {
+      "grandma": {
+        "name": "Léa’s cleaning",
+        "where": "At Léa’s, in the block of flats"
+      },
+      "grandpa": {
+        "name": "Papy Caillou’s memory game",
+        "where": "At the park, by bus"
+      },
+      "boy": {
+        "name": "Lucas’s fishing",
+        "where": "At the park’s lake"
+      },
+      "basketball": {
+        "name": "The day’s basket",
+        "where": "At the arcade"
+      },
+      "gaspard": {
+        "name": "Gaspard’s dalgona",
+        "where": "In the street, by our house"
+      },
+      "berenice": {
+        "name": "Bérénice’s raffle",
+        "where": "In the street, near the arcade"
+      }
+    },
+    "status": {
+      "done": "Done",
+      "todo": "To do"
+    },
+    "resetHint": "The quests and the reward come back every day. A quest counts as soon as it’s done, even a lost raffle."
   }
 }

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
+import { canClaimDailyBonus, DAILY_QUEST_GOAL, type DailyActivity } from '@/game/activity';
 import { addToCollection } from '@/game/binder';
 import { stopAt } from '@/game/bus';
 import type { PlayableSet, SetId } from '@/game/card-sets';
@@ -27,11 +28,13 @@ import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type {
   BasketballResult,
+  DailyBonusClaim,
   DalgonaResult,
   FishingCatch,
   PlayerProgress,
   RaffleDraw,
 } from '@/player/progress';
+import { ActivityDialog, ActivityIcon } from './activity-dialog';
 import { AnimatedCount } from './animated-count';
 import { BasketballDialog } from './basketball-dialog';
 import { BinderView } from './binder-view';
@@ -136,11 +139,14 @@ export function Game({ player, sets, progress }: Props) {
   const [isBinderOpen, setIsBinderOpen] = useState(false);
   const [isBagOpen, setIsBagOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [activity, setActivity] = useState(progress.activity);
   const [collection, setCollection] = useState(progress.collection);
   const { isSaving, showSaveNotice } = useSaveNotice();
   const locale = useLocale();
   const tBooster = useTranslations('Booster');
   const tSettings = useTranslations('Settings');
+  const tActivity = useTranslations('Activity');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tTown = useTranslations('Town');
   const tHails = useTranslations('Hails');
@@ -153,6 +159,7 @@ export function Game({ player, sets, progress }: Props) {
     isBinderOpen ||
     isBagOpen ||
     isSettingsOpen ||
+    isActivityOpen ||
     opening !== null ||
     memoryCards !== null ||
     isFishing ||
@@ -646,6 +653,44 @@ export function Game({ player, sets, progress }: Props) {
     setIsBagOpen(true);
   };
 
+  // The tracker reads the day's quests again whenever a dialog closes, since most quests end in one.
+  const wasDialogOpen = useRef(isDialogOpen);
+  useEffect(() => {
+    const hasClosed = wasDialogOpen.current && !isDialogOpen;
+    wasDialogOpen.current = isDialogOpen;
+    if (!hasClosed) {
+      return;
+    }
+    fetch('/api/activity')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((loaded: DailyActivity | null) => loaded && setActivity(loaded))
+      .catch(() => {});
+  }, [isDialogOpen]);
+
+  // The server checks that every quest of the day is done, and pays the bonus once.
+  const claimDailyBonus = async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/activity/claim', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const claim: DailyBonusClaim = await response.json();
+      setActivity(claim.activity);
+      setWallet(claim.wallet);
+      if (claim.isClaimed) {
+        showSaveNotice();
+      }
+      return claim.isClaimed;
+    } catch {
+      return false;
+    }
+  };
+
+  const openActivity = () => {
+    stopWalking();
+    setIsActivityOpen(true);
+  };
+
   const openSettings = () => {
     stopWalking();
     setIsSettingsOpen(true);
@@ -706,26 +751,44 @@ export function Game({ player, sets, progress }: Props) {
             {t('binderButton')}
           </button>
         </div>
-        <button
-          type="button"
-          aria-label={tSettings('open')}
-          onClick={openSettings}
-          className="shrink-0 rotate-2 cursor-pointer ui-paper-button bg-ui-paper p-1.5"
-        >
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
-            {[0, 45, 90, 135].map((angle) => (
-              <path
-                key={angle}
-                d="M12 1v22"
-                stroke="currentColor"
-                strokeWidth="4"
-                transform={`rotate(${angle} 12 12)`}
+        <div className="flex shrink-0 flex-col items-end gap-3">
+          <button
+            type="button"
+            aria-label={tSettings('open')}
+            onClick={openSettings}
+            className="shrink-0 rotate-2 cursor-pointer ui-paper-button bg-ui-paper p-1.5"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
+              {[0, 45, 90, 135].map((angle) => (
+                <path
+                  key={angle}
+                  d="M12 1v22"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  transform={`rotate(${angle} 12 12)`}
+                />
+              ))}
+              <circle cx="12" cy="12" r="7" fill="currentColor" />
+              <circle cx="12" cy="12" r="3" fill="var(--ui-paper)" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label={tActivity('open', { done: activity.done.length, total: DAILY_QUEST_GOAL })}
+            onClick={openActivity}
+            className="relative flex -rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
+          >
+            <ActivityIcon />
+            {activity.done.length}/{DAILY_QUEST_GOAL}
+            {/* A reward waits to be claimed. */}
+            {canClaimDailyBonus(activity) && (
+              <span
+                aria-hidden="true"
+                className="ui-bob absolute -top-1.5 -right-1.5 size-3.5 rounded-full border-2 border-ui-paper bg-ui-stamp"
               />
-            ))}
-            <circle cx="12" cy="12" r="7" fill="currentColor" />
-            <circle cx="12" cy="12" r="3" fill="var(--ui-paper)" />
-          </svg>
-        </button>
+            )}
+          </button>
+        </div>
       </div>
       {isPapySaying && !isDialogOpen && (
         // Papy Caillou's saying, in his speech bubble: something to read, not to press.
@@ -829,6 +892,13 @@ export function Game({ player, sets, progress }: Props) {
         />
       )}
       {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
+      {isActivityOpen && (
+        <ActivityDialog
+          activity={activity}
+          onClaim={claimDailyBonus}
+          onClose={() => setIsActivityOpen(false)}
+        />
+      )}
       {quest && !isTalking && (
         <QuestBanner
           startedAt={quest.startedAt}

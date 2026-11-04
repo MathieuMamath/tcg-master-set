@@ -506,5 +506,51 @@
     "here": "Tu es ici",
     "close": "Fermer",
     "goTo": "Y aller"
+  },
+  "Activity": {
+    "open": "Activités : {done} quêtes du jour sur {total}",
+    "title": "Activités",
+    "close": "Fermer",
+    "tabs": {
+      "daily": "Quêtes du jour"
+    },
+    "bonus": {
+      "title": "Récompense du jour",
+      "reward": "{count, number} pièces en terminant toutes les quêtes du jour",
+      "progress": "{done} / {total} quêtes",
+      "claim": "Récupérer",
+      "claimed": "Récupérée !"
+    },
+    "quests": {
+      "grandma": {
+        "name": "Le ménage de Léa",
+        "where": "Chez Léa, dans l’immeuble de la rue"
+      },
+      "grandpa": {
+        "name": "Le mémo de Papy Caillou",
+        "where": "Au parc, en bus"
+      },
+      "boy": {
+        "name": "La pêche de Lucas",
+        "where": "Au lac du parc"
+      },
+      "basketball": {
+        "name": "Le panier du jour",
+        "where": "À la salle d’arcade"
+      },
+      "gaspard": {
+        "name": "Le dalgona de Gaspard",
+        "where": "Dans la rue, à côté de la maison"
+      },
+      "berenice": {
+        "name": "La tombola de Bérénice",
+        "where": "Dans la rue, près de l’arcade"
+      }
+    },
+    "status": {
+      "done": "Faite",
+      "todo": "À faire"
+    },
+    "resetHint": "Les quêtes et la récompense reviennent chaque jour. Une quête compte dès qu’elle est faite, même la tombola perdue."
   }
 }
