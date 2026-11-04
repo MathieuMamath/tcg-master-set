@@ -20,7 +20,7 @@
     "older": "Talk (earlier sets)",
     "binderSeller": "Talk (binders)",
     "dash": "Dash",
-    "grandma": "Talk (Grandma)",
+    "grandma": "Talk (Léa)",
     "grandpa": "Talk (Grandpa)",
     "boy": "Talk (little boy)",
     "basketball": "Play (basketball)",
@@ -29,7 +29,10 @@
     "enterShop": "Go into the shop",
     "leaveShop": "Go outside",
     "enterBookshop": "Go into the bookshop",
-    "leaveBookshop": "Go outside"
+    "leaveBookshop": "Go outside",
+    "enterFlat": "Go into Léa’s flat",
+    "leaveFlat": "Go outside",
+    "scrub": "Rub off the dust"
   },
   "Shopkeeper": {
     "names": {
@@ -193,16 +196,17 @@
   },
   "Quest": {
     "grandma": {
-      "name": "Grandma",
+      "name": "Léa",
       "lines": {
-        "greeting": "Oh, this floor is a mess! Could you clean every stain in 30 seconds? I'll give you 100 coins.",
-        "hurry": "Quick, there are still stains!",
-        "rewarded": "How spotless! Here are your 100 coins, dear.",
-        "failed": "Oh, you ran out of time. Shall we try again?",
-        "alreadyDone": "You've done enough for today, dear. Come back tomorrow!",
-        "unavailable": "Oh dear, something went wrong. Please try again."
+        "greeting": "Sorry Pip, I’m snowed under with work… Could you dust my walls for me? I’ve got a video call in 30 seconds! I’ll give you 100 coins.",
+        "hurry": "Quick, my call’s about to start!",
+        "rewarded": "Spotless! You saved my life. Here are your 100 coins.",
+        "failed": "Oh no, the call’s started… Shall we try again?",
+        "alreadyDone": "You already saved me today. Come back tomorrow, there’ll be plenty more dust!",
+        "unavailable": "Ouch, my computer crashed… Try again in a moment."
       },
-      "accept": "I'll do it"
+      "accept": "I’m on it!",
+      "title": "the overworked neighbour"
     },
     "grandpa": {
       "name": "Grandpa",
@@ -230,7 +234,7 @@
     "retry": "Try again",
     "leave": "Goodbye",
     "timeLeft": "{seconds} s",
-    "stainsLeft": "{count, plural, one {# stain left} other {# stains left}}",
+    "stainsLeft": "{count, plural, one {# patch of dust} other {# patches of dust}}",
     "fishing": {
       "title": "Fishing",
       "waiting": "Waiting for a bite...",
@@ -288,7 +292,7 @@
     "thisYear": "Hello, hello!",
     "older": "Psst… come and see!",
     "binderSeller": "There you are, dear!",
-    "grandma": "Hello, dear!",
+    "grandma": "Ah, Pip! Just in time!",
     "grandpa": "Fancy a game?",
     "boy": "Hey! Over here!"
   }

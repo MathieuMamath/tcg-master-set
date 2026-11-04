@@ -1,60 +1,72 @@
-import { APARTMENT, APARTMENT_FROM_TOWN } from './apartment';
-import { isBlocked, type Position } from './collision';
-import { CHARACTER_RADIUS, exitAt, npcInReach, obstaclesOf } from './world';
+import { FLAT_BOUNDS, FLAT_DOOR_REACH, FLAT_FURNITURE, LEA_X } from './side-rooms';
 
+// Léa's quest: dust off the walls of her flat while she works. The quest keeps its first id and
+// giver from when it was a grandmother's, because players' progress is stored under them.
 export const GRANDMA_QUEST = 'grandma-cleaning';
 export const QUEST_REWARD = 100;
 export const QUEST_SECONDS = 30;
-export const STAIN_COUNT = 8;
+export const STAIN_COUNT = 6;
+// Each patch of dust takes a few rubs before it's gone.
+export const SCRUBS_PER_STAIN = 3;
 
 // Room for the request to reach the server, and a floor below which no one can have played.
 const GRACE_SECONDS = 3;
 const MIN_SECONDS = 3;
 
-const STAIN_REACH = 0.45;
-const GRID_STEP = 0.5;
-const STAIN_MARGIN = 0.1;
+// How close along the floor the character must stand to rub a patch on the wall.
+const STAIN_REACH = 0.55;
+// Each patch can shift this far within its stretch of wall, for some variety from one day to the
+// next while keeping them apart.
+const JITTER = 0.12;
+// The heights on the wall where dust can be: above the sofa, and above the shelf where it stands,
+// so that no furniture hides a patch.
+const LOWEST = 1.75;
+const HIGHEST = 3.2;
+const ABOVE_SHELF = 2.75;
+// Léa's corner stays clear: she and her desk would hide the wall behind them.
+const LEA_CLEARANCE = 1.45;
 
-export type Stain = Position & { id: number };
+export type Stain = { id: number; x: number; height: number; scrubsLeft: number };
 
-// Every spot of the floor a stain can be on: the character must be able to reach it, and it mustn't
-// be where the player starts or talks.
-export function stainSpots(): Position[] {
-  const { minX, maxX, minZ, maxZ } = APARTMENT.bounds;
-  const obstacles = obstaclesOf(APARTMENT);
-  const spots: Position[] = [];
-  for (let x = minX + GRID_STEP; x < maxX; x += GRID_STEP) {
-    for (let z = minZ + GRID_STEP; z < maxZ; z += GRID_STEP) {
-      const spot = { x, z };
-      const isNearArrival =
-        Math.hypot(x - APARTMENT_FROM_TOWN.x, z - APARTMENT_FROM_TOWN.z) < GRID_STEP * 2;
-      if (
-        !isBlocked(spot, obstacles, CHARACTER_RADIUS + STAIN_MARGIN) &&
-        !exitAt(APARTMENT, spot) &&
-        !npcInReach(APARTMENT, spot) &&
-        !isNearArrival
-      ) {
-        spots.push(spot);
-      }
-    }
-  }
-  return spots;
+// The wall from past the door to Léa's corner is shared into one stretch per patch, and each
+// patch settles near the middle of its own stretch.
+export function stainSpots(): number[] {
+  const start = FLAT_BOUNDS.minX + FLAT_DOOR_REACH + 0.4;
+  const end = LEA_X - LEA_CLEARANCE;
+  const stretch = (end - start) / STAIN_COUNT;
+  return Array.from({ length: STAIN_COUNT }, (_, index) => start + stretch * (index + 0.5));
+}
+
+function isAboveShelf(x: number): boolean {
+  const { shelf } = FLAT_FURNITURE;
+  return Math.abs(x - shelf.x) < shelf.width / 2 + 0.4;
 }
 
 export function pickStains(random: () => number = Math.random): Stain[] {
-  const spots = stainSpots();
-  const picked: Stain[] = [];
-  for (let id = 0; id < STAIN_COUNT && spots.length > 0; id += 1) {
-    const [spot] = spots.splice(Math.floor(random() * spots.length), 1);
-    picked.push({ ...spot, id });
-  }
-  return picked;
+  return stainSpots().map((spot, id) => {
+    const x = spot + (random() * 2 - 1) * JITTER;
+    const lowest = isAboveShelf(x) ? ABOVE_SHELF : LOWEST;
+    return { id, x, height: lowest + random() * (HIGHEST - lowest), scrubsLeft: SCRUBS_PER_STAIN };
+  });
 }
 
-export function stainsReached(stains: readonly Stain[], position: Position): Stain[] {
-  return stains.filter(
-    (stain) => Math.hypot(stain.x - position.x, stain.z - position.z) <= STAIN_REACH,
-  );
+// The patch the character stands below, if any: the nearest one within reach.
+export function stainAlong(stains: readonly Stain[], x: number): Stain | null {
+  let nearest: Stain | null = null;
+  for (const stain of stains) {
+    const distance = Math.abs(stain.x - x);
+    if (distance <= STAIN_REACH && (!nearest || distance < Math.abs(nearest.x - x))) {
+      nearest = stain;
+    }
+  }
+  return nearest;
+}
+
+// One rub: the patch fades, and goes once it has had all its rubs.
+export function scrubStain(stains: readonly Stain[], id: number): Stain[] {
+  return stains
+    .map((stain) => (stain.id === id ? { ...stain, scrubsLeft: stain.scrubsLeft - 1 } : stain))
+    .filter(({ scrubsLeft }) => scrubsLeft > 0);
 }
 
 // The quest can be done once a day, so that it can't be repeated for endless coins.

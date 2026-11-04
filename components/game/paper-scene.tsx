@@ -14,6 +14,7 @@ import {
 } from 'three';
 import { type DashState, NO_DASH, tickDash } from '@/game/dash';
 import { type Direction, STILL } from '@/game/movement';
+import { SCRUBS_PER_STAIN, type Stain, stainAlong } from '@/game/quests';
 import {
   BEDROOM,
   BEDROOM_FURNITURE,
@@ -22,7 +23,11 @@ import {
   BOOKSHOP_SELLER_X,
   BOOKSHOP_WALLS,
   exitAlong,
+  FLAT_FURNITURE,
+  FLAT_WALLS,
+  FLAT_WINDOW_X,
   interactionAlong,
+  LEA_X,
   SHOP_COUNTERS,
   SHOP_WALLS,
   SIDE_PLACES,
@@ -58,9 +63,13 @@ import {
   drawCounter,
   drawDesk,
   drawDoor,
+  drawDust,
+  drawFlats,
+  drawFrame,
   drawHedgehog,
   drawHills,
   drawHouse,
+  drawLea,
   drawMagazineRack,
   drawPip,
   drawPlanks,
@@ -70,12 +79,14 @@ import {
   drawSign,
   drawSky,
   drawSkyGradient,
+  drawSofa,
   drawStationeryTable,
   drawStreet,
   drawUprightCorrugatedEdge,
   drawWallpaper,
   drawWindowFrame,
   HEDGEHOG_SIZE,
+  LEA_SIZE,
   paint,
   RACCOON_SIZE,
   SELLERS,
@@ -90,6 +101,8 @@ export type MovementInput = {
   wantsDash: boolean;
   // Set by whoever asks to go through the door the character stands at, and used up the same way.
   wantsDoor: boolean;
+  // Set by whoever asks to rub the patch of dust the character stands below, and used up the same way.
+  wantsScrub: boolean;
 };
 
 // The words painted in the scene, in the player's language.
@@ -168,7 +181,7 @@ const WINDOW_MARGIN = 13;
 const SKY_SHOWN = 0.45;
 
 // A double window over the desk, onto a sky that will one day follow the time and the weather.
-function BedroomWindow() {
+function SkyWindow({ x }: { x: number }) {
   const look = skyLook('day', 'fewClouds');
   const sky = useMemo(() => {
     const map = texture(drawSky(look));
@@ -191,16 +204,16 @@ function BedroomWindow() {
   const openingCenterY = WINDOW.centerY + WINDOW_SILL / 2 / PIXELS_PER_UNIT;
   return (
     <>
-      <mesh position={[WINDOW.x, openingCenterY, WALL_Z + 0.01]}>
+      <mesh position={[x, openingCenterY, WALL_Z + 0.01]}>
         <planeGeometry args={[openingWidth, openingHeight]} />
         <meshBasicMaterial map={sky} />
       </mesh>
       {/* Light on the glass. */}
-      <mesh position={[WINDOW.x, openingCenterY, WALL_Z + 0.02]} rotation={[0, 0, -0.5]}>
+      <mesh position={[x, openingCenterY, WALL_Z + 0.02]} rotation={[0, 0, -0.5]}>
         <planeGeometry args={[0.18, openingHeight * 1.1]} />
         <meshBasicMaterial color="#ffffff" transparent opacity={0.28} depthWrite={false} />
       </mesh>
-      <group position={[WINDOW.x, WINDOW.centerY - frameHeight / 2, WALL_Z + 0.03]}>
+      <group position={[x, WINDOW.centerY - frameHeight / 2, WALL_Z + 0.03]}>
         <CutOut map={frame} height={frameHeight} />
       </group>
     </>
@@ -348,7 +361,7 @@ function Bedroom() {
   return (
     <>
       <RoomShell walls={BEDROOM_WALLS} doorSide="right" textures={textures.room} />
-      <BedroomWindow />
+      <SkyWindow x={WINDOW.x} />
       <Furniture
         map={textures.bookcase}
         x={bookcase.x}
@@ -540,6 +553,79 @@ function Bookshop({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
   );
 }
 
+const LEA_HEIGHT = 3.5;
+const LEA_Z = -0.6;
+const DUST_SIZE = { width: 0.95, height: 0.75 };
+
+// Léa's flat: a shelf, a sofa under pictures, a window, and Léa at her desk. During her quest,
+// patches of dust cover the wall, fading with each rub.
+function Flat({
+  speakerTops,
+  stains,
+}: {
+  speakerTops: RefObject<SpeakerTops>;
+  stains: readonly Stain[];
+}) {
+  const { shelf, sofa } = FLAT_FURNITURE;
+  const textures = useMemo(
+    () => ({
+      room: {
+        wall: texture(drawWallpaper('#f3e4ee', 'rgb(190 120 160 / 14%)')),
+        floor: texture(drawPlanks()),
+        door: doorTexture(91),
+      },
+      shadow: texture(drawShadowBlob()),
+      lea: texture(cutOut(LEA_SIZE.width, LEA_SIZE.height, drawLea, 9, 92)),
+      shelf: texture(cutOut(170, 230, drawBookcase, 9, 93)),
+      sofa: texture(cutOut(300, 150, drawSofa, 9, 94)),
+      frames: ['#78ae6c', '#9a7bd6'].map((color, index) =>
+        texture(cutOut(90, 70, drawFrame(color), 6, 95 + index)),
+      ),
+      dust: texture(paint(120, 95, drawDust, 97)),
+    }),
+    [],
+  );
+  return (
+    <>
+      <RoomShell walls={FLAT_WALLS} doorSide="left" textures={textures.room} />
+      <SkyWindow x={FLAT_WINDOW_X} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[{ interaction: 'grandma', map: textures.lea, height: LEA_HEIGHT, z: LEA_Z }]}
+      />
+      {/* Pictures high on the wall, above Léa's head. */}
+      {textures.frames.map((map, index) => (
+        <group
+          key={map.id}
+          position={[LEA_X - 1.6 + index * 0.95, 3.25 + index * 0.15, WALL_Z + 0.02]}
+        >
+          <CutOut map={map} height={0.7} />
+        </group>
+      ))}
+      {stains.map(({ id, x, height, scrubsLeft }) => (
+        <mesh key={id} position={[x, height, WALL_Z + 0.05]}>
+          <planeGeometry args={[DUST_SIZE.width, DUST_SIZE.height]} />
+          <meshBasicMaterial
+            map={textures.dust}
+            transparent
+            depthWrite={false}
+            opacity={0.35 + (0.65 * scrubsLeft) / SCRUBS_PER_STAIN}
+          />
+        </mesh>
+      ))}
+      <Furniture map={textures.shelf} x={shelf.x} z={-1.3} height={2.51} shadow={textures.shadow} />
+      <Furniture map={textures.sofa} x={sofa.x} z={-1} height={1.45} shadow={textures.shadow} />
+      <Furniture
+        map={textures.lea}
+        x={LEA_X}
+        z={LEA_Z}
+        height={LEA_HEIGHT}
+        shadow={textures.shadow}
+      />
+    </>
+  );
+}
+
 const STREET_FRONT_Z = 3;
 const CLOUD_SPAN = 50;
 const CLOUD_SPEED = 25;
@@ -568,6 +654,7 @@ function Town({ signs }: { signs: SceneSigns }) {
       edge: texture(drawCorrugatedEdge()),
       shadow: texture(drawShadowBlob()),
       house: texture(cutOut(420, 380, drawHouse, 9, 61)),
+      flats: texture(cutOut(440, 420, drawFlats, 9, 65)),
       hills: HILL_ROWS.map(({ color, hatch, bumps, seed, height }) =>
         texture(
           cutOut(1600, Math.round(height * 100), drawHills(color, hatch, bumps, seed), 8, seed),
@@ -602,7 +689,7 @@ function Town({ signs }: { signs: SceneSigns }) {
     }
   });
 
-  const { house, shop: shopPlace, bookshop: bookshopPlace } = TOWN_BUILDINGS;
+  const { flats, house, shop: shopPlace, bookshop: bookshopPlace } = TOWN_BUILDINGS;
   const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
   const streetCenter = (TOWN_ENDS.left + TOWN_ENDS.right) / 2;
   return (
@@ -635,6 +722,13 @@ function Town({ signs }: { signs: SceneSigns }) {
         <boxGeometry args={[streetWidth, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
       </mesh>
+      <Furniture
+        map={textures.flats}
+        x={flats.x}
+        z={BUILDINGS_Z}
+        height={4.5}
+        shadow={textures.shadow}
+      />
       <Furniture
         map={textures.house}
         x={house.x}
@@ -677,16 +771,21 @@ function Pip({
   arrival,
   bubble,
   speakerTops,
+  stains,
   onInteractionChange,
   onExit,
+  onScrub,
 }: {
   input: RefObject<MovementInput>;
   room: SideRoom;
   arrival: { x: number; facing: Facing };
   bubble: RefObject<HTMLElement | null>;
   speakerTops: RefObject<SpeakerTops>;
+  // The patches of dust on this place's walls, during Léa's quest.
+  stains: readonly Stain[];
   onInteractionChange: (interaction: Interaction | null) => void;
   onExit: (exit: SideExit) => void;
+  onScrub: (id: number) => void;
 }) {
   const pip = useMemo(() => texture(cutOut(240, 300, drawPip, 10, 21)), []);
   const blob = useMemo(() => texture(drawShadowBlob()), []);
@@ -722,13 +821,22 @@ function Pip({
     walker.current = stepWalker(previous, sidePush(pushed ?? STILL), isDashing, delta, room.bounds);
     const { x, velocity, facing } = walker.current;
 
-    const reached = interactionAlong(room, x);
+    // During Léa's quest, a patch of dust overhead comes before anything else.
+    const stain = stainAlong(stains, x);
+    const reached = stain ? 'scrub' : interactionAlong(room, x);
     if (reached !== interaction.current) {
       interaction.current = reached;
       onInteractionChange(reached);
     }
     const exit = input.current.wantsDoor ? exitAlong(room, x) : null;
     input.current.wantsDoor = false;
+    if (input.current.wantsScrub && stain) {
+      onScrub(stain.id);
+      for (let ball = 0; ball < 4; ball++) {
+        emitPaperBall(balls.current, stain.x, PIP_Z - 0.4, ball % 2 === 0 ? 1 : -1);
+      }
+    }
+    input.current.wantsScrub = false;
     if (exit) {
       onExit(exit);
     }
@@ -831,7 +939,11 @@ type Props = {
   signs: SceneSigns;
   // The speech bubble offering what the player can do, which the scene moves over its place.
   bubble: RefObject<HTMLElement | null>;
+  stains: readonly Stain[];
   onInteractionChange: (interaction: Interaction | null) => void;
+  onScrub: (id: number) => void;
+  // Told whenever the character goes through a door, with the place it arrives in.
+  onPlaceChange: (place: SidePlaceId) => void;
 };
 
 // Matches the duration-300 class on the overlay.
@@ -839,7 +951,16 @@ const FADE_MILLISECONDS = 300;
 
 // The paper world, seen from the side. Every visit starts afresh, so that the character arrives
 // at the door it came through.
-export function PaperScene({ input, webglUnavailable, signs, bubble, onInteractionChange }: Props) {
+export function PaperScene({
+  input,
+  webglUnavailable,
+  signs,
+  bubble,
+  stains,
+  onInteractionChange,
+  onScrub,
+  onPlaceChange,
+}: Props) {
   const [visit, setVisit] = useState<{
     number: number;
     place: SidePlaceId;
@@ -860,6 +981,7 @@ export function PaperScene({ input, webglUnavailable, signs, bubble, onInteracti
     fadeTimer.current = setTimeout(() => {
       setVisit(({ number }) => ({ number: number + 1, place: exit.to, arrival: exit.arrival }));
       setIsFading(false);
+      onPlaceChange(exit.to);
     }, FADE_MILLISECONDS);
   };
 
@@ -884,14 +1006,17 @@ export function PaperScene({ input, webglUnavailable, signs, bubble, onInteracti
           {visit.place === 'town' && <Town signs={signs} />}
           {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
           {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
+          {visit.place === 'flat' && <Flat speakerTops={speakerTops} stains={stains} />}
           <Pip
             input={input}
             room={SIDE_PLACES[visit.place]}
             arrival={visit.arrival}
             bubble={bubble}
             speakerTops={speakerTops}
+            stains={visit.place === 'flat' ? stains : []}
             onInteractionChange={onInteractionChange}
             onExit={goThrough}
+            onScrub={onScrub}
           />
         </group>
       </Canvas>

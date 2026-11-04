@@ -8,8 +8,12 @@ import {
   BOOKSHOP_SELLER_X,
   BOOKSHOP_WALLS,
   exitAlong,
+  FLAT,
+  FLAT_FURNITURE,
+  FLAT_WALLS,
   interactionAlong,
   isDoorInteraction,
+  LEA_X,
   SHOP,
   SHOP_COUNTER_WIDTH,
   SHOP_COUNTERS,
@@ -79,9 +83,10 @@ describe('the bedroom', () => {
 
 describe('the street', () => {
   test('every building stands on it, without overlapping the next', () => {
-    const { house, shop, bookshop } = TOWN_BUILDINGS;
+    const { flats, house, shop, bookshop } = TOWN_BUILDINGS;
 
-    expect(house.x - house.width / 2).toBeGreaterThan(TOWN_ENDS.left);
+    expect(flats.x - flats.width / 2).toBeGreaterThan(TOWN_ENDS.left);
+    expect(flats.x + flats.width / 2).toBeLessThan(house.x - house.width / 2);
     expect(bookshop.x + bookshop.width / 2).toBeLessThan(TOWN_ENDS.right);
     expect(house.x + house.width / 2).toBeLessThan(shop.x - shop.width / 2);
     expect(shop.x + shop.width / 2).toBeLessThan(bookshop.x - bookshop.width / 2);
@@ -91,6 +96,7 @@ describe('the street', () => {
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.house.doorX)).toBe('goHome');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.shop.doorX)).toBe('enterShop');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.bookshop.doorX)).toBe('enterBookshop');
+    expect(interactionAlong(TOWN, TOWN_BUILDINGS.flats.doorX)).toBe('enterFlat');
   });
 });
 
@@ -163,6 +169,31 @@ describe('the bookshop', () => {
     const arrival = TOWN.exits.find(({ to }) => to === 'bookshop')?.arrival;
 
     expect(arrival && interactionAlong(BOOKSHOP, arrival.x)).toBe('leaveBookshop');
+  });
+});
+
+describe("Léa's flat", () => {
+  test('Léa can be talked to at her desk', () => {
+    expect(interactionAlong(FLAT, LEA_X)).toBe('grandma');
+    expect(speakerAlong(FLAT, LEA_X)).toEqual({ interaction: 'grandma', x: LEA_X });
+  });
+
+  test('its furniture fits between the walls without overlapping', () => {
+    const pieces = Object.values(FLAT_FURNITURE).sort((a, b) => a.x - b.x);
+    for (const [index, { x, width }] of pieces.entries()) {
+      expect(x - width / 2).toBeGreaterThan(FLAT_WALLS.left);
+      expect(x + width / 2).toBeLessThan(FLAT_WALLS.right);
+      const next = pieces[index + 1];
+      if (next) {
+        expect(x + width / 2).toBeLessThan(next.x - next.width / 2);
+      }
+    }
+  });
+
+  test('arriving from the street, the player is at the door', () => {
+    const arrival = TOWN.exits.find(({ to }) => to === 'flat')?.arrival;
+
+    expect(arrival && interactionAlong(FLAT, arrival.x)).toBe('leaveFlat');
   });
 });
 

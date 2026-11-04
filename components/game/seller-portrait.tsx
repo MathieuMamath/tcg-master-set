@@ -3,9 +3,12 @@
 import { useEffect, useRef } from 'react';
 import {
   drawHedgehog,
+  drawLea,
   drawRaccoon,
   HEDGEHOG_FACE,
   HEDGEHOG_SIZE,
+  LEA_FACE,
+  LEA_SIZE,
   RACCOON_FACE,
   RACCOON_SIZE,
   SELLERS,
@@ -14,14 +17,21 @@ import {
 const PORTRAIT_SIZE = 208;
 
 // Each seller's whole drawing, and where her face is in it.
-function sellerDrawing(stock: keyof typeof SELLERS | 'binderSeller') {
+function sellerDrawing(stock: keyof typeof SELLERS | 'binderSeller' | 'grandma') {
+  if (stock === 'grandma') {
+    return { draw: drawLea, size: LEA_SIZE, face: LEA_FACE };
+  }
   return stock === 'binderSeller'
     ? { draw: drawHedgehog, size: HEDGEHOG_SIZE, face: HEDGEHOG_FACE }
     : { draw: drawRaccoon(SELLERS[stock].look), size: RACCOON_SIZE, face: RACCOON_FACE };
 }
 
-// A seller's face, cut from her full drawing, for the round portrait of the speech box.
-export function SellerPortrait({ stock }: { stock: keyof typeof SELLERS | 'binderSeller' }) {
+// A character's face, cut from her full drawing, for the round portrait of the speech box.
+export function SellerPortrait({
+  stock,
+}: {
+  stock: keyof typeof SELLERS | 'binderSeller' | 'grandma';
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
