@@ -32,7 +32,6 @@ import {
   MEMORY_REWARD,
   type MemoryStatus,
 } from '@/game/memory-game';
-import { type PlayerSpot, parseSpot } from '@/game/places';
 import {
   canFinishQuest,
   canStartQuest,
@@ -47,6 +46,7 @@ import {
   STARTING_COINS,
   type Wallet,
 } from '@/game/shop-dialogue';
+import { type PlayerSpot, parseSpot } from '@/game/spot';
 
 // Either the database itself or a transaction of it.
 type Database = ReturnType<typeof getDb>;
@@ -142,8 +142,7 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
       .select({
         place: playerSpots.place,
         x: playerSpots.x,
-        z: playerSpots.z,
-        heading: playerSpots.heading,
+        facing: playerSpots.facing,
       })
       .from(playerSpots)
       .where(eq(playerSpots.userId, userId)),
@@ -449,13 +448,13 @@ export async function reelInItem(userId: string): Promise<FishingCatch> {
 }
 
 export async function savePlayerSpot(userId: string, spot: PlayerSpot): Promise<void> {
-  const { place, x, z, heading } = spot;
+  const { place, x, facing } = spot;
   await getDb()
     .insert(playerSpots)
-    .values({ userId, place, x, z, heading })
+    .values({ userId, place, x, facing })
     .onConflictDoUpdate({
       target: playerSpots.userId,
-      set: { place, x, z, heading, updatedAt: new Date() },
+      set: { place, x, facing, updatedAt: new Date() },
     });
 }
 

@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { parseSpot } from '@/game/places';
+import { parseSpot } from '@/game/spot';
 import { savePlayerSpot } from '@/player/progress';
 
 export async function POST(request: Request) {

@@ -51,6 +51,7 @@ import {
   type Walker,
 } from '@/game/side-walk';
 import { skyLook } from '@/game/sky';
+import type { PlayerSpot } from '@/game/spot';
 import type { Interaction } from '@/game/world';
 import {
   cutOut,
@@ -1059,6 +1060,7 @@ function Pip({
   bubble,
   speakerTops,
   stains,
+  spot,
   onInteractionChange,
   onExit,
   onScrub,
@@ -1070,6 +1072,7 @@ function Pip({
   speakerTops: RefObject<SpeakerTops>;
   // The patches of dust on this place's walls, during Léa's quest.
   stains: readonly Stain[];
+  spot: RefObject<PlayerSpot | null>;
   onInteractionChange: (interaction: Interaction | null) => void;
   onExit: (travel: Travel) => void;
   onScrub: (id: number) => void;
@@ -1107,6 +1110,7 @@ function Pip({
     const previous = walker.current;
     walker.current = stepWalker(previous, sidePush(pushed ?? STILL), isDashing, delta, room.bounds);
     const { x, velocity, facing } = walker.current;
+    spot.current = { place: room.id, x, facing };
 
     // During Léa's quest, a patch of dust overhead comes before anything else.
     const stain = stainAlong(stains, x);
@@ -1231,8 +1235,12 @@ type Props = {
   stains: readonly Stain[];
   onInteractionChange: (interaction: Interaction | null) => void;
   onScrub: (id: number) => void;
-  // Told whenever the character goes through a door, with the place it arrives in.
-  onPlaceChange: (place: SidePlaceId) => void;
+  // Where the character starts: where it was left last time, or else the bedroom.
+  startSpot: PlayerSpot | null;
+  // Kept up to date with where the character stands, for saving it when the page is left.
+  spot: RefObject<PlayerSpot | null>;
+  // Told whenever the character arrives somewhere else, with where it stands there.
+  onPlaceChange: (arrived: PlayerSpot) => void;
 };
 
 // Matches the duration-300 class on the overlay.
@@ -1248,13 +1256,23 @@ export function PaperScene({
   stains,
   onInteractionChange,
   onScrub,
+  startSpot,
+  spot,
   onPlaceChange,
 }: Props) {
   const [visit, setVisit] = useState<{
     number: number;
     place: SidePlaceId;
     arrival: { x: number; facing: Facing };
-  }>({ number: 0, place: 'bedroom', arrival: { x: BEDROOM.start, facing: 1 } });
+  }>(() =>
+    startSpot
+      ? {
+          number: 0,
+          place: startSpot.place,
+          arrival: { x: startSpot.x, facing: startSpot.facing },
+        }
+      : { number: 0, place: 'bedroom', arrival: { x: BEDROOM.start, facing: 1 } },
+  );
   const [isFading, setIsFading] = useState(false);
   const speakerTops = useRef<SpeakerTops>({});
   const fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -1270,7 +1288,7 @@ export function PaperScene({
     fadeTimer.current = setTimeout(() => {
       setVisit(({ number }) => ({ number: number + 1, place: exit.to, arrival: exit.arrival }));
       setIsFading(false);
-      onPlaceChange(exit.to);
+      onPlaceChange({ place: exit.to, x: exit.arrival.x, facing: exit.arrival.facing });
     }, FADE_MILLISECONDS);
   };
 
@@ -1305,6 +1323,7 @@ export function PaperScene({
             bubble={bubble}
             speakerTops={speakerTops}
             stains={visit.place === 'flat' ? stains : []}
+            spot={spot}
             onInteractionChange={onInteractionChange}
             onExit={goThrough}
             onScrub={onScrub}

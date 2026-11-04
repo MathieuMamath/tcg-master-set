@@ -1,13 +1,12 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { BEDROOM_START } from '@/game/bedroom';
 import { savePlayerSpot } from '@/player/progress';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/player/progress', () => ({ savePlayerSpot: vi.fn() }));
 
-const SPOT = { place: 'bedroom', ...BEDROOM_START };
+const SPOT = { place: 'bedroom', x: 0, facing: 1 };
 
 function save(body: unknown) {
   return POST(

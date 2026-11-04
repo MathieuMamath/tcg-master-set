@@ -6,6 +6,7 @@ import {
   jsonb,
   pgTable,
   primaryKey,
+  smallint,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
@@ -50,9 +51,10 @@ export const playerSpots = pgTable('player_spots', {
     .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' }),
   place: text('place').notNull(),
+  // How far along the place's floor, now that the world is seen from the side.
   x: doublePrecision('x').notNull(),
-  z: doublePrecision('z').notNull(),
-  heading: doublePrecision('heading').notNull(),
+  // 1 facing right, -1 facing left.
+  facing: smallint('facing').notNull().default(1),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
