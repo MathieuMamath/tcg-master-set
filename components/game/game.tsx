@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
 import { addToCollection } from '@/game/binder';
+import { stopAt } from '@/game/bus';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
@@ -74,6 +75,7 @@ export function Game({ player, sets, progress }: Props) {
     joystick: STILL,
     wantsDash: false,
     wantsScrub: false,
+    travelTo: null,
     wantsDoor: false,
   });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
@@ -88,6 +90,8 @@ export function Game({ player, sets, progress }: Props) {
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
   const [isBusMapOpen, setIsBusMapOpen] = useState(false);
+  // Where the character is, for the bus map to know which stop it is read at.
+  const [place, setPlace] = useState<SidePlaceId>('bedroom');
   const [highScore, setHighScore] = useState(progress.basketballHighScore);
   const [basketballRewardedOn, setBasketballRewardedOn] = useState(progress.basketballRewardedOn);
   const [binders, setBinders] = useState(progress.binders);
@@ -368,8 +372,9 @@ export function Game({ player, sets, progress }: Props) {
   };
 
   // Stepping out of Léa's flat gives up on the quest, since the dust stays inside.
-  const changePlace = useCallback((place: SidePlaceId) => {
-    if (place !== 'flat') {
+  const changePlace = useCallback((next: SidePlaceId) => {
+    setPlace(next);
+    if (next !== 'flat') {
       setQuest(null);
       setQuestLine((line) => (line === 'hurry' ? 'greeting' : line));
     }
@@ -458,7 +463,7 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
-  // The server draws the fish and pays for it. This only shows the result.
+  // The server draws what comes up on the line and pays for it. This only shows the result.
   const reelIn = async (): Promise<FishingCatch | null> => {
     try {
       const response = await fetch('/api/quests/fishing/catch', { method: 'POST' });
@@ -466,7 +471,7 @@ export function Game({ player, sets, progress }: Props) {
         throw new Error(`HTTP ${response.status}`);
       }
       const caught: FishingCatch = await response.json();
-      if (caught.fish) {
+      if (caught.item) {
         showSaveNotice();
       }
       return caught;
@@ -506,6 +511,7 @@ export function Game({ player, sets, progress }: Props) {
           arcade: tTown('arcade'),
           busStop: tBus('stops.mainStreet'),
           busLine: tBus('line'),
+          parkStop: tBus('stops.park'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
@@ -734,7 +740,16 @@ export function Game({ player, sets, progress }: Props) {
           onClose={() => setTalkingTo(null)}
         />
       )}
-      {isBusMapOpen && <BusMap here="mainStreet" onClose={() => setIsBusMapOpen(false)} />}
+      {isBusMapOpen && stopAt(place) && (
+        <BusMap
+          here={stopAt(place)?.id ?? 'mainStreet'}
+          onTravel={({ place: to, arrivalX }) => {
+            input.current.travelTo = { to, arrival: { x: arrivalX, facing: 1 } };
+            setIsBusMapOpen(false);
+          }}
+          onClose={() => setIsBusMapOpen(false)}
+        />
+      )}
       <SaveNotice isSaving={isSaving} />
     </div>
   );

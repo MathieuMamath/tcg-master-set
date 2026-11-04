@@ -2,13 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
-import { BUS_STOPS, type BusStopId, isOpen } from '@/game/bus';
+import { BUS_STOPS, type BusStop, type BusStopId } from '@/game/bus';
 import { moveThroughChoices } from './menu-focus';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
 type Props = {
   // The stop the player is reading the map at.
   here: BusStopId;
+  onTravel: (stop: BusStop) => void;
   onClose: () => void;
 };
 
@@ -22,8 +23,8 @@ const MAP_SPOTS: Record<BusStopId, { x: number; y: number }> = {
 const ROUTE = `M${MAP_SPOTS.mainStreet.x} ${MAP_SPOTS.mainStreet.y} C 170 150, 200 40, ${MAP_SPOTS.park.x} ${MAP_SPOTS.park.y}`;
 
 // The map of the stops the bus serves, read on the stop's sign: the route drawn on paper, and the
-// stops to choose from. A stop whose place isn't built yet is shown closed for works.
-export function BusMap({ here, onClose }: Props) {
+// stops to ride to.
+export function BusMap({ here, onTravel, onClose }: Props) {
   const t = useTranslations('Bus');
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -117,7 +118,6 @@ export function BusMap({ here, onClose }: Props) {
         <ul className="mt-4 grid gap-2.5">
           {BUS_STOPS.map((stop) => {
             const isHere = stop.id === here;
-            const isClosed = !isOpen(stop);
             return (
               <li
                 key={stop.id}
@@ -128,16 +128,19 @@ export function BusMap({ here, onClose }: Props) {
                   <span className="rotate-2 rounded-xs bg-ui-stamp px-2 text-ui-paper">
                     {t('here')}
                   </span>
-                ) : isClosed ? (
-                  <span className="-rotate-6 border-3 border-[#d99a22] px-2 font-display text-sm text-[#b8761f]">
-                    {t('closed')}
-                  </span>
-                ) : null}
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onTravel(stop)}
+                    className={`${CHOICE_CLASS} bg-[#3f8a6a] text-ui-paper`}
+                  >
+                    {t('goTo')}
+                  </button>
+                )}
               </li>
             );
           })}
         </ul>
-        <p className="mt-3 text-ui-ink/70">{t('parkClosed')}</p>
         <form method="dialog" className="mt-4 flex">
           <button
             type="submit"

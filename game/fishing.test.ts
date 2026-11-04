@@ -1,18 +1,28 @@
 import { describe, expect, test } from 'vitest';
-import { catchFish, SHINY_CHANCE, secondsUntilBite } from './fishing';
+import { EVERYDAY_ITEMS, fishItem, secondsUntilBite, TREASURE_CHANCE } from './fishing';
 
-describe('catchFish', () => {
-  test('one fish in five is shiny', () => {
-    expect(SHINY_CHANCE).toBe(0.2);
+function rolls(...values: number[]) {
+  return () => values.shift() ?? 0;
+}
+
+describe('fishItem', () => {
+  test('one line in five brings up the treasure box', () => {
+    expect(TREASURE_CHANCE).toBe(0.2);
+    expect(fishItem(rolls(0))).toBe('treasure');
+    expect(fishItem(rolls(0.19))).toBe('treasure');
   });
 
-  test.each([
-    [0, 'shiny'],
-    [0.19, 'shiny'],
-    [0.2, 'common'],
-    [0.99, 'common'],
-  ])('a roll of %d catches a %s fish', (roll, fish) => {
-    expect(catchFish(() => roll)).toBe(fish);
+  test('otherwise it brings up one of his everyday things', () => {
+    expect(fishItem(rolls(0.2, 0))).toBe(EVERYDAY_ITEMS[0]);
+    expect(fishItem(rolls(0.99, 0.999))).toBe(EVERYDAY_ITEMS.at(-1));
+  });
+
+  test('every everyday thing can come up', () => {
+    const found = new Set(
+      EVERYDAY_ITEMS.map((_, index) => fishItem(rolls(0.5, (index + 0.5) / EVERYDAY_ITEMS.length))),
+    );
+
+    expect(found.size).toBe(EVERYDAY_ITEMS.length);
   });
 });
 

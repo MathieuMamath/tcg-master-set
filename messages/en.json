@@ -21,8 +21,8 @@
     "binderSeller": "Talk (binders)",
     "dash": "Dash",
     "grandma": "Talk (Léa)",
-    "grandpa": "Talk (Grandpa)",
-    "boy": "Talk (little boy)",
+    "grandpa": "Talk (Grandpa Pebble)",
+    "boy": "Talk (Lucas)",
     "basketball": "Play (basketball)",
     "leaveHome": "Go outside",
     "goHome": "Go home",
@@ -212,27 +212,29 @@
       "title": "the overworked neighbour"
     },
     "grandpa": {
-      "name": "Grandpa",
+      "name": "Grandpa Pebble",
       "lines": {
-        "greeting": "Fancy a game of memory? Find all 8 pairs in 20 moves at most, and I'll give you 150 coins.",
-        "rewarded": "Well, I never! You beat me. Here are your 150 coins.",
-        "failed": "Ha! Out of moves, my memory is still the best. Another game?",
-        "alreadyDone": "One defeat a day is enough for me. Come back tomorrow!",
-        "unavailable": "Hm, I've mislaid my cards. Please try again."
+        "greeting": "Heh heh, fancy a game of memory, youngster? Find the 8 pairs in 20 moves at most… and I’ll give you 150 coins. But I warn you, I never lose!",
+        "rewarded": "Well I never, you beat me! What a memory. Here are your 150 coins, well earned.",
+        "failed": "Ha ha! Out of moves! Don’t worry, I’ve had a hundred years to practise. Another round?",
+        "alreadyDone": "One defeat a day is quite enough for my pride! Come back tomorrow.",
+        "unavailable": "Hmm, I’ve mislaid my cards… Try again in a moment."
       },
-      "accept": "Let's play"
+      "accept": "Let’s play!",
+      "title": "the memory champion"
     },
     "boy": {
-      "name": "Little boy",
+      "name": "Lucas",
       "lines": {
-        "greeting": "Hey! Can you catch me a Magikarp from the lake? Please! I'll give you 50 coins, and something even better if it's a golden one!",
-        "rewarded": "Wow, a Magikarp! It's so cool! Thanks a lot, here are your 50 coins!",
-        "rewardedShiny": "NO WAY!!! A GOLDEN MAGIKARP!!! THIS IS THE BEST DAY OF MY LIFE!!! Here, take this booster from the very latest set!!!",
-        "failed": "Oh no, you stopped already? Come on, one more try!",
-        "alreadyDone": "I've got my fish for today! Come back tomorrow!",
-        "unavailable": "Oh, my line is all tangled up. Try again!"
+        "greeting": "Oh no! I dropped my things in the lake again… Can you help me fish them out? I’ll give you 50 coins! And if you find my treasure box, the booster inside is yours!",
+        "rewarded": "Thank you! I knew it was down there. Here are your 50 coins!",
+        "rewardedShiny": "MY TREASURE BOX!!! I’ve been looking for it for days!!! Here, the booster that was inside is yours!!!",
+        "failed": "Oh, stopping already? There’s loads more stuff at the bottom, you know!",
+        "alreadyDone": "You already helped me today! Come back tomorrow, I’m sure to drop something else…",
+        "unavailable": "Oh, my line’s all tangled. Try again!"
       },
-      "accept": "I'll catch it"
+      "accept": "I’ll fish it out",
+      "title": "the little otter of the lake"
     },
     "retry": "Try again",
     "leave": "Goodbye",
@@ -240,17 +242,22 @@
     "stainsLeft": "{count, plural, one {# patch of dust} other {# patches of dust}}",
     "fishing": {
       "title": "Fishing",
-      "waiting": "Waiting for a bite...",
-      "reel": "It's biting! Reel it in!",
+      "waiting": "Something’s bound to catch on…",
+      "reel": "Something’s pulling! Reel it in!",
       "reeling": "Reeling in...",
       "giveUp": "Stop fishing",
-      "giveToBoy": "Give it to him",
-      "commonFish": "A Magikarp!",
-      "shinyFish": "A GOLDEN MAGIKARP!",
+      "giveToBoy": "Give it back to Lucas",
       "coins": "+{count} coins",
       "booster": "+1 {set} booster",
       "floatResting": "The float is resting on the water",
-      "floatBiting": "The float is going under!"
+      "floatBiting": "The float is going under!",
+      "items": {
+        "boat": "His little boat!",
+        "sandal": "His sandal!",
+        "ball": "His ball!",
+        "duck": "His rubber duck!",
+        "treasure": "HIS TREASURE BOX!"
+      }
     },
     "memory": {
       "title": "Memory game",
@@ -298,7 +305,7 @@
     "binderSeller": "There you are, dear!",
     "grandma": "Ah, Pip! Just in time!",
     "grandpa": "Fancy a game?",
-    "boy": "Hey! Over here!"
+    "boy": "Hey! Can you help me?"
   },
   "Bus": {
     "title": "Bus map",
@@ -308,8 +315,7 @@
       "park": "Linden Park"
     },
     "here": "You are here",
-    "closed": "Closed for works",
-    "parkClosed": "The park is closed for works. The bus will take you there as soon as it reopens.",
-    "close": "Close"
+    "close": "Close",
+    "goTo": "Go there"
   }
 }

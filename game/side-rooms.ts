@@ -1,7 +1,7 @@
 import type { Facing } from './side-walk';
 import type { Interaction } from './world';
 
-export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop' | 'flat' | 'arcade';
+export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop' | 'flat' | 'arcade' | 'park';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -138,6 +138,22 @@ export const ARCADE_MACHINES = {
 const ARCADE_BOUNDS = {
   minX: ARCADE_WALLS.left + CHARACTER_HALF_WIDTH,
   maxX: ARCADE_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+
+// The Linden Park, reached by bus: its stop on the left, Papy Caillou beside his bench with his
+// cards on it, and Lucas the little otter at the edge of the lake on the right.
+export const PARK_ENDS = { left: -10, right: 13 };
+export const PARK_SPOTS = {
+  busStop: { x: -7.4, width: 3.6, signX: -8.9 },
+  bench: { x: -2.6, width: 2.6 },
+  papy: { x: -0.6 },
+  lake: { left: 4.4, right: 12.6 },
+  lucas: { x: 6.2 },
+} as const;
+
+const PARK_BOUNDS = {
+  minX: PARK_ENDS.left + CHARACTER_HALF_WIDTH,
+  maxX: PARK_ENDS.right - CHARACTER_HALF_WIDTH,
 };
 
 const SHOP_BOUNDS = {
@@ -318,6 +334,33 @@ export const ARCADE: SideRoom = {
   ],
 };
 
+export const PARK: SideRoom = {
+  id: 'park',
+  bounds: PARK_BOUNDS,
+  start: PARK_SPOTS.busStop.signX + 0.5,
+  interactions: [
+    {
+      interaction: 'busStop',
+      minX: PARK_SPOTS.busStop.signX - DOOR_REACH,
+      maxX: PARK_SPOTS.busStop.signX + DOOR_REACH,
+    },
+    {
+      interaction: 'grandpa',
+      minX: PARK_SPOTS.papy.x - 1.1,
+      maxX: PARK_SPOTS.papy.x + 1.1,
+      speaker: { x: PARK_SPOTS.papy.x },
+    },
+    {
+      interaction: 'boy',
+      minX: PARK_SPOTS.lucas.x - 1,
+      maxX: PARK_SPOTS.lucas.x + 1,
+      speaker: { x: PARK_SPOTS.lucas.x },
+    },
+  ],
+  // The park is left by bus, from the stop's sign.
+  exits: [],
+};
+
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bedroom: BEDROOM,
   town: TOWN,
@@ -325,6 +368,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bookshop: BOOKSHOP,
   flat: FLAT,
   arcade: ARCADE,
+  park: PARK,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

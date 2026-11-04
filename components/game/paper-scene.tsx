@@ -30,6 +30,8 @@ import {
   FLAT_WINDOW_X,
   interactionAlong,
   LEA_X,
+  PARK_ENDS,
+  PARK_SPOTS,
   SHOP_COUNTERS,
   SHOP_WALLS,
   SIDE_PLACES,
@@ -58,6 +60,7 @@ import {
   drawArcadeDoor,
   drawBasketballMachine,
   drawBed,
+  drawBench,
   drawBigPlant,
   drawBookcase,
   drawBookPile,
@@ -79,11 +82,16 @@ import {
   drawHedgehog,
   drawHills,
   drawHouse,
+  drawLake,
   drawLea,
+  drawLucas,
   drawMagazineRack,
+  drawPapy,
+  drawParkGround,
   drawPip,
   drawPlanks,
   drawRaccoon,
+  drawReeds,
   drawShadowBlob,
   drawShop,
   drawSign,
@@ -92,11 +100,14 @@ import {
   drawSofa,
   drawStationeryTable,
   drawStreet,
+  drawTree,
   drawUprightCorrugatedEdge,
   drawWallpaper,
   drawWindowFrame,
   HEDGEHOG_SIZE,
   LEA_SIZE,
+  LUCAS_SIZE,
+  PAPY_SIZE,
   paint,
   RACCOON_SIZE,
   SELLERS,
@@ -113,7 +124,12 @@ export type MovementInput = {
   wantsDoor: boolean;
   // Set by whoever asks to rub the patch of dust the character stands below, and used up the same way.
   wantsScrub: boolean;
+  // Set by the bus map to ride to another stop, and used up the same way.
+  travelTo: Travel | null;
 };
+
+// Going somewhere: through a door, or by bus.
+export type Travel = Pick<SideExit, 'to' | 'arrival'>;
 
 // The words painted in the scene, in the player's language.
 export type SceneSigns = {
@@ -123,6 +139,8 @@ export type SceneSigns = {
   // The name of the street's bus stop, and the line shown on the bus.
   busStop: string;
   busLine: string;
+  // The name of the park's bus stop, on its sign.
+  parkStop: string;
   latest: string;
   thisYear: string;
   older: string;
@@ -895,6 +913,134 @@ function Town({ signs }: { signs: SceneSigns }) {
   );
 }
 
+const PARK_TREES = [
+  { x: -9.2, z: -3, height: 4.2, seed: 1 },
+  { x: -4.6, z: -2.6, height: 3.6, seed: 2 },
+  { x: 1.8, z: -2.8, height: 4, seed: 3 },
+  { x: 3.6, z: -3.4, height: 3.4, seed: 4 },
+  { x: 12.2, z: -3.6, height: 4.4, seed: 5 },
+];
+const PAPY_HEIGHT = 2.9;
+const LUCAS_HEIGHT = 2.6;
+const PARK_PEOPLE_Z = -0.5;
+
+// The Linden Park: lawns and trees under the sky, the bus stop on the left, Papy Caillou by his
+// bench, and Lucas fishing at the edge of the lake.
+function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
+  const look = skyLook('day', 'fewClouds');
+  const fontsReady = useFontsReady();
+  const { busStop, bench, papy, lake, lucas } = PARK_SPOTS;
+  const textures = useMemo(
+    () => ({
+      sky: texture(drawSkyGradient(look)),
+      cloud: texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)),
+      ground: texture(drawParkGround()),
+      lake: texture(drawLake()),
+      edge: texture(drawCorrugatedEdge()),
+      shadow: texture(drawShadowBlob()),
+      hills: HILL_ROWS.map(({ color, hatch, bumps, seed, height }) =>
+        texture(
+          cutOut(1600, Math.round(height * 100), drawHills(color, hatch, bumps, seed), 8, seed),
+        ),
+      ),
+      trees: PARK_TREES.map(({ seed }) => texture(cutOut(240, 320, drawTree(seed), 9, 110 + seed))),
+      bench: texture(cutOut(260, 150, drawBench, 8, 116)),
+      reeds: texture(cutOut(220, 110, drawReeds, 6, 117)),
+      papy: texture(cutOut(PAPY_SIZE.width, PAPY_SIZE.height, drawPapy, 9, 118)),
+      lucas: texture(cutOut(LUCAS_SIZE.width, LUCAS_SIZE.height, drawLucas, 9, 119)),
+    }),
+    [look],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const shelter = useMemo(
+    () => texture(cutOut(360, 320, drawBusShelter(signs.parkStop), 9, 120)),
+    [fontsReady, signs.parkStop],
+  );
+  const width = PARK_ENDS.right - PARK_ENDS.left + 20;
+  const center = (PARK_ENDS.left + PARK_ENDS.right) / 2;
+  const lakeWidth = lake.right - lake.left;
+  return (
+    <>
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[
+          { interaction: 'grandpa', map: textures.papy, height: PAPY_HEIGHT, z: PARK_PEOPLE_Z },
+          { interaction: 'boy', map: textures.lucas, height: LUCAS_HEIGHT, z: PARK_PEOPLE_Z },
+        ]}
+      />
+      <mesh position={[center, 7, -10]}>
+        <planeGeometry args={[width + 70, 26]} />
+        <meshBasicMaterial map={textures.sky} />
+      </mesh>
+      {[
+        [-12, 6.2, 1.4],
+        [2, 6.8, 1.6],
+        [16, 5.9, 1.2],
+      ].map(([cloudX, cloudY, size]) => (
+        <group key={cloudX} position={[center + cloudX, cloudY, -8]}>
+          <CutOut map={textures.cloud} height={size} />
+        </group>
+      ))}
+      {HILL_ROWS.map(({ z, height }, index) => (
+        <group key={z} position={[center, -0.15, z]}>
+          <CutOut
+            map={textures.hills[index]}
+            height={(height * 100 + 24) / 100}
+            width={width + 30}
+          />
+        </group>
+      ))}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center, 0, -1]}>
+        <planeGeometry args={[width, 8]} />
+        <meshBasicMaterial map={textures.ground} />
+      </mesh>
+      {/* The lake, lying behind the path, a little above the lawn so that it covers it. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[(lake.left + lake.right) / 2, 0.01, -2.4]}>
+        <planeGeometry args={[lakeWidth, 4.4]} />
+        <meshBasicMaterial map={textures.lake} />
+      </mesh>
+      <mesh position={[center, -0.18, STREET_FRONT_Z]}>
+        <boxGeometry args={[width, 0.36, 0.14]} />
+        <meshBasicMaterial map={textures.edge} />
+      </mesh>
+      {PARK_TREES.map(({ x, z, height }, index) => (
+        <Furniture
+          key={x}
+          map={textures.trees[index]}
+          x={x}
+          z={z}
+          height={height}
+          shadow={textures.shadow}
+        />
+      ))}
+      <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
+      <Furniture map={textures.bench} x={bench.x} z={-1.1} height={1.4} shadow={textures.shadow} />
+      <Furniture
+        map={textures.papy}
+        // The drawing leaves room for the cane on its right, so it moves right to stay centred.
+        x={papy.x + 0.25}
+        z={PARK_PEOPLE_Z}
+        height={PAPY_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <group position={[lake.left + 0.6, 0, -0.3]}>
+        <CutOut map={textures.reeds} height={1.1} />
+      </group>
+      <group position={[lake.right - 0.8, 0, -0.3]}>
+        <CutOut map={textures.reeds} height={1.2} />
+      </group>
+      <Furniture
+        // The drawing leaves room for the rod on its right, so it moves right to stay centred.
+        map={textures.lucas}
+        x={lucas.x + 0.7}
+        z={PARK_PEOPLE_Z}
+        height={LUCAS_HEIGHT}
+        shadow={textures.shadow}
+      />
+    </>
+  );
+}
+
 // The drawings with text wait for the game's fonts, or they would be drawn in a fallback font.
 function useFontsReady(): boolean {
   const [isReady, setIsReady] = useState(false);
@@ -925,7 +1071,7 @@ function Pip({
   // The patches of dust on this place's walls, during Léa's quest.
   stains: readonly Stain[];
   onInteractionChange: (interaction: Interaction | null) => void;
-  onExit: (exit: SideExit) => void;
+  onExit: (travel: Travel) => void;
   onScrub: (id: number) => void;
 }) {
   const pip = useMemo(() => texture(cutOut(240, 300, drawPip, 10, 21)), []);
@@ -978,8 +1124,10 @@ function Pip({
       }
     }
     input.current.wantsScrub = false;
-    if (exit) {
-      onExit(exit);
+    const travel = exit ?? input.current.travelTo;
+    input.current.travelTo = null;
+    if (travel) {
+      onExit(travel);
     }
 
     // Turning round flips the cut-out like a card.
@@ -1113,7 +1261,7 @@ export function PaperScene({
 
   useEffect(() => () => clearTimeout(fadeTimer.current), []);
 
-  const goThrough = (exit: SideExit) => {
+  const goThrough = (exit: Travel) => {
     if (isFading) {
       return;
     }
@@ -1149,6 +1297,7 @@ export function PaperScene({
           {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
           {visit.place === 'flat' && <Flat speakerTops={speakerTops} stains={stains} />}
           {visit.place === 'arcade' && <Arcade />}
+          {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
           <Pip
             input={input}
             room={SIDE_PLACES[visit.place]}

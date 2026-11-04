@@ -4,11 +4,17 @@ import { useEffect, useRef } from 'react';
 import {
   drawHedgehog,
   drawLea,
+  drawLucas,
+  drawPapy,
   drawRaccoon,
   HEDGEHOG_FACE,
   HEDGEHOG_SIZE,
   LEA_FACE,
   LEA_SIZE,
+  LUCAS_FACE,
+  LUCAS_SIZE,
+  PAPY_FACE,
+  PAPY_SIZE,
   RACCOON_FACE,
   RACCOON_SIZE,
   SELLERS,
@@ -16,10 +22,19 @@ import {
 
 const PORTRAIT_SIZE = 208;
 
-// Each seller's whole drawing, and where her face is in it.
-function sellerDrawing(stock: keyof typeof SELLERS | 'binderSeller' | 'grandma') {
+// The characters with a portrait: the sellers, and the quest givers.
+type Character = keyof typeof SELLERS | 'binderSeller' | 'grandma' | 'grandpa' | 'boy';
+
+// Each character's whole drawing, and where the face is in it.
+function sellerDrawing(stock: Character) {
   if (stock === 'grandma') {
     return { draw: drawLea, size: LEA_SIZE, face: LEA_FACE };
+  }
+  if (stock === 'grandpa') {
+    return { draw: drawPapy, size: PAPY_SIZE, face: PAPY_FACE };
+  }
+  if (stock === 'boy') {
+    return { draw: drawLucas, size: LUCAS_SIZE, face: LUCAS_FACE };
   }
   return stock === 'binderSeller'
     ? { draw: drawHedgehog, size: HEDGEHOG_SIZE, face: HEDGEHOG_FACE }
@@ -27,11 +42,7 @@ function sellerDrawing(stock: keyof typeof SELLERS | 'binderSeller' | 'grandma')
 }
 
 // A character's face, cut from her full drawing, for the round portrait of the speech box.
-export function SellerPortrait({
-  stock,
-}: {
-  stock: keyof typeof SELLERS | 'binderSeller' | 'grandma';
-}) {
+export function SellerPortrait({ stock }: { stock: Character }) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
