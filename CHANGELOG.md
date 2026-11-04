@@ -4,6 +4,13 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.53](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.52...v0.1.53) (2026-11-04)
+
+### Features
+
+* **city:** open the arcade in paper, with its basketball game restyled ([#54](https://github.com/MathieuMamath/tcg-master-set/issues/54)) ([ba24913](https://github.com/MathieuMamath/tcg-master-set/commit/ba249132531e489f05697c05d915f78efecffd3a))
+* **quests:** bring back the cleaning quest in paper, at Léa's flat ([#53](https://github.com/MathieuMamath/tcg-master-set/issues/53)) ([f256ad8](https://github.com/MathieuMamath/tcg-master-set/commit/f256ad86c9be9a5e946de9801695e147fad698ff))
+
 ## [0.1.52](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.51...v0.1.52) (2026-11-04)
 
 ## [0.1.51](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.50...v0.1.51) (2026-11-04)
