@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.56](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.55...v0.1.56) (2026-11-04)
+
+### Bug Fixes
+
+* **city:** show the save notice again when the spot is saved ([#57](https://github.com/MathieuMamath/tcg-master-set/issues/57)) ([c0ba5e5](https://github.com/MathieuMamath/tcg-master-set/commit/c0ba5e555ff5e2e548a67e737cd38ea9d6fa8a8d))
+
 ## [0.1.55](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.54...v0.1.55) (2026-11-04)
 
 ### Refactoring
