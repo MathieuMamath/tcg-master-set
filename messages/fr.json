@@ -42,21 +42,21 @@
       "basketball": "Basket"
     },
     "greetings": {
-      "latest": "Bonjour ! Voici nos trois dernières collections.",
-      "thisYear": "Bonjour ! J'ai les autres collections de cette année.",
-      "older": "Bonjour ! Je garde toutes les collections précédentes.",
+      "latest": "Bienvenue à la Tanière ! Ici, c’est toujours le plus frais.",
+      "thisYear": "Bonjour ! J’ai rangé toutes les séries de cette année, par ordre de sortie.",
+      "older": "Psst… J’ai gardé toutes les anciennes séries. Viens fouiller !",
       "binderSeller": "Oh, te revoilà mon petit ! Tu viens chercher un classeur pour ta collection ?"
     },
-    "thanks": "Merci, et bonne chance pour tes cartes !",
+    "thanks": {
+      "latest": "Excellent choix, c’est tout frais !",
+      "thisYear": "Bonne pioche, j’en suis sûre !",
+      "older": "Hé hé, bonne chance pour tes cartes !",
+      "binderSeller": "Prends-en bien soin, mon petit !"
+    },
     "notEnoughCoins": "Oups, il te manque des pièces.",
     "unavailable": "Oups, la caisse ne marche pas pour l'instant. Réessaie.",
-    "buy": "Acheter un booster {set} ({price} pièces)",
-    "leave": "Au revoir",
     "needsBinder": "Il te faut d'abord son classeur. Mamie Noisette en vend à la librairie, juste après.",
     "alreadyOwned": "Tu as déjà ce classeur.",
-    "buyBinder": "Acheter le classeur {set} ({price} pièces)",
-    "binderOwned": "{set} : classeur déjà acheté",
-    "buyNeedsBinder": "{set} : classeur requis",
     "sellers": {
       "latest": "Filou",
       "thisYear": "Frimousse",
@@ -67,6 +67,40 @@
       "thisYear": "la cadette des triplées",
       "older": "la benjamine des triplées",
       "binderSeller": "la libraire du quartier"
+    },
+    "browse": {
+      "latest": "Montre-moi les nouveautés !",
+      "thisYear": "Qu’as-tu de cette année ?",
+      "older": "Fais voir tes trésors !",
+      "binderSeller": "Je peux voir tes classeurs, Mamie ?"
+    },
+    "nothing": {
+      "latest": "Je jetais juste un œil.",
+      "thisYear": "Je réfléchis encore…",
+      "older": "Une autre fois, Fripouille !",
+      "binderSeller": "Juste un petit coucou, Mamie !"
+    },
+    "window": {
+      "binders": "Classeurs · {price} pièces",
+      "boosters": "Boosters · {price} pièces",
+      "bindersList": "Classeurs à vendre",
+      "boostersList": "Boosters à vendre",
+      "coins": "{count, plural, one {# pièce} other {# pièces}}",
+      "close": "Fermer",
+      "back": "Retour",
+      "buy": "Acheter",
+      "released": "Sortie",
+      "cardsToCollect": "Cartes à collectionner",
+      "cardsPerBooster": "Cartes par booster",
+      "inBag": "Dans ton sac",
+      "boosterCount": "{count, plural, =0 {aucun} one {# booster} other {# boosters}}",
+      "binderTitle": "Classeur {set}",
+      "boosterTitle": "Booster {set}",
+      "owned": "Déjà acheté",
+      "needsBinder": "Classeur requis",
+      "quantity": "Quantité",
+      "less": "Un de moins",
+      "more": "Un de plus"
     }
   },
   "Booster": {

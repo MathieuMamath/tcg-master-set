@@ -1,9 +1,12 @@
 import { describe, expect, test } from 'vitest';
 import type { PlayableSet } from './card-sets';
 import {
+  affordableBoosters,
   BOOSTER_PRICE,
   bindersForSale,
   boosterCount,
+  MAX_BOOSTER_QUANTITY,
+  parseBoosterQuantity,
   SHOPKEEPER_STOCKS,
   STARTING_COINS,
   setsSoldBy,
@@ -87,5 +90,38 @@ describe('setsSoldBy', () => {
 
       expect([...sold].sort()).toEqual(SETS.map(({ id }) => id).sort());
     }
+  });
+});
+
+describe('parseBoosterQuantity', () => {
+  test('takes one booster when no quantity is asked', () => {
+    expect(parseBoosterQuantity(null)).toBe(1);
+  });
+
+  test('takes any whole number up to the most a purchase allows', () => {
+    expect(parseBoosterQuantity('3')).toBe(3);
+    expect(parseBoosterQuantity(String(MAX_BOOSTER_QUANTITY))).toBe(MAX_BOOSTER_QUANTITY);
+  });
+
+  test('refuses anything else', () => {
+    for (const value of ['0', '-1', '2.5', 'abc', '', String(MAX_BOOSTER_QUANTITY + 1)]) {
+      expect(parseBoosterQuantity(value)).toBeNull();
+    }
+  });
+});
+
+describe('affordableBoosters', () => {
+  test('goes as far as the coins allow', () => {
+    expect(affordableBoosters(2008)).toBe(20);
+    expect(affordableBoosters(BOOSTER_PRICE)).toBe(1);
+  });
+
+  test('stays under a hundred', () => {
+    expect(affordableBoosters(1_000_000)).toBe(MAX_BOOSTER_QUANTITY);
+    expect(MAX_BOOSTER_QUANTITY).toBe(99);
+  });
+
+  test('still offers one booster to a player who has too few coins', () => {
+    expect(affordableBoosters(0)).toBe(1);
   });
 });

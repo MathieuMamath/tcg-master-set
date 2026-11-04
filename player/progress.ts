@@ -452,10 +452,13 @@ export async function savePlayerSpot(userId: string, spot: PlayerSpot): Promise<
 
 // A set's boosters need its binder first. The coins and the booster change together, or not at all. The coins are only taken if they are
 // there, so that two purchases at once can never go below zero.
+// Several boosters of a set are paid for and added together, or not at all.
 export async function buyBooster(
   userId: string,
   setId: SetId,
+  quantity = 1,
 ): Promise<{ wallet: Wallet; line: ShopkeeperLine }> {
+  const price = BOOSTER_PRICE * quantity;
   return getDb().transaction(async (transaction) => {
     await loadWallet(transaction, userId);
     const [binder] = await transaction
@@ -468,8 +471,8 @@ export async function buyBooster(
 
     const [paid] = await transaction
       .update(playerWallets)
-      .set({ coins: sql`${playerWallets.coins} - ${BOOSTER_PRICE}`, updatedAt: new Date() })
-      .where(and(eq(playerWallets.userId, userId), gte(playerWallets.coins, BOOSTER_PRICE)))
+      .set({ coins: sql`${playerWallets.coins} - ${price}`, updatedAt: new Date() })
+      .where(and(eq(playerWallets.userId, userId), gte(playerWallets.coins, price)))
       .returning({ coins: playerWallets.coins });
     if (!paid) {
       return { wallet: await loadWallet(transaction, userId), line: 'notEnoughCoins' as const };
@@ -477,10 +480,10 @@ export async function buyBooster(
 
     await transaction
       .insert(playerBoosters)
-      .values({ userId, setId, count: 1 })
+      .values({ userId, setId, count: quantity })
       .onConflictDoUpdate({
         target: [playerBoosters.userId, playerBoosters.setId],
-        set: { count: sql`${playerBoosters.count} + 1` },
+        set: { count: sql`${playerBoosters.count} + ${quantity}` },
       });
     return { wallet: await loadWallet(transaction, userId), line: 'thanks' as const };
   });

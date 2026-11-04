@@ -42,21 +42,21 @@
       "basketball": "Basketball"
     },
     "greetings": {
-      "latest": "Hello! Here are our three newest sets.",
-      "thisYear": "Hello! I have the other sets from this year.",
-      "older": "Hello! I keep all the earlier sets.",
+      "latest": "Welcome to the Den! Here, it’s always the freshest.",
+      "thisYear": "Hello! I’ve shelved all of this year’s sets, in order of release.",
+      "older": "Psst… I’ve kept all the older sets. Come and rummage!",
       "binderSeller": "Oh, there you are, dear! Have you come for a binder for your collection?"
     },
-    "thanks": "Thank you, and good luck with your cards!",
+    "thanks": {
+      "latest": "Great pick, it’s brand new!",
+      "thisYear": "A fine choice, I’m sure of it!",
+      "older": "Hee hee, good luck with your cards!",
+      "binderSeller": "Take good care of it, dear!"
+    },
     "notEnoughCoins": "Sorry, you don't have enough coins.",
     "unavailable": "Sorry, the till isn't working right now. Please try again.",
-    "buy": "Buy a {set} booster ({price} coins)",
-    "leave": "Goodbye",
     "needsBinder": "You need its binder first. Granny Hazel sells them at the bookshop, just past here.",
     "alreadyOwned": "You already have this binder.",
-    "buyBinder": "Buy the {set} binder ({price} coins)",
-    "binderOwned": "{set}: binder already bought",
-    "buyNeedsBinder": "{set}: binder needed first",
     "sellers": {
       "latest": "Filou",
       "thisYear": "Frimousse",
@@ -67,6 +67,40 @@
       "thisYear": "the middle triplet",
       "older": "the youngest of the triplets",
       "binderSeller": "the neighbourhood bookseller"
+    },
+    "browse": {
+      "latest": "Show me what’s new!",
+      "thisYear": "What do you have from this year?",
+      "older": "Show me your treasures!",
+      "binderSeller": "Can I see your binders, Granny?"
+    },
+    "nothing": {
+      "latest": "Just having a look.",
+      "thisYear": "I’m still thinking…",
+      "older": "Another time, Fripouille!",
+      "binderSeller": "Just saying hello, Granny!"
+    },
+    "window": {
+      "binders": "Binders · {price} coins",
+      "boosters": "Boosters · {price} coins",
+      "bindersList": "Binders for sale",
+      "boostersList": "Boosters for sale",
+      "coins": "{count, plural, one {# coin} other {# coins}}",
+      "close": "Close",
+      "back": "Back",
+      "buy": "Buy",
+      "released": "Released",
+      "cardsToCollect": "Cards to collect",
+      "cardsPerBooster": "Cards per booster",
+      "inBag": "In your bag",
+      "boosterCount": "{count, plural, =0 {none} one {# booster} other {# boosters}}",
+      "binderTitle": "{set} binder",
+      "boosterTitle": "{set} booster",
+      "owned": "Already bought",
+      "needsBinder": "Binder needed",
+      "quantity": "Quantity",
+      "less": "One fewer",
+      "more": "One more"
     }
   },
   "Booster": {

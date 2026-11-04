@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { horizontalStep, nextChoice, verticalStep } from './menu-keys';
+import { gridStep, horizontalStep, nextChoice, verticalStep } from './menu-keys';
 
 test('the movement keys step through a menu', () => {
   expect(verticalStep('ArrowUp')).toBe(-1);
@@ -27,4 +27,24 @@ test('goes round at both ends', () => {
 test('with nothing chosen, lands on the nearest end', () => {
   expect(nextChoice(-1, 1, 3)).toBe(0);
   expect(nextChoice(-1, -1, 3)).toBe(2);
+});
+
+test('walks through a grid by items and by rows', () => {
+  // Three columns, seven items: 0 1 2 / 3 4 5 / 6.
+  expect(gridStep(1, 'ArrowRight', 3, 7)).toBe(2);
+  expect(gridStep(2, 'ArrowRight', 3, 7)).toBe(3);
+  expect(gridStep(1, 'ArrowDown', 3, 7)).toBe(4);
+  expect(gridStep(4, 'KeyW', 3, 7)).toBe(1);
+});
+
+test('stops at the edges of a grid', () => {
+  expect(gridStep(0, 'ArrowLeft', 3, 7)).toBe(0);
+  expect(gridStep(1, 'ArrowUp', 3, 7)).toBe(1);
+  expect(gridStep(5, 'ArrowDown', 3, 7)).toBe(5);
+  expect(gridStep(6, 'ArrowRight', 3, 7)).toBe(6);
+});
+
+test('starts a grid at its first item, and ignores other keys', () => {
+  expect(gridStep(-1, 'ArrowDown', 3, 7)).toBe(0);
+  expect(gridStep(2, 'Enter', 3, 7)).toBeUndefined();
 });
