@@ -52,9 +52,8 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
       <SpeechBox
         nameId="quest-speaker"
         name={t(`${giver}.name`)}
-        // Only Léa is drawn in paper yet, so only she has a title and a portrait.
-        title={giver === 'grandma' ? t('grandma.title') : undefined}
-        portrait={giver === 'grandma' ? <SellerPortrait stock="grandma" /> : undefined}
+        title={t(`${giver}.title`)}
+        portrait={<SellerPortrait stock={giver} />}
       >
         <TypedLine
           key={speech.turn}

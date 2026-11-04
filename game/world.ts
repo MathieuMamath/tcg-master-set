@@ -211,7 +211,9 @@ export type Interaction =
   | 'enterArcade'
   | 'leaveArcade'
   // Scrubbing the dust off a wall, during Léa's quest.
-  | 'scrub';
+  | 'scrub'
+  // Reading the bus stop's sign, which opens the map of the stops.
+  | 'busStop';
 
 export function interactionAt(place: Place, position: Position): Interaction | null {
   const npc = npcInReach(place, position);

@@ -21,8 +21,8 @@
     "binderSeller": "Talk (binders)",
     "dash": "Dash",
     "grandma": "Talk (Léa)",
-    "grandpa": "Talk (Grandpa)",
-    "boy": "Talk (little boy)",
+    "grandpa": "Talk (Grandpa Pebble)",
+    "boy": "Talk (Lucas)",
     "basketball": "Play (basketball)",
     "leaveHome": "Go outside",
     "goHome": "Go home",
@@ -34,7 +34,8 @@
     "leaveFlat": "Go outside",
     "scrub": "Rub off the dust",
     "enterArcade": "Go into the arcade",
-    "leaveArcade": "Go outside"
+    "leaveArcade": "Go outside",
+    "busStop": "Read the bus map"
   },
   "Shopkeeper": {
     "names": {
@@ -211,27 +212,151 @@
       "title": "the overworked neighbour"
     },
     "grandpa": {
-      "name": "Grandpa",
+      "name": "Grandpa Pebble",
       "lines": {
-        "greeting": "Fancy a game of memory? Find all 8 pairs in 20 moves at most, and I'll give you 150 coins.",
-        "rewarded": "Well, I never! You beat me. Here are your 150 coins.",
-        "failed": "Ha! Out of moves, my memory is still the best. Another game?",
-        "alreadyDone": "One defeat a day is enough for me. Come back tomorrow!",
-        "unavailable": "Hm, I've mislaid my cards. Please try again."
+        "greeting": "Heh heh, fancy a game of memory, youngster? Find the 8 pairs in 20 moves at most… and I’ll give you 150 coins. But I warn you, I never lose!",
+        "rewarded": "Well I never, you beat me! What a memory. Here are your 150 coins, well earned.",
+        "failed": "Ha ha! Out of moves! Don’t worry, I’ve had a hundred years to practise. Another round?",
+        "alreadyDone": "One defeat a day is quite enough for my pride! Come back tomorrow.",
+        "unavailable": "Hmm, I’ve mislaid my cards… Try again in a moment."
       },
-      "accept": "Let's play"
+      "accept": "Let’s play!",
+      "title": "the memory champion",
+      "proverbs": {
+        "1": {
+          "text": "Patience is a tree with bitter roots, but very sweet fruit.",
+          "source": "Persian proverb"
+        },
+        "2": {
+          "text": "Fall seven times, stand up eight.",
+          "source": "Japanese proverb"
+        },
+        "3": {
+          "text": "A journey of a thousand miles begins with a single step.",
+          "source": "Chinese proverb"
+        },
+        "4": {
+          "text": "The best time to plant a tree was twenty years ago. The second best time is now.",
+          "source": "Chinese proverb"
+        },
+        "5": {
+          "text": "Even monkeys fall from trees.",
+          "source": "Japanese proverb"
+        },
+        "6": {
+          "text": "Dripping water hollows out the stone.",
+          "source": "Chinese proverb"
+        },
+        "7": {
+          "text": "Ask, and you look a fool for five minutes. Don’t, and you stay one forever.",
+          "source": "Chinese proverb"
+        },
+        "8": {
+          "text": "When you drink water, remember the spring.",
+          "source": "Chinese proverb"
+        },
+        "9": {
+          "text": "The bamboo that bends is stronger than the oak that resists.",
+          "source": "Japanese proverb"
+        },
+        "10": {
+          "text": "The frog at the bottom of the well knows nothing of the ocean.",
+          "source": "Japanese proverb"
+        },
+        "11": {
+          "text": "One day with a good teacher is worth a thousand days of study.",
+          "source": "Japanese proverb"
+        },
+        "12": {
+          "text": "Small streams make great rivers.",
+          "source": "Chinese proverb"
+        },
+        "13": {
+          "text": "If you are in a hurry, take the long way round.",
+          "source": "Japanese proverb"
+        },
+        "14": {
+          "text": "You can’t see the forest with your nose against a tree.",
+          "source": "Chinese proverb"
+        },
+        "15": {
+          "text": "The slow tortoise goes further than the sleeping hare.",
+          "source": "Grandpa Pebble’s saying"
+        },
+        "16": {
+          "text": "A smile costs less than electricity, but gives as much light.",
+          "source": "Scottish proverb… er, no, Korean!"
+        },
+        "17": {
+          "text": "Even a long journey is made one cup of tea at a time.",
+          "source": "Chinese proverb"
+        },
+        "18": {
+          "text": "The nail that sticks out gets hammered down.",
+          "source": "Japanese proverb"
+        },
+        "19": {
+          "text": "Learning is like rowing upstream: stop, and you drift back.",
+          "source": "Chinese proverb"
+        },
+        "20": {
+          "text": "Kind words cost nothing and are worth a lot.",
+          "source": "Korean proverb"
+        },
+        "21": {
+          "text": "A house without books is like a body without a soul.",
+          "source": "Chinese proverb"
+        },
+        "22": {
+          "text": "Ripe rice bows its head.",
+          "source": "Japanese proverb"
+        },
+        "23": {
+          "text": "A friend knows the song of your heart.",
+          "source": "Vietnamese proverb"
+        },
+        "24": {
+          "text": "Be not afraid of going slowly, only of standing still.",
+          "source": "Chinese proverb"
+        },
+        "25": {
+          "text": "Even the tallest tower starts from the ground.",
+          "source": "Chinese proverb"
+        },
+        "26": {
+          "text": "The wind doesn’t always blow the way the boat wants.",
+          "source": "Chinese proverb"
+        },
+        "27": {
+          "text": "When the wise man points at the moon, the fool looks at the finger.",
+          "source": "Chinese proverb"
+        },
+        "28": {
+          "text": "Better to light a candle than to curse the darkness.",
+          "source": "Chinese proverb"
+        },
+        "29": {
+          "text": "Memory is a garden: it needs watering every day.",
+          "source": "Grandpa Pebble’s saying"
+        },
+        "30": {
+          "text": "Flipped cards never lie, but they love to hide.",
+          "source": "Grandpa Pebble’s saying"
+        }
+      }
     },
     "boy": {
-      "name": "Little boy",
+      "name": "Lucas",
       "lines": {
-        "greeting": "Hey! Can you catch me a Magikarp from the lake? Please! I'll give you 50 coins, and something even better if it's a golden one!",
-        "rewarded": "Wow, a Magikarp! It's so cool! Thanks a lot, here are your 50 coins!",
-        "rewardedShiny": "NO WAY!!! A GOLDEN MAGIKARP!!! THIS IS THE BEST DAY OF MY LIFE!!! Here, take this booster from the very latest set!!!",
-        "failed": "Oh no, you stopped already? Come on, one more try!",
-        "alreadyDone": "I've got my fish for today! Come back tomorrow!",
-        "unavailable": "Oh, my line is all tangled up. Try again!"
+        "greeting": "Oh no! I dropped my things in the lake again… Can you help me fish them out? I’ll give you 50 coins! And if you find my treasure box, the booster inside is yours!",
+        "rewarded": "Thank you! I knew it was down there. Here are your 50 coins!",
+        "rewardedShiny": "MY TREASURE BOX!!! I’ve been looking for it for days!!! Here, the booster that was inside is yours!!!",
+        "failed": "Oh, stopping already? There’s loads more stuff at the bottom, you know!",
+        "alreadyDone": "You already helped me today! Come back tomorrow, I’m sure to drop something else…",
+        "unavailable": "Oh, my line’s all tangled. Try again!"
       },
-      "accept": "I'll catch it"
+      "accept": "I’ll fish it out",
+      "title": "the little otter of the lake"
     },
     "retry": "Try again",
     "leave": "Goodbye",
@@ -239,20 +364,25 @@
     "stainsLeft": "{count, plural, one {# patch of dust} other {# patches of dust}}",
     "fishing": {
       "title": "Fishing",
-      "waiting": "Waiting for a bite...",
-      "reel": "It's biting! Reel it in!",
-      "reeling": "Reeling in...",
+      "waiting": "Wait for it…",
+      "reel": "It’s pulling! Reel in!",
+      "reeling": "Reeling in…",
       "giveUp": "Stop fishing",
-      "giveToBoy": "Give it to him",
-      "commonFish": "A Magikarp!",
-      "shinyFish": "A GOLDEN MAGIKARP!",
+      "giveToBoy": "Give it back to Lucas",
       "coins": "+{count} coins",
       "booster": "+1 {set} booster",
       "floatResting": "The float is resting on the water",
-      "floatBiting": "The float is going under!"
+      "floatBiting": "The float is going under!",
+      "items": {
+        "boat": "His little boat!",
+        "sandal": "His sandal!",
+        "ball": "His ball!",
+        "duck": "His rubber duck!",
+        "treasure": "HIS TREASURE BOX!"
+      }
     },
     "memory": {
-      "title": "Memory game",
+      "title": "Grandpa Pebble’s memory game",
       "moves": "Moves: {moves} / {limit}",
       "pairs": "Pairs: {found} / {total}",
       "giveUp": "Give up",
@@ -297,6 +427,17 @@
     "binderSeller": "There you are, dear!",
     "grandma": "Ah, Pip! Just in time!",
     "grandpa": "Fancy a game?",
-    "boy": "Hey! Over here!"
+    "boy": "Hey! Can you help me?"
+  },
+  "Bus": {
+    "title": "Bus map",
+    "line": "Line 1",
+    "stops": {
+      "mainStreet": "High Street",
+      "park": "Linden Park"
+    },
+    "here": "You are here",
+    "close": "Close",
+    "goTo": "Go there"
   }
 }

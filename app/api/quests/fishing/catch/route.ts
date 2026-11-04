@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { reelInFish } from '@/player/progress';
+import { reelInItem } from '@/player/progress';
 
 export async function POST() {
   try {
@@ -7,7 +7,7 @@ export async function POST() {
     if (!player) {
       return Response.json({ error: 'not-signed-in' }, { status: 401 });
     }
-    return Response.json(await reelInFish(player.id));
+    return Response.json(await reelInItem(player.id));
   } catch (error) {
     // Logged as text: the full error object carries the database client's internals.
     console.error(

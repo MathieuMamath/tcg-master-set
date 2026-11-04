@@ -24,7 +24,7 @@ import { type Collection, firstCopies, slotKey } from '@/game/binder';
 import { boosterRecipe, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
 import { duplicateCoins } from '@/game/duplicate-coins';
-import { catchFish, FISH_COINS, FISHING_QUEST, type Fish } from '@/game/fishing';
+import { FISHING_QUEST, type FishedItem, fishItem, ITEM_COINS } from '@/game/fishing';
 import {
   dealMemoryGame,
   flipMemoryCard,
@@ -60,6 +60,8 @@ export type PlayerProgress = {
   basketballHighScore: number;
   // The day of the last reward, so that the machine can say when it's already been paid.
   basketballRewardedOn: string | null;
+  // The day Papy Caillou was last beaten at memory, after which he only shares sayings.
+  memoryWonOn: string | null;
 };
 
 export type OpenedBooster = {
@@ -102,11 +104,16 @@ async function loadBasketballHighScore(database: Reader, userId: string): Promis
   return best?.score ?? 0;
 }
 
-async function loadBasketballRewardDay(database: Reader, userId: string): Promise<string | null> {
+// The day a quest last paid its reward.
+async function loadRewardDay(
+  database: Reader,
+  userId: string,
+  questId: string,
+): Promise<string | null> {
   const [attempt] = await database
     .select({ completedOn: playerQuests.completedOn })
     .from(playerQuests)
-    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, BASKETBALL_QUEST)));
+    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId)));
   return attempt?.completedOn ?? null;
 }
 
@@ -150,7 +157,8 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     ),
     spot: parseSpot(spots[0]),
     basketballHighScore: await loadBasketballHighScore(getDb(), userId),
-    basketballRewardedOn: await loadBasketballRewardDay(getDb(), userId),
+    basketballRewardedOn: await loadRewardDay(getDb(), userId, BASKETBALL_QUEST),
+    memoryWonOn: await loadRewardDay(getDb(), userId, GRANDPA_QUEST),
   };
 }
 
@@ -398,14 +406,15 @@ async function addBooster(database: Pick<Database, 'insert'>, userId: string, se
 
 export type FishingCatch = {
   // Null when no attempt is under way.
-  fish: Fish | null;
+  item: FishedItem | null;
   boosterSetId: SetId | null;
   wallet: Wallet;
 };
 
-// The fish is drawn here, in the transaction that uses up the attempt, so that it can't be drawn
-// again. A shiny pays in coins too if no set has been imported, since it has no booster to give.
-export async function reelInFish(userId: string): Promise<FishingCatch> {
+// The item is drawn here, in the transaction that uses up the attempt, so that it can't be drawn
+// again. The treasure box pays in coins too if no set has been imported, since it has no booster
+// to give.
+export async function reelInItem(userId: string): Promise<FishingCatch> {
   const latestSetId = await loadLatestSoldSetId();
 
   return getDb().transaction(async (transaction) => {
@@ -418,24 +427,24 @@ export async function reelInFish(userId: string): Promise<FishingCatch> {
       .where(quest)
       .for('update');
     if (!attempt?.startedAt || !canStartQuest(attempt, now)) {
-      return { fish: null, boosterSetId: null, wallet: await loadWallet(transaction, userId) };
+      return { item: null, boosterSetId: null, wallet: await loadWallet(transaction, userId) };
     }
 
     await transaction
       .update(playerQuests)
       .set({ startedAt: null, completedOn: questDay(now) })
       .where(quest);
-    const fish = catchFish();
-    const boosterSetId = fish === 'shiny' ? latestSetId : null;
+    const item = fishItem();
+    const boosterSetId = item === 'treasure' ? latestSetId : null;
     if (boosterSetId) {
       await addBooster(transaction, userId, boosterSetId);
     } else {
       await transaction
         .update(playerWallets)
-        .set({ coins: sql`${playerWallets.coins} + ${FISH_COINS}`, updatedAt: new Date() })
+        .set({ coins: sql`${playerWallets.coins} + ${ITEM_COINS}`, updatedAt: new Date() })
         .where(eq(playerWallets.userId, userId));
     }
-    return { fish, boosterSetId, wallet: await loadWallet(transaction, userId) };
+    return { item, boosterSetId, wallet: await loadWallet(transaction, userId) };
   });
 }
 

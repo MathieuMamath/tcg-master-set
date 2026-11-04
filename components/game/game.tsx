@@ -2,13 +2,15 @@
 
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
 import { addToCollection } from '@/game/binder';
+import { stopAt } from '@/game/bus';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
+import { nextProverb, pickProverb } from '@/game/proverbs';
 import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests';
 import {
   bindersForSale,
@@ -27,6 +29,7 @@ import { BasketballDialog } from './basketball-dialog';
 import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
+import { BusMap } from './bus-map';
 import { FishingDialog } from './fishing-dialog';
 import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
 import { Joystick } from './joystick';
@@ -54,7 +57,8 @@ function isTalk(interaction: Interaction): interaction is Talk {
     !isDoorInteraction(interaction) &&
     interaction !== 'binder' &&
     interaction !== 'basketball' &&
-    interaction !== 'scrub'
+    interaction !== 'scrub' &&
+    interaction !== 'busStop'
   );
 }
 const DASH_KEY = 'Space';
@@ -72,6 +76,7 @@ export function Game({ player, sets, progress }: Props) {
     joystick: STILL,
     wantsDash: false,
     wantsScrub: false,
+    travelTo: null,
     wantsDoor: false,
   });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
@@ -82,9 +87,15 @@ export function Game({ player, sets, progress }: Props) {
   const [questLine, setQuestLine] = useState<QuestLine>('greeting');
   const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
   const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
+  const [memoryWonOn, setMemoryWonOn] = useState(progress.memoryWonOn);
+  // The saying Papy Caillou shares once beaten, picked anew at each visit to the park.
+  const [proverb, setProverb] = useState(() => pickProverb());
   const [isFishing, setIsFishing] = useState(false);
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
+  const [isBusMapOpen, setIsBusMapOpen] = useState(false);
+  // Where the character is, for the bus map to know which stop it is read at.
+  const [place, setPlace] = useState<SidePlaceId>('bedroom');
   const [highScore, setHighScore] = useState(progress.basketballHighScore);
   const [basketballRewardedOn, setBasketballRewardedOn] = useState(progress.basketballRewardedOn);
   const [binders, setBinders] = useState(progress.binders);
@@ -105,6 +116,10 @@ export function Game({ player, sets, progress }: Props) {
   const tShopkeeper = useTranslations('Shopkeeper');
   const tTown = useTranslations('Town');
   const tHails = useTranslations('Hails');
+  const tBus = useTranslations('Bus');
+  const tQuest = useTranslations('Quest');
+  // Beaten for the day, Papy Caillou only shares a saying: there is nothing to talk about.
+  const isPapySaying = interaction === 'grandpa' && memoryWonOn === questDay(new Date());
   const isDialogOpen =
     isTalking ||
     isBinderOpen ||
@@ -113,15 +128,16 @@ export function Game({ player, sets, progress }: Props) {
     opening !== null ||
     memoryCards !== null ||
     isFishing ||
-    isPlayingBasketball;
+    isPlayingBasketball ||
+    isBusMapOpen;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
   const boosterTotal = totalBoosters(wallet);
-  const bubble = useRef<HTMLButtonElement>(null);
+  const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
-  const controls = useRef({ interaction, isDialogOpen });
-  controls.current = { interaction, isDialogOpen };
+  const controls = useRef({ interaction, isDialogOpen, isPapySaying });
+  controls.current = { interaction, isDialogOpen, isPapySaying };
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -149,7 +165,11 @@ export function Game({ player, sets, progress }: Props) {
       if (controls.current.isDialogOpen) {
         return;
       }
-      if (event.code === INTERACT_KEY && controls.current.interaction) {
+      if (
+        event.code === INTERACT_KEY &&
+        controls.current.interaction &&
+        !controls.current.isPapySaying
+      ) {
         event.preventDefault();
         releaseKeys();
         if (controls.current.interaction === 'binder') {
@@ -160,6 +180,8 @@ export function Game({ player, sets, progress }: Props) {
           setIsPlayingBasketball(true);
         } else if (controls.current.interaction === 'scrub') {
           input.current.wantsScrub = true;
+        } else if (controls.current.interaction === 'busStop') {
+          setIsBusMapOpen(true);
         } else {
           setTalkingTo(controls.current.interaction);
         }
@@ -210,6 +232,8 @@ export function Game({ player, sets, progress }: Props) {
       setIsPlayingBasketball(true);
     } else if (interaction === 'scrub') {
       input.current.wantsScrub = true;
+    } else if (interaction === 'busStop') {
+      setIsBusMapOpen(true);
     } else if (interaction) {
       setTalkingTo(interaction);
     }
@@ -359,8 +383,12 @@ export function Game({ player, sets, progress }: Props) {
   };
 
   // Stepping out of Léa's flat gives up on the quest, since the dust stays inside.
-  const changePlace = useCallback((place: SidePlaceId) => {
-    if (place !== 'flat') {
+  const changePlace = useCallback((next: SidePlaceId) => {
+    setPlace(next);
+    if (next === 'park') {
+      setProverb((previous) => nextProverb(previous));
+    }
+    if (next !== 'flat') {
       setQuest(null);
       setQuestLine((line) => (line === 'hurry' ? 'greeting' : line));
     }
@@ -399,6 +427,7 @@ export function Game({ player, sets, progress }: Props) {
     setMemoryCards(null);
     if (ending?.status === 'won') {
       showSaveNotice();
+      setMemoryWonOn(questDay(new Date()));
     }
     if (ending) {
       setWallet(ending.wallet);
@@ -449,7 +478,7 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
-  // The server draws the fish and pays for it. This only shows the result.
+  // The server draws what comes up on the line and pays for it. This only shows the result.
   const reelIn = async (): Promise<FishingCatch | null> => {
     try {
       const response = await fetch('/api/quests/fishing/catch', { method: 'POST' });
@@ -457,7 +486,7 @@ export function Game({ player, sets, progress }: Props) {
         throw new Error(`HTTP ${response.status}`);
       }
       const caught: FishingCatch = await response.json();
-      if (caught.fish) {
+      if (caught.item) {
         showSaveNotice();
       }
       return caught;
@@ -495,6 +524,9 @@ export function Game({ player, sets, progress }: Props) {
           shop: tTown('shop'),
           bookshop: tTown('bookshop'),
           arcade: tTown('arcade'),
+          busStop: tBus('stops.mainStreet'),
+          busLine: tBus('line'),
+          parkStop: tBus('stops.park'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
@@ -553,10 +585,32 @@ export function Game({ player, sets, progress }: Props) {
           </svg>
         </button>
       </div>
-      {interaction && !isDialogOpen && isTalk(interaction) && (
+      {isPapySaying && !isDialogOpen && (
+        // Papy Caillou's saying, in his speech bubble: something to read, not to press.
+        <p
+          ref={bubble as RefObject<HTMLParagraphElement | null>}
+          aria-live="polite"
+          style={{ transform: 'translate(-200vw, 0)' }}
+          className="pointer-events-none absolute top-0 left-0 pb-2.5 font-game text-ui-ink"
+        >
+          <span className="ui-pop-in block w-max max-w-[min(22rem,80vw)] rounded-[2rem] bg-ui-paper px-6 py-3 text-center shadow-[3px_4px_0_var(--ui-shadow)]">
+            <span className="block text-lg leading-snug">
+              « {tQuest(`grandpa.proverbs.${proverb}.text` as 'grandpa.proverbs.1.text')} »
+            </span>
+            <span className="mt-1 block text-sm text-ui-ink/60">
+              {tQuest(`grandpa.proverbs.${proverb}.source` as 'grandpa.proverbs.1.source')}
+            </span>
+          </span>
+          <span
+            aria-hidden="true"
+            className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
+          />
+        </p>
+      )}
+      {interaction && !isDialogOpen && !isPapySaying && isTalk(interaction) && (
         // A speech bubble that the scene moves just above the head of who the player can talk to.
         <button
-          ref={bubble}
+          ref={bubble as RefObject<HTMLButtonElement | null>}
           type="button"
           aria-label={t(interaction)}
           onClick={interact}
@@ -721,6 +775,16 @@ export function Game({ player, sets, progress }: Props) {
           coins={wallet.coins}
           onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
           onClose={() => setTalkingTo(null)}
+        />
+      )}
+      {isBusMapOpen && stopAt(place) && (
+        <BusMap
+          here={stopAt(place)?.id ?? 'mainStreet'}
+          onTravel={({ place: to, arrivalX }) => {
+            input.current.travelTo = { to, arrival: { x: arrivalX, facing: 1 } };
+            setIsBusMapOpen(false);
+          }}
+          onClose={() => setIsBusMapOpen(false)}
         />
       )}
       <SaveNotice isSaving={isSaving} />

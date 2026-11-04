@@ -20,6 +20,7 @@ vi.mock('@/player/progress', () => ({
     spot: null,
     basketballHighScore: 0,
     basketballRewardedOn: null,
+    memoryWonOn: null,
   }),
 }));
 
@@ -38,6 +39,7 @@ function renderHome(locale: Locale, messages: typeof en) {
           spot: null,
           basketballHighScore: 0,
           basketballRewardedOn: null,
+          memoryWonOn: null,
         }}
       />
     </NextIntlClientProvider>,

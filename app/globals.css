@@ -146,6 +146,24 @@ body {
   }
 }
 
+@keyframes ui-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+/* A sparkle that grows, turns and fades, again and again. */
+.ui-twinkle {
+  animation: ui-twinkle 1.6s ease-in-out infinite;
+  opacity: 0;
+}
+
 @keyframes ui-bob {
   50% {
     transform: translateY(-0.2rem);
@@ -456,6 +474,7 @@ body {
   .ui-god-pack-banner,
   .ui-pop-in,
   .ui-bob,
+  .ui-twinkle,
   .ui-pull-rays,
   .ui-pull-beam,
   .ui-pull-shake,

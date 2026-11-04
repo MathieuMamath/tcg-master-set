@@ -21,8 +21,8 @@
     "binderSeller": "Parler (classeurs)",
     "dash": "Dash",
     "grandma": "Parler (Léa)",
-    "grandpa": "Parler (papy)",
-    "boy": "Parler (petit garçon)",
+    "grandpa": "Parler (Papy Caillou)",
+    "boy": "Parler (Lucas)",
     "basketball": "Jouer (basket)",
     "leaveHome": "Sortir",
     "goHome": "Rentrer à la maison",
@@ -34,7 +34,8 @@
     "leaveFlat": "Sortir",
     "scrub": "Frotter la poussière",
     "enterArcade": "Entrer dans la salle d’arcade",
-    "leaveArcade": "Sortir"
+    "leaveArcade": "Sortir",
+    "busStop": "Lire le plan du bus"
   },
   "Shopkeeper": {
     "names": {
@@ -211,27 +212,151 @@
       "title": "la voisine débordée"
     },
     "grandpa": {
-      "name": "Papy",
+      "name": "Papy Caillou",
       "lines": {
-        "greeting": "Une petite partie de mémoire ? Retrouve les 8 paires en 20 coups maximum, et je te donnerai 150 pièces.",
-        "rewarded": "Ça alors, tu m'as battu ! Voici tes 150 pièces.",
-        "failed": "Ha ! Plus de coups, ma mémoire reste la meilleure. On en refait une ?",
-        "alreadyDone": "Une défaite par jour me suffit. Reviens demain !",
-        "unavailable": "Hum, j'ai égaré mes cartes. Réessaie."
+        "greeting": "Hé hé, une petite partie de memory, jeune homme ? Retrouve les 8 paires en 20 coups maximum… et je te donne 150 pièces. Mais je te préviens, je ne perds jamais !",
+        "rewarded": "Ça alors, tu m’as battu ! Tu as une sacrée mémoire. Voici tes 150 pièces, bien méritées.",
+        "failed": "Ha ha ! Plus de coups ! Ne t’en fais pas, j’ai eu cent ans pour m’entraîner. On en refait une ?",
+        "alreadyDone": "Une défaite par jour, c’est bien assez pour mon orgueil ! Reviens demain.",
+        "unavailable": "Hum, j’ai égaré mes cartes… Réessaie dans un instant."
       },
-      "accept": "Jouons"
+      "accept": "Jouons !",
+      "title": "le champion du memory",
+      "proverbs": {
+        "1": {
+          "text": "La patience est un arbre aux racines amères, mais aux fruits très doux.",
+          "source": "Proverbe persan"
+        },
+        "2": {
+          "text": "Tombe sept fois, relève-toi huit.",
+          "source": "Proverbe japonais"
+        },
+        "3": {
+          "text": "Un voyage de mille lieues commence toujours par un premier pas.",
+          "source": "Proverbe chinois"
+        },
+        "4": {
+          "text": "Le meilleur moment pour planter un arbre, c’était il y a vingt ans. Le deuxième meilleur, c’est maintenant.",
+          "source": "Proverbe chinois"
+        },
+        "5": {
+          "text": "Même les singes tombent des arbres.",
+          "source": "Proverbe japonais"
+        },
+        "6": {
+          "text": "L’eau qui tombe goutte à goutte finit par creuser la pierre.",
+          "source": "Proverbe chinois"
+        },
+        "7": {
+          "text": "Celui qui pose une question a l’air bête cinq minutes. Celui qui n’en pose pas le reste toute sa vie.",
+          "source": "Proverbe chinois"
+        },
+        "8": {
+          "text": "Quand tu bois de l’eau, pense à la source.",
+          "source": "Proverbe chinois"
+        },
+        "9": {
+          "text": "Le bambou qui plie est plus fort que le chêne qui résiste.",
+          "source": "Proverbe japonais"
+        },
+        "10": {
+          "text": "La grenouille au fond du puits ne connaît pas l’océan.",
+          "source": "Proverbe japonais"
+        },
+        "11": {
+          "text": "Une seule journée passée avec un maître vaut mieux que mille jours d’étude.",
+          "source": "Proverbe japonais"
+        },
+        "12": {
+          "text": "Les petits ruisseaux font les grandes rivières.",
+          "source": "Proverbe chinois"
+        },
+        "13": {
+          "text": "Si tu es pressé, fais un détour.",
+          "source": "Proverbe japonais"
+        },
+        "14": {
+          "text": "On ne voit pas la forêt quand on a le nez sur un arbre.",
+          "source": "Proverbe chinois"
+        },
+        "15": {
+          "text": "La tortue qui avance lentement va plus loin que le lièvre endormi.",
+          "source": "Dicton de Papy Caillou"
+        },
+        "16": {
+          "text": "Un sourire coûte moins cher que l’électricité, mais il donne autant de lumière.",
+          "source": "Proverbe écossais… euh, non, coréen !"
+        },
+        "17": {
+          "text": "Même un long voyage se fait une tasse de thé à la fois.",
+          "source": "Proverbe chinois"
+        },
+        "18": {
+          "text": "Le clou qui dépasse appelle le marteau.",
+          "source": "Proverbe japonais"
+        },
+        "19": {
+          "text": "Apprendre, c’est comme ramer à contre-courant : dès qu’on s’arrête, on recule.",
+          "source": "Proverbe chinois"
+        },
+        "20": {
+          "text": "Les mots doux ne coûtent rien et valent beaucoup.",
+          "source": "Proverbe coréen"
+        },
+        "21": {
+          "text": "Une maison sans livres est comme un corps sans âme.",
+          "source": "Proverbe chinois"
+        },
+        "22": {
+          "text": "Le riz mûr baisse la tête.",
+          "source": "Proverbe japonais"
+        },
+        "23": {
+          "text": "Un ami, c’est quelqu’un qui connaît la chanson de ton cœur.",
+          "source": "Proverbe vietnamien"
+        },
+        "24": {
+          "text": "Ne crains pas d’avancer lentement, crains seulement de t’arrêter.",
+          "source": "Proverbe chinois"
+        },
+        "25": {
+          "text": "Même la plus haute tour commence au sol.",
+          "source": "Proverbe chinois"
+        },
+        "26": {
+          "text": "Le vent ne souffle pas toujours dans le sens du bateau.",
+          "source": "Proverbe chinois"
+        },
+        "27": {
+          "text": "Quand le sage montre la lune, l’idiot regarde le doigt.",
+          "source": "Proverbe chinois"
+        },
+        "28": {
+          "text": "Mieux vaut allumer une bougie que maudire l’obscurité.",
+          "source": "Proverbe chinois"
+        },
+        "29": {
+          "text": "La mémoire est un jardin : il faut l’arroser tous les jours.",
+          "source": "Dicton de Papy Caillou"
+        },
+        "30": {
+          "text": "Les cartes retournées ne mentent jamais, mais elles aiment se cacher.",
+          "source": "Dicton de Papy Caillou"
+        }
+      }
     },
     "boy": {
-      "name": "Petit garçon",
+      "name": "Lucas",
       "lines": {
-        "greeting": "Dis ! Tu peux me pêcher un Magicarpe dans le lac ? S'il te plaît ! Je te donnerai 50 pièces, et encore mieux s'il est doré !",
-        "rewarded": "Trop bien, un Magicarpe ! Merci beaucoup, voici tes 50 pièces !",
-        "rewardedShiny": "C'EST PAS VRAI !!! UN MAGICARPE DORÉ !!! C'EST LE PLUS BEAU JOUR DE MA VIE !!! Tiens, prends ce booster de la toute dernière série !!!",
-        "failed": "Oh non, tu arrêtes déjà ? Allez, encore un essai !",
-        "alreadyDone": "J'ai eu mon poisson aujourd'hui ! Reviens demain !",
+        "greeting": "Oh non ! J’ai encore fait tomber mes affaires dans le lac… Tu peux m’aider à les repêcher ? Je te donnerai 50 pièces ! Et si tu retrouves ma boîte à trésor, le booster qui est dedans est pour toi !",
+        "rewarded": "Merci ! Je savais bien qu’il était là-dedans. Voici tes 50 pièces !",
+        "rewardedShiny": "MA BOÎTE À TRÉSOR !!! Je la cherchais depuis des jours !!! Tiens, le booster qu’il y avait dedans est pour toi !!!",
+        "failed": "Oh, tu arrêtes déjà ? Il reste plein de trucs au fond, tu sais !",
+        "alreadyDone": "Tu m’as déjà aidé aujourd’hui ! Reviens demain, je vais sûrement encore faire tomber quelque chose…",
         "unavailable": "Oh, ma ligne est tout emmêlée. Réessaie !"
       },
-      "accept": "Je vais le pêcher"
+      "accept": "Je vais repêcher ça",
+      "title": "le petit loutre du lac"
     },
     "retry": "Réessayer",
     "leave": "Au revoir",
@@ -239,20 +364,25 @@
     "stainsLeft": "{count, plural, one {# tache de poussière} other {# taches de poussière}}",
     "fishing": {
       "title": "Pêche",
-      "waiting": "Ça va bien finir par mordre...",
-      "reel": "Ça mord ! Remonte la ligne !",
-      "reeling": "Ça remonte...",
+      "waiting": "Patience…",
+      "reel": "Ça tire ! Remonte !",
+      "reeling": "Ça remonte…",
       "giveUp": "Arrêter de pêcher",
-      "giveToBoy": "Le lui donner",
-      "commonFish": "Un Magicarpe !",
-      "shinyFish": "UN MAGICARPE DORÉ !",
+      "giveToBoy": "Le rendre à Lucas",
       "coins": "+{count} pièces",
       "booster": "+1 booster {set}",
       "floatResting": "Le flotteur repose sur l'eau",
-      "floatBiting": "Le flotteur s'enfonce !"
+      "floatBiting": "Le flotteur s'enfonce !",
+      "items": {
+        "boat": "Son petit bateau !",
+        "sandal": "Sa sandale !",
+        "ball": "Son ballon !",
+        "duck": "Son canard en plastique !",
+        "treasure": "SA BOÎTE À TRÉSOR !"
+      }
     },
     "memory": {
-      "title": "Jeu de mémoire",
+      "title": "Le memory de Papy Caillou",
       "moves": "Coups : {moves} / {limit}",
       "pairs": "Paires : {found} / {total}",
       "giveUp": "Abandonner",
@@ -297,6 +427,17 @@
     "binderSeller": "Te revoilà, mon petit !",
     "grandma": "Ah, Pip ! Tu tombes bien !",
     "grandpa": "Une petite partie ?",
-    "boy": "Hé ! Par ici !"
+    "boy": "Hé ! Tu peux m’aider ?"
+  },
+  "Bus": {
+    "title": "Plan du bus",
+    "line": "Ligne 1",
+    "stops": {
+      "mainStreet": "Grand-Rue",
+      "park": "Parc des Tilleuls"
+    },
+    "here": "Tu es ici",
+    "close": "Fermer",
+    "goTo": "Y aller"
   }
 }
