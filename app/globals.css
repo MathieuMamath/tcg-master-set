@@ -249,6 +249,32 @@ body {
   animation: ui-binder-turn 750ms ease-in-out 450ms forwards;
 }
 
+/* A binder page turning over round the spine, to the angle in `--turn-to`. */
+@keyframes ui-page-turn {
+  to {
+    transform: rotateY(var(--turn-to));
+  }
+}
+
+.ui-page-turn {
+  animation: ui-page-turn 650ms ease-in-out forwards;
+}
+
+/* A binder's only page on show, lifting away to the left. Played backwards, it comes back. */
+@keyframes ui-page-lift {
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: rotateY(-100deg);
+  }
+}
+
+.ui-page-lift {
+  animation: ui-page-lift 500ms ease-in forwards;
+}
+
 .ui-god-pack-glow {
   background: radial-gradient(circle at 50% 45%, rgb(255 210 80 / 70%), transparent 65%);
   animation: ui-god-pack-glow 900ms ease-in-out infinite alternate;

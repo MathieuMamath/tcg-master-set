@@ -1,7 +1,15 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type AnimationEvent,
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   type BinderCard,
   type BinderSlot,
@@ -20,12 +28,16 @@ import { pageStep } from '@/game/menu-keys';
 import {
   BinderCover,
   BinderOpening,
+  BinderTitle,
+  EMPTY_POCKET_CLASS,
   NARROW_OPENING_MILLISECONDS,
+  PAGE_CLASS,
   WIDE_OPENING_MILLISECONDS,
   WIDE_PAGE_WIDTH_CLASS,
 } from './binder-cover';
 import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
 import { isFocusLost, moveThroughChoices, moveThroughChoicesOnScreen } from './menu-focus';
+import { TornPaper } from './shop-dialog';
 import { TiltCard } from './tilt-card';
 import { useWideScreen } from './use-wide-screen';
 
@@ -48,7 +60,7 @@ function VariantTag({ variant }: { variant: string }) {
     return null;
   }
   return (
-    <span className="absolute inset-x-0 bottom-1 mx-auto w-fit ui-scrap bg-ui-accent px-1.5 text-[0.65rem] leading-4 font-semibold text-ui-ink">
+    <span className="absolute inset-x-0 bottom-1 mx-auto w-fit -rotate-3 bg-(--ui-tape) px-1.5 text-[0.65rem] leading-4 font-semibold text-ui-ink">
       {t(variant)}
     </span>
   );
@@ -60,9 +72,9 @@ function Pocket({ slot, count, onOpen }: { slot: BinderSlot; count: number; onOp
   if (count === 0) {
     return (
       <div
-        className={`${POCKET_CLASS} flex flex-col items-center justify-center border-2 border-dashed border-ui-paper/30 bg-ui-paper/5 text-ui-paper/60`}
+        className={`${POCKET_CLASS} ${EMPTY_POCKET_CLASS} flex flex-col items-center justify-center text-ui-ink/35`}
       >
-        <span className="text-lg font-semibold">{slot.card.localId}</span>
+        <span className="font-digits text-lg font-bold">{slot.card.localId}</span>
         <span className="sr-only">{t('emptySlot')}</span>
         <VariantTag variant={slot.variant} />
       </div>
@@ -77,9 +89,14 @@ function Pocket({ slot, count, onOpen }: { slot: BinderSlot; count: number; onOp
       className={`${POCKET_CLASS} block w-full cursor-pointer outline-offset-2`}
     >
       <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="low" />
+      {/* The light on the pocket's plastic sleeve. */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 rounded-[inherit] bg-[linear-gradient(115deg,transparent_38%,rgb(255_255_255/24%)_46%,transparent_54%)]"
+      />
       <VariantTag variant={slot.variant} />
       {count > 1 && (
-        <span className="absolute -top-1 -right-1 ui-scrap px-1.5 text-xs font-semibold text-ui-ink">
+        <span className="absolute -top-1.5 -right-1.5 grid min-w-6 rotate-6 place-items-center rounded-full border-2 border-ui-paper bg-ui-stamp px-1 font-digits text-xs leading-5 font-bold text-ui-paper shadow-[1px_2px_0_var(--ui-shadow)]">
           ×{count}
         </span>
       )}
@@ -123,22 +140,61 @@ function CardDetail({
   }, [onClose]);
 
   return (
-    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
+    <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-ui-ink/85 p-4">
       <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
         <TiltCard isSpecial={slot.variant !== 'normal'}>
           <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="max" />
         </TiltCard>
       </div>
-      <p className="text-center text-lg font-semibold text-ui-paper">
-        {slot.card.name}
-        {slot.card.rarity && ` · ${slot.card.rarity}`}
-      </p>
-      <p className="text-ui-paper/80">{t('copies', { count })}</p>
-      <button ref={close} type="button" onClick={onClose} className={NAV_BUTTON_CLASS}>
-        {t('backToPage')}
-      </button>
+      <TornPaper className="flex flex-col items-center gap-1 px-6 pt-3 pb-4 text-center text-ui-ink">
+        <p className="font-display text-lg">
+          {slot.card.name}
+          {slot.card.rarity && ` · ${slot.card.rarity}`}
+        </p>
+        <p className="text-ui-ink/75">{t('copies', { count })}</p>
+        <button ref={close} type="button" onClick={onClose} className={`${NAV_BUTTON_CLASS} mt-1`}>
+          {t('backToPage')}
+        </button>
+      </TornPaper>
     </div>
   );
+}
+
+// A page of pockets, or a blank sheet where the binder has no page left.
+function PageSheet({
+  page,
+  slots,
+  collection,
+  className,
+  onOpen,
+}: {
+  page: number | null;
+  slots: readonly BinderSlot[];
+  collection: Collection;
+  className: string;
+  onOpen: (slot: BinderSlot) => void;
+}) {
+  if (page === null) {
+    return <div aria-hidden="true" className={`${className} ${PAGE_CLASS}`} />;
+  }
+  return (
+    <ul className={`${className} ${PAGE_CLASS} content-start`}>
+      {slotsOnPage(slots, page).map((slot) => (
+        <li key={slot.key}>
+          <Pocket slot={slot} count={collection[slot.key] ?? 0} onOpen={() => onOpen(slot)} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// A page on its way over: the side it starts from, and the side it shows once turned.
+type Turn = { direction: -1 | 1; before: (number | null)[]; id: number };
+
+// The page shown in each place, left then right on a wide screen, or the single one on a narrow
+// screen. A missing page at the end of the binder leaves a blank sheet.
+function spreadOf(shown: readonly number[], pagesAtOnce: number): (number | null)[] {
+  return Array.from({ length: pagesAtOnce }, (_, index) => shown[index] ?? null);
 }
 
 function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Collection }) {
@@ -146,19 +202,36 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
   const slots = useMemo(() => binderSlots(catalogue.cards), [catalogue]);
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState<BinderSlot | null>(null);
-  // The first pages take over from the opening animation, so they must appear without moving.
-  const [hasTurned, setHasTurned] = useState(false);
+  const [turning, setTurning] = useState<Turn | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const isWide = useWideScreen();
   const pagesAtOnce = isWide ? 2 : 1;
   const pages = pageCount(slots.length);
   const shown = pagesShown(page, slots.length, pagesAtOnce);
   const lastShown = shown[shown.length - 1];
+  const spread = spreadOf(shown, pagesAtOnce);
 
-  const turn = (direction: -1 | 1) => {
-    setHasTurned(true);
-    setPage((current) => turnPage(current, direction, slots.length, pagesAtOnce));
-  };
+  // Turns from the pages on show, which the animation keeps until the page has gone over.
+  const turn = useCallback(
+    (direction: -1 | 1) => {
+      const next = turnPage(page, direction, slots.length, pagesAtOnce);
+      if (next === page) {
+        return;
+      }
+      const isStill = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      setTurning(
+        isStill
+          ? null
+          : {
+              direction,
+              before: spreadOf(pagesShown(page, slots.length, pagesAtOnce), pagesAtOnce),
+              id: Date.now(),
+            },
+      );
+      setPage(next);
+    },
+    [page, slots.length, pagesAtOnce],
+  );
 
   // On the window, because the focus can be anywhere in the dialog, such as on its close button.
   useEffect(() => {
@@ -170,14 +243,13 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
       const step = pageStep(event.code);
       if (step) {
         event.preventDefault();
-        setHasTurned(true);
-        setPage((current) => turnPage(current, step, slots.length, pagesAtOnce));
+        turn(step);
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [detail, slots.length, pagesAtOnce]);
+  }, [detail, turn]);
 
   // On arrival, and when a turned page takes away the pocket that had the focus.
   // biome-ignore lint/correctness/useExhaustiveDependencies: a new page is what can lose the focus.
@@ -185,48 +257,136 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
     if (isFocusLost()) {
       root.current?.querySelector<HTMLElement>('button:not([aria-disabled="true"])')?.focus();
     }
-  }, [shown[0]]);
+  }, [shown[0], turning]);
 
   const pageClass = isWide
     ? WIDE_PAGE_WIDTH_CLASS
-    : 'w-[min(100%,calc((100dvh-14.5rem)*0.7))] sm:w-[min(100%,calc((100dvh-11.5rem)*0.7))]';
+    : 'w-[min(100%,calc((100dvh-16rem)*0.7))] sm:w-[min(100%,calc((100dvh-13rem)*0.7))]';
+  const sheetClass = 'w-full aspect-[5/7]';
+
+  // While a page turns, each place shows what lies under the turning page: going forwards on a
+  // wide screen, the old left page stays until the turning page covers it, and the new right page
+  // is already there underneath. Going backwards, the other way round.
+  const isForward = turning?.direction === 1;
+  const under = spread.map((shownPage, index) => {
+    if (!turning || !isWide) {
+      return turning && !isForward ? turning.before[index] : shownPage;
+    }
+    const keepsOld = isForward ? index === 0 : index === 1;
+    return keepsOld ? turning.before[index] : shownPage;
+  });
+
+  const sheet = (shownPage: number | null, className = sheetClass) => (
+    <PageSheet
+      page={shownPage}
+      slots={slots}
+      collection={collection}
+      className={className}
+      onOpen={setDetail}
+    />
+  );
+
+  // Only the turning page's own animation, not one inside it.
+  const endTurn = (event: AnimationEvent) => {
+    if (event.target === event.currentTarget) {
+      setTurning(null);
+    }
+  };
+
+  // The turning page: the side it leaves from, carrying its old face, and on a wide screen the
+  // new page on its back. On a narrow screen it lifts away to the left, or comes back from there.
+  const turningPage = (() => {
+    if (!turning) {
+      return null;
+    }
+    if (!isWide) {
+      return (
+        <div
+          key={turning.id}
+          className={`ui-page-lift absolute inset-0 origin-left [backface-visibility:hidden] ${
+            isForward ? '' : '[animation-direction:reverse]'
+          }`}
+          onAnimationEnd={endTurn}
+        >
+          {sheet(isForward ? turning.before[0] : spread[0], 'size-full')}
+        </div>
+      );
+    }
+    const front = isForward ? turning.before[1] : turning.before[0];
+    const back = isForward ? spread[0] : spread[1];
+    return (
+      <div
+        key={turning.id}
+        style={
+          {
+            '--turn-to': isForward ? '-180deg' : '180deg',
+            transformOrigin: isForward ? '-0.25rem 50%' : 'calc(100% + 0.25rem) 50%',
+          } as CSSProperties
+        }
+        className={`ui-page-turn absolute top-0 ${isForward ? 'left-0' : 'right-0'} size-full [transform-style:preserve-3d]`}
+        onAnimationEnd={endTurn}
+      >
+        <div className="absolute inset-0 [backface-visibility:hidden]">
+          {sheet(front, 'size-full')}
+        </div>
+        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          {sheet(back, 'size-full')}
+        </div>
+      </div>
+    );
+  })();
+  // Which place the turning page starts from.
+  const turnsFrom = turning ? (isWide && !isForward ? 0 : isWide ? 1 : 0) : -1;
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: only catches keys from the buttons inside.
     <div
       ref={root}
       onKeyDown={moveThroughChoicesOnScreen}
-      className="flex h-full flex-col items-center gap-3"
+      className="flex h-full flex-col items-center gap-4"
     >
-      <div className="text-center text-ui-paper">
-        <h2 className="font-display text-xl">{catalogue.setName}</h2>
-        <p>{t('progress', { owned: ownedSlotCount(slots, collection), total: slots.length })}</p>
-      </div>
-      <div inert={detail !== null} className="flex min-h-0 w-full justify-center gap-2">
-        {shown.map((shownPage) => (
-          <ul
-            key={shownPage}
-            className={`${hasTurned ? 'ui-pop-in' : ''} grid min-h-0 ${pageClass} grid-cols-3 gap-2 rounded-2xl border-4 border-ui-paper/40 bg-[#3b3157] p-2`}
+      <BinderTitle
+        name={catalogue.setName}
+        progress={t('progress', { owned: ownedSlotCount(slots, collection), total: slots.length })}
+      />
+      <div inert={detail !== null} className="relative flex min-h-0 w-full justify-center gap-2">
+        {under.map((shownPage, index) => (
+          <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: the places are left and right.
+            key={index}
+            className={`relative min-h-0 ${pageClass} ${index === turnsFrom ? 'z-10' : ''}`}
           >
-            {slotsOnPage(slots, shownPage).map((slot) => (
-              <li key={slot.key}>
-                <Pocket
-                  slot={slot}
-                  count={collection[slot.key] ?? 0}
-                  onOpen={() => setDetail(slot)}
-                />
-              </li>
-            ))}
-          </ul>
+            {sheet(shownPage)}
+            {index === turnsFrom && (
+              // Only a picture of the pages, which the keyboard and screen readers skip.
+              <div
+                inert
+                aria-hidden="true"
+                // Seen from in front of the spine, which the page turns round.
+                style={{ perspectiveOrigin: isWide && !isForward ? 'right center' : 'left center' }}
+                className="absolute inset-0 [perspective:120rem]"
+              >
+                {turningPage}
+              </div>
+            )}
+          </div>
         ))}
-        {isWide && shown.length === 1 && (
+        {/* The rings holding the two pages together, across the spine. */}
+        {isWide && (
           <div
             aria-hidden="true"
-            className={`${pageClass} rounded-2xl border-4 border-ui-paper/40 bg-[#3b3157]`}
-          />
+            className="pointer-events-none absolute inset-y-[8%] left-1/2 flex -translate-x-1/2 flex-col justify-between"
+          >
+            {['top', 'middle', 'bottom'].map((ring) => (
+              <span
+                key={ring}
+                className="h-3 w-9 rounded-full border-[3px] border-[#b9b7c2] shadow-[1px_2px_0_var(--ui-shadow)]"
+              />
+            ))}
+          </div>
         )}
       </div>
-      <div inert={detail !== null} className="flex items-center gap-3 text-ui-paper">
+      <div inert={detail !== null} className="flex items-center gap-3 text-ui-ink">
         {/* Not `disabled`, which would take the focus away at the first and last pages. */}
         <button
           type="button"
@@ -237,7 +397,10 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
         >
           ◀
         </button>
-        <span aria-live="polite">
+        <span
+          aria-live="polite"
+          className="ui-scrap px-3 pt-1 pb-0.5 font-digits text-sm font-bold"
+        >
           {shown.length === 2
             ? t('pages', { first: shown[0] + 1, last: lastShown + 1, total: pages })
             : t('page', { current: shown[0] + 1, total: pages })}
@@ -252,7 +415,7 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
           ▶
         </button>
       </div>
-      <p className="text-sm text-ui-paper/70 pointer-coarse:hidden">{t('pageKeys')}</p>
+      <p className="text-sm text-ui-ink/70 pointer-coarse:hidden">{t('pageKeys')}</p>
       {detail && (
         <CardDetail
           slot={detail}
@@ -292,7 +455,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
   // Ready to pick a binder, on arrival and when coming back from one.
   useEffect(() => {
     if (!isBinderChosen) {
-      binderList.current?.querySelector<HTMLElement>('button:enabled')?.focus();
+      binderList.current?.querySelector<HTMLElement>('button:not([aria-disabled="true"])')?.focus();
     }
   }, [isBinderChosen]);
 
@@ -372,8 +535,10 @@ export function BinderView({ sets, collection, onClose }: Props) {
       aria-label={t('title')}
       onClose={onClose}
       onKeyDown={chosenSet ? undefined : moveThroughChoices}
-      className="m-0 size-full max-h-none max-w-none bg-ui-ink/95 p-4 font-game backdrop:bg-transparent"
+      // A desk of kraft paper, a little darker towards its edges.
+      className="m-0 size-full max-h-none max-w-none bg-transparent bg-[radial-gradient(circle_at_50%_40%,rgb(210_177_131/70%),rgb(165_129_79/82%))] p-4 font-game text-ui-ink backdrop:bg-transparent"
     >
+      <span aria-hidden="true" className="ui-paper-grain absolute inset-0" />
       {chosenSet ? (
         <button
           type="button"
@@ -390,23 +555,24 @@ export function BinderView({ sets, collection, onClose }: Props) {
         </form>
       )}
       {!chosenSet && (
-        <div className="flex h-full flex-col items-center gap-5 overflow-y-auto pt-10 sm:pt-0">
+        <div className="relative flex h-full flex-col items-center gap-5 overflow-y-auto pt-10 sm:pt-0">
           <div className="my-auto flex w-full flex-col items-center gap-5 py-2">
-            <h2 className="text-center font-display text-2xl text-ui-paper">
+            <h2 className="max-w-xl -rotate-1 ui-tape ui-scrap px-5 pt-2.5 pb-1.5 text-center font-display text-2xl">
               {sets.length > 0 ? t('chooseBinder') : t('noBinderYet')}
             </h2>
             {sets.length > 0 && binders.every(({ owned }) => owned === 0) && (
-              <p className="text-center text-ui-paper/80">{t('noCardsYet')}</p>
+              <p className="text-center text-ui-ink/80">{t('noCardsYet')}</p>
             )}
-            <div ref={binderList} className="flex w-full flex-wrap justify-center gap-5">
+            <div ref={binderList} className="flex w-full flex-wrap justify-center gap-6 pt-2">
               {binders.map(({ owned, ...set }) => (
                 <button
                   key={set.id}
                   type="button"
-                  disabled={owned === 0}
+                  // Not `disabled`, which would take the focus away from the keyboard.
+                  aria-disabled={owned === 0}
                   aria-label={`${set.name}. ${t('progress', { owned, total: set.slotTotal })}`}
-                  onClick={() => choose(set)}
-                  className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,11rem)] rounded-md outline-offset-4 transition-transform enabled:cursor-pointer enabled:hover:-translate-y-1 enabled:focus-visible:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-45 disabled:grayscale"
+                  onClick={() => owned > 0 && choose(set)}
+                  className="ui-pop-in relative aspect-[5/6] w-[min(42%,46vh,11rem)] rounded-md outline-none transition-transform odd:-rotate-2 even:rotate-[1.5deg] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-dashed focus-visible:outline-ui-stamp not-aria-disabled:cursor-pointer not-aria-disabled:hover:-translate-y-1 not-aria-disabled:focus-visible:-translate-y-1 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:grayscale"
                 >
                   <BinderCover set={set} owned={owned} />
                 </button>
@@ -416,22 +582,22 @@ export function BinderView({ sets, collection, onClose }: Props) {
         </div>
       )}
       {chosenSet && isOpening && (
-        <BinderOpening
-          set={chosenSet}
-          owned={ownedInSet(collection, chosenSet.id)}
-          isWide={isWide}
-        />
+        <div className="relative h-full">
+          <BinderOpening
+            set={chosenSet}
+            owned={ownedInSet(collection, chosenSet.id)}
+            isWide={isWide}
+          />
+        </div>
       )}
       {chosenSet && !isOpening && (
-        <div className="h-full pt-12 sm:pt-0">
+        <div className="relative h-full pt-12 sm:pt-0">
           {catalogue && <Pages catalogue={catalogue} collection={collection} />}
           {!catalogue && !hasFailed && (
-            <div className="flex h-full items-center justify-center text-xl text-ui-paper">
-              {t('loading')}
-            </div>
+            <div className="flex h-full items-center justify-center text-xl">{t('loading')}</div>
           )}
           {!catalogue && hasFailed && (
-            <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-ui-paper">
+            <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
               <p className="max-w-sm text-xl">{t('error')}</p>
               <button
                 type="button"
