@@ -221,7 +221,129 @@
         "unavailable": "Hum, j’ai égaré mes cartes… Réessaie dans un instant."
       },
       "accept": "Jouons !",
-      "title": "le champion du memory"
+      "title": "le champion du memory",
+      "proverbs": {
+        "1": {
+          "text": "La patience est un arbre aux racines amères, mais aux fruits très doux.",
+          "source": "Proverbe persan"
+        },
+        "2": {
+          "text": "Tombe sept fois, relève-toi huit.",
+          "source": "Proverbe japonais"
+        },
+        "3": {
+          "text": "Un voyage de mille lieues commence toujours par un premier pas.",
+          "source": "Proverbe chinois"
+        },
+        "4": {
+          "text": "Le meilleur moment pour planter un arbre, c’était il y a vingt ans. Le deuxième meilleur, c’est maintenant.",
+          "source": "Proverbe chinois"
+        },
+        "5": {
+          "text": "Même les singes tombent des arbres.",
+          "source": "Proverbe japonais"
+        },
+        "6": {
+          "text": "L’eau qui tombe goutte à goutte finit par creuser la pierre.",
+          "source": "Proverbe chinois"
+        },
+        "7": {
+          "text": "Celui qui pose une question a l’air bête cinq minutes. Celui qui n’en pose pas le reste toute sa vie.",
+          "source": "Proverbe chinois"
+        },
+        "8": {
+          "text": "Quand tu bois de l’eau, pense à la source.",
+          "source": "Proverbe chinois"
+        },
+        "9": {
+          "text": "Le bambou qui plie est plus fort que le chêne qui résiste.",
+          "source": "Proverbe japonais"
+        },
+        "10": {
+          "text": "La grenouille au fond du puits ne connaît pas l’océan.",
+          "source": "Proverbe japonais"
+        },
+        "11": {
+          "text": "Une seule journée passée avec un maître vaut mieux que mille jours d’étude.",
+          "source": "Proverbe japonais"
+        },
+        "12": {
+          "text": "Les petits ruisseaux font les grandes rivières.",
+          "source": "Proverbe chinois"
+        },
+        "13": {
+          "text": "Si tu es pressé, fais un détour.",
+          "source": "Proverbe japonais"
+        },
+        "14": {
+          "text": "On ne voit pas la forêt quand on a le nez sur un arbre.",
+          "source": "Proverbe chinois"
+        },
+        "15": {
+          "text": "La tortue qui avance lentement va plus loin que le lièvre endormi.",
+          "source": "Dicton de Papy Caillou"
+        },
+        "16": {
+          "text": "Un sourire coûte moins cher que l’électricité, mais il donne autant de lumière.",
+          "source": "Proverbe écossais… euh, non, coréen !"
+        },
+        "17": {
+          "text": "Même un long voyage se fait une tasse de thé à la fois.",
+          "source": "Proverbe chinois"
+        },
+        "18": {
+          "text": "Le clou qui dépasse appelle le marteau.",
+          "source": "Proverbe japonais"
+        },
+        "19": {
+          "text": "Apprendre, c’est comme ramer à contre-courant : dès qu’on s’arrête, on recule.",
+          "source": "Proverbe chinois"
+        },
+        "20": {
+          "text": "Les mots doux ne coûtent rien et valent beaucoup.",
+          "source": "Proverbe coréen"
+        },
+        "21": {
+          "text": "Une maison sans livres est comme un corps sans âme.",
+          "source": "Proverbe chinois"
+        },
+        "22": {
+          "text": "Le riz mûr baisse la tête.",
+          "source": "Proverbe japonais"
+        },
+        "23": {
+          "text": "Un ami, c’est quelqu’un qui connaît la chanson de ton cœur.",
+          "source": "Proverbe vietnamien"
+        },
+        "24": {
+          "text": "Ne crains pas d’avancer lentement, crains seulement de t’arrêter.",
+          "source": "Proverbe chinois"
+        },
+        "25": {
+          "text": "Même la plus haute tour commence au sol.",
+          "source": "Proverbe chinois"
+        },
+        "26": {
+          "text": "Le vent ne souffle pas toujours dans le sens du bateau.",
+          "source": "Proverbe chinois"
+        },
+        "27": {
+          "text": "Quand le sage montre la lune, l’idiot regarde le doigt.",
+          "source": "Proverbe chinois"
+        },
+        "28": {
+          "text": "Mieux vaut allumer une bougie que maudire l’obscurité.",
+          "source": "Proverbe chinois"
+        },
+        "29": {
+          "text": "La mémoire est un jardin : il faut l’arroser tous les jours.",
+          "source": "Dicton de Papy Caillou"
+        },
+        "30": {
+          "text": "Les cartes retournées ne mentent jamais, mais elles aiment se cacher.",
+          "source": "Dicton de Papy Caillou"
+        }
+      }
     },
     "boy": {
       "name": "Lucas",

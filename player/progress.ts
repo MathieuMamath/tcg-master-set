@@ -60,6 +60,8 @@ export type PlayerProgress = {
   basketballHighScore: number;
   // The day of the last reward, so that the machine can say when it's already been paid.
   basketballRewardedOn: string | null;
+  // The day Papy Caillou was last beaten at memory, after which he only shares sayings.
+  memoryWonOn: string | null;
 };
 
 export type OpenedBooster = {
@@ -102,11 +104,16 @@ async function loadBasketballHighScore(database: Reader, userId: string): Promis
   return best?.score ?? 0;
 }
 
-async function loadBasketballRewardDay(database: Reader, userId: string): Promise<string | null> {
+// The day a quest last paid its reward.
+async function loadRewardDay(
+  database: Reader,
+  userId: string,
+  questId: string,
+): Promise<string | null> {
   const [attempt] = await database
     .select({ completedOn: playerQuests.completedOn })
     .from(playerQuests)
-    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, BASKETBALL_QUEST)));
+    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId)));
   return attempt?.completedOn ?? null;
 }
 
@@ -150,7 +157,8 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     ),
     spot: parseSpot(spots[0]),
     basketballHighScore: await loadBasketballHighScore(getDb(), userId),
-    basketballRewardedOn: await loadBasketballRewardDay(getDb(), userId),
+    basketballRewardedOn: await loadRewardDay(getDb(), userId, BASKETBALL_QUEST),
+    memoryWonOn: await loadRewardDay(getDb(), userId, GRANDPA_QUEST),
   };
 }
 

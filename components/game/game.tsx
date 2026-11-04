@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
 import { addToCollection } from '@/game/binder';
@@ -10,6 +10,7 @@ import { stopAt } from '@/game/bus';
 import type { PlayableSet, SetId } from '@/game/card-sets';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
+import { nextProverb, pickProverb } from '@/game/proverbs';
 import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests';
 import {
   bindersForSale,
@@ -86,6 +87,9 @@ export function Game({ player, sets, progress }: Props) {
   const [questLine, setQuestLine] = useState<QuestLine>('greeting');
   const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
   const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
+  const [memoryWonOn, setMemoryWonOn] = useState(progress.memoryWonOn);
+  // The saying Papy Caillou shares once beaten, picked anew at each visit to the park.
+  const [proverb, setProverb] = useState(() => pickProverb());
   const [isFishing, setIsFishing] = useState(false);
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
@@ -113,6 +117,9 @@ export function Game({ player, sets, progress }: Props) {
   const tTown = useTranslations('Town');
   const tHails = useTranslations('Hails');
   const tBus = useTranslations('Bus');
+  const tQuest = useTranslations('Quest');
+  // Beaten for the day, Papy Caillou only shares a saying: there is nothing to talk about.
+  const isPapySaying = interaction === 'grandpa' && memoryWonOn === questDay(new Date());
   const isDialogOpen =
     isTalking ||
     isBinderOpen ||
@@ -127,10 +134,10 @@ export function Game({ player, sets, progress }: Props) {
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
   const boosterTotal = totalBoosters(wallet);
-  const bubble = useRef<HTMLButtonElement>(null);
+  const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
-  const controls = useRef({ interaction, isDialogOpen });
-  controls.current = { interaction, isDialogOpen };
+  const controls = useRef({ interaction, isDialogOpen, isPapySaying });
+  controls.current = { interaction, isDialogOpen, isPapySaying };
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -158,7 +165,11 @@ export function Game({ player, sets, progress }: Props) {
       if (controls.current.isDialogOpen) {
         return;
       }
-      if (event.code === INTERACT_KEY && controls.current.interaction) {
+      if (
+        event.code === INTERACT_KEY &&
+        controls.current.interaction &&
+        !controls.current.isPapySaying
+      ) {
         event.preventDefault();
         releaseKeys();
         if (controls.current.interaction === 'binder') {
@@ -374,6 +385,9 @@ export function Game({ player, sets, progress }: Props) {
   // Stepping out of Léa's flat gives up on the quest, since the dust stays inside.
   const changePlace = useCallback((next: SidePlaceId) => {
     setPlace(next);
+    if (next === 'park') {
+      setProverb((previous) => nextProverb(previous));
+    }
     if (next !== 'flat') {
       setQuest(null);
       setQuestLine((line) => (line === 'hurry' ? 'greeting' : line));
@@ -413,6 +427,7 @@ export function Game({ player, sets, progress }: Props) {
     setMemoryCards(null);
     if (ending?.status === 'won') {
       showSaveNotice();
+      setMemoryWonOn(questDay(new Date()));
     }
     if (ending) {
       setWallet(ending.wallet);
@@ -570,10 +585,32 @@ export function Game({ player, sets, progress }: Props) {
           </svg>
         </button>
       </div>
-      {interaction && !isDialogOpen && isTalk(interaction) && (
+      {isPapySaying && !isDialogOpen && (
+        // Papy Caillou's saying, in his speech bubble: something to read, not to press.
+        <p
+          ref={bubble as RefObject<HTMLParagraphElement | null>}
+          aria-live="polite"
+          style={{ transform: 'translate(-200vw, 0)' }}
+          className="pointer-events-none absolute top-0 left-0 pb-2.5 font-game text-ui-ink"
+        >
+          <span className="ui-pop-in block w-max max-w-[min(22rem,80vw)] rounded-[2rem] bg-ui-paper px-6 py-3 text-center shadow-[3px_4px_0_var(--ui-shadow)]">
+            <span className="block text-lg leading-snug">
+              « {tQuest(`grandpa.proverbs.${proverb}.text` as 'grandpa.proverbs.1.text')} »
+            </span>
+            <span className="mt-1 block text-sm text-ui-ink/60">
+              {tQuest(`grandpa.proverbs.${proverb}.source` as 'grandpa.proverbs.1.source')}
+            </span>
+          </span>
+          <span
+            aria-hidden="true"
+            className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
+          />
+        </p>
+      )}
+      {interaction && !isDialogOpen && !isPapySaying && isTalk(interaction) && (
         // A speech bubble that the scene moves just above the head of who the player can talk to.
         <button
-          ref={bubble}
+          ref={bubble as RefObject<HTMLButtonElement | null>}
           type="button"
           aria-label={t(interaction)}
           onClick={interact}
