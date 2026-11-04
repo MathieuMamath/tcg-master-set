@@ -4,6 +4,13 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.58](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.57...v0.1.58) (2026-11-04)
+
+### Features
+
+* **binder:** restyle the binder in paper, with pages that turn ([#59](https://github.com/MathieuMamath/tcg-master-set/issues/59)) ([37295c5](https://github.com/MathieuMamath/tcg-master-set/commit/37295c50163f9119ac4017256424c8792517194f))
+* **quests:** add Gaspard's dalgona stand, a fifth daily quest ([#60](https://github.com/MathieuMamath/tcg-master-set/issues/60)) ([76b5a6b](https://github.com/MathieuMamath/tcg-master-set/commit/76b5a6be1733090836122134af21702cf86abe54))
+
 ## [0.1.57](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.56...v0.1.57) (2026-11-04)
 
 ### Features
