@@ -1,4 +1,5 @@
 const VERTICAL_STEPS: Record<string, -1 | 1> = { ArrowUp: -1, KeyW: -1, ArrowDown: 1, KeyS: 1 };
+const PAGE_STEPS: Record<string, -1 | 1> = { PageUp: -1, PageDown: 1 };
 const HORIZONTAL_STEPS: Record<string, -1 | 1> = {
   ArrowLeft: -1,
   KeyA: -1,
@@ -13,6 +14,11 @@ export function verticalStep(code: string): -1 | 1 | undefined {
 
 export function horizontalStep(code: string): -1 | 1 | undefined {
   return HORIZONTAL_STEPS[code];
+}
+
+// Turning a whole page, such as in a binder, where the arrows move from pocket to pocket.
+export function pageStep(code: string): -1 | 1 | undefined {
+  return PAGE_STEPS[code];
 }
 
 // Goes round at both ends. With nothing chosen yet, a step lands on the nearest end.

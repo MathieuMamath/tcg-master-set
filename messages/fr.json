@@ -151,7 +151,8 @@
       "firstEdition": "1re éd.",
       "wPromo": "Promo"
     },
-    "noBinderYet": "Achète ton premier classeur chez Mamie Noisette, à la librairie après la boutique."
+    "noBinderYet": "Achète ton premier classeur chez Mamie Noisette, à la librairie après la boutique.",
+    "pageKeys": "Page préc. et Page suiv. pour tourner les pages"
   },
   "Settings": {
     "open": "Réglages",

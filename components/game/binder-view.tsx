@@ -16,7 +16,7 @@ import {
   turnPage,
 } from '@/game/binder';
 import type { PlayableSet } from '@/game/card-sets';
-import { horizontalStep } from '@/game/menu-keys';
+import { pageStep } from '@/game/menu-keys';
 import {
   BinderCover,
   BinderOpening,
@@ -25,7 +25,7 @@ import {
   WIDE_PAGE_WIDTH_CLASS,
 } from './binder-cover';
 import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
-import { isFocusLost, moveThroughChoices, moveThroughChoicesVertically } from './menu-focus';
+import { isFocusLost, moveThroughChoices, moveThroughChoicesOnScreen } from './menu-focus';
 import { TiltCard } from './tilt-card';
 import { useWideScreen } from './use-wide-screen';
 
@@ -166,7 +166,8 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
       if (detail) {
         return;
       }
-      const step = horizontalStep(event.code);
+      // The arrows move from pocket to pocket, so the page keys turn the pages.
+      const step = pageStep(event.code);
       if (step) {
         event.preventDefault();
         setHasTurned(true);
@@ -194,7 +195,7 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
     // biome-ignore lint/a11y/noStaticElementInteractions: only catches keys from the buttons inside.
     <div
       ref={root}
-      onKeyDown={moveThroughChoicesVertically}
+      onKeyDown={moveThroughChoicesOnScreen}
       className="flex h-full flex-col items-center gap-3"
     >
       <div className="text-center text-ui-paper">
@@ -251,6 +252,7 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
           ▶
         </button>
       </div>
+      <p className="text-sm text-ui-paper/70 pointer-coarse:hidden">{t('pageKeys')}</p>
       {detail && (
         <CardDetail
           slot={detail}

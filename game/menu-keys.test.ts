@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { gridStep, horizontalStep, nextChoice, verticalStep } from './menu-keys';
+import { gridStep, horizontalStep, nextChoice, pageStep, verticalStep } from './menu-keys';
 
 test('the movement keys step through a menu', () => {
   expect(verticalStep('ArrowUp')).toBe(-1);
@@ -47,4 +47,10 @@ test('stops at the edges of a grid', () => {
 test('starts a grid at its first item, and ignores other keys', () => {
   expect(gridStep(-1, 'ArrowDown', 3, 7)).toBe(0);
   expect(gridStep(2, 'Enter', 3, 7)).toBeUndefined();
+});
+
+test('the page keys turn a whole page', () => {
+  expect(pageStep('PageUp')).toBe(-1);
+  expect(pageStep('PageDown')).toBe(1);
+  expect(pageStep('ArrowRight')).toBeUndefined();
 });

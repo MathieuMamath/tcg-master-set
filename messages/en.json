@@ -151,7 +151,8 @@
       "firstEdition": "1st ed.",
       "wPromo": "Promo"
     },
-    "noBinderYet": "Buy your first binder from Granny Hazel, at the bookshop past the shop."
+    "noBinderYet": "Buy your first binder from Granny Hazel, at the bookshop past the shop.",
+    "pageKeys": "Page Up and Page Down turn the pages"
   },
   "Settings": {
     "open": "Settings",
