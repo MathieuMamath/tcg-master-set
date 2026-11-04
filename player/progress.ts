@@ -62,6 +62,8 @@ export type PlayerProgress = {
   basketballRewardedOn: string | null;
   // The day Papy Caillou was last beaten at memory, after which he only shares sayings.
   memoryWonOn: string | null;
+  // The day Léa's walls were last dusted, after which she can breathe again.
+  cleanedOn: string | null;
 };
 
 export type OpenedBooster = {
@@ -158,6 +160,7 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     basketballHighScore: await loadBasketballHighScore(getDb(), userId),
     basketballRewardedOn: await loadRewardDay(getDb(), userId, BASKETBALL_QUEST),
     memoryWonOn: await loadRewardDay(getDb(), userId, GRANDPA_QUEST),
+    cleanedOn: await loadRewardDay(getDb(), userId, GRANDMA_QUEST),
   };
 }
 

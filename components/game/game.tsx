@@ -98,6 +98,7 @@ export function Game({ player, sets, progress }: Props) {
   const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
   const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
   const [memoryWonOn, setMemoryWonOn] = useState(progress.memoryWonOn);
+  const [cleanedOn, setCleanedOn] = useState(progress.cleanedOn);
   // The saying Papy Caillou shares once beaten, picked anew at each visit to the park.
   const [proverb, setProverb] = useState(() => pickProverb());
   const [isFishing, setIsFishing] = useState(false);
@@ -349,6 +350,7 @@ export function Game({ player, sets, progress }: Props) {
       }
       const { hasStarted } = await response.json();
       if (!hasStarted) {
+        setCleanedOn(questDay(new Date()));
         return 'alreadyDone';
       }
       isFinishingQuest.current = false;
@@ -386,6 +388,7 @@ export function Game({ player, sets, progress }: Props) {
       setWallet(updated);
       if (isRewarded) {
         showSaveNotice();
+        setCleanedOn(questDay(new Date()));
       }
       setQuestLine(isRewarded ? 'rewarded' : 'failed');
     } catch {
@@ -564,6 +567,7 @@ export function Game({ player, sets, progress }: Props) {
           older: tShopkeeper('names.older'),
         }}
         stains={quest?.stains ?? []}
+        isLeaCalm={cleanedOn === questDay(new Date())}
         onInteractionChange={setInteraction}
         onScrub={scrub}
         startSpot={progress.spot}
