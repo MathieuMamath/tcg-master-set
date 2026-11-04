@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.60](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.59...v0.1.60) (2026-11-04)
+
+### Features
+
+* **quests:** add an activity tracker with the day's quests and a daily bonus ([#62](https://github.com/MathieuMamath/tcg-master-set/issues/62)) ([99b4661](https://github.com/MathieuMamath/tcg-master-set/commit/99b466117f0d66083ffedd05641439b6d550bf35))
+
 ## [0.1.59](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.58...v0.1.59) (2026-11-04)
 
 ### Features
