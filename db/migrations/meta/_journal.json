@@ -71,6 +71,13 @@
       "when": 1793796252284,
       "tag": "0009_cuddly_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793835894849,
+      "tag": "0010_next_terrax",
+      "breakpoints": true
     }
   ]
 }

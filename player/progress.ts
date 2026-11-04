@@ -65,6 +65,7 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import { type PlayerSpot, parseSpot } from '@/game/spot';
+import { recordEvent } from './events';
 
 // Either the database itself or a transaction of it.
 type Database = ReturnType<typeof getDb>;
@@ -185,6 +186,7 @@ export async function claimDailyBonus(userId: string): Promise<DailyBonusClaim> 
       .update(playerWallets)
       .set({ coins: sql`${playerWallets.coins} + ${DAILY_BONUS_COINS}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
+    await recordEvent(transaction, userId, 'daily_bonus.claimed', { coins: DAILY_BONUS_COINS });
     return {
       isClaimed: true,
       activity: { ...activity, isBonusClaimed: true },
@@ -262,6 +264,7 @@ async function startQuestAttempt(
         target: [playerQuests.userId, playerQuests.questId],
         set: { startedAt: now },
       });
+    await recordEvent(transaction, userId, 'quest.started', { questId });
     return { hasStarted: true };
   });
 }
@@ -287,6 +290,9 @@ export async function finishGrandmaQuest(
       .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, GRANDMA_QUEST)))
       .for('update');
     if (!attempt || !canFinishQuest(attempt, now)) {
+      if (attempt?.startedAt) {
+        await recordEvent(transaction, userId, 'quest.rejected', { questId: GRANDMA_QUEST });
+      }
       return { isRewarded: false, wallet: await loadWallet(transaction, userId) };
     }
 
@@ -298,6 +304,12 @@ export async function finishGrandmaQuest(
       .update(playerWallets)
       .set({ coins: sql`${playerWallets.coins} + ${QUEST_REWARD}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
+    await recordEvent(transaction, userId, 'quest.finished', {
+      questId: GRANDMA_QUEST,
+      outcome: 'rewarded',
+      coins: QUEST_REWARD,
+      boosterSetId: null,
+    });
     return { isRewarded: true, wallet: await loadWallet(transaction, userId) };
   });
 }
@@ -323,6 +335,7 @@ export async function startGrandpaQuest(userId: string): Promise<{ hasStarted: b
         target: [playerQuests.userId, playerQuests.questId],
         set: { startedAt: now, memoryGame },
       });
+    await recordEvent(transaction, userId, 'quest.started', { questId: GRANDPA_QUEST });
     return { hasStarted: true };
   });
 }
@@ -366,6 +379,13 @@ export async function flipGrandpaCard(
         .update(playerQuests)
         .set({ startedAt: null, memoryGame: null })
         .where(quest);
+      await recordEvent(transaction, userId, 'quest.finished', {
+        questId: GRANDPA_QUEST,
+        outcome: 'lost',
+        coins: 0,
+        boosterSetId: null,
+        moves: game.moves,
+      });
       return answer;
     }
 
@@ -377,20 +397,30 @@ export async function flipGrandpaCard(
       .update(playerWallets)
       .set({ coins: sql`${playerWallets.coins} + ${MEMORY_REWARD}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
+    await recordEvent(transaction, userId, 'quest.finished', {
+      questId: GRANDPA_QUEST,
+      outcome: 'won',
+      coins: MEMORY_REWARD,
+      boosterSetId: null,
+      moves: game.moves,
+    });
     return { ...answer, wallet: await loadWallet(transaction, userId) };
   });
 }
 
 // The machine can always be played for the high score, so this keeps the day of the last reward.
 export async function startBasketball(userId: string): Promise<void> {
-  const startedAt = new Date();
-  await getDb()
-    .insert(playerQuests)
-    .values({ userId, questId: BASKETBALL_QUEST, startedAt })
-    .onConflictDoUpdate({
-      target: [playerQuests.userId, playerQuests.questId],
-      set: { startedAt },
-    });
+  await getDb().transaction(async (transaction) => {
+    const startedAt = new Date();
+    await transaction
+      .insert(playerQuests)
+      .values({ userId, questId: BASKETBALL_QUEST, startedAt })
+      .onConflictDoUpdate({
+        target: [playerQuests.userId, playerQuests.questId],
+        set: { startedAt },
+      });
+    await recordEvent(transaction, userId, 'quest.started', { questId: BASKETBALL_QUEST });
+  });
 }
 
 export type BasketballResult = {
@@ -424,6 +454,9 @@ export async function finishBasketball(
       .for('update');
     const score = scoreOfShots(shots);
     if (!attempt?.startedAt || score === null || !canFinishBasketball(attempt.startedAt, now)) {
+      if (attempt?.startedAt) {
+        await recordEvent(transaction, userId, 'quest.rejected', { questId: BASKETBALL_QUEST });
+      }
       return null;
     }
 
@@ -460,11 +493,19 @@ export async function finishBasketball(
         });
     }
 
+    const paidReward = boosterSetId ? 'booster' : reward === 'none' ? 'none' : 'coins';
+    await recordEvent(transaction, userId, 'quest.finished', {
+      questId: BASKETBALL_QUEST,
+      outcome: wasAlreadyPaid ? 'alreadyPaid' : paidReward,
+      coins: paidReward === 'coins' ? BASKETBALL_COINS : 0,
+      boosterSetId,
+      score,
+    });
     return {
       score,
       highScore: Math.max(score, previousBest),
       isNewHighScore,
-      reward: boosterSetId ? 'booster' : reward === 'none' ? 'none' : 'coins',
+      reward: paidReward,
       wasAlreadyPaid,
       boosterSetId,
       wallet: await loadWallet(transaction, userId),
@@ -495,6 +536,7 @@ export async function startDalgona(
         target: [playerQuests.userId, playerQuests.questId],
         set: { startedAt: now },
       });
+    await recordEvent(transaction, userId, 'quest.started', { questId: DALGONA_QUEST });
     return { hasStarted: true, shape: shapeOf(now) };
   });
 }
@@ -514,9 +556,6 @@ export async function finishDalgona(
   pressesSent: unknown,
 ): Promise<DalgonaResult | null> {
   const presses = parsePresses(pressesSent);
-  if (!presses) {
-    return null;
-  }
   return getDb().transaction(async (transaction) => {
     const now = new Date();
     await loadWallet(transaction, userId);
@@ -530,8 +569,9 @@ export async function finishDalgona(
       return null;
     }
     const shape = shapeOf(attempt.startedAt);
-    const carving = replayDalgona(shape, presses);
-    if (!canFinishDalgona(attempt.startedAt, now, carving.ms)) {
+    const carving = presses && replayDalgona(shape, presses);
+    if (!carving || !canFinishDalgona(attempt.startedAt, now, carving.ms)) {
+      await recordEvent(transaction, userId, 'quest.rejected', { questId: DALGONA_QUEST });
       return null;
     }
 
@@ -547,6 +587,13 @@ export async function finishDalgona(
         .set({ coins: sql`${playerWallets.coins} + ${coins}`, updatedAt: new Date() })
         .where(eq(playerWallets.userId, userId));
     }
+    await recordEvent(transaction, userId, 'quest.finished', {
+      questId: DALGONA_QUEST,
+      outcome: isCarved ? 'carved' : 'broken',
+      coins,
+      boosterSetId: null,
+      shape,
+    });
     return {
       status: isCarved ? 'carved' : 'broken',
       shape,
@@ -590,6 +637,12 @@ export async function drawRaffleBall(userId: string): Promise<RaffleDraw> {
         .set({ coins: sql`${playerWallets.coins} + ${coins}`, updatedAt: new Date() })
         .where(eq(playerWallets.userId, userId));
     }
+    await recordEvent(transaction, userId, 'quest.finished', {
+      questId: RAFFLE_QUEST,
+      outcome,
+      coins,
+      boosterSetId: null,
+    });
     return { hasDrawn: true, outcome, coins, wallet: await loadWallet(transaction, userId) };
   });
 }
@@ -644,19 +697,41 @@ export async function reelInItem(userId: string): Promise<FishingCatch> {
         .set({ coins: sql`${playerWallets.coins} + ${ITEM_COINS}`, updatedAt: new Date() })
         .where(eq(playerWallets.userId, userId));
     }
+    await recordEvent(transaction, userId, 'quest.finished', {
+      questId: FISHING_QUEST,
+      outcome: item === 'treasure' ? 'treasure' : 'item',
+      coins: boosterSetId ? 0 : ITEM_COINS,
+      boosterSetId,
+      item,
+    });
     return { item, boosterSetId, wallet: await loadWallet(transaction, userId) };
   });
 }
 
+// A save in another place than the last one means the player went there, through a door or by
+// bus. A save in the same place, such as the one made when the page is left, records nothing.
 export async function savePlayerSpot(userId: string, spot: PlayerSpot): Promise<void> {
   const { place, x, facing } = spot;
-  await getDb()
-    .insert(playerSpots)
-    .values({ userId, place, x, facing })
-    .onConflictDoUpdate({
-      target: playerSpots.userId,
-      set: { place, x, facing, updatedAt: new Date() },
-    });
+  await getDb().transaction(async (transaction) => {
+    const [previous] = await transaction
+      .select({ place: playerSpots.place })
+      .from(playerSpots)
+      .where(eq(playerSpots.userId, userId))
+      .for('update');
+    await transaction
+      .insert(playerSpots)
+      .values({ userId, place, x, facing })
+      .onConflictDoUpdate({
+        target: playerSpots.userId,
+        set: { place, x, facing, updatedAt: new Date() },
+      });
+    if (previous?.place !== place) {
+      await recordEvent(transaction, userId, 'place.entered', {
+        place,
+        from: previous?.place ?? null,
+      });
+    }
+  });
 }
 
 // A set's boosters need its binder first. The coins and the booster change together, or not at all. The coins are only taken if they are
@@ -694,6 +769,7 @@ export async function buyBooster(
         target: [playerBoosters.userId, playerBoosters.setId],
         set: { count: sql`${playerBoosters.count} + ${quantity}` },
       });
+    await recordEvent(transaction, userId, 'booster.bought', { setId, quantity, coins: price });
     return { wallet: await loadWallet(transaction, userId), line: 'thanks' as const };
   });
 }
@@ -732,6 +808,7 @@ export async function buyBinder(
       return result('notEnoughCoins');
     }
 
+    await recordEvent(transaction, userId, 'binder.bought', { setId, coins: BINDER_PRICE });
     return result('thanks');
   });
 }
@@ -786,13 +863,18 @@ export async function openOwnedBooster(
     });
 
     // In the same transaction, so that the coins can't be lost or earned twice.
+    const duplicateTotal = cards.reduce((total, { coins }) => total + coins, 0);
     await transaction
       .update(playerWallets)
-      .set({
-        coins: sql`${playerWallets.coins} + ${cards.reduce((total, { coins }) => total + coins, 0)}`,
-        updatedAt: new Date(),
-      })
+      .set({ coins: sql`${playerWallets.coins} + ${duplicateTotal}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
+    await recordEvent(transaction, userId, 'booster.opened', {
+      setId,
+      isGodPack: opened.isGodPack,
+      bestTier: Math.max(0, ...cards.map(({ tier }) => tier)),
+      newCards: cards.filter(({ isNew }) => isNew).length,
+      duplicateCoins: duplicateTotal,
+    });
 
     return {
       ...details,
