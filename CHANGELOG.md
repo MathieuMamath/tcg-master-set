@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.48](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.47...v0.1.48) (2026-11-04)
+
+### Features
+
+* **city:** open the bookshop in paper, kept by Mamie Noisette ([#48](https://github.com/MathieuMamath/tcg-master-set/issues/48)) ([adbccb4](https://github.com/MathieuMamath/tcg-master-set/commit/adbccb41573ea91ee7f48d5b2c4a7a205ddd0845))
+
 ## [0.1.47](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.46...v0.1.47) (2026-11-04)
 
 ### Features
