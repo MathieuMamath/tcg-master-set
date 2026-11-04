@@ -260,7 +260,7 @@
       }
     },
     "memory": {
-      "title": "Jeu de mémoire",
+      "title": "Le memory de Papy Caillou",
       "moves": "Coups : {moves} / {limit}",
       "pairs": "Paires : {found} / {total}",
       "giveUp": "Abandonner",

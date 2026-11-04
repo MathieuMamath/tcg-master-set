@@ -260,7 +260,7 @@
       }
     },
     "memory": {
-      "title": "Memory game",
+      "title": "Grandpa Pebble’s memory game",
       "moves": "Moves: {moves} / {limit}",
       "pairs": "Pairs: {found} / {total}",
       "giveUp": "Give up",
