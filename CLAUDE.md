@@ -24,7 +24,7 @@ Work reaches `main` through a squashed PR, never a direct push. Lefthook refuses
 - **Commits and PR titles**: Conventional Commits, `type(scope): subject`.
 - **Types**: `feat`, `fix`, `perf`, `docs`, `refactor`, `revert`, `chore`, `build`, `ci`, `style`, `test`, plus `balance` (numbers change, no new mechanic) and `content` (cards, sets, NPCs or text added, no new system).
 - **Scopes** name systems, not files: `city`, `shop`, `boosters`, `binder`, `quests`, `npc`, `cards`, `accounts`, `db`, `i18n`, `deps`.
-- **`/open-pr`** runs the gate, pushes and writes the description. **`/sync`** cleans up once the user says a PR is merged.
+- **`/open-pr`** runs the gate, pushes, writes the description and turns on Auto-fix. **`/sync`** cleans up once the user says a PR is merged.
 - **Commit or push only when asked.** Merging is always the user's call.
 - **Never write a CI-exclusion marker** in a commit message or PR text. GitHub Actions obeys it anywhere in the message, which skips the release.
 - **Do not edit `CHANGELOG.md` or the version by hand.** Every merge to `main` makes the `release` job in `.github/workflows/ci.yml` bump the version, regenerate the changelog, tag `vX.Y.Z` and publish a GitHub Release.
