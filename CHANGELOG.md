@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.54](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.53...v0.1.54) (2026-11-04)
+
+### Features
+
+* **quests:** open the park by bus, with Papy Caillou and Lucas ([#55](https://github.com/MathieuMamath/tcg-master-set/issues/55)) ([defbe94](https://github.com/MathieuMamath/tcg-master-set/commit/defbe9449f931bf79dcab0c70b2ee5728b8345f1))
+
 ## [0.1.53](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.52...v0.1.53) (2026-11-04)
 
 ### Features
