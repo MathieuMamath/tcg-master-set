@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.62](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.61...v0.1.62) (2026-11-05)
+
+### Features
+
+* **db:** log the game's events for its statistics ([#64](https://github.com/MathieuMamath/tcg-master-set/issues/64)) ([9d8f5fb](https://github.com/MathieuMamath/tcg-master-set/commit/9d8f5fb1105f6b980478f066a35cabeff858513a))
+
 ## [0.1.61](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.60...v0.1.61) (2026-11-04)
 
 ### Documentation
