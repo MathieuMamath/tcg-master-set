@@ -500,7 +500,8 @@
     "title": "Bus map",
     "line": "Line 1",
     "stops": {
-      "mainStreet": "High Street",
+      "downtown": "Big City",
+      "mainStreet": "Little Vale",
       "park": "Linden Park"
     },
     "here": "You are here",

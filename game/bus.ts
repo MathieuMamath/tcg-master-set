@@ -1,12 +1,17 @@
-import { PARK_SPOTS, type SidePlaceId, TOWN_BUILDINGS } from './side-rooms';
+import { DOWNTOWN_SPOTS, PARK_SPOTS, type SidePlaceId, TOWN_BUILDINGS } from './side-rooms';
 
 // The stops the bus serves, in the order of its route, and where the player gets off at each:
 // just past the stop's sign, facing along the street.
-export type BusStop = { id: 'mainStreet' | 'park'; place: SidePlaceId; arrivalX: number };
+export type BusStop = {
+  id: 'downtown' | 'mainStreet' | 'park';
+  place: SidePlaceId;
+  arrivalX: number;
+};
 
 const GETTING_OFF = 0.5;
 
 export const BUS_STOPS: readonly BusStop[] = [
+  { id: 'downtown', place: 'downtown', arrivalX: DOWNTOWN_SPOTS.busStop.signX + GETTING_OFF },
   { id: 'mainStreet', place: 'town', arrivalX: TOWN_BUILDINGS.busStop.signX + GETTING_OFF },
   { id: 'park', place: 'park', arrivalX: PARK_SPOTS.busStop.signX + GETTING_OFF },
 ];

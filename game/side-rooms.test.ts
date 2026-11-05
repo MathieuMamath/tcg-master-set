@@ -10,6 +10,10 @@ import {
   BOOKSHOP_FURNITURE,
   BOOKSHOP_SELLER_X,
   BOOKSHOP_WALLS,
+  DOWNTOWN_BACK_TOWERS,
+  DOWNTOWN_ENDS,
+  DOWNTOWN_SPOTS,
+  DOWNTOWN_TOWERS,
   exitAlong,
   FLAT,
   FLAT_FURNITURE,
@@ -124,6 +128,31 @@ describe('the street', () => {
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.bookshop.doorX)).toBe('enterBookshop');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.flats.doorX)).toBe('enterFlat');
     expect(interactionAlong(TOWN, TOWN_BUILDINGS.arcade.doorX)).toBe('enterArcade');
+  });
+});
+
+describe('downtown', () => {
+  test('its towers stand along the pavement, side by side, past the bus stop', () => {
+    for (const row of [DOWNTOWN_TOWERS, DOWNTOWN_BACK_TOWERS]) {
+      for (const [index, tower] of row.entries()) {
+        expect(tower.x - tower.width / 2).toBeGreaterThan(DOWNTOWN_ENDS.left - 2);
+        expect(tower.x + tower.width / 2).toBeLessThan(DOWNTOWN_ENDS.right + 2);
+        const next = row[index + 1];
+        if (next) {
+          expect(tower.x + tower.width / 2).toBeLessThanOrEqual(next.x - next.width / 2 + 0.6);
+        }
+      }
+    }
+    const { busStop } = DOWNTOWN_SPOTS;
+    expect(busStop.x + busStop.width / 2).toBeLessThan(
+      DOWNTOWN_TOWERS[0].x - DOWNTOWN_TOWERS[0].width / 2,
+    );
+  });
+
+  test('rise out of sight', () => {
+    for (const tower of DOWNTOWN_TOWERS) {
+      expect(tower.height).toBeGreaterThan(10);
+    }
   });
 });
 
