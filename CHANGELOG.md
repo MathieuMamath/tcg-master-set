@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.69](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.68...v0.1.69) (2026-11-05)
+
+### Bug Fixes
+
+* **city:** stop the overlapping pines beyond the park's lake from flickering ([#71](https://github.com/MathieuMamath/tcg-master-set/issues/71)) ([5b6e3c1](https://github.com/MathieuMamath/tcg-master-set/commit/5b6e3c1ff0c853fd3e859c000311ea254e568298))
+
 ## [0.1.68](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.67...v0.1.68) (2026-11-05)
 
 ### Features
