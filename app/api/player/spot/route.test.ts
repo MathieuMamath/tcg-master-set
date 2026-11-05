@@ -1,9 +1,11 @@
 import { beforeEach, expect, test, vi } from 'vitest';
+import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
 import { savePlayerSpot } from '@/player/progress';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
+vi.mock('@/auth/roles', () => ({ isAdmin: vi.fn() }));
 vi.mock('@/player/progress', () => ({ savePlayerSpot: vi.fn() }));
 
 const SPOT = { place: 'bedroom', x: 0, facing: 1 };
@@ -21,6 +23,19 @@ beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
   vi.mocked(savePlayerSpot).mockReset();
   vi.mocked(getPlayer).mockResolvedValue({ id: 'player-1', username: 'Placeholder' });
+  vi.mocked(isAdmin).mockResolvedValue(false);
+});
+
+test('keeps a spot in the statistics bureau for an admin only', async () => {
+  const inBureau = { place: 'bureau', x: 0, facing: 1 };
+
+  expect((await save(inBureau)).status).toBe(204);
+  expect(savePlayerSpot).not.toHaveBeenCalled();
+
+  vi.mocked(isAdmin).mockResolvedValue(true);
+  await save(inBureau);
+
+  expect(savePlayerSpot).toHaveBeenCalledWith('player-1', inBureau);
 });
 
 test('saves the spot of the signed-in player', async () => {

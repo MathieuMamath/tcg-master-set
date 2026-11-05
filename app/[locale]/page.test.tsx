@@ -24,6 +24,7 @@ vi.mock('@/player/progress', () => ({
     cleanedOn: null,
     raffleDrawnOn: null,
     activity: { done: [], isBonusClaimed: false },
+    isAdmin: false,
   }),
 }));
 
@@ -46,6 +47,7 @@ function renderHome(locale: Locale, messages: typeof en) {
           cleanedOn: null,
           raffleDrawnOn: null,
           activity: { done: [], isBonusClaimed: false },
+          isAdmin: false,
         }}
       />
     </NextIntlClientProvider>,

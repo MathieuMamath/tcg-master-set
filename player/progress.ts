@@ -1,4 +1,5 @@
 import { and, eq, gt, gte, sql } from 'drizzle-orm';
+import { isAdmin } from '@/auth/roles';
 import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
 import { loadLatestSoldSetId } from '@/cards/playable-sets';
 import { getDb } from '@/db/client';
@@ -87,6 +88,8 @@ export type PlayerProgress = {
   raffleDrawnOn: string | null;
   // Today's quests done, for the activity tracker.
   activity: DailyActivity;
+  // Whether Brutus lets the player into the statistics bureau.
+  isAdmin: boolean;
 };
 
 export type OpenedBooster = {
@@ -195,6 +198,11 @@ export async function claimDailyBonus(userId: string): Promise<DailyBonusClaim> 
   });
 }
 
+// A spot in the statistics bureau is only for admins: anyone else starts in the bedroom.
+async function allowedSpot(userId: string, spot: PlayerSpot | null): Promise<PlayerSpot | null> {
+  return spot?.place === 'bureau' && !(await isAdmin(userId)) ? null : spot;
+}
+
 async function loadBinders(database: Reader, userId: string): Promise<SetId[]> {
   const binders = await database
     .select({ setId: playerBinders.setId })
@@ -232,13 +240,14 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     collection: Object.fromEntries(
       cards.map(({ cardId, variant, count }) => [slotKey(cardId, variant), count]),
     ),
-    spot: parseSpot(spots[0]),
+    spot: await allowedSpot(userId, parseSpot(spots[0])),
     basketballHighScore: await loadBasketballHighScore(getDb(), userId),
     basketballRewardedOn: await loadRewardDay(getDb(), userId, BASKETBALL_QUEST),
     memoryWonOn: await loadRewardDay(getDb(), userId, GRANDPA_QUEST),
     cleanedOn: await loadRewardDay(getDb(), userId, GRANDMA_QUEST),
     raffleDrawnOn: await loadRewardDay(getDb(), userId, RAFFLE_QUEST),
     activity: await loadDailyActivity(getDb(), userId),
+    isAdmin: await isAdmin(userId),
   };
 }
 

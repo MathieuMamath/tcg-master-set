@@ -37,7 +37,10 @@
     "leaveArcade": "Go outside",
     "busStop": "Read the bus map",
     "gaspard": "Talk (Gaspard)",
-    "berenice": "Talk (Bérénice)"
+    "berenice": "Talk (Bérénice)",
+    "leaveBureau": "Leave",
+    "hulotte": "Talk (Mme Hulotte)",
+    "brutus": "Talk (Brutus)"
   },
   "Shopkeeper": {
     "names": {
@@ -483,7 +486,8 @@
     "bookshop": "The Page Nook",
     "arcade": "Arcade",
     "dalgona": "Dalgona",
-    "raffle": "Raffle"
+    "raffle": "Raffle",
+    "bureau": "Statistics Bureau"
   },
   "Hails": {
     "latest": "Welcome to the Den!",
@@ -494,7 +498,9 @@
     "grandpa": "Fancy a game?",
     "boy": "Hey! Can you help me?",
     "gaspard": "Psst… fancy a little challenge?",
-    "berenice": "Try your luck!"
+    "berenice": "Try your luck!",
+    "hulotte": "Ah, a visitor!",
+    "brutus": "Halt!"
   },
   "Bus": {
     "title": "Bus map",
@@ -553,5 +559,24 @@
       "todo": "To do"
     },
     "resetHint": "The quests and the reward come back every day. A quest counts as soon as it’s done, even a lost raffle."
+  },
+  "Speakers": {
+    "leave": "Goodbye",
+    "brutus": {
+      "name": "Brutus",
+      "title": "the guard of the statistics bureau",
+      "lines": {
+        "refused": "Stop right there. The statistics bureau is for authorised staff only. Move along… nice scarf, though.",
+        "welcome": "Ah, it’s you. The bureau is expecting you, Mme Hulotte is at her desk. Step inside, please."
+      },
+      "enter": "Go in"
+    },
+    "hulotte": {
+      "name": "Mme Hulotte",
+      "title": "the owl of the statistics bureau",
+      "lines": {
+        "greeting": "Welcome to the statistics bureau! I’m still filing my folders and drawing my charts… Come back soon, I’ll have plenty of fascinating numbers to show you!"
+      }
+    }
   }
 }

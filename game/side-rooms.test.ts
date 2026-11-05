@@ -10,6 +10,8 @@ import {
   BOOKSHOP_FURNITURE,
   BOOKSHOP_SELLER_X,
   BOOKSHOP_WALLS,
+  BUREAU_ENTRANCE,
+  DOWNTOWN,
   DOWNTOWN_BACK_TOWERS,
   DOWNTOWN_ENDS,
   DOWNTOWN_SPOTS,
@@ -52,9 +54,11 @@ describe.each(Object.values(SIDE_PLACES))('the $id', (place) => {
     }
   });
 
-  test('every door leads to a place with a door back', () => {
+  test('every door leads to a place with a door back, or a guard who lets the player in', () => {
     for (const exit of place.exits) {
-      expect(SIDE_PLACES[exit.to].exits.some(({ to }) => to === place.id)).toBe(true);
+      const hasDoorBack = SIDE_PLACES[exit.to].exits.some(({ to }) => to === place.id);
+      const isGuarded = BUREAU_ENTRANCE.from === exit.to && BUREAU_ENTRANCE.to === place.id;
+      expect(hasDoorBack || isGuarded).toBe(true);
     }
   });
 });
@@ -147,6 +151,18 @@ describe('downtown', () => {
     expect(busStop.x + busStop.width / 2).toBeLessThan(
       DOWNTOWN_TOWERS[0].x - DOWNTOWN_TOWERS[0].width / 2,
     );
+  });
+
+  test("the statistics bureau's door stands clear of its neighbours and of the bus stop", () => {
+    const { bureau, busStop } = DOWNTOWN_SPOTS;
+
+    expect(interactionAlong(DOWNTOWN, bureau.doorX)).toBe('brutus');
+    expect(speakerAlong(DOWNTOWN, bureau.doorX)?.x).toBe(bureau.brutusX);
+    expect(DOWNTOWN.exits).toEqual([]);
+    expect(busStop.x + busStop.width / 2).toBeLessThan(bureau.x - bureau.width / 2);
+    for (const tower of DOWNTOWN_TOWERS) {
+      expect(Math.abs(tower.x - bureau.x)).toBeGreaterThan((tower.width + bureau.width) / 2 - 0.6);
+    }
   });
 
   test('rise out of sight', () => {

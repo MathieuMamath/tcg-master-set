@@ -98,6 +98,8 @@ The activity tracker, under the settings button, opens `components/game/activity
 
 Playing requires an account: pages and API routes check `getPlayer()` from `auth/session.ts` on the server. [Better Auth](https://www.better-auth.com/) handles sign-up, sign-in, sessions and password hashing through `auth/server.ts`. Only the email, username and hashed password are collected. Show players `auth/rules.ts` error keys, never the library's messages.
 
+An admin is a player with a row in `player_roles`, set by hand in the database, for instance `insert into player_roles (user_id, role) select id, 'admin' from users where name = '<username>';`. `isAdmin()` in `auth/roles.ts` reads it on the server. The statistics bureau in the big city has no door to walk through: the way in is to talk to Brutus, the bulldog who guards it, who lets admins in and tells anyone else that it is for staff only. He is only a picture of the rule, so everything in the bureau that matters checks `isAdmin()` on the server again, and a spot in the bureau is neither saved nor restored for anyone else. Inside, Mme Hulotte, an owl, keeps the bureau.
+
 ## Languages
 
 Text lives in `messages/en.json` and `messages/fr.json`, which must define the same keys. A test enforces this. URLs carry the language, such as `/en` and `/fr`. Players change it in the settings menu, or with the switcher on the sign-up and sign-in pages.
