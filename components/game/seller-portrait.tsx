@@ -5,9 +5,13 @@ import type { QuestGiver } from '@/game/world';
 import {
   BERENICE_FACE,
   BERENICE_SIZE,
+  BRUTUS_FACE,
+  BRUTUS_SIZE,
   drawBerenice,
+  drawBrutus,
   drawGaspard,
   drawHedgehog,
+  drawHulotte,
   drawLea,
   drawLucas,
   drawPapy,
@@ -16,6 +20,8 @@ import {
   GASPARD_SIZE,
   HEDGEHOG_FACE,
   HEDGEHOG_SIZE,
+  HULOTTE_FACE,
+  HULOTTE_SIZE,
   LEA_FACE,
   LEA_SIZE,
   LUCAS_FACE,
@@ -30,7 +36,7 @@ import {
 const PORTRAIT_SIZE = 208;
 
 // The characters with a portrait: the sellers, and the quest givers.
-type Character = keyof typeof SELLERS | 'binderSeller' | QuestGiver;
+type Character = keyof typeof SELLERS | 'binderSeller' | QuestGiver | 'brutus' | 'hulotte';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -42,6 +48,12 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'boy') {
     return { draw: drawLucas, size: LUCAS_SIZE, face: LUCAS_FACE };
+  }
+  if (stock === 'brutus') {
+    return { draw: drawBrutus, size: BRUTUS_SIZE, face: BRUTUS_FACE };
+  }
+  if (stock === 'hulotte') {
+    return { draw: drawHulotte, size: HULOTTE_SIZE, face: HULOTTE_FACE };
   }
   if (stock === 'berenice') {
     return { draw: drawBerenice, size: BERENICE_SIZE, face: BERENICE_FACE };

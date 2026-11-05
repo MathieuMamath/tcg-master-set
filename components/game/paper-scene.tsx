@@ -25,6 +25,8 @@ import {
   BOOKSHOP_FURNITURE,
   BOOKSHOP_SELLER_X,
   BOOKSHOP_WALLS,
+  BUREAU_FURNITURE,
+  BUREAU_WALLS,
   DOWNTOWN_BACK_TOWERS,
   DOWNTOWN_ENDS,
   DOWNTOWN_SPOTS,
@@ -33,6 +35,7 @@ import {
   FLAT_FURNITURE,
   FLAT_WALLS,
   FLAT_WINDOW_X,
+  HULOTTE_X,
   interactionAlong,
   LEA_X,
   PARK_ENDS,
@@ -60,6 +63,7 @@ import type { PlayerSpot } from '@/game/spot';
 import type { Interaction } from '@/game/world';
 import {
   BERENICE_SIZE,
+  BRUTUS_SIZE,
   cutOut,
   drawArcade,
   drawArcadeCabinet,
@@ -76,6 +80,8 @@ import {
   drawBookshop,
   drawBookWall,
   drawBoosterShelves,
+  drawBrutus,
+  drawBureauTower,
   drawBus,
   drawBusShelter,
   drawChair,
@@ -85,19 +91,27 @@ import {
   drawCounter,
   drawDalgonaAwning,
   drawDalgonaCart,
+  drawDashboard,
   drawDesk,
   drawDoor,
   drawDust,
   drawFlats,
   drawFrame,
   drawGaspard,
+  drawGlassDoor,
   drawHedgehog,
   drawHills,
   drawHouse,
+  drawHulotte,
   drawLake,
   drawLea,
   drawLucas,
   drawMagazineRack,
+  drawModernDesk,
+  drawModernSofa,
+  drawOfficeFloor,
+  drawOfficeWall,
+  drawPanorama,
   drawPapy,
   drawParkGround,
   drawPavement,
@@ -117,6 +131,7 @@ import {
   drawStationeryTable,
   drawStreet,
   drawSweatDrop,
+  drawTallPlant,
   drawTower,
   drawTree,
   drawUprightCorrugatedEdge,
@@ -125,6 +140,7 @@ import {
   type Eyes,
   GASPARD_SIZE,
   HEDGEHOG_SIZE,
+  HULOTTE_SIZE,
   LEA_SIZE,
   LUCAS_SIZE,
   PAPY_SIZE,
@@ -163,6 +179,8 @@ export type SceneSigns = {
   parkStop: string;
   // The name of downtown's bus stop.
   downtownStop: string;
+  // On the plaque over the statistics bureau's door.
+  bureau: string;
   // Painted on Gaspard's cart.
   dalgona: string;
   // On the board over Bérénice's stand.
@@ -1399,7 +1417,13 @@ const DOWNTOWN_BACK_TOWERS_Z = -5;
 
 // Downtown: a modern pavement under towers so tall that they rise out of sight, with a farther row
 // fading into the haze behind them.
-function Downtown({ signs }: { signs: SceneSigns }) {
+function Downtown({
+  signs,
+  speakerTops,
+}: {
+  signs: SceneSigns;
+  speakerTops: RefObject<SpeakerTops>;
+}) {
   const look = skyLook('day', 'fewClouds');
   const fontsReady = useFontsReady();
   const { busStop } = DOWNTOWN_SPOTS;
@@ -1439,6 +1463,25 @@ function Downtown({ signs }: { signs: SceneSigns }) {
   const shelter = useMemo(
     () => texture(cutOut(360, 320, drawBusShelter(signs.downtownStop), 9, 160)),
     [fontsReady, signs.downtownStop],
+  );
+  const { bureau } = DOWNTOWN_SPOTS;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const bureauTower = useMemo(
+    () =>
+      texture(
+        cutOut(
+          Math.round(bureau.width * PIXELS_PER_UNIT),
+          Math.round(bureau.height * PIXELS_PER_UNIT),
+          drawBureauTower(signs.bureau),
+          9,
+          161,
+        ),
+      ),
+    [fontsReady, signs.bureau, bureau.width, bureau.height],
+  );
+  const brutus = useMemo(
+    () => texture(cutOut(BRUTUS_SIZE.width, BRUTUS_SIZE.height, drawBrutus, 9, 162)),
+    [],
   );
   const width = DOWNTOWN_ENDS.right - DOWNTOWN_ENDS.left + 20;
   const center = (DOWNTOWN_ENDS.left + DOWNTOWN_ENDS.right) / 2;
@@ -1481,6 +1524,103 @@ function Downtown({ signs }: { signs: SceneSigns }) {
         />
       ))}
       <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[{ interaction: 'brutus', map: brutus, height: BRUTUS_HEIGHT, z: -0.6 }]}
+      />
+      <Furniture
+        map={bureauTower}
+        x={bureau.x}
+        z={DOWNTOWN_TOWERS_Z}
+        height={bureau.height}
+        shadow={textures.shadow}
+      />
+      {/* Brutus, by the bureau's door. His dark glasses hide his eyes, so he never blinks. */}
+      <Character
+        map={brutus}
+        x={bureau.brutusX}
+        z={-0.6}
+        height={BRUTUS_HEIGHT}
+        shadow={textures.shadow}
+      />
+    </>
+  );
+}
+
+const BRUTUS_HEIGHT = 2.9;
+const HULOTTE_HEIGHT = 2.8;
+const HULOTTE_Z = -0.9;
+
+// The statistics bureau, high in its tower: white walls and a polished floor, a window onto the
+// big city with a sofa before it, a wall screen of dashboards, plants, and Mme Hulotte behind her
+// white desk.
+function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
+  const { window: view, sofa, plant, screen, desk, cornerPlant } = BUREAU_FURNITURE;
+  const textures = useMemo(
+    () => ({
+      room: {
+        wall: texture(drawOfficeWall()),
+        floor: texture(drawOfficeFloor()),
+        door: texture(
+          paint(
+            Math.round(DOOR_WIDTH * PIXELS_PER_UNIT),
+            Math.round(DOOR_HEIGHT * PIXELS_PER_UNIT),
+            drawGlassDoor,
+            163,
+          ),
+        ),
+      },
+      shadow: texture(drawShadowBlob()),
+      view: texture(paint(Math.round(view.width * PIXELS_PER_UNIT), 260, drawPanorama, 164)),
+      screen: texture(paint(Math.round(screen.width * PIXELS_PER_UNIT), 130, drawDashboard, 165)),
+      desk: texture(cutOut(320, 200, drawModernDesk, 9, 166)),
+      plant: texture(cutOut(140, 300, drawTallPlant, 8, 168)),
+      sofa: texture(cutOut(340, 150, drawModernSofa, 9, 169)),
+      hulotte: blinker(HULOTTE_SIZE.width, HULOTTE_SIZE.height, drawHulotte, 9, 167),
+    }),
+    [],
+  );
+  return (
+    <>
+      <RoomShell walls={BUREAU_WALLS} doorSide="left" textures={textures.room} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[
+          {
+            interaction: 'hulotte',
+            map: textures.hulotte.open,
+            height: HULOTTE_HEIGHT,
+            z: HULOTTE_Z,
+          },
+        ]}
+      />
+      {/* The window, floor to ceiling, and the wall screen. */}
+      <mesh position={[view.x, 2.1, WALL_Z + 0.01]}>
+        <planeGeometry args={[view.width, 2.6]} />
+        <meshBasicMaterial map={textures.view} />
+      </mesh>
+      <mesh position={[screen.x, 2.55, WALL_Z + 0.02]}>
+        <planeGeometry args={[screen.width, 1.3]} />
+        <meshBasicMaterial map={textures.screen} />
+      </mesh>
+      <Furniture map={textures.plant} x={plant.x} z={-1.1} height={2} shadow={textures.shadow} />
+      <Furniture map={textures.sofa} x={sofa.x} z={-1.2} height={1.25} shadow={textures.shadow} />
+      <Furniture
+        map={textures.plant}
+        x={cornerPlant.x}
+        z={-1.2}
+        height={1.7}
+        shadow={textures.shadow}
+      />
+      <Character
+        map={textures.hulotte.open}
+        blinks={textures.hulotte}
+        x={HULOTTE_X}
+        z={HULOTTE_Z}
+        height={HULOTTE_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture map={textures.desk} x={desk.x} z={-0.5} height={1.7} shadow={textures.shadow} />
     </>
   );
 }
@@ -1768,7 +1908,8 @@ export function PaperScene({
           )}
           {visit.place === 'arcade' && <Arcade />}
           {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
-          {visit.place === 'downtown' && <Downtown signs={signs} />}
+          {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
+          {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
           <Pip
             input={input}
             room={SIDE_PLACES[visit.place]}

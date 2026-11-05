@@ -23,7 +23,7 @@ import {
   totalBoosters,
   type Wallet,
 } from '@/game/shop-dialogue';
-import { isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
+import { BUREAU_ENTRANCE, isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type {
@@ -46,6 +46,7 @@ import { FishingDialog } from './fishing-dialog';
 import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
 import { Joystick } from './joystick';
 import { MemoryDialog } from './memory-dialog';
+import { NpcDialog, type Speaker } from './npc-dialog';
 import type { MovementInput } from './paper-scene';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
@@ -61,11 +62,11 @@ const PaperScene = dynamic(() => import('./paper-scene').then((module) => module
 
 const INTERACT_KEY = 'KeyE';
 
-type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver;
+type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker;
 
 // Talking to someone gets a speech bubble over their head, and everything else a prompt at the
 // bottom of the screen.
-function isTalk(interaction: Interaction): interaction is Talk {
+function isTalk(interaction: Interaction): interaction is Extract<Talk, Interaction> {
   return (
     !isDoorInteraction(interaction) &&
     interaction !== 'binder' &&
@@ -102,9 +103,7 @@ export function Game({ player, sets, progress }: Props) {
     wantsDoor: false,
   });
   const [interaction, setInteraction] = useState<Interaction | null>(null);
-  const [talkingTo, setTalkingTo] = useState<ShopkeeperStock | 'binderSeller' | QuestGiver | null>(
-    null,
-  );
+  const [talkingTo, setTalkingTo] = useState<Talk | null>(null);
   const [quest, setQuest] = useState<{ startedAt: number; stains: readonly Stain[] } | null>(null);
   const [questLine, setQuestLine] = useState<QuestLine>('greeting');
   const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
@@ -147,6 +146,7 @@ export function Game({ player, sets, progress }: Props) {
   const tBooster = useTranslations('Booster');
   const tSettings = useTranslations('Settings');
   const tActivity = useTranslations('Activity');
+  const tSpeakers = useTranslations('Speakers');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tTown = useTranslations('Town');
   const tHails = useTranslations('Hails');
@@ -712,6 +712,7 @@ export function Game({ player, sets, progress }: Props) {
           downtownStop: tBus('stops.downtown'),
           dalgona: tTown('dalgona'),
           raffle: tTown('raffle'),
+          bureau: tTown('bureau'),
           latest: tShopkeeper('names.latest'),
           thisYear: tShopkeeper('names.thisYear'),
           older: tShopkeeper('names.older'),
@@ -998,6 +999,28 @@ export function Game({ player, sets, progress }: Props) {
         />
       )}
       {isRaffling && !isTalking && <RaffleDialog onDraw={drawRaffle} onEnd={endRaffle} />}
+      {talkingTo === 'brutus' && (
+        // Brutus lets admins in, and turns everyone else away. The server checks the role again for
+        // everything in the bureau that matters.
+        <NpcDialog
+          speaker="brutus"
+          line={progress.isAdmin ? 'welcome' : 'refused'}
+          action={
+            progress.isAdmin
+              ? {
+                  label: tSpeakers('brutus.enter'),
+                  onPress: () => {
+                    input.current.travelTo = BUREAU_ENTRANCE;
+                  },
+                }
+              : undefined
+          }
+          onClose={() => setTalkingTo(null)}
+        />
+      )}
+      {talkingTo === 'hulotte' && (
+        <NpcDialog speaker="hulotte" line="greeting" onClose={() => setTalkingTo(null)} />
+      )}
       {dalgonaShape && !isTalking && (
         <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
       )}
@@ -1006,7 +1029,9 @@ export function Game({ player, sets, progress }: Props) {
         talkingTo !== 'grandpa' &&
         talkingTo !== 'boy' &&
         talkingTo !== 'gaspard' &&
-        talkingTo !== 'berenice' && (
+        talkingTo !== 'berenice' &&
+        talkingTo !== 'brutus' &&
+        talkingTo !== 'hulotte' && (
           <ShopDialog
             stock={talkingTo}
             items={(talkingTo === 'binderSeller'

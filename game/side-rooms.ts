@@ -9,7 +9,8 @@ export type SidePlaceId =
   | 'flat'
   | 'arcade'
   | 'park'
-  | 'downtown';
+  | 'downtown'
+  | 'bureau';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -22,6 +23,7 @@ export const DOOR_INTERACTIONS = [
   'leaveFlat',
   'enterArcade',
   'leaveArcade',
+  'leaveBureau',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -169,11 +171,13 @@ export const PARK_SPOTS = {
 export const DOWNTOWN_ENDS = { left: -12, right: 18 };
 export const DOWNTOWN_SPOTS = {
   busStop: { x: -9.4, width: 3.6, signX: -10.9 },
+  // The statistics bureau's tower, its door in the middle, and Brutus guarding it on its right: the
+  // way in is to talk to him.
+  bureau: { x: 0.8, width: 4.8, height: 17, doorX: 0.8, brutusX: 2.5 },
 } as const;
 // The towers along the pavement, and a farther row behind them, from left to right.
 export const DOWNTOWN_TOWERS = [
   { x: -4.6, width: 4.4, height: 13, look: 'curtain' },
-  { x: 0.8, width: 4.6, height: 17, look: 'fins' },
   { x: 6.4, width: 4.6, height: 12, look: 'setback' },
   { x: 11.8, width: 5, height: 15, look: 'ribbon' },
   { x: 16.6, width: 3.8, height: 13.5, look: 'diagrid' },
@@ -185,6 +189,26 @@ export const DOWNTOWN_BACK_TOWERS = [
   { x: 9.2, width: 3.8, height: 10.5, look: 'cylinder' },
   { x: 14.4, width: 4.4, height: 13, look: 'curtain' },
 ] as const;
+
+// The statistics bureau, high in its tower: a window onto the big city, a wall screen of
+// dashboards, Mme Hulotte's desk on the right, and the door in the left wall. Only admins get past
+// Brutus to come in.
+export const BUREAU_WALLS = { left: -6, right: 6 };
+export const BUREAU_FURNITURE = {
+  window: { x: -2.6, width: 4.6 },
+  // A sofa before the window, to sit and look at the city.
+  sofa: { x: -2.6, width: 2.8 },
+  plant: { x: -5, width: 1 },
+  screen: { x: 1, width: 2.2 },
+  desk: { x: 3.2, width: 2.8 },
+  cornerPlant: { x: 5.2, width: 0.9 },
+} as const;
+export const HULOTTE_X = BUREAU_FURNITURE.desk.x;
+
+const BUREAU_BOUNDS = {
+  minX: BUREAU_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: BUREAU_WALLS.right - CHARACTER_HALF_WIDTH,
+};
 
 const DOWNTOWN_BOUNDS = {
   minX: DOWNTOWN_ENDS.left + CHARACTER_HALF_WIDTH,
@@ -423,9 +447,46 @@ export const DOWNTOWN: SideRoom = {
       minX: DOWNTOWN_SPOTS.busStop.signX - DOOR_REACH,
       maxX: DOWNTOWN_SPOTS.busStop.signX + DOOR_REACH,
     },
+    {
+      interaction: 'brutus',
+      minX: DOWNTOWN_SPOTS.bureau.doorX - 0.6,
+      maxX: DOWNTOWN_SPOTS.bureau.brutusX + 1,
+      speaker: { x: DOWNTOWN_SPOTS.bureau.brutusX },
+    },
   ],
-  // Downtown is left by bus, from the stop's sign.
+  // Downtown is left by bus, from the stop's sign. The bureau has no door of its own to use: Brutus
+  // lets admins in.
   exits: [],
+};
+
+// Where Brutus lets an admin in, through the bureau's door.
+export const BUREAU_ENTRANCE = {
+  from: 'downtown',
+  to: 'bureau',
+  arrival: { x: BUREAU_BOUNDS.minX, facing: 1 },
+} as const satisfies { from: SidePlaceId; to: SidePlaceId; arrival: { x: number; facing: Facing } };
+
+export const BUREAU: SideRoom = {
+  id: 'bureau',
+  bounds: BUREAU_BOUNDS,
+  start: BUREAU_BOUNDS.minX,
+  interactions: [
+    {
+      interaction: 'hulotte',
+      minX: HULOTTE_X - 1.2,
+      maxX: HULOTTE_X + 1.2,
+      speaker: { x: HULOTTE_X },
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveBureau',
+      minX: BUREAU_BOUNDS.minX,
+      maxX: BUREAU_BOUNDS.minX + DOOR_REACH,
+      to: 'downtown',
+      arrival: { x: DOWNTOWN_SPOTS.bureau.doorX, facing: 1 },
+    },
+  ],
 };
 
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
@@ -437,6 +498,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   arcade: ARCADE,
   park: PARK,
   downtown: DOWNTOWN,
+  bureau: BUREAU,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

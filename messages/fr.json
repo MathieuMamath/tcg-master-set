@@ -37,7 +37,10 @@
     "leaveArcade": "Sortir",
     "busStop": "Lire le plan du bus",
     "gaspard": "Parler (Gaspard)",
-    "berenice": "Parler (Bérénice)"
+    "berenice": "Parler (Bérénice)",
+    "leaveBureau": "Sortir",
+    "hulotte": "Parler (Mme Hulotte)",
+    "brutus": "Parler (Brutus)"
   },
   "Shopkeeper": {
     "names": {
@@ -483,7 +486,8 @@
     "bookshop": "Le Coin des Pages",
     "arcade": "Arcade",
     "dalgona": "Dalgona",
-    "raffle": "Tombola"
+    "raffle": "Tombola",
+    "bureau": "Bureau des statistiques"
   },
   "Hails": {
     "latest": "Bienvenue à la Tanière !",
@@ -494,7 +498,9 @@
     "grandpa": "Une petite partie ?",
     "boy": "Hé ! Tu peux m’aider ?",
     "gaspard": "Psst… un petit défi ?",
-    "berenice": "Tentez votre chance !"
+    "berenice": "Tentez votre chance !",
+    "hulotte": "Ah, un visiteur !",
+    "brutus": "Halte !"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -553,5 +559,24 @@
       "todo": "À faire"
     },
     "resetHint": "Les quêtes et la récompense reviennent chaque jour. Une quête compte dès qu’elle est faite, même la tombola perdue."
+  },
+  "Speakers": {
+    "leave": "Au revoir",
+    "brutus": {
+      "name": "Brutus",
+      "title": "le vigile du bureau des statistiques",
+      "lines": {
+        "refused": "Halte. Le bureau des statistiques est réservé au personnel autorisé. Circulez… mais belle écharpe, cela dit.",
+        "welcome": "Ah, c’est vous. Le bureau vous attend, Mme Hulotte est à son poste. Entrez, je vous prie."
+      },
+      "enter": "Entrer"
+    },
+    "hulotte": {
+      "name": "Mme Hulotte",
+      "title": "la chouette du bureau des statistiques",
+      "lines": {
+        "greeting": "Bienvenue au bureau des statistiques ! Je classe encore mes dossiers et je prépare mes graphiques… Repasse bientôt, j’aurai plein de chiffres passionnants à te montrer !"
+      }
+    }
   }
 }
