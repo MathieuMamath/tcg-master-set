@@ -575,8 +575,103 @@
       "name": "Mme Hulotte",
       "title": "the owl of the statistics bureau",
       "lines": {
-        "greeting": "Welcome to the statistics bureau! I’m still filing my folders and drawing my charts… Come back soon, I’ll have plenty of fascinating numbers to show you!"
-      }
+        "greeting": "Welcome to the statistics bureau! My reports are up to date, all sorted by period. Would you like a look?"
+      },
+      "reports": "See the reports"
+    }
+  },
+  "Stats": {
+    "title": "Mme Hulotte’s reports",
+    "aggregateNote": "Figures on the whole game, never on any one player.",
+    "close": "Close",
+    "periodLabel": "Period",
+    "periods": {
+      "day": "Today",
+      "week": "7 days",
+      "month": "30 days",
+      "all": "Since the start"
+    },
+    "tabs": {
+      "economy": "Economy",
+      "boosters": "Boosters",
+      "quests": "Quests",
+      "players": "Players",
+      "log": "Log"
+    },
+    "loading": "Mme Hulotte is leafing through her folders…",
+    "error": "The reports couldn’t be loaded.",
+    "empty": "Nothing in this period.",
+    "economy": {
+      "earned": "Coins earned",
+      "spent": "Coins spent",
+      "net": "Balance",
+      "earnedBySource": "Coins earned, by source",
+      "spentOn": "Coins spent, by purchase"
+    },
+    "sources": {
+      "daily-bonus": "Daily reward",
+      "duplicates": "Duplicates",
+      "boosters": "Boosters",
+      "binders": "Binders"
+    },
+    "boosters": {
+      "bought": "Bought",
+      "opened": "Opened",
+      "newCards": "New cards",
+      "godPacks": "God packs",
+      "bySet": "Boosters opened, by set",
+      "bestPulls": "Best card of the boosters opened",
+      "tier": "Tier {tier}"
+    },
+    "quests": {
+      "dailyBonuses": "Daily rewards claimed",
+      "byQuest": "By quest",
+      "counts": "{started} started · {finished} finished · {rejected} refused"
+    },
+    "outcomes": {
+      "rewarded": "Paid",
+      "won": "Won",
+      "lost": "Lost",
+      "item": "Item fished out",
+      "treasure": "Treasure",
+      "coins": "Coins",
+      "booster": "Booster",
+      "none": "Nothing",
+      "alreadyPaid": "Already paid",
+      "carved": "Carved",
+      "broken": "Broken",
+      "jackpot": "Jackpot",
+      "prize": "Red ball"
+    },
+    "players": {
+      "active": "Active players",
+      "signUps": "Sign-ups",
+      "signIns": "Sign-ins",
+      "places": "Places visited"
+    },
+    "places": {
+      "bedroom": "The bedroom",
+      "town": "Little Vale",
+      "shop": "The shop",
+      "bookshop": "The bookshop",
+      "flat": "Léa’s flat",
+      "arcade": "The arcade",
+      "park": "The park",
+      "downtown": "The Big City",
+      "bureau": "The statistics bureau"
+    },
+    "log": {
+      "title": "Log coverage",
+      "hint": "Every type of event, how many in the period, and the last one recorded. A type never seen most likely points to something forgotten.",
+      "neverSeen": "Never seen"
+    },
+    "charts": {
+      "coins": "Coins earned and spent",
+      "boosters": "Boosters bought and opened",
+      "quests": "Quests finished",
+      "finished": "Finished",
+      "active": "Active players",
+      "weekOf": "wk of {day}"
     }
   }
 }
