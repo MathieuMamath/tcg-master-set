@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.71](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.70...v0.1.71) (2026-11-05)
+
+### Bug Fixes
+
+* **i18n:** call the player by their username instead of Pip ([#73](https://github.com/MathieuMamath/tcg-master-set/issues/73)) ([ad61f15](https://github.com/MathieuMamath/tcg-master-set/commit/ad61f15cc17a1811d57d220cad35bb6ae1648b09))
+
 ## [0.1.70](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.69...v0.1.70) (2026-11-05)
 
 ### Features
