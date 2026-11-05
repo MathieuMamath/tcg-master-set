@@ -1,7 +1,15 @@
 import type { Facing } from './side-walk';
 import type { Interaction } from './world';
 
-export type SidePlaceId = 'bedroom' | 'town' | 'shop' | 'bookshop' | 'flat' | 'arcade' | 'park';
+export type SidePlaceId =
+  | 'bedroom'
+  | 'town'
+  | 'shop'
+  | 'bookshop'
+  | 'flat'
+  | 'arcade'
+  | 'park'
+  | 'downtown';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -155,6 +163,33 @@ export const PARK_SPOTS = {
   lake: { left: 4.4, right: 12.6 },
   lucas: { x: 6.2 },
 } as const;
+
+// Downtown, behind the village, reached by bus: a wide modern pavement under towers so tall that
+// they rise out of sight. The bus stop is on the far left.
+export const DOWNTOWN_ENDS = { left: -12, right: 18 };
+export const DOWNTOWN_SPOTS = {
+  busStop: { x: -9.4, width: 3.6, signX: -10.9 },
+} as const;
+// The towers along the pavement, and a farther row behind them, from left to right.
+export const DOWNTOWN_TOWERS = [
+  { x: -4.6, width: 4.4, height: 13, look: 'curtain' },
+  { x: 0.8, width: 4.6, height: 17, look: 'fins' },
+  { x: 6.4, width: 4.6, height: 12, look: 'setback' },
+  { x: 11.8, width: 5, height: 15, look: 'ribbon' },
+  { x: 16.6, width: 3.8, height: 13.5, look: 'diagrid' },
+] as const;
+export const DOWNTOWN_BACK_TOWERS = [
+  { x: -8, width: 4, height: 10, look: 'ribbon' },
+  { x: -1.8, width: 3.6, height: 12.5, look: 'cylinder' },
+  { x: 3.6, width: 4.2, height: 14, look: 'diagrid' },
+  { x: 9.2, width: 3.8, height: 10.5, look: 'cylinder' },
+  { x: 14.4, width: 4.4, height: 13, look: 'curtain' },
+] as const;
+
+const DOWNTOWN_BOUNDS = {
+  minX: DOWNTOWN_ENDS.left + CHARACTER_HALF_WIDTH,
+  maxX: DOWNTOWN_ENDS.right - CHARACTER_HALF_WIDTH,
+};
 
 const PARK_BOUNDS = {
   minX: PARK_ENDS.left + CHARACTER_HALF_WIDTH,
@@ -378,6 +413,21 @@ export const PARK: SideRoom = {
   exits: [],
 };
 
+export const DOWNTOWN: SideRoom = {
+  id: 'downtown',
+  bounds: DOWNTOWN_BOUNDS,
+  start: DOWNTOWN_SPOTS.busStop.signX + 0.5,
+  interactions: [
+    {
+      interaction: 'busStop',
+      minX: DOWNTOWN_SPOTS.busStop.signX - DOOR_REACH,
+      maxX: DOWNTOWN_SPOTS.busStop.signX + DOOR_REACH,
+    },
+  ],
+  // Downtown is left by bus, from the stop's sign.
+  exits: [],
+};
+
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bedroom: BEDROOM,
   town: TOWN,
@@ -386,6 +436,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   flat: FLAT,
   arcade: ARCADE,
   park: PARK,
+  downtown: DOWNTOWN,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

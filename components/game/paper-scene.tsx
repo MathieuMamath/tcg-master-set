@@ -25,6 +25,10 @@ import {
   BOOKSHOP_FURNITURE,
   BOOKSHOP_SELLER_X,
   BOOKSHOP_WALLS,
+  DOWNTOWN_BACK_TOWERS,
+  DOWNTOWN_ENDS,
+  DOWNTOWN_SPOTS,
+  DOWNTOWN_TOWERS,
   exitAlong,
   FLAT_FURNITURE,
   FLAT_WALLS,
@@ -96,6 +100,7 @@ import {
   drawMagazineRack,
   drawPapy,
   drawParkGround,
+  drawPavement,
   drawPip,
   drawPlanks,
   drawRaccoon,
@@ -107,10 +112,12 @@ import {
   drawSign,
   drawSky,
   drawSkyGradient,
+  drawSkyline,
   drawSofa,
   drawStationeryTable,
   drawStreet,
   drawSweatDrop,
+  drawTower,
   drawTree,
   drawUprightCorrugatedEdge,
   drawWallpaper,
@@ -154,6 +161,8 @@ export type SceneSigns = {
   busLine: string;
   // The name of the park's bus stop, on its sign.
   parkStop: string;
+  // The name of downtown's bus stop.
+  downtownStop: string;
   // Painted on Gaspard's cart.
   dalgona: string;
   // On the board over Bérénice's stand.
@@ -935,6 +944,8 @@ const CLOUDS = [
   { x: 34, y: 6.8, size: 1.1 },
 ];
 const BUILDINGS_Z = -1.4;
+// Downtown seen from the village, between the sky and the farthest hills.
+const SKYLINE = { x: -2, z: -9, width: 26, height: 5.4 };
 const HILL_ROWS = [
   { z: -7, color: '#9cc6a6', hatch: '#6e9e7a', bumps: 7, height: 3.6, seed: 1 },
   { z: -5.5, color: '#78ae6c', hatch: '#4e8448', bumps: 8, height: 2.8, seed: 2 },
@@ -1014,6 +1025,15 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       shadow: texture(drawShadowBlob()),
       house: texture(cutOut(420, 380, drawHouse, 9, 61)),
       flats: texture(cutOut(440, 420, drawFlats, 9, 65)),
+      skyline: texture(
+        cutOut(
+          Math.round(SKYLINE.width * PIXELS_PER_UNIT),
+          Math.round(SKYLINE.height * PIXELS_PER_UNIT),
+          drawSkyline,
+          6,
+          170,
+        ),
+      ),
       awning: texture(cutOut(320, 380, drawDalgonaAwning, 8, 121)),
       gaspard: blinker(GASPARD_SIZE.width, GASPARD_SIZE.height, drawGaspard, 9, 122),
       berenice: blinker(BERENICE_SIZE.width, BERENICE_SIZE.height, drawBerenice, 9, 124),
@@ -1112,6 +1132,10 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
             <CutOut map={cloud} height={size} />
           </group>
         ))}
+      </group>
+      {/* Downtown, far behind the hills. */}
+      <group position={[SKYLINE.x, -0.2, SKYLINE.z]}>
+        <CutOut map={textures.skyline} height={SKYLINE.height} />
       </group>
       {HILL_ROWS.map(({ z, height }, index) => (
         <group key={z} position={[streetCenter, -0.15, z]}>
@@ -1366,6 +1390,97 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         height={LUCAS_HEIGHT}
         shadow={textures.shadow}
       />
+    </>
+  );
+}
+
+const DOWNTOWN_TOWERS_Z = -1.6;
+const DOWNTOWN_BACK_TOWERS_Z = -5;
+
+// Downtown: a modern pavement under towers so tall that they rise out of sight, with a farther row
+// fading into the haze behind them.
+function Downtown({ signs }: { signs: SceneSigns }) {
+  const look = skyLook('day', 'fewClouds');
+  const fontsReady = useFontsReady();
+  const { busStop } = DOWNTOWN_SPOTS;
+  const textures = useMemo(
+    () => ({
+      sky: texture(drawSkyGradient(look)),
+      cloud: texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)),
+      pavement: texture(drawPavement()),
+      edge: texture(drawCorrugatedEdge()),
+      shadow: texture(drawShadowBlob()),
+      towers: DOWNTOWN_TOWERS.map(({ width, height, look: towerLook }, index) =>
+        texture(
+          cutOut(
+            Math.round(width * PIXELS_PER_UNIT),
+            Math.round(height * PIXELS_PER_UNIT),
+            drawTower(towerLook),
+            9,
+            140 + index,
+          ),
+        ),
+      ),
+      backTowers: DOWNTOWN_BACK_TOWERS.map(({ width, height, look: towerLook }, index) =>
+        texture(
+          cutOut(
+            Math.round(width * PIXELS_PER_UNIT),
+            Math.round(height * PIXELS_PER_UNIT),
+            drawTower(towerLook, true),
+            8,
+            150 + index,
+          ),
+        ),
+      ),
+    }),
+    [look],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const shelter = useMemo(
+    () => texture(cutOut(360, 320, drawBusShelter(signs.downtownStop), 9, 160)),
+    [fontsReady, signs.downtownStop],
+  );
+  const width = DOWNTOWN_ENDS.right - DOWNTOWN_ENDS.left + 20;
+  const center = (DOWNTOWN_ENDS.left + DOWNTOWN_ENDS.right) / 2;
+  return (
+    <>
+      <mesh position={[center, 7, -10]}>
+        <planeGeometry args={[width + 70, 40]} />
+        <meshBasicMaterial map={textures.sky} />
+      </mesh>
+      {[
+        [-14, 8.5, 1.4],
+        [6, 9.4, 1.7],
+        [20, 7.8, 1.2],
+      ].map(([cloudX, cloudY, size]) => (
+        <group key={cloudX} position={[center + cloudX, cloudY, -8]}>
+          <CutOut map={textures.cloud} height={size} />
+        </group>
+      ))}
+      {DOWNTOWN_BACK_TOWERS.map(({ x, height }, index) => (
+        <group key={x} position={[x, 0, DOWNTOWN_BACK_TOWERS_Z]}>
+          <CutOut map={textures.backTowers[index]} height={height} />
+        </group>
+      ))}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center, 0, -1]}>
+        <planeGeometry args={[width, 8]} />
+        <meshBasicMaterial map={textures.pavement} />
+      </mesh>
+      <mesh position={[center, -0.18, STREET_FRONT_Z]}>
+        <boxGeometry args={[width, 0.36, 0.14]} />
+        <meshBasicMaterial map={textures.edge} />
+      </mesh>
+      {DOWNTOWN_TOWERS.map(({ x, height }, index) => (
+        <Furniture
+          key={x}
+          map={textures.towers[index]}
+          x={x}
+          z={DOWNTOWN_TOWERS_Z}
+          height={height}
+          shadow={textures.shadow}
+        />
+      ))}
+      <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
     </>
   );
 }
@@ -1653,6 +1768,7 @@ export function PaperScene({
           )}
           {visit.place === 'arcade' && <Arcade />}
           {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
+          {visit.place === 'downtown' && <Downtown signs={signs} />}
           <Pip
             input={input}
             room={SIDE_PLACES[visit.place]}

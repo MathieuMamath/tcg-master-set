@@ -500,7 +500,8 @@
     "title": "Plan du bus",
     "line": "Ligne 1",
     "stops": {
-      "mainStreet": "Grand-Rue",
+      "downtown": "Grande Ville",
+      "mainStreet": "Petit-Vallon",
       "park": "Parc des Tilleuls"
     },
     "here": "Tu es ici",

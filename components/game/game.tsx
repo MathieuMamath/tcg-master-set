@@ -709,6 +709,7 @@ export function Game({ player, sets, progress }: Props) {
           busStop: tBus('stops.mainStreet'),
           busLine: tBus('line'),
           parkStop: tBus('stops.park'),
+          downtownStop: tBus('stops.downtown'),
           dalgona: tTown('dalgona'),
           raffle: tTown('raffle'),
           latest: tShopkeeper('names.latest'),

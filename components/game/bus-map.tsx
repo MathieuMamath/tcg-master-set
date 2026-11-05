@@ -15,12 +15,23 @@ type Props = {
 
 const ROUTE_GREEN = '#3f8a6a';
 
-// Where each stop sits on the drawn map, from left to right along the route.
+// Where each stop sits on the drawn map: downtown on the left, the village in the middle and the
+// park on the right, along the route.
 const MAP_SPOTS: Record<BusStopId, { x: number; y: number }> = {
-  mainStreet: { x: 80, y: 140 },
-  park: { x: 296, y: 46 },
+  downtown: { x: 72, y: 112 },
+  mainStreet: { x: 200, y: 140 },
+  park: { x: 318, y: 58 },
 };
-const ROUTE = `M${MAP_SPOTS.mainStreet.x} ${MAP_SPOTS.mainStreet.y} C 170 150, 200 40, ${MAP_SPOTS.park.x} ${MAP_SPOTS.park.y}`;
+const ROUTE = `M${MAP_SPOTS.downtown.x} ${MAP_SPOTS.downtown.y} C 110 150, 160 152, ${MAP_SPOTS.mainStreet.x} ${MAP_SPOTS.mainStreet.y} S 286 80, ${MAP_SPOTS.park.x} ${MAP_SPOTS.park.y}`;
+
+// Downtown's towers on the map, as tall paper blocks.
+const MAP_TOWERS = [
+  { x: 22, width: 20, height: 52, color: '#7fa7c9' },
+  { x: 46, width: 24, height: 78, color: '#4f5d70' },
+  { x: 74, width: 18, height: 60, color: '#4f9a96' },
+  { x: 96, width: 24, height: 70, color: '#c9c6bf' },
+  { x: 122, width: 16, height: 46, color: '#7fa7c9' },
+];
 
 // The map of the stops the bus serves, read on the stop's sign: the route drawn on paper, and the
 // stops to ride to.
@@ -51,52 +62,72 @@ export function BusMap({ here, onTravel, onClose }: Props) {
           viewBox="0 0 400 170"
           className="mt-3 w-full rounded-md bg-[#eef1e6] shadow-[2px_3px_0_var(--ui-shadow)]"
         >
-          {/* The town, its houses along the main street. */}
-          <path d="M0 152 Q110 132 200 150 T400 142 V170 H0Z" fill="#c8a574" fillOpacity="0.45" />
+          {/* Downtown, its towers on a grey block. */}
           <path
-            d="M18 122 Q24 94 68 98 Q118 88 152 110 Q166 138 122 148 Q64 156 30 144 Q12 136 18 122Z"
+            d="M8 112 Q6 40 30 30 Q90 18 136 34 Q150 70 142 112 Q120 126 70 124 Q20 126 8 112Z"
+            fill="#d9dbe6"
+          />
+          {MAP_TOWERS.map(({ x, width, height, color }) => (
+            <g key={x}>
+              <rect x={x} y={110 - height} width={width} height={height} rx="2" fill={color} />
+              {Array.from({ length: Math.floor(height / 14) }, (_, floor) => (
+                <rect
+                  // biome-ignore lint/suspicious/noArrayIndexKey: the floors never change.
+                  key={floor}
+                  x={x + 4}
+                  y={110 - height + 6 + floor * 14}
+                  width={width - 8}
+                  height="5"
+                  fill="#fff"
+                  fillOpacity="0.4"
+                />
+              ))}
+            </g>
+          ))}
+          {/* The village, its houses along the main street. */}
+          <path
+            d="M146 122 Q152 98 196 102 Q240 94 262 116 Q272 146 232 156 Q182 166 156 152 Q140 140 146 122Z"
             fill="#e9dcc4"
           />
           {(
             [
-              [34, '#e9b8a4'],
-              [70, '#f6e7c4'],
-              [106, '#bfe0d0'],
+              [160, '#e9b8a4'],
+              [192, '#f6e7c4'],
+              [224, '#bfe0d0'],
             ] as const
           ).map(([houseX, color]) => (
             <g key={houseX}>
-              <path d={`M${houseX} 108 l14 -12 l14 12 v18 h-28z`} fill={color} />
+              <path d={`M${houseX} 124 l12 -10 l12 10 v16 h-24z`} fill={color} />
               <path
-                d={`M${houseX - 2} 109 l16 -14 l16 14`}
+                d={`M${houseX - 2} 125 l14 -12 l14 12`}
                 fill="none"
                 stroke="#c8453a"
-                strokeWidth="4"
+                strokeWidth="3.5"
                 strokeLinejoin="round"
               />
             </g>
           ))}
           {/* The park: a lawn with its lake, and trees here and there. */}
           <path
-            d="M246 62 Q252 22 302 22 Q352 14 380 42 Q398 74 386 112 Q374 152 318 150 Q262 156 246 122 Q234 94 246 62Z"
+            d="M276 52 Q280 16 322 16 Q368 12 388 38 Q400 70 390 104 Q380 134 334 132 Q288 136 276 108 Q266 82 276 52Z"
             fill="#b5d9a8"
           />
-          <ellipse cx="318" cy="102" rx="44" ry="24" fill="#8cc3e6" />
-          <ellipse cx="306" cy="96" rx="16" ry="5" fill="#fff" fillOpacity="0.45" />
+          <ellipse cx="336" cy="92" rx="36" ry="20" fill="#8cc3e6" />
+          <ellipse cx="326" cy="87" rx="13" ry="4" fill="#fff" fillOpacity="0.45" />
           {[
-            [262, 46],
-            [366, 40],
-            [258, 128],
-            [380, 124],
-            [350, 62],
-            [232, 92],
-            [392, 78],
+            [290, 40],
+            [372, 34],
+            [286, 112],
+            [384, 110],
+            [358, 56],
+            [392, 74],
           ].map(([treeX, treeY]) => (
             <g key={`${treeX}-${treeY}`}>
               <rect x={treeX - 2} y={treeY} width="4" height="10" fill="#8a5a35" />
-              <circle cx={treeX} cy={treeY - 2} r="9" fill="#579552" />
+              <circle cx={treeX} cy={treeY - 2} r="8" fill="#579552" />
             </g>
           ))}
-          {/* The bus's route, from the main street up to the park. */}
+          {/* The bus's route, from downtown through the village up to the park. */}
           <path d={ROUTE} fill="none" stroke={ROUTE_GREEN} strokeWidth="9" strokeLinecap="round" />
           <path d={ROUTE} fill="none" stroke="#fbf6ea" strokeWidth="2" strokeDasharray="8 8" />
           {BUS_STOPS.map(({ id }) => (

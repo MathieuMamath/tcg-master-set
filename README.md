@@ -10,7 +10,7 @@ There are no duels and no real money.
 
 The world is a paper diorama seen from the side: Pip walks left and right, and goes through doors with the interact key.
 
-- **The street**, with Pip's house, Léa's block of flats, a dalgona stand, a raffle stand, an arcade and a bus stop. The bus goes to **Linden Park**.
+- **The street**, with Pip's house, Léa's block of flats, a dalgona stand, a raffle stand, an arcade and a bus stop. The bus goes to **Linden Park** and to **the big city**, whose towers can be seen far behind the village.
 - **The Card Den**, where the raccoon triplets sell booster packs, and **the Page Nook**, where Mamie Noisette the hedgehog sells binders. A set's boosters are sold once its binder is bought.
 - **Booster openings**: ten cards a pack, revealed from the most common to the best, with light effects that climb up to the best card.
 - **The binder**: a book of pages for each set, which turn like a real binder's, with every version of every card to collect.

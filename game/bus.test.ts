@@ -2,13 +2,14 @@ import { expect, test } from 'vitest';
 import { BUS_STOPS, stopAt } from './bus';
 import { interactionAlong, PARK, SIDE_PLACES, TOWN, TOWN_BUILDINGS, TOWN_ENDS } from './side-rooms';
 
-test('the bus serves the main street and the park', () => {
-  expect(BUS_STOPS.map(({ id }) => id)).toEqual(['mainStreet', 'park']);
+test('the bus serves downtown, the main street and the park', () => {
+  expect(BUS_STOPS.map(({ id }) => id)).toEqual(['downtown', 'mainStreet', 'park']);
 });
 
 test('each stop belongs to its place', () => {
   expect(stopAt('town')?.id).toBe('mainStreet');
   expect(stopAt('park')?.id).toBe('park');
+  expect(stopAt('downtown')?.id).toBe('downtown');
   expect(stopAt('bedroom')).toBeUndefined();
 });
 
