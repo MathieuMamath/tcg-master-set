@@ -1591,6 +1591,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
   );
 }
 
+// Trees that overlap never share a depth, or the two drawings fight over the same spot and flicker.
 // A wood of round trees and pines along the back of the lawn, the pines mostly further back, and
 // more beyond the lake.
 const PARK_TREES = [
@@ -1607,10 +1608,10 @@ const PARK_TREES = [
   { x: 3.6, z: -3.4, height: 3.4, kind: 'round', seed: 4 },
   { x: 4.6, z: -3.9, height: 4.4, kind: 'pine', seed: 13 },
   // Beyond the lake, on the first hill, their trunks hidden behind it.
-  { x: 6.3, z: -4.4, height: 5.6, kind: 'pine', seed: 15 },
-  { x: 7.9, z: -4.6, height: 4.8, kind: 'round', seed: 16 },
-  { x: 9.4, z: -4.4, height: 6, kind: 'pine', seed: 17 },
-  { x: 11, z: -4.6, height: 5.2, kind: 'pine', seed: 18 },
+  { x: 6.3, z: -4.3, height: 5.6, kind: 'pine', seed: 15 },
+  { x: 7.9, z: -4.7, height: 4.8, kind: 'round', seed: 16 },
+  { x: 9.4, z: -4.5, height: 6, kind: 'pine', seed: 17 },
+  { x: 11, z: -4.85, height: 5.2, kind: 'pine', seed: 18 },
   { x: 12.2, z: -3.6, height: 4.4, kind: 'round', seed: 5 },
   { x: 13.6, z: -3.2, height: 5, kind: 'pine', seed: 14 },
 ] as const;
