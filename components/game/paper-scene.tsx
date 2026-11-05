@@ -1,7 +1,15 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { type Ref, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type ReactNode,
+  type Ref,
+  type RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   CanvasTexture,
   DoubleSide,
@@ -115,6 +123,7 @@ import {
   drawPapy,
   drawParkGround,
   drawPavement,
+  drawPine,
   drawPip,
   drawPlanks,
   drawRaccoon,
@@ -134,6 +143,7 @@ import {
   drawTallPlant,
   drawTower,
   drawTree,
+  drawTuft,
   drawUprightCorrugatedEdge,
   drawWallpaper,
   drawWindowFrame,
@@ -1033,6 +1043,114 @@ const GASPARD_HEIGHT = 3.3;
 const DALGONA_Z = { awning: -1.1, gaspard: -0.85, cart: -0.45 };
 
 // The street: a wide sky, rows of hills, our house, Gaspard's stand, the shop and the bookshop.
+// The village's greenery, as in the art direction's prototype: trees between and behind the
+// buildings, in front of the hills, and tufts of grass with flowers along the street, some at the
+// foot of the buildings and some at its front edge, in front of Pip.
+const TOWN_TREES = [
+  { x: -18.6, z: -2.9, height: 4.6, kind: 'pine', seed: 31 },
+  { x: -17.1, z: -3.3, height: 3.7, kind: 'round', seed: 32 },
+  { x: -9.6, z: -2.6, height: 3.9, kind: 'round', seed: 33 },
+  { x: -8.1, z: -3.2, height: 4.8, kind: 'pine', seed: 34 },
+  { x: 8.6, z: -2.7, height: 4.1, kind: 'round', seed: 35 },
+  { x: 10.1, z: -3.3, height: 5, kind: 'pine', seed: 36 },
+  { x: -1.6, z: -3, height: 4.7, kind: 'round', seed: 39 },
+  { x: 16, z: -3.2, height: 5.4, kind: 'pine', seed: 40 },
+  { x: 25.8, z: -2.8, height: 3.8, kind: 'round', seed: 37 },
+  { x: 37.6, z: -3, height: 4.5, kind: 'pine', seed: 38 },
+] as const;
+const TOWN_TUFTS = [
+  { x: -17.8, z: -1.0, height: 0.8 },
+  { x: -16.2, z: -0.9, height: 0.7 },
+  { x: -10.9, z: -1.0, height: 0.9 },
+  { x: -9.9, z: -0.9, height: 0.8 },
+  { x: 1.8, z: -1.0, height: 0.7 },
+  { x: 7.8, z: -0.9, height: 0.9 },
+  { x: 8.9, z: -1.0, height: 0.8 },
+  { x: 10.6, z: -0.9, height: 0.7 },
+  { x: 16.3, z: -1.0, height: 0.9 },
+  { x: 25.0, z: -0.9, height: 0.8 },
+  { x: 26.5, z: -1.0, height: 0.7 },
+  { x: 37.2, z: -0.9, height: 0.9 },
+  { x: -19.2, z: 2.6, height: 0.85 },
+  { x: -18.4, z: 2.75, height: 0.72 },
+  { x: -14.6, z: 2.68, height: 0.95 },
+  { x: -12.8, z: 2.6, height: 0.78 },
+  { x: -8.4, z: 2.75, height: 0.85 },
+  { x: -7.6, z: 2.68, height: 0.72 },
+  { x: -3.4, z: 2.6, height: 0.95 },
+  { x: -2.5, z: 2.75, height: 0.78 },
+  { x: 1.1, z: 2.68, height: 0.85 },
+  { x: 3.3, z: 2.6, height: 0.72 },
+  { x: 4.2, z: 2.75, height: 0.95 },
+  { x: 8.6, z: 2.68, height: 0.78 },
+  { x: 9.4, z: 2.6, height: 0.85 },
+  { x: 12.6, z: 2.75, height: 0.72 },
+  { x: 15.6, z: 2.68, height: 0.95 },
+  { x: 16.4, z: 2.6, height: 0.78 },
+  { x: 19.8, z: 2.75, height: 0.85 },
+  { x: 20.8, z: 2.68, height: 0.72 },
+  { x: 24.3, z: 2.6, height: 0.95 },
+  { x: 25.9, z: 2.75, height: 0.78 },
+  { x: 29.1, z: 2.68, height: 0.85 },
+  { x: 31.4, z: 2.6, height: 0.72 },
+  { x: 32.2, z: 2.75, height: 0.95 },
+  { x: 35.4, z: 2.68, height: 0.78 },
+  { x: 36.8, z: 2.6, height: 0.85 },
+];
+const WIND_SWAY = 0.025;
+
+// Something rooted to the floor that sways a little in the wind, like the prototype's trees.
+function Swaying({
+  x,
+  z,
+  phase,
+  children,
+}: {
+  x: number;
+  z: number;
+  phase: number;
+  children: ReactNode;
+}) {
+  const group = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    if (group.current) {
+      group.current.rotation.z = Math.sin(clock.elapsedTime * 1.1 + phase) * WIND_SWAY;
+    }
+  });
+  return (
+    <group ref={group} position={[x, 0, z]}>
+      {children}
+    </group>
+  );
+}
+
+// A tree that sways in the wind, its shadow staying still on the floor.
+function SwayingTree({
+  map,
+  x,
+  z,
+  height,
+  phase,
+  shadow,
+}: {
+  map: Texture;
+  x: number;
+  z: number;
+  height: number;
+  phase: number;
+  shadow: Texture;
+}) {
+  const image = map.image as HTMLCanvasElement;
+  return (
+    <>
+      <Swaying x={x} z={z} phase={phase}>
+        <CutOut map={map} height={height} />
+      </Swaying>
+      <FloorShadow x={x} z={z} width={(height * image.width) / image.height} map={shadow} />
+    </>
+  );
+}
+
 function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
   const look = skyLook('day', 'fewClouds');
   const fontsReady = useFontsReady();
@@ -1056,6 +1174,12 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       gaspard: blinker(GASPARD_SIZE.width, GASPARD_SIZE.height, drawGaspard, 9, 122),
       berenice: blinker(BERENICE_SIZE.width, BERENICE_SIZE.height, drawBerenice, 9, 124),
       raffleCounter: texture(cutOut(340, 200, drawRaffleCounter, 8, 126)),
+      trees: TOWN_TREES.map(({ kind, seed }) =>
+        texture(cutOut(240, 320, kind === 'pine' ? drawPine(seed) : drawTree(seed), 9, 140 + seed)),
+      ),
+      tufts: [1, 2, 3, 4].map((seed) =>
+        texture(cutOut(160, 140, drawTuft(seed * 7), 7, 180 + seed)),
+      ),
       hills: HILL_ROWS.map(({ color, hatch, bumps, seed, height }) =>
         texture(
           cutOut(1600, Math.round(height * 100), drawHills(color, hatch, bumps, seed), 8, seed),
@@ -1172,6 +1296,22 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         <boxGeometry args={[streetWidth, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
       </mesh>
+      {TOWN_TREES.map(({ x, z, height }, index) => (
+        <SwayingTree
+          key={x}
+          map={textures.trees[index]}
+          x={x}
+          z={z}
+          height={height}
+          phase={index * 1.3}
+          shadow={textures.shadow}
+        />
+      ))}
+      {TOWN_TUFTS.map(({ x, z, height }, index) => (
+        <Swaying key={`${x}-${z}`} x={x} z={z} phase={index * 0.9}>
+          <CutOut map={textures.tufts[index % 4]} height={height} />
+        </Swaying>
+      ))}
       <Furniture
         map={textures.flats}
         x={flats.x}
@@ -1283,12 +1423,48 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
   );
 }
 
+// A wood of round trees and pines along the back of the lawn, the pines mostly further back, and
+// more beyond the lake.
 const PARK_TREES = [
-  { x: -9.2, z: -3, height: 4.2, seed: 1 },
-  { x: -4.6, z: -2.6, height: 3.6, seed: 2 },
-  { x: 1.8, z: -2.8, height: 4, seed: 3 },
-  { x: 3.6, z: -3.4, height: 3.4, seed: 4 },
-  { x: 12.2, z: -3.6, height: 4.4, seed: 5 },
+  { x: -10.4, z: -3.6, height: 5.2, kind: 'pine', seed: 6 },
+  { x: -9.2, z: -3, height: 4.2, kind: 'round', seed: 1 },
+  { x: -7.8, z: -3.4, height: 4.6, kind: 'pine', seed: 7 },
+  { x: -6.2, z: -3.1, height: 3.4, kind: 'round', seed: 8 },
+  { x: -4.6, z: -2.6, height: 3.6, kind: 'round', seed: 2 },
+  { x: -3.1, z: -3.5, height: 5, kind: 'pine', seed: 9 },
+  { x: -1.2, z: -3.2, height: 4.4, kind: 'round', seed: 10 },
+  { x: 0.4, z: -3.6, height: 4.8, kind: 'pine', seed: 11 },
+  { x: 1.8, z: -2.8, height: 4, kind: 'round', seed: 3 },
+  { x: 2.7, z: -3.8, height: 5.4, kind: 'pine', seed: 12 },
+  { x: 3.6, z: -3.4, height: 3.4, kind: 'round', seed: 4 },
+  { x: 4.6, z: -3.9, height: 4.4, kind: 'pine', seed: 13 },
+  // Beyond the lake, on the first hill, their trunks hidden behind it.
+  { x: 6.3, z: -4.4, height: 5.6, kind: 'pine', seed: 15 },
+  { x: 7.9, z: -4.6, height: 4.8, kind: 'round', seed: 16 },
+  { x: 9.4, z: -4.4, height: 6, kind: 'pine', seed: 17 },
+  { x: 11, z: -4.6, height: 5.2, kind: 'pine', seed: 18 },
+  { x: 12.2, z: -3.6, height: 4.4, kind: 'round', seed: 5 },
+  { x: 13.6, z: -3.2, height: 5, kind: 'pine', seed: 14 },
+] as const;
+// Tufts of grass on the lawn: at the foot of the trees and the bench, never on the lake, and
+// along the front edge, in front of Pip.
+const PARK_TUFTS = [
+  { x: -9.6, z: -1, height: 0.8 },
+  { x: -5.2, z: -0.9, height: 0.9 },
+  { x: -4.1, z: -1, height: 0.7 },
+  { x: 1.2, z: -0.9, height: 0.85 },
+  { x: 2.6, z: -1, height: 0.75 },
+  { x: 12.9, z: -1, height: 0.8 },
+  { x: -9.2, z: 2.6, height: 0.85 },
+  { x: -6.8, z: 2.75, height: 0.72 },
+  { x: -3.6, z: 2.68, height: 0.95 },
+  { x: -2.8, z: 2.6, height: 0.78 },
+  { x: 0.4, z: 2.75, height: 0.85 },
+  { x: 3.2, z: 2.68, height: 0.72 },
+  { x: 5.6, z: 2.6, height: 0.95 },
+  { x: 8.3, z: 2.75, height: 0.78 },
+  { x: 9.1, z: 2.68, height: 0.85 },
+  { x: 11.8, z: 2.6, height: 0.72 },
 ];
 const PAPY_HEIGHT = 2.9;
 const LUCAS_HEIGHT = 2.6;
@@ -1313,9 +1489,14 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
           cutOut(1600, Math.round(height * 100), drawHills(color, hatch, bumps, seed), 8, seed),
         ),
       ),
-      trees: PARK_TREES.map(({ seed }) => texture(cutOut(240, 320, drawTree(seed), 9, 110 + seed))),
+      trees: PARK_TREES.map(({ kind, seed }) =>
+        texture(cutOut(240, 320, kind === 'pine' ? drawPine(seed) : drawTree(seed), 9, 110 + seed)),
+      ),
       bench: texture(cutOut(260, 150, drawBench, 8, 116)),
       reeds: texture(cutOut(220, 110, drawReeds, 6, 117)),
+      tufts: [1, 2, 3, 4].map((seed) =>
+        texture(cutOut(160, 140, drawTuft(seed * 11), 7, 190 + seed)),
+      ),
       papy: texture(cutOut(PAPY_SIZE.width, PAPY_SIZE.height, drawPapy, 9, 118)),
       lucas: blinker(LUCAS_SIZE.width, LUCAS_SIZE.height, drawLucas, 9, 119),
     }),
@@ -1374,14 +1555,20 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         <meshBasicMaterial map={textures.edge} />
       </mesh>
       {PARK_TREES.map(({ x, z, height }, index) => (
-        <Furniture
+        <SwayingTree
           key={x}
           map={textures.trees[index]}
           x={x}
           z={z}
           height={height}
+          phase={index * 1.3}
           shadow={textures.shadow}
         />
+      ))}
+      {PARK_TUFTS.map(({ x, z, height }, index) => (
+        <Swaying key={`${x}-${z}`} x={x} z={z} phase={index * 0.9}>
+          <CutOut map={textures.tufts[index % 4]} height={height} />
+        </Swaying>
       ))}
       <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
       <Furniture map={textures.bench} x={bench.x} z={-1.1} height={1.4} shadow={textures.shadow} />
@@ -1393,12 +1580,12 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         height={PAPY_HEIGHT}
         shadow={textures.shadow}
       />
-      <group position={[lake.left + 0.6, 0, -0.3]}>
+      <Swaying x={lake.left + 0.6} z={-0.3} phase={0.4}>
         <CutOut map={textures.reeds} height={1.1} />
-      </group>
-      <group position={[lake.right - 0.8, 0, -0.3]}>
+      </Swaying>
+      <Swaying x={lake.right - 0.8} z={-0.3} phase={2.1}>
         <CutOut map={textures.reeds} height={1.2} />
-      </group>
+      </Swaying>
       <Character
         // The drawing leaves room for the rod on its right, so it moves right to stay centred.
         map={textures.lucas.open}

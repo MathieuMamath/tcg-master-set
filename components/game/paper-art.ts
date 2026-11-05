@@ -2858,6 +2858,79 @@ export function drawTree(seed: number) {
   };
 }
 
+// A pine: a trunk under three tiers of needles, alternating two greens.
+export function drawPine(seed: number) {
+  return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
+    const x = drawing;
+    const random = seededRandom(seed);
+    const dark = random() < 0.5 ? '#3f7d48' : '#4c8a4a';
+    x.fillStyle = '#8a5a35';
+    x.fillRect(width / 2 - 12, height * 0.7, 24, height * 0.3);
+    for (let tier = 0; tier < 3; tier++) {
+      const top = height * (0.02 + tier * 0.19);
+      const bottom = height * (0.36 + tier * 0.19);
+      const halfWidth = width * (0.24 + tier * 0.1);
+      x.fillStyle = tier % 2 === 0 ? dark : '#5a9a55';
+      x.beginPath();
+      x.moveTo(width / 2, top);
+      x.lineTo(width / 2 + halfWidth, bottom);
+      x.lineTo(width / 2 - halfWidth, bottom);
+      x.closePath();
+      x.fill();
+    }
+    x.fillStyle = 'rgb(255 255 255 / 16%)';
+    x.beginPath();
+    x.moveTo(width / 2, height * 0.04);
+    x.lineTo(width / 2 - width * 0.12, height * 0.2);
+    x.lineTo(width / 2 - width * 0.04, height * 0.2);
+    x.closePath();
+    x.fill();
+  };
+}
+
+const FLOWER_COLORS = ['#e8645a', '#f3c14b', '#f4f0e6', '#9a7bd6'];
+
+// A tuft of grass, with a flower or two standing out of it.
+export function drawTuft(seed: number) {
+  return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
+    const x = drawing;
+    const random = seededRandom(seed);
+    for (let blade = 0; blade < 9; blade++) {
+      x.fillStyle = blade % 2 === 0 ? '#6fae5e' : '#4f8f4e';
+      const baseX = width * 0.15 + random() * width * 0.7;
+      const bladeHeight = height * (0.35 + random() * 0.45);
+      x.beginPath();
+      x.moveTo(baseX - 8, height);
+      x.quadraticCurveTo(
+        baseX + (random() - 0.5) * 30,
+        height - bladeHeight * 0.6,
+        baseX + (random() - 0.5) * 24,
+        height - bladeHeight,
+      );
+      x.quadraticCurveTo(baseX + 4, height - bladeHeight * 0.4, baseX + 8, height);
+      x.fill();
+    }
+    const flowers = 1 + Math.floor(random() * 2);
+    for (let flower = 0; flower < flowers; flower++) {
+      const flowerX = width * (flowers === 1 ? 0.5 : 0.3 + flower * 0.4);
+      const flowerY = height * (0.25 + random() * 0.2);
+      x.strokeStyle = '#4f8f4e';
+      x.lineWidth = 4;
+      x.beginPath();
+      x.moveTo(flowerX, height);
+      x.lineTo(flowerX, flowerY);
+      x.stroke();
+      x.fillStyle = FLOWER_COLORS[Math.floor(random() * FLOWER_COLORS.length)] ?? '#f3c14b';
+      for (let petal = 0; petal < 5; petal++) {
+        const angle = (petal / 5) * Math.PI * 2;
+        ellipse(x, flowerX + Math.cos(angle) * 10, flowerY + Math.sin(angle) * 10, 8, 8);
+      }
+      x.fillStyle = '#f7d36a';
+      ellipse(x, flowerX, flowerY, 6, 6);
+    }
+  };
+}
+
 // The park's bench, with Papy Caillou's memory cards laid out on it, face down.
 export function drawBench(drawing: CanvasRenderingContext2D, width: number, height: number) {
   const x = drawing;
