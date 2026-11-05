@@ -14,6 +14,7 @@
 - **Keep the product name, domain, logos and repository metadata generic**, without third-party trademarks.
   - **Temporary exception, decided by the owner**: the card back in `components/game/card-back.tsx`, used when opening boosters and in Papy Caillou's memory game, imitates the real cards' back. The owner allows it for now, knowing the consequences, and it is to be replaced by a back of our own later. Don't add other third-party designs on the strength of it.
 - **The server decides.** Booster draws, balances, duplicate coins and quest rewards are computed on the server, never trusted from the browser. The browser only displays the result. Coins, boosters and the collection live in the database and only change through `player/progress.ts`.
+- **Statistics only in aggregate.** The game's statistics count and add up across players, and never show a player's name, email or anything that points to one player.
 - **No real money**: no payments, donations or ads.
 - **Single-player only.**
 
@@ -52,6 +53,8 @@ Work reaches `main` through a squashed PR, never a direct push. Lefthook refuses
 ## Data
 
 The schema lives in `db/schema`, and every change goes through a migration in `db/migrations`. Call `getDb()` from `db/client.ts` on the server only. Add a table with the feature that needs it.
+
+`game_events` is the game's event log, only ever added to. Every action that changes a player's coins, boosters, collection or quests records its event with `recordEvent` from `player/events.ts`, in the same transaction, so that an event exists exactly when its action does. Signing up and in are recorded too, from `auth/server.ts`, and so is each arrival in another place, through a door or by bus, when the spot saved changes place. The catalogue of types and their details is in `game/events.ts`. It is a contract with whatever reads the log, the game's statistics now and tools of their own later: a type's name and its details' fields never change once recorded, a new need gets a new field or a new type, and details hold no personal data. A new action gets its type in the catalogue, and a test fails for any type that nothing records.
 
 `player_cards` deliberately has no foreign key to `cards`, because `pnpm cards:import` replaces a set's card rows.
 

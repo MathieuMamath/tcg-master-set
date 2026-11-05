@@ -4,6 +4,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { username } from 'better-auth/plugins';
 import { getDb } from '@/db/client';
 import * as schema from '@/db/schema';
+import { recordEvent } from '@/player/events';
 import {
   isValidUsername,
   PASSWORD_MAX_LENGTH,
@@ -23,6 +24,21 @@ function requiredEnv(name: string): string {
   return value;
 }
 
+async function logAccountEvent(
+  userId: string,
+  type: 'player.signed_up' | 'player.signed_in',
+): Promise<void> {
+  try {
+    await recordEvent(getDb(), userId, type, {});
+  } catch (error) {
+    // Logged as text: the full error object carries the database client's internals.
+    console.error(
+      'The event log failed:',
+      String(error instanceof Error ? (error.cause ?? error) : error),
+    );
+  }
+}
+
 function createAuth() {
   return betterAuth({
     baseURL: requiredEnv('APP_URL'),
@@ -37,6 +53,16 @@ function createAuth() {
     session: { expiresIn: SESSION_DAYS * SECONDS_PER_DAY },
     // Players only hand over an email, a username and a password, so nothing else is kept.
     advanced: { ipAddress: { disableIpTracking: true } },
+    // Signing up and in are logged for the game's statistics. A failure to log never stops a
+    // player from playing.
+    databaseHooks: {
+      user: {
+        create: { after: (user) => logAccountEvent(user.id, 'player.signed_up') },
+      },
+      session: {
+        create: { after: (session) => logAccountEvent(session.userId, 'player.signed_in') },
+      },
+    },
     plugins: [
       username({
         minUsernameLength: USERNAME_MIN_LENGTH,
