@@ -51,6 +51,7 @@ import { Joystick } from './joystick';
 import { MemoryDialog } from './memory-dialog';
 import { NpcDialog, type Speaker } from './npc-dialog';
 import type { MovementInput } from './paper-scene';
+import { PlayerNameContext } from './player-name';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
 import { RaffleDialog } from './raffle-dialog';
@@ -761,401 +762,406 @@ export function Game({ player, sets, progress }: Props) {
   };
 
   return (
-    <div className="absolute inset-0">
-      <PaperScene
-        input={input}
-        bubble={bubble}
-        webglUnavailable={t('webglUnavailable')}
-        signs={{
-          shop: tTown('shop'),
-          bookshop: tTown('bookshop'),
-          arcade: tTown('arcade'),
-          busStop: tBus('stops.mainStreet'),
-          busLine: tBus('line'),
-          parkStop: tBus('stops.park'),
-          downtownStop: tBus('stops.downtown'),
-          dalgona: tTown('dalgona'),
-          raffle: tTown('raffle'),
-          bureau: tTown('bureau'),
-          latest: tShopkeeper('names.latest'),
-          thisYear: tShopkeeper('names.thisYear'),
-          older: tShopkeeper('names.older'),
-        }}
-        stains={quest?.stains ?? []}
-        isLeaCalm={cleanedOn === questDay(new Date())}
-        onInteractionChange={setInteraction}
-        onScrub={scrub}
-        startSpot={progress.spot}
-        spot={spot}
-        onPlaceChange={changePlace}
-        sky={sky}
-        light={light}
-      >
-        {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
-      </PaperScene>
-      <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
-        <div className="flex min-w-0 flex-wrap items-center gap-3">
-          <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
-            {player.username}
-          </p>
-          <p className="relative flex rotate-1 items-center gap-1.5 ui-scrap px-3 py-1 font-digits text-base font-bold">
-            <CoinIcon />
-            <AnimatedCount value={wallet.coins} format={(count) => t('coins', { count })} />
-          </p>
-          <button
-            type="button"
-            disabled={boosterTotal === 0}
-            aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
-            onClick={openBag}
-            className="relative flex -rotate-1 items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <BoosterIcon />
-            <AnimatedCount value={boosterTotal} format={(count) => t('boosters', { count })} />
-          </button>
-          <button
-            type="button"
-            onClick={openBinder}
-            className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
-          >
-            <BinderIcon />
-            {t('binderButton')}
-          </button>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-3">
-          <button
-            type="button"
-            aria-label={tSettings('open')}
-            onClick={openSettings}
-            className="shrink-0 rotate-2 cursor-pointer ui-paper-button bg-ui-paper p-1.5"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
-              {[0, 45, 90, 135].map((angle) => (
-                <path
-                  key={angle}
-                  d="M12 1v22"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  transform={`rotate(${angle} 12 12)`}
-                />
-              ))}
-              <circle cx="12" cy="12" r="7" fill="currentColor" />
-              <circle cx="12" cy="12" r="3" fill="var(--ui-paper)" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            aria-label={tActivity('open', { done: activity.done.length, total: DAILY_QUEST_GOAL })}
-            onClick={openActivity}
-            className="relative flex -rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
-          >
-            <ActivityIcon />
-            {activity.done.length}/{DAILY_QUEST_GOAL}
-            {/* A reward waits to be claimed. */}
-            {canClaimDailyBonus(activity) && (
-              <span
-                aria-hidden="true"
-                className="ui-bob absolute -top-1.5 -right-1.5 size-3.5 rounded-full border-2 border-ui-paper bg-ui-stamp"
-              />
-            )}
-          </button>
-          {clock && <ClockBadge offset={clockOffset} clock={clock} />}
-        </div>
-      </div>
-      {isPapySaying && !isDialogOpen && (
-        // Papy Caillou's saying, in his speech bubble: something to read, not to press.
-        <p
-          ref={bubble as RefObject<HTMLParagraphElement | null>}
-          aria-live="polite"
-          style={{ transform: 'translate(-200vw, 0)' }}
-          className="pointer-events-none absolute top-0 left-0 pb-2.5 font-game text-ui-ink"
+    <PlayerNameContext value={player.username}>
+      <div className="absolute inset-0">
+        <PaperScene
+          input={input}
+          bubble={bubble}
+          webglUnavailable={t('webglUnavailable')}
+          signs={{
+            shop: tTown('shop'),
+            bookshop: tTown('bookshop'),
+            arcade: tTown('arcade'),
+            busStop: tBus('stops.mainStreet'),
+            busLine: tBus('line'),
+            parkStop: tBus('stops.park'),
+            downtownStop: tBus('stops.downtown'),
+            dalgona: tTown('dalgona'),
+            raffle: tTown('raffle'),
+            bureau: tTown('bureau'),
+            latest: tShopkeeper('names.latest'),
+            thisYear: tShopkeeper('names.thisYear'),
+            older: tShopkeeper('names.older'),
+          }}
+          stains={quest?.stains ?? []}
+          isLeaCalm={cleanedOn === questDay(new Date())}
+          onInteractionChange={setInteraction}
+          onScrub={scrub}
+          startSpot={progress.spot}
+          spot={spot}
+          onPlaceChange={changePlace}
+          sky={sky}
+          light={light}
         >
-          <span className="ui-pop-in block w-max max-w-[min(22rem,80vw)] rounded-[2rem] bg-ui-paper px-6 py-3 text-center shadow-[3px_4px_0_var(--ui-shadow)]">
-            <span className="block text-lg leading-snug">
-              « {tQuest(`grandpa.proverbs.${proverb}.text` as 'grandpa.proverbs.1.text')} »
-            </span>
-            <span className="mt-1 block text-sm text-ui-ink/60">
-              {tQuest(`grandpa.proverbs.${proverb}.source` as 'grandpa.proverbs.1.source')}
-            </span>
-          </span>
-          <span
-            aria-hidden="true"
-            className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
-          />
-        </p>
-      )}
-      {interaction && !isDialogOpen && !isPapySaying && isTalk(interaction) && (
-        // A speech bubble that the scene moves just above the head of who the player can talk to.
-        <button
-          ref={bubble as RefObject<HTMLButtonElement | null>}
-          type="button"
-          aria-label={t(interaction)}
-          onClick={interact}
-          style={{ transform: 'translate(-200vw, 0)' }}
-          className="group absolute top-0 left-0 cursor-pointer pb-2.5 font-game text-xl text-ui-ink"
-        >
-          <span className="ui-pop-in flex items-center gap-2 rounded-[50%] bg-ui-paper px-9 py-3 shadow-[3px_4px_0_var(--ui-shadow)] transition-transform group-hover:-translate-y-0.5">
-            <kbd className="rounded-full bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
-              E
-            </kbd>
-            {/* What the character says, while the button's name says what pressing it does. */}
-            <span aria-hidden="true">{tHails(interaction)}</span>
-          </span>
-          {/* The bubble's tail, pointing down at the speaker. */}
-          <span
-            aria-hidden="true"
-            className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
-          />
-        </button>
-      )}
-      {interaction && !isDialogOpen && !isTalk(interaction) && (
-        <button
-          type="button"
-          onClick={interact}
-          aria-disabled={interaction === 'bed' && !clock?.canSleep}
-          className="ui-bob absolute inset-x-0 bottom-16 mx-auto flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
-        >
-          <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
-            E
-          </kbd>
-          {interaction === 'bed' && !clock?.canSleep ? t('notSleepy') : t(interaction)}
-        </button>
-      )}
-      {!isTalking &&
-        memoryCards === null &&
-        !isFishing &&
-        !isPlayingBasketball &&
-        dalgonaShape === null &&
-        !isRaffling && (
-          <>
-            <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
-              {t('keyboardHint')}
+          {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
+        </PaperScene>
+        <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
+            <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
+              {player.username}
             </p>
-            <Joystick
-              onChange={(direction) => {
-                input.current.joystick = direction;
-              }}
-            />
+            <p className="relative flex rotate-1 items-center gap-1.5 ui-scrap px-3 py-1 font-digits text-base font-bold">
+              <CoinIcon />
+              <AnimatedCount value={wallet.coins} format={(count) => t('coins', { count })} />
+            </p>
             <button
               type="button"
-              aria-hidden="true"
-              tabIndex={-1}
-              onPointerDown={() => {
-                input.current.wantsDash = true;
-              }}
-              className="absolute right-8 bottom-20 hidden size-20 touch-none select-none items-center justify-center rounded-full border border-current/30 bg-current/10 font-game font-semibold pointer-coarse:flex"
+              disabled={boosterTotal === 0}
+              aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
+              onClick={openBag}
+              className="relative flex -rotate-1 items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {t('dash')}
+              <BoosterIcon />
+              <AnimatedCount value={boosterTotal} format={(count) => t('boosters', { count })} />
             </button>
-          </>
+            <button
+              type="button"
+              onClick={openBinder}
+              className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
+            >
+              <BinderIcon />
+              {t('binderButton')}
+            </button>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-3">
+            <button
+              type="button"
+              aria-label={tSettings('open')}
+              onClick={openSettings}
+              className="shrink-0 rotate-2 cursor-pointer ui-paper-button bg-ui-paper p-1.5"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
+                {[0, 45, 90, 135].map((angle) => (
+                  <path
+                    key={angle}
+                    d="M12 1v22"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    transform={`rotate(${angle} 12 12)`}
+                  />
+                ))}
+                <circle cx="12" cy="12" r="7" fill="currentColor" />
+                <circle cx="12" cy="12" r="3" fill="var(--ui-paper)" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label={tActivity('open', {
+                done: activity.done.length,
+                total: DAILY_QUEST_GOAL,
+              })}
+              onClick={openActivity}
+              className="relative flex -rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
+            >
+              <ActivityIcon />
+              {activity.done.length}/{DAILY_QUEST_GOAL}
+              {/* A reward waits to be claimed. */}
+              {canClaimDailyBonus(activity) && (
+                <span
+                  aria-hidden="true"
+                  className="ui-bob absolute -top-1.5 -right-1.5 size-3.5 rounded-full border-2 border-ui-paper bg-ui-stamp"
+                />
+              )}
+            </button>
+            {clock && <ClockBadge offset={clockOffset} clock={clock} />}
+          </div>
+        </div>
+        {isPapySaying && !isDialogOpen && (
+          // Papy Caillou's saying, in his speech bubble: something to read, not to press.
+          <p
+            ref={bubble as RefObject<HTMLParagraphElement | null>}
+            aria-live="polite"
+            style={{ transform: 'translate(-200vw, 0)' }}
+            className="pointer-events-none absolute top-0 left-0 pb-2.5 font-game text-ui-ink"
+          >
+            <span className="ui-pop-in block w-max max-w-[min(22rem,80vw)] rounded-[2rem] bg-ui-paper px-6 py-3 text-center shadow-[3px_4px_0_var(--ui-shadow)]">
+              <span className="block text-lg leading-snug">
+                « {tQuest(`grandpa.proverbs.${proverb}.text` as 'grandpa.proverbs.1.text')} »
+              </span>
+              <span className="mt-1 block text-sm text-ui-ink/60">
+                {tQuest(`grandpa.proverbs.${proverb}.source` as 'grandpa.proverbs.1.source')}
+              </span>
+            </span>
+            <span
+              aria-hidden="true"
+              className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
+            />
+          </p>
         )}
-      {isBinderOpen && (
-        <BinderView
-          sets={sets.filter(({ id }) => binders.includes(id))}
-          collection={collection}
-          onClose={() => setIsBinderOpen(false)}
-        />
-      )}
-      {opening && <BoosterOpening opening={opening} onCut={cutBooster} onClose={closeOpening} />}
-      {isBagOpen && (
-        <BoosterBag
-          boosters={ownedBoosters}
-          onPick={pickBooster}
-          onClose={() => setIsBagOpen(false)}
-        />
-      )}
-      {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
-      {isActivityOpen && (
-        <ActivityDialog
-          activity={activity}
-          onClaim={claimDailyBonus}
-          onClose={() => setIsActivityOpen(false)}
-        />
-      )}
-      {quest && !isTalking && (
-        <QuestBanner
-          startedAt={quest.startedAt}
-          stainsLeft={quest.stains.length}
-          onTimeUp={timeUp}
-        />
-      )}
-      {talkingTo === 'grandma' && (
-        <QuestDialog
-          giver="grandma"
-          line={questLine}
-          onAccept={quest ? null : startQuest}
-          onClose={() => {
-            setTalkingTo(null);
-            if (!quest) {
-              setQuestLine((line) =>
+        {interaction && !isDialogOpen && !isPapySaying && isTalk(interaction) && (
+          // A speech bubble that the scene moves just above the head of who the player can talk to.
+          <button
+            ref={bubble as RefObject<HTMLButtonElement | null>}
+            type="button"
+            aria-label={t(interaction)}
+            onClick={interact}
+            style={{ transform: 'translate(-200vw, 0)' }}
+            className="group absolute top-0 left-0 cursor-pointer pb-2.5 font-game text-xl text-ui-ink"
+          >
+            <span className="ui-pop-in flex items-center gap-2 rounded-[50%] bg-ui-paper px-9 py-3 shadow-[3px_4px_0_var(--ui-shadow)] transition-transform group-hover:-translate-y-0.5">
+              <kbd className="rounded-full bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
+                E
+              </kbd>
+              {/* What the character says, while the button's name says what pressing it does. */}
+              <span aria-hidden="true">{tHails(interaction, { name: player.username })}</span>
+            </span>
+            {/* The bubble's tail, pointing down at the speaker. */}
+            <span
+              aria-hidden="true"
+              className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
+            />
+          </button>
+        )}
+        {interaction && !isDialogOpen && !isTalk(interaction) && (
+          <button
+            type="button"
+            onClick={interact}
+            aria-disabled={interaction === 'bed' && !clock?.canSleep}
+            className="ui-bob absolute inset-x-0 bottom-16 mx-auto flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
+          >
+            <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
+              E
+            </kbd>
+            {interaction === 'bed' && !clock?.canSleep ? t('notSleepy') : t(interaction)}
+          </button>
+        )}
+        {!isTalking &&
+          memoryCards === null &&
+          !isFishing &&
+          !isPlayingBasketball &&
+          dalgonaShape === null &&
+          !isRaffling && (
+            <>
+              <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
+                {t('keyboardHint')}
+              </p>
+              <Joystick
+                onChange={(direction) => {
+                  input.current.joystick = direction;
+                }}
+              />
+              <button
+                type="button"
+                aria-hidden="true"
+                tabIndex={-1}
+                onPointerDown={() => {
+                  input.current.wantsDash = true;
+                }}
+                className="absolute right-8 bottom-20 hidden size-20 touch-none select-none items-center justify-center rounded-full border border-current/30 bg-current/10 font-game font-semibold pointer-coarse:flex"
+              >
+                {t('dash')}
+              </button>
+            </>
+          )}
+        {isBinderOpen && (
+          <BinderView
+            sets={sets.filter(({ id }) => binders.includes(id))}
+            collection={collection}
+            onClose={() => setIsBinderOpen(false)}
+          />
+        )}
+        {opening && <BoosterOpening opening={opening} onCut={cutBooster} onClose={closeOpening} />}
+        {isBagOpen && (
+          <BoosterBag
+            boosters={ownedBoosters}
+            onPick={pickBooster}
+            onClose={() => setIsBagOpen(false)}
+          />
+        )}
+        {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
+        {isActivityOpen && (
+          <ActivityDialog
+            activity={activity}
+            onClaim={claimDailyBonus}
+            onClose={() => setIsActivityOpen(false)}
+          />
+        )}
+        {quest && !isTalking && (
+          <QuestBanner
+            startedAt={quest.startedAt}
+            stainsLeft={quest.stains.length}
+            onTimeUp={timeUp}
+          />
+        )}
+        {talkingTo === 'grandma' && (
+          <QuestDialog
+            giver="grandma"
+            line={questLine}
+            onAccept={quest ? null : startQuest}
+            onClose={() => {
+              setTalkingTo(null);
+              if (!quest) {
+                setQuestLine((line) =>
+                  line === 'rewarded' || line === 'failed' ? 'greeting' : line,
+                );
+              }
+            }}
+          />
+        )}
+        {talkingTo === 'grandpa' && (
+          <QuestDialog
+            giver="grandpa"
+            line={grandpaLine}
+            onAccept={startMemoryGame}
+            onClose={() => {
+              setTalkingTo(null);
+              setGrandpaLine((line) =>
                 line === 'rewarded' || line === 'failed' ? 'greeting' : line,
               );
+            }}
+          />
+        )}
+        {memoryCards && !isTalking && (
+          <MemoryDialog
+            cards={memoryCards}
+            onEnd={endMemoryGame}
+            onGiveUp={() => setMemoryCards(null)}
+          />
+        )}
+        {isPlayingBasketball && (
+          <BasketballDialog
+            sets={sets}
+            highScore={highScore}
+            isRewardTaken={basketballRewardedOn === questDay(new Date())}
+            onFinish={finishBasketball}
+            onClose={() => setIsPlayingBasketball(false)}
+          />
+        )}
+        {talkingTo === 'boy' && (
+          <QuestDialog
+            giver="boy"
+            line={boyLine}
+            onAccept={startFishing}
+            onClose={() => {
+              setTalkingTo(null);
+              setBoyLine((line) =>
+                line === 'rewarded' || line === 'rewardedShiny' || line === 'failed'
+                  ? 'greeting'
+                  : line,
+              );
+            }}
+          />
+        )}
+        {isFishing && !isTalking && (
+          <FishingDialog sets={sets} onReelIn={reelIn} onEnd={endFishing} />
+        )}
+        {talkingTo === 'gaspard' && (
+          <QuestDialog
+            giver="gaspard"
+            line={gaspardLine}
+            onAccept={startDalgona}
+            onClose={() => {
+              setTalkingTo(null);
+              setGaspardLine((line) =>
+                line === 'rewarded' || line === 'failed' ? 'greeting' : line,
+              );
+            }}
+          />
+        )}
+        {talkingTo === 'berenice' && (
+          <QuestDialog
+            giver="berenice"
+            line={bereniceLine}
+            onAccept={startRaffle}
+            onClose={() => {
+              setTalkingTo(null);
+              setBereniceLine((line) =>
+                line === 'rewarded' || line === 'rewardedShiny' || line === 'lost'
+                  ? 'alreadyDone'
+                  : line,
+              );
+            }}
+          />
+        )}
+        {isRaffling && !isTalking && <RaffleDialog onDraw={drawRaffle} onEnd={endRaffle} />}
+        {talkingTo === 'brutus' && (
+          // Brutus lets admins in, and turns everyone else away. The server checks the role again for
+          // everything in the bureau that matters.
+          <NpcDialog
+            speaker="brutus"
+            line={progress.isAdmin ? 'welcome' : 'refused'}
+            action={
+              progress.isAdmin
+                ? {
+                    label: tSpeakers('brutus.enter'),
+                    onPress: () => {
+                      input.current.travelTo = BUREAU_ENTRANCE;
+                    },
+                  }
+                : undefined
             }
-          }}
-        />
-      )}
-      {talkingTo === 'grandpa' && (
-        <QuestDialog
-          giver="grandpa"
-          line={grandpaLine}
-          onAccept={startMemoryGame}
-          onClose={() => {
-            setTalkingTo(null);
-            setGrandpaLine((line) =>
-              line === 'rewarded' || line === 'failed' ? 'greeting' : line,
-            );
-          }}
-        />
-      )}
-      {memoryCards && !isTalking && (
-        <MemoryDialog
-          cards={memoryCards}
-          onEnd={endMemoryGame}
-          onGiveUp={() => setMemoryCards(null)}
-        />
-      )}
-      {isPlayingBasketball && (
-        <BasketballDialog
-          sets={sets}
-          highScore={highScore}
-          isRewardTaken={basketballRewardedOn === questDay(new Date())}
-          onFinish={finishBasketball}
-          onClose={() => setIsPlayingBasketball(false)}
-        />
-      )}
-      {talkingTo === 'boy' && (
-        <QuestDialog
-          giver="boy"
-          line={boyLine}
-          onAccept={startFishing}
-          onClose={() => {
-            setTalkingTo(null);
-            setBoyLine((line) =>
-              line === 'rewarded' || line === 'rewardedShiny' || line === 'failed'
-                ? 'greeting'
-                : line,
-            );
-          }}
-        />
-      )}
-      {isFishing && !isTalking && (
-        <FishingDialog sets={sets} onReelIn={reelIn} onEnd={endFishing} />
-      )}
-      {talkingTo === 'gaspard' && (
-        <QuestDialog
-          giver="gaspard"
-          line={gaspardLine}
-          onAccept={startDalgona}
-          onClose={() => {
-            setTalkingTo(null);
-            setGaspardLine((line) =>
-              line === 'rewarded' || line === 'failed' ? 'greeting' : line,
-            );
-          }}
-        />
-      )}
-      {talkingTo === 'berenice' && (
-        <QuestDialog
-          giver="berenice"
-          line={bereniceLine}
-          onAccept={startRaffle}
-          onClose={() => {
-            setTalkingTo(null);
-            setBereniceLine((line) =>
-              line === 'rewarded' || line === 'rewardedShiny' || line === 'lost'
-                ? 'alreadyDone'
-                : line,
-            );
-          }}
-        />
-      )}
-      {isRaffling && !isTalking && <RaffleDialog onDraw={drawRaffle} onEnd={endRaffle} />}
-      {talkingTo === 'brutus' && (
-        // Brutus lets admins in, and turns everyone else away. The server checks the role again for
-        // everything in the bureau that matters.
-        <NpcDialog
-          speaker="brutus"
-          line={progress.isAdmin ? 'welcome' : 'refused'}
-          action={
-            progress.isAdmin
-              ? {
-                  label: tSpeakers('brutus.enter'),
-                  onPress: () => {
-                    input.current.travelTo = BUREAU_ENTRANCE;
-                  },
-                }
-              : undefined
-          }
-          onClose={() => setTalkingTo(null)}
-        />
-      )}
-      {talkingTo === 'hulotte' && (
-        <NpcDialog
-          speaker="hulotte"
-          line="greeting"
-          action={{ label: tSpeakers('hulotte.reports'), onPress: () => setIsStatsOpen(true) }}
-          onClose={() => setTalkingTo(null)}
-        />
-      )}
-      {isStatsOpen && !isTalking && (
-        <StatsDialog sets={sets} onClose={() => setIsStatsOpen(false)} />
-      )}
-      {dalgonaShape && !isTalking && (
-        <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
-      )}
-      {talkingTo &&
-        talkingTo !== 'grandma' &&
-        talkingTo !== 'grandpa' &&
-        talkingTo !== 'boy' &&
-        talkingTo !== 'gaspard' &&
-        talkingTo !== 'berenice' &&
-        talkingTo !== 'brutus' &&
-        talkingTo !== 'hulotte' && (
-          <ShopDialog
-            stock={talkingTo}
-            items={(talkingTo === 'binderSeller'
-              ? bindersForSale(sets)
-              : setsSoldBy(talkingTo, sets, new Date().getFullYear())
-            ).map((set) => {
-              const hasBinder = binders.includes(set.id);
-              return {
-                set,
-                refusal:
-                  talkingTo === 'binderSeller'
-                    ? hasBinder
-                      ? 'alreadyOwned'
-                      : null
-                    : hasBinder
-                      ? null
-                      : 'needsBinder',
-                inBag: boosterCount(wallet, set.id),
-              };
-            })}
-            coins={wallet.coins}
-            onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
             onClose={() => setTalkingTo(null)}
           />
         )}
-      {isBusMapOpen && stopAt(place) && (
-        <BusMap
-          here={stopAt(place)?.id ?? 'mainStreet'}
-          onTravel={({ place: to, arrivalX }) => {
-            input.current.travelTo = { to, arrival: { x: arrivalX, facing: 1 } };
-            setIsBusMapOpen(false);
-          }}
-          onClose={() => setIsBusMapOpen(false)}
-        />
-      )}
-      <SaveNotice isSaving={isSaving} />
-      {/* A night's sleep: the screen goes dark, then the morning comes back. */}
-      <div
-        role="status"
-        className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#141b33] font-display text-3xl text-ui-paper transition-opacity duration-700 ${
-          sleep === 'asleep' ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        {sleep === 'asleep' && t('sleeping')}
-        {sleep === 'waking' && <span className="sr-only">{t('wakingUp')}</span>}
+        {talkingTo === 'hulotte' && (
+          <NpcDialog
+            speaker="hulotte"
+            line="greeting"
+            action={{ label: tSpeakers('hulotte.reports'), onPress: () => setIsStatsOpen(true) }}
+            onClose={() => setTalkingTo(null)}
+          />
+        )}
+        {isStatsOpen && !isTalking && (
+          <StatsDialog sets={sets} onClose={() => setIsStatsOpen(false)} />
+        )}
+        {dalgonaShape && !isTalking && (
+          <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
+        )}
+        {talkingTo &&
+          talkingTo !== 'grandma' &&
+          talkingTo !== 'grandpa' &&
+          talkingTo !== 'boy' &&
+          talkingTo !== 'gaspard' &&
+          talkingTo !== 'berenice' &&
+          talkingTo !== 'brutus' &&
+          talkingTo !== 'hulotte' && (
+            <ShopDialog
+              stock={talkingTo}
+              items={(talkingTo === 'binderSeller'
+                ? bindersForSale(sets)
+                : setsSoldBy(talkingTo, sets, new Date().getFullYear())
+              ).map((set) => {
+                const hasBinder = binders.includes(set.id);
+                return {
+                  set,
+                  refusal:
+                    talkingTo === 'binderSeller'
+                      ? hasBinder
+                        ? 'alreadyOwned'
+                        : null
+                      : hasBinder
+                        ? null
+                        : 'needsBinder',
+                  inBag: boosterCount(wallet, set.id),
+                };
+              })}
+              coins={wallet.coins}
+              onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
+        {isBusMapOpen && stopAt(place) && (
+          <BusMap
+            here={stopAt(place)?.id ?? 'mainStreet'}
+            onTravel={({ place: to, arrivalX }) => {
+              input.current.travelTo = { to, arrival: { x: arrivalX, facing: 1 } };
+              setIsBusMapOpen(false);
+            }}
+            onClose={() => setIsBusMapOpen(false)}
+          />
+        )}
+        <SaveNotice isSaving={isSaving} />
+        {/* A night's sleep: the screen goes dark, then the morning comes back. */}
+        <div
+          role="status"
+          className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#141b33] font-display text-3xl text-ui-paper transition-opacity duration-700 ${
+            sleep === 'asleep' ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {sleep === 'asleep' && t('sleeping', { name: player.username })}
+          {sleep === 'waking' && <span className="sr-only">{t('wakingUp')}</span>}
+        </div>
       </div>
-    </div>
+    </PlayerNameContext>
   );
 }

@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type { QuestGiver } from '@/game/world';
 import { moveThroughChoices } from './menu-focus';
+import { usePlayerName } from './player-name';
 import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, SpeechBox, TypedLine } from './shop-dialog';
 
@@ -30,6 +31,7 @@ type Props = {
 // quest giver answers with something else.
 export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props) {
   const t = useTranslations('Quest');
+  const playerName = usePlayerName();
   const dialog = useRef<HTMLDialogElement>(null);
   const [speech, setSpeech] = useState({ line: firstLine, turn: 0 });
   const [isAsking, setIsAsking] = useState(false);
@@ -62,7 +64,7 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
           key={speech.turn}
           text={
             // Each quest giver only ever gets the lines it has, which this type can't tell.
-            t(`${giver}.lines.${speech.line}` as 'grandma.lines.greeting')
+            t(`${giver}.lines.${speech.line}` as 'grandma.lines.greeting', { name: playerName })
           }
         />
         <form method="dialog" className="mt-2.5 flex flex-wrap gap-2.5">

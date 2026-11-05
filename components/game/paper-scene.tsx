@@ -170,6 +170,7 @@ import {
   solidTop,
 } from './paper-art';
 import { createPaperBalls, emitPaperBall, PaperBalls } from './paper-balls';
+import { usePlayerName } from './player-name';
 import {
   COVER_MILLISECONDS,
   MIN_COVERED_MILLISECONDS,
@@ -2260,9 +2261,10 @@ export function PaperScene({
   children,
 }: Props) {
   const tTravel = useTranslations('Travel');
+  const playerName = usePlayerName();
   // Each place by the name on its sign, or else its own.
   const placeNames: Record<SidePlaceId, string> = {
-    bedroom: tTravel('places.bedroom'),
+    bedroom: tTravel('places.bedroom', { name: playerName }),
     town: signs.busStop,
     shop: signs.shop,
     bookshop: signs.bookshop,
