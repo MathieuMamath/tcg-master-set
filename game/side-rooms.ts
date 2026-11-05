@@ -234,8 +234,13 @@ export const BEDROOM: SideRoom = {
   id: 'bedroom',
   bounds: BEDROOM_BOUNDS,
   start: -1.2,
-  // The binders are kept on the bookcase.
+  // The binders are kept on the bookcase, and Pip sleeps in the bed against the left wall.
   interactions: [
+    {
+      interaction: 'bed',
+      minX: BEDROOM_BOUNDS.minX,
+      maxX: BEDROOM_FURNITURE.bed.x + BEDROOM_FURNITURE.bed.width / 2,
+    },
     {
       interaction: 'binder',
       minX: BEDROOM_FURNITURE.bookcase.x - BEDROOM_FURNITURE.bookcase.width / 2 - 0.3,

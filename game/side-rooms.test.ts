@@ -83,7 +83,11 @@ describe('the bedroom', () => {
 
   test('the binders can be opened in front of the bookcase', () => {
     expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.bookcase.x)).toBe('binder');
-    expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.bed.x)).toBeNull();
+  });
+
+  test('Pip goes to bed in front of it, and nowhere else', () => {
+    expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.bed.x)).toBe('bed');
+    expect(interactionAlong(BEDROOM, BEDROOM.start)).toBeNull();
   });
 
   test('the door in the right wall leads out to the street', () => {

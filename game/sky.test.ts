@@ -1,10 +1,48 @@
-import { expect, test } from 'vitest';
-import { skyLook } from './sky';
+import { describe, expect, it } from 'vitest';
+import { mixColors, skyLook, worldTint } from './sky';
 
-test('a day with a few clouds is a bright blue sky with some clouds drifting', () => {
-  const look = skyLook('day', 'fewClouds');
+describe('mixColors', () => {
+  it('goes from one colour to the other', () => {
+    expect(mixColors('#000000', '#ffffff', 0)).toBe('#000000');
+    expect(mixColors('#000000', '#ffffff', 1)).toBe('#ffffff');
+    expect(mixColors('#000000', '#ffffff', 0.5)).toBe('#808080');
+  });
+});
 
-  expect(look.cloudCount).toBeGreaterThan(0);
-  expect(look.drift).toBeGreaterThan(0);
-  expect(look.top).toMatch(/^#[0-9a-f]{6}$/);
+describe('skyLook', () => {
+  it('keeps the clear morning sky the game always had', () => {
+    expect(skyLook('day', 'fewClouds')).toEqual({
+      top: '#6fb3e6',
+      horizon: '#cfe8f5',
+      cloud: '#ffffff',
+      cloudCount: 4,
+      drift: 0.006,
+      stars: false,
+    });
+  });
+
+  it('shows stars on a clear night, never through rain', () => {
+    expect(skyLook('night', 'fewClouds').stars).toBe(true);
+    expect(skyLook('night', 'rain').stars).toBe(false);
+    expect(skyLook('day', 'fewClouds').stars).toBe(false);
+  });
+
+  it('greys the sky and adds clouds in bad weather', () => {
+    const fair = skyLook('day', 'fewClouds');
+    const storm = skyLook('day', 'storm');
+    expect(storm.top).not.toBe(fair.top);
+    expect(storm.cloudCount).toBeGreaterThan(fair.cloudCount);
+  });
+});
+
+describe('worldTint', () => {
+  it('leaves a fair day untouched and darkens the night', () => {
+    expect(worldTint('day', 'fewClouds').strength).toBe(0);
+    expect(worldTint('night', 'fewClouds').strength).toBeGreaterThan(0.3);
+  });
+
+  it('dims the world in the rain, without ever blacking it out', () => {
+    expect(worldTint('day', 'rain').strength).toBeGreaterThan(0);
+    expect(worldTint('night', 'storm').strength).toBeLessThanOrEqual(0.65);
+  });
 });

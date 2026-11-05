@@ -85,6 +85,13 @@
       "when": 1793904450390,
       "tag": "0011_far_mister_fear",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793911177556,
+      "tag": "0012_white_roulette",
+      "breakpoints": true
     }
   ]
 }

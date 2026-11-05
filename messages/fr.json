@@ -40,7 +40,11 @@
     "berenice": "Parler (Bérénice)",
     "leaveBureau": "Sortir",
     "hulotte": "Parler (Mme Hulotte)",
-    "brutus": "Parler (Brutus)"
+    "brutus": "Parler (Brutus)",
+    "bed": "Dormir jusqu’au matin",
+    "notSleepy": "Pip n’a pas encore sommeil",
+    "sleeping": "Zzz… Bonne nuit, Pip.",
+    "wakingUp": "Le jour se lève !"
   },
   "Shopkeeper": {
     "names": {
@@ -672,6 +676,16 @@
       "finished": "Terminées",
       "active": "Joueurs actifs",
       "weekOf": "sem. du {day}"
+    }
+  },
+  "Clock": {
+    "label": "Il est {time}, {weather}",
+    "weather": {
+      "fewClouds": "beau temps",
+      "cloudy": "nuageux",
+      "rain": "pluie",
+      "storm": "orage",
+      "snow": "neige"
     }
   }
 }

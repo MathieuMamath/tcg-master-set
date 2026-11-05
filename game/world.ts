@@ -28,4 +28,6 @@ export type Interaction =
   // Scrubbing the dust off a wall, during Léa's quest.
   | 'scrub'
   // Reading the bus stop's sign, which opens the map of the stops.
-  | 'busStop';
+  | 'busStop'
+  // Going to bed, which only sends Pip to sleep at night.
+  | 'bed';

@@ -7,6 +7,7 @@ import {
   playerBinders,
   playerBoosters,
   playerCards,
+  playerClocks,
   playerHighScores,
   playerQuests,
   playerSpots,
@@ -31,6 +32,7 @@ import {
 import { type Collection, firstCopies, slotKey } from '@/game/binder';
 import { boosterRecipe, openBooster } from '@/game/booster';
 import { isPlayableSet, type SetId } from '@/game/card-sets';
+import { canSleep, isValidOffset, minuteOfDay, offsetAfterSleep } from '@/game/clock';
 import {
   type CarvingStatus,
   canFinishDalgona,
@@ -90,6 +92,8 @@ export type PlayerProgress = {
   activity: DailyActivity;
   // Whether Brutus lets the player into the statistics bureau.
   isAdmin: boolean;
+  // How far the player's sleeps moved the game's clock on, in game minutes.
+  clockOffset: number;
 };
 
 export type OpenedBooster = {
@@ -248,7 +252,41 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     raffleDrawnOn: await loadRewardDay(getDb(), userId, RAFFLE_QUEST),
     activity: await loadDailyActivity(getDb(), userId),
     isAdmin: await isAdmin(userId),
+    clockOffset: await loadClockOffset(getDb(), userId),
   };
+}
+
+async function loadClockOffset(database: Reader, userId: string): Promise<number> {
+  const [row] = await database
+    .select({ offset: playerClocks.offset })
+    .from(playerClocks)
+    .where(eq(playerClocks.userId, userId));
+  return isValidOffset(row?.offset) ? row.offset : 0;
+}
+
+// Going to bed at night moves the player's clock on to the morning. Only at night: by day Pip
+// isn't sleepy. Returns the new offset, or null when it isn't bedtime.
+export async function sleepUntilMorning(userId: string, now = new Date()): Promise<number | null> {
+  return getDb().transaction(async (transaction) => {
+    const [row] = await transaction
+      .select({ offset: playerClocks.offset })
+      .from(playerClocks)
+      .where(eq(playerClocks.userId, userId))
+      .for('update');
+    const offset = isValidOffset(row?.offset) ? row.offset : 0;
+    if (!canSleep(minuteOfDay(now, offset))) {
+      return null;
+    }
+    const slept = offsetAfterSleep(now, offset);
+    await transaction
+      .insert(playerClocks)
+      .values({ userId, offset: slept })
+      .onConflictDoUpdate({
+        target: playerClocks.userId,
+        set: { offset: slept, updatedAt: now },
+      });
+    return slept;
+  });
 }
 
 // Starting again simply replaces an attempt that was given up on.

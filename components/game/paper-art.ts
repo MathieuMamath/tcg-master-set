@@ -677,6 +677,9 @@ export function drawSky(look: SkyLook): HTMLCanvasElement {
   gradient.addColorStop(1, look.horizon);
   x.fillStyle = gradient;
   x.fillRect(0, 0, width, height);
+  if (look.stars) {
+    drawStars(x, width, height, 90);
+  }
   const random = seededRandom(23);
   for (let cloud = 0; cloud < look.cloudCount; cloud++) {
     const centerX = ((cloud + random() * 0.6) / look.cloudCount) * width;
@@ -977,32 +980,51 @@ export function drawShop(name: string) {
 }
 
 // The sky's colours alone, for a backdrop with its clouds hung in front as cut-outs.
+// Stars scattered over the upper part of a sky, smaller and fainter towards the horizon.
+function drawStars(x: CanvasRenderingContext2D, width: number, height: number, count: number) {
+  const random = seededRandom(91);
+  for (let star = 0; star < count; star++) {
+    const starY = random() * height * 0.7;
+    const fade = 1 - starY / (height * 0.85);
+    const size = 1.2 + random() * 1.5;
+    x.fillStyle = `rgb(255 248 220 / ${Math.round((0.7 + random() * 0.3) * fade * 100)}%)`;
+    ellipse(x, random() * width, starY, size, size);
+  }
+}
+
+// The sky behind a whole place. Plain colours stretch from a narrow strip, but stars need the
+// width of the place, or they would be drawn out into streaks.
 export function drawSkyGradient(look: SkyLook): HTMLCanvasElement {
-  const canvas = createCanvas(16, 256);
+  // Tall enough with stars for them to stay round once stretched over the place.
+  const canvas = createCanvas(look.stars ? 2048 : 16, look.stars ? 384 : 256);
   const x = context(canvas);
   const gradient = x.createLinearGradient(0, 0, 0, canvas.height);
   gradient.addColorStop(0, look.top);
   gradient.addColorStop(1, look.horizon);
   x.fillStyle = gradient;
   x.fillRect(0, 0, canvas.width, canvas.height);
+  if (look.stars) {
+    drawStars(x, canvas.width, canvas.height, 420);
+  }
   return canvas;
 }
 
-// A fluffy cloud with a soft grey belly.
+// A fluffy cloud with a soft grey belly, whole within its drawing: its puffs reach neither the top
+// nor the bottom edge, or the paper's outline would cut them flat.
 export function drawCloud(color: string) {
   return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
     const x = drawing;
     x.fillStyle = color;
     for (const [left, top, radius] of [
-      [0.3, 0.62, 0.22],
-      [0.5, 0.45, 0.3],
-      [0.72, 0.6, 0.22],
-      [0.5, 0.7, 0.25],
+      [0.3, 0.56, 0.2],
+      [0.5, 0.44, 0.27],
+      [0.71, 0.55, 0.2],
+      [0.5, 0.62, 0.24],
     ]) {
-      ellipse(x, width * left, height * top, width * radius, height * radius * 1.6);
+      ellipse(x, width * left, height * top, width * radius, height * radius * 1.2);
     }
     x.fillStyle = 'rgb(140 180 200 / 25%)';
-    ellipse(x, width * 0.5, height * 0.86, width * 0.36, height * 0.1);
+    ellipse(x, width * 0.5, height * 0.8, width * 0.3, height * 0.07);
   };
 }
 

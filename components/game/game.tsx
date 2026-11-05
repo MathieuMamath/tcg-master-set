@@ -2,13 +2,14 @@
 
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
-import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
 import { canClaimDailyBonus, DAILY_QUEST_GOAL, type DailyActivity } from '@/game/activity';
 import { addToCollection } from '@/game/binder';
 import { stopAt } from '@/game/bus';
 import type { PlayableSet, SetId } from '@/game/card-sets';
+import { isValidOffset } from '@/game/clock';
 import type { DalgonaShape, Press } from '@/game/dalgona';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
@@ -24,6 +25,7 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import { BUREAU_ENTRANCE, isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
+import { skyLook } from '@/game/sky';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type {
@@ -43,6 +45,7 @@ import { BoosterOpening, type Opening } from './booster-opening';
 import { BusMap } from './bus-map';
 import { DalgonaDialog } from './dalgona-dialog';
 import { FishingDialog } from './fishing-dialog';
+import { ClockBadge, useGameClock, WeatherLayer } from './game-clock';
 import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
 import { Joystick } from './joystick';
 import { MemoryDialog } from './memory-dialog';
@@ -73,10 +76,16 @@ function isTalk(interaction: Interaction): interaction is Extract<Talk, Interact
     interaction !== 'binder' &&
     interaction !== 'basketball' &&
     interaction !== 'scrub' &&
-    interaction !== 'busStop'
+    interaction !== 'busStop' &&
+    interaction !== 'bed'
   );
 }
 const DASH_KEY = 'Space';
+// The places under the open sky, where the weather falls and the night darkens the world.
+const OUTSIDE: ReadonlySet<SidePlaceId> = new Set(['town', 'park', 'downtown']);
+// How long the screen stays dark for a night's sleep, and the morning takes to come back.
+const NIGHT_MILLISECONDS = 1800;
+const WAKING_MILLISECONDS = 1600;
 
 // Where the character stands gives no advantage, so a save that fails is simply let go.
 function saveSpot(spot: PlayerSpot) {
@@ -123,6 +132,14 @@ export function Game({ player, sets, progress }: Props) {
   const [bereniceLine, setBereniceLine] = useState<QuestLine>('greeting');
   const [raffleDrawnOn, setRaffleDrawnOn] = useState(progress.raffleDrawnOn);
   const [isBusMapOpen, setIsBusMapOpen] = useState(false);
+  // The game's clock, moved on by the player's sleeps, and the night's sleep while it lasts.
+  const [clockOffset, setClockOffset] = useState(progress.clockOffset);
+  const clock = useGameClock(clockOffset);
+  const sky = useMemo(
+    () => skyLook(clock?.time ?? 'day', clock?.weather ?? 'fewClouds'),
+    [clock?.time, clock?.weather],
+  );
+  const [sleep, setSleep] = useState<'asleep' | 'waking' | null>(null);
   // Where the character is, for the bus map to know which stop it is read at.
   const [place, setPlace] = useState<SidePlaceId>(progress.spot?.place ?? 'bedroom');
   // Where the character stands, kept by the scene, for saving it when the page is left.
@@ -169,15 +186,16 @@ export function Game({ player, sets, progress }: Props) {
     isPlayingBasketball ||
     dalgonaShape !== null ||
     isRaffling ||
-    isBusMapOpen;
+    isBusMapOpen ||
+    sleep !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
     .filter(({ count }) => count > 0);
   const boosterTotal = totalBoosters(wallet);
   const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
-  const controls = useRef({ interaction, isDialogOpen, isPapySaying });
-  controls.current = { interaction, isDialogOpen, isPapySaying };
+  const controls = useRef({ interaction, isDialogOpen, isPapySaying, goToBed: () => {} });
+  controls.current = { interaction, isDialogOpen, isPapySaying, goToBed: () => goToBed() };
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -222,6 +240,8 @@ export function Game({ player, sets, progress }: Props) {
           input.current.wantsScrub = true;
         } else if (controls.current.interaction === 'busStop') {
           setIsBusMapOpen(true);
+        } else if (controls.current.interaction === 'bed') {
+          controls.current.goToBed();
         } else {
           setTalkingTo(controls.current.interaction);
         }
@@ -274,6 +294,8 @@ export function Game({ player, sets, progress }: Props) {
       input.current.wantsScrub = true;
     } else if (interaction === 'busStop') {
       setIsBusMapOpen(true);
+    } else if (interaction === 'bed') {
+      goToBed();
     } else if (interaction) {
       setTalkingTo(interaction);
     }
@@ -689,6 +711,38 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
+  // At night, Pip sleeps until the morning: the server moves the clock on, while the screen goes
+  // dark for a moment. By day, he isn't sleepy and the bed does nothing.
+  const goToBed = async () => {
+    if (!clock?.canSleep || sleep !== null) {
+      return;
+    }
+    stopWalking();
+    setSleep('asleep');
+    const fellAsleep = Date.now();
+    let slept: number | null = null;
+    try {
+      const response = await fetch('/api/player/sleep', { method: 'POST' });
+      if (response.ok) {
+        const { clockOffset: offset } = (await response.json()) as { clockOffset: unknown };
+        slept = isValidOffset(offset) ? offset : null;
+      }
+    } catch {
+      // The night is simply cut short.
+    }
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.max(0, NIGHT_MILLISECONDS - (Date.now() - fellAsleep))),
+    );
+    if (slept === null) {
+      setSleep(null);
+      return;
+    }
+    setClockOffset(slept);
+    setSleep('waking');
+    await new Promise((resolve) => setTimeout(resolve, WAKING_MILLISECONDS));
+    setSleep(null);
+  };
+
   const openActivity = () => {
     stopWalking();
     setIsActivityOpen(true);
@@ -727,7 +781,9 @@ export function Game({ player, sets, progress }: Props) {
         startSpot={progress.spot}
         spot={spot}
         onPlaceChange={changePlace}
+        sky={sky}
       />
+      {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
@@ -793,6 +849,7 @@ export function Game({ player, sets, progress }: Props) {
               />
             )}
           </button>
+          {clock && <ClockBadge offset={clockOffset} clock={clock} />}
         </div>
       </div>
       {isPapySaying && !isDialogOpen && (
@@ -845,12 +902,13 @@ export function Game({ player, sets, progress }: Props) {
         <button
           type="button"
           onClick={interact}
+          aria-disabled={interaction === 'bed' && !clock?.canSleep}
           className="ui-bob absolute inset-x-0 bottom-16 mx-auto flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
         >
           <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
             E
           </kbd>
-          {t(interaction)}
+          {interaction === 'bed' && !clock?.canSleep ? t('notSleepy') : t(interaction)}
         </button>
       )}
       {!isTalking &&
@@ -1079,6 +1137,16 @@ export function Game({ player, sets, progress }: Props) {
         />
       )}
       <SaveNotice isSaving={isSaving} />
+      {/* A night's sleep: the screen goes dark, then the morning comes back. */}
+      <div
+        role="status"
+        className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#141b33] font-display text-3xl text-ui-paper transition-opacity duration-700 ${
+          sleep === 'asleep' ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        {sleep === 'asleep' && t('sleeping')}
+        {sleep === 'waking' && <span className="sr-only">{t('wakingUp')}</span>}
+      </div>
     </div>
   );
 }
