@@ -687,5 +687,25 @@
       "storm": "orage",
       "snow": "neige"
     }
+  },
+  "Travel": {
+    "headingTo": "En route vers",
+    "nextStop": "Prochain arrêt",
+    "loading": "Chargement",
+    "tip": "Astuce :",
+    "places": {
+      "bedroom": "La chambre de Pip",
+      "flat": "Chez Léa"
+    },
+    "tips": {
+      "0": "Un doublon n’est jamais perdu : il rapporte des pièces selon sa rareté.",
+      "1": "Termine les six quêtes du jour pour récupérer le bonus quotidien.",
+      "2": "La nuit, Pip peut dormir dans son lit jusqu’au matin.",
+      "3": "Lucas repêche parfois une boîte au trésor, avec un booster dedans !",
+      "4": "Il faut le classeur d’une série, chez Mamie Noisette, pour en acheter les boosters.",
+      "5": "Appuie sur Espace pour faire un dash.",
+      "6": "Une fois sur deux mille, un booster est un god pack rempli de cartes rares.",
+      "7": "Bérénice offre un tour de tombola gratuit chaque jour."
+    }
   }
 }

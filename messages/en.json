@@ -687,5 +687,25 @@
       "storm": "storm",
       "snow": "snow"
     }
+  },
+  "Travel": {
+    "headingTo": "On the way to",
+    "nextStop": "Next stop",
+    "loading": "Loading",
+    "tip": "Tip:",
+    "places": {
+      "bedroom": "Pip’s bedroom",
+      "flat": "Léa’s flat"
+    },
+    "tips": {
+      "0": "A duplicate is never wasted: it pays coins according to its rarity.",
+      "1": "Finish the day’s six quests to claim the daily bonus.",
+      "2": "At night, Pip can sleep in his bed until the morning.",
+      "3": "Lucas sometimes fishes out a treasure box, with a booster inside!",
+      "4": "You need a set’s binder, from Mamie Noisette, to buy its boosters.",
+      "5": "Press Space to dash.",
+      "6": "One booster in two thousand is a god pack full of rare cards.",
+      "7": "Bérénice gives a free turn of her raffle every day."
+    }
   }
 }
