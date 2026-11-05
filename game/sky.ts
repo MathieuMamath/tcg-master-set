@@ -96,3 +96,12 @@ export function worldTint(time: TimeOfDay, weather: Weather): WorldTint {
     strength: Math.min(0.65, strength + dimming),
   };
 }
+
+const LAMP_LIGHT: Record<TimeOfDay, number> = { dawn: 0.35, day: 0, dusk: 0.75, night: 1 };
+
+// How brightly the street lamps shine, from 0 when they are off to 1: from dusk until dawn, and
+// on a stormy day too.
+export function lampLight(time: TimeOfDay, weather: Weather): number {
+  const light = LAMP_LIGHT[time];
+  return weather === 'storm' ? Math.max(light, 0.6) : light;
+}

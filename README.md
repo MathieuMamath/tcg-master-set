@@ -22,7 +22,7 @@ The world is a paper diorama seen from the side: Pip walks left and right, and g
   - carving Gaspard's dalgona biscuit;
   - a free turn of Bérénice's raffle drum.
 - **The activity tracker** counts the day's quests, and doing all six earns a daily bonus.
-- **Day, night and weather**: the game's own clock runs a day in 24 minutes, with rain, storms and winter snow. At night, Pip can sleep in his bed until the morning.
+- **Day, night and weather**: the game's own clock runs a day in 24 minutes, with rain, storms and winter snow. Street lamps light up at night, and Pip can sleep in his bed until the morning.
 - **The statistics bureau**, in the big city, where only admins get past the guard at the door.
 
 It plays with a keyboard, a mouse or a touch screen, on a desktop first and on a phone too, in English and French.

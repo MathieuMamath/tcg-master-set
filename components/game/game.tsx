@@ -25,7 +25,7 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import { BUREAU_ENTRANCE, isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
-import { skyLook } from '@/game/sky';
+import { lampLight, skyLook, worldTint } from '@/game/sky';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type {
@@ -137,6 +137,13 @@ export function Game({ player, sets, progress }: Props) {
   const clock = useGameClock(clockOffset);
   const sky = useMemo(
     () => skyLook(clock?.time ?? 'day', clock?.weather ?? 'fewClouds'),
+    [clock?.time, clock?.weather],
+  );
+  const light = useMemo(
+    () => ({
+      tint: worldTint(clock?.time ?? 'day', clock?.weather ?? 'fewClouds'),
+      lamps: lampLight(clock?.time ?? 'day', clock?.weather ?? 'fewClouds'),
+    }),
     [clock?.time, clock?.weather],
   );
   const [sleep, setSleep] = useState<'asleep' | 'waking' | null>(null);
@@ -782,6 +789,7 @@ export function Game({ player, sets, progress }: Props) {
         spot={spot}
         onPlaceChange={changePlace}
         sky={sky}
+        light={light}
       />
       {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">

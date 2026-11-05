@@ -2953,6 +2953,95 @@ export function drawTuft(seed: number) {
   };
 }
 
+// A lamp's warm halo, brightest in the middle and fading out to nothing.
+export function drawLampGlow(): HTMLCanvasElement {
+  const canvas = createCanvas(256, 256);
+  const x = context(canvas);
+  const gradient = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+  gradient.addColorStop(0, 'rgb(255 236 170 / 100%)');
+  gradient.addColorStop(0.18, 'rgb(255 214 130 / 75%)');
+  gradient.addColorStop(0.5, 'rgb(255 190 100 / 22%)');
+  gradient.addColorStop(1, 'rgb(255 180 90 / 0%)');
+  x.fillStyle = gradient;
+  x.fillRect(0, 0, 256, 256);
+  return canvas;
+}
+
+export type LampStyle = 'classic' | 'modern';
+
+// Each lamp's drawing, and where its light sits in it, as shares of its width and height.
+export const LAMP_DRAWINGS: Record<
+  LampStyle,
+  { width: number; height: number; lightX: number; lightY: number }
+> = {
+  classic: { width: 140, height: 440, lightX: 0.5, lightY: 0.14 },
+  modern: { width: 220, height: 440, lightX: 0.74, lightY: 0.09 },
+};
+
+// A street lamp: a green cast-iron lantern for the village and the park, or a slim grey pole with
+// a long arm for the big city. Its glass stays pale: the scene lights it up at night.
+export function drawStreetLamp(style: LampStyle) {
+  return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
+    const x = drawing;
+    if (style === 'classic') {
+      const middle = width / 2;
+      x.fillStyle = '#2f5a48';
+      // The base, the pole, and the ring under the lantern.
+      roundedRect(x, middle - 26, height - 46, 52, 46, 8);
+      x.fill();
+      x.fillRect(middle - 9, height * 0.26, 18, height * 0.66);
+      roundedRect(x, middle - 22, height * 0.245, 44, 14, 5);
+      x.fill();
+      // The lantern: a glass box under a pointed roof, with a knob on top.
+      x.fillStyle = '#f3ead0';
+      x.beginPath();
+      x.moveTo(middle - 30, height * 0.08);
+      x.lineTo(middle + 30, height * 0.08);
+      x.lineTo(middle + 22, height * 0.24);
+      x.lineTo(middle - 22, height * 0.24);
+      x.closePath();
+      x.fill();
+      x.strokeStyle = '#2f5a48';
+      x.lineWidth = 6;
+      x.stroke();
+      x.beginPath();
+      x.moveTo(middle, height * 0.08);
+      x.lineTo(middle, height * 0.24);
+      x.lineWidth = 4;
+      x.stroke();
+      x.fillStyle = '#2f5a48';
+      x.beginPath();
+      x.moveTo(middle - 40, height * 0.085);
+      x.lineTo(middle, height * 0.02);
+      x.lineTo(middle + 40, height * 0.085);
+      x.closePath();
+      x.fill();
+      ellipse(x, middle, height * 0.018, 8, 8);
+      return;
+    }
+    const poleX = width * 0.26;
+    x.fillStyle = '#5b6470';
+    roundedRect(x, poleX - 20, height - 24, 40, 24, 6);
+    x.fill();
+    x.fillRect(poleX - 7, height * 0.07, 14, height * 0.9);
+    // The arm reaching over the pavement, and the flat head at its end.
+    x.strokeStyle = '#5b6470';
+    x.lineWidth = 12;
+    x.lineCap = 'round';
+    x.beginPath();
+    x.moveTo(poleX, height * 0.1);
+    x.quadraticCurveTo(poleX + 10, height * 0.05, width * 0.55, height * 0.06);
+    x.lineTo(width * 0.66, height * 0.065);
+    x.stroke();
+    x.fillStyle = '#3e4651';
+    roundedRect(x, width * 0.56, height * 0.045, width * 0.36, 22, 10);
+    x.fill();
+    x.fillStyle = '#eef3f6';
+    roundedRect(x, width * 0.6, height * 0.045 + 16, width * 0.28, 8, 4);
+    x.fill();
+  };
+}
+
 // The park's bench, with Papy Caillou's memory cards laid out on it, face down.
 export function drawBench(drawing: CanvasRenderingContext2D, width: number, height: number) {
   const x = drawing;

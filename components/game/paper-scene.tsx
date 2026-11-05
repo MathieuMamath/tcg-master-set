@@ -13,11 +13,14 @@ import {
   useState,
 } from 'react';
 import {
+  AdditiveBlending,
   CanvasTexture,
+  Color,
   DoubleSide,
   type Group,
   type Mesh,
   type MeshBasicMaterial,
+  MultiplyBlending,
   RepeatWrapping,
   SRGBColorSpace,
   type Texture,
@@ -68,7 +71,7 @@ import {
   WALKING_SPEED,
   type Walker,
 } from '@/game/side-walk';
-import { type SkyLook, skyLook } from '@/game/sky';
+import { mixColors, type SkyLook, skyLook, type WorldTint } from '@/game/sky';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction } from '@/game/world';
 import {
@@ -114,6 +117,7 @@ import {
   drawHouse,
   drawHulotte,
   drawLake,
+  drawLampGlow,
   drawLea,
   drawLucas,
   drawMagazineRack,
@@ -141,6 +145,7 @@ import {
   drawSofa,
   drawStationeryTable,
   drawStreet,
+  drawStreetLamp,
   drawSweatDrop,
   drawTallPlant,
   drawTower,
@@ -153,6 +158,8 @@ import {
   GASPARD_SIZE,
   HEDGEHOG_SIZE,
   HULOTTE_SIZE,
+  LAMP_DRAWINGS,
+  type LampStyle,
   LEA_SIZE,
   LUCAS_SIZE,
   PAPY_SIZE,
@@ -390,6 +397,135 @@ const SKY_SHOWN = 0.45;
 
 // The sky of the moment, by the game's time and weather, for every place that shows it.
 const SkyContext = createContext<SkyLook>(skyLook('day', 'fewClouds'));
+
+// Outside, the light of the moment: the tint laid over the world, and how bright the lamps shine.
+export type OutdoorLight = { tint: WorldTint; lamps: number };
+const LightContext = createContext<OutdoorLight>({
+  tint: { color: '#ffffff', strength: 0 },
+  lamps: 0,
+});
+// How fast the light moves to a new time of day, in shares of the way per second.
+const LIGHT_EASING = 0.6;
+// Drawn after the world and before the lamps' halos, so that the night darkens everything but them.
+const VEIL_ORDER = 10;
+const GLOW_ORDER = 11;
+
+// The light of the time of day, laid over the whole view by multiplying its colours, just in front
+// of the camera. It moves softly from one time of day to the next.
+function LightVeil() {
+  const { tint } = useContext(LightContext);
+  const veil = useRef<Mesh>(null);
+  const material = useRef<MeshBasicMaterial>(null);
+  const target = useMemo(
+    () => new Color(mixColors('#ffffff', tint.color, tint.strength)),
+    [tint.color, tint.strength],
+  );
+  const ahead = useMemo(() => new Vector3(), []);
+  useFrame(({ camera }, delta) => {
+    if (!veil.current || !material.current) {
+      return;
+    }
+    camera.getWorldDirection(ahead);
+    veil.current.position.copy(camera.position).addScaledVector(ahead, 0.2);
+    veil.current.quaternion.copy(camera.quaternion);
+    material.current.color.lerp(target, Math.min(1, delta * LIGHT_EASING));
+  });
+  return (
+    <mesh ref={veil} renderOrder={VEIL_ORDER} frustumCulled={false}>
+      <planeGeometry args={[4, 4]} />
+      <meshBasicMaterial
+        ref={material}
+        color={target}
+        blending={MultiplyBlending}
+        premultipliedAlpha
+        transparent
+        depthTest={false}
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+// A street lamp, its glass lit up from dusk until dawn: a warm halo around it and a pool of light
+// on the floor below, both drawn over the night's veil. It stands on the floor at x, z.
+function StreetLamp({
+  style,
+  x,
+  z,
+  height,
+  textures,
+}: {
+  style: LampStyle;
+  x: number;
+  z: number;
+  height: number;
+  textures: { lamp: Texture; glow: Texture; shadow: Texture };
+}) {
+  const { lamps } = useContext(LightContext);
+  const drawing = LAMP_DRAWINGS[style];
+  const width = (height * drawing.width) / drawing.height;
+  const lightX = x - width / 2 + width * drawing.lightX;
+  const lightY = height * (1 - drawing.lightY);
+  const halo = useRef<MeshBasicMaterial>(null);
+  const pool = useRef<MeshBasicMaterial>(null);
+  useFrame((_, delta) => {
+    for (const material of [halo.current, pool.current]) {
+      if (material) {
+        const goal = material === pool.current ? lamps * 0.55 : lamps;
+        material.opacity += (goal - material.opacity) * Math.min(1, delta * LIGHT_EASING * 2);
+        material.visible = material.opacity > 0.01;
+      }
+    }
+  });
+  return (
+    <>
+      <Furniture map={textures.lamp} x={x} z={z} height={height} shadow={textures.shadow} />
+      <mesh position={[lightX, lightY, z + 0.05]} renderOrder={GLOW_ORDER}>
+        <planeGeometry args={[2.6, 2.6]} />
+        <meshBasicMaterial
+          ref={halo}
+          map={textures.glow}
+          blending={AdditiveBlending}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[lightX, 0.02, z + 0.9]}
+        renderOrder={GLOW_ORDER}
+      >
+        <planeGeometry args={[3.4, 2]} />
+        <meshBasicMaterial
+          ref={pool}
+          map={textures.glow}
+          blending={AdditiveBlending}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+    </>
+  );
+}
+
+// The lamps' drawings and their halo, drawn once for a place.
+function useLampTextures(style: LampStyle) {
+  return useMemo(() => {
+    const { width, height } = LAMP_DRAWINGS[style];
+    return {
+      lamp: texture(
+        cutOut(width, height, drawStreetLamp(style), 8, style === 'classic' ? 201 : 202),
+      ),
+      glow: texture(drawLampGlow()),
+      shadow: texture(drawShadowBlob()),
+    };
+  }, [style]);
+}
 
 // A double window over the desk, onto the sky of the moment.
 function SkyWindow({ x }: { x: number }) {
@@ -1104,6 +1240,32 @@ const TOWN_TUFTS = [
 ];
 const WIND_SWAY = 0.025;
 
+// The street lamps along each place outside, between the buildings and the path, so that Pip
+// walks in front of them: cast-iron lanterns in the village and the park, slim poles in the city.
+const LAMP_Z = -0.25;
+const LAMP_HEIGHTS: Record<LampStyle, number> = { classic: 3.3, modern: 4.2 };
+const TOWN_LAMPS = [-17.6, -9.4, 2.05, 9.4, 25.8];
+const PARK_LAMPS = [-5.1, 2.7, 9.8];
+const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2];
+
+function Lamps({ style, xs }: { style: LampStyle; xs: readonly number[] }) {
+  const textures = useLampTextures(style);
+  return (
+    <>
+      {xs.map((x) => (
+        <StreetLamp
+          key={x}
+          style={style}
+          x={x}
+          z={LAMP_Z}
+          height={LAMP_HEIGHTS[style]}
+          textures={textures}
+        />
+      ))}
+    </>
+  );
+}
+
 // Something rooted to the floor that sways a little in the wind, like the prototype's trees.
 function Swaying({
   x,
@@ -1301,6 +1463,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         <boxGeometry args={[streetWidth, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
       </mesh>
+      <Lamps style="classic" xs={TOWN_LAMPS} />
       {TOWN_TREES.map(({ x, z, height }, index) => (
         <SwayingTree
           key={x}
@@ -1565,6 +1728,7 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         <boxGeometry args={[width, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
       </mesh>
+      <Lamps style="classic" xs={PARK_LAMPS} />
       {PARK_TREES.map(({ x, z, height }, index) => (
         <SwayingTree
           key={x}
@@ -1727,6 +1891,7 @@ function Downtown({
           shadow={textures.shadow}
         />
       ))}
+      <Lamps style="modern" xs={DOWNTOWN_LAMPS} />
       <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
       <SpeakerTopsOf
         speakerTops={speakerTops}
@@ -2036,7 +2201,12 @@ type Props = {
   onPlaceChange: (arrived: PlayerSpot) => void;
   // The sky of the moment, by the game's time and weather.
   sky: SkyLook;
+  // Outside, the light of the moment.
+  light: OutdoorLight;
 };
+
+// The places under the open sky, which the light of the time of day falls on.
+const OUTSIDE_PLACES: ReadonlySet<SidePlaceId> = new Set(['town', 'park', 'downtown']);
 
 // Matches the duration-300 class on the overlay.
 const FADE_MILLISECONDS = 300;
@@ -2056,6 +2226,7 @@ export function PaperScene({
   spot,
   onPlaceChange,
   sky,
+  light,
 }: Props) {
   const [visit, setVisit] = useState<{
     number: number;
@@ -2106,31 +2277,34 @@ export function PaperScene({
         <ambientLight intensity={1.6} color="#fff4e4" />
         <directionalLight position={[-4, 8, 10]} intensity={1.2} />
         <SkyContext value={sky}>
-          <group key={visit.number}>
-            {visit.place === 'bedroom' && <Bedroom />}
-            {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
-            {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
-            {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
-            {visit.place === 'flat' && (
-              <Flat speakerTops={speakerTops} stains={stains} isLeaCalm={isLeaCalm} />
-            )}
-            {visit.place === 'arcade' && <Arcade />}
-            {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
-            {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
-            {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
-            <Pip
-              input={input}
-              room={SIDE_PLACES[visit.place]}
-              arrival={visit.arrival}
-              bubble={bubble}
-              speakerTops={speakerTops}
-              stains={visit.place === 'flat' ? stains : []}
-              spot={spot}
-              onInteractionChange={onInteractionChange}
-              onExit={goThrough}
-              onScrub={onScrub}
-            />
-          </group>
+          <LightContext value={light}>
+            <group key={visit.number}>
+              {visit.place === 'bedroom' && <Bedroom />}
+              {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
+              {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
+              {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
+              {visit.place === 'flat' && (
+                <Flat speakerTops={speakerTops} stains={stains} isLeaCalm={isLeaCalm} />
+              )}
+              {visit.place === 'arcade' && <Arcade />}
+              {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
+              {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
+              {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
+              <Pip
+                input={input}
+                room={SIDE_PLACES[visit.place]}
+                arrival={visit.arrival}
+                bubble={bubble}
+                speakerTops={speakerTops}
+                stains={visit.place === 'flat' ? stains : []}
+                spot={spot}
+                onInteractionChange={onInteractionChange}
+                onExit={goThrough}
+                onScrub={onScrub}
+              />
+            </group>
+            {OUTSIDE_PLACES.has(visit.place) && <LightVeil />}
+          </LightContext>
         </SkyContext>
       </Canvas>
       <div

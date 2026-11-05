@@ -11,7 +11,6 @@ import {
   type Weather,
   weatherAt,
 } from '@/game/clock';
-import { worldTint } from '@/game/sky';
 
 export type GameClock = { time: TimeOfDay; weather: Weather; canSleep: boolean };
 
@@ -135,13 +134,12 @@ type Drop = { x: number; y: number; speed: number; size: number; sway: number };
 
 const DROP_COUNTS: Partial<Record<Weather, number>> = { rain: 140, storm: 220, snow: 110 };
 
-// Outside: the evening's warm light and the night's blue laid over the world, rain or snow falling
-// in front of it, and lightning now and then in a storm. Drawn over the scene, under the menus.
+// Outside: rain or snow falling in front of the world, and lightning now and then in a storm.
+// Drawn over the scene, under the menus. The light of the time of day is the scene's own.
 export function WeatherLayer({ clock, isOutside }: { clock: GameClock; isOutside: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [flash, setFlash] = useState(false);
-  const { time, weather } = clock;
-  const tint = worldTint(time, weather);
+  const { weather } = clock;
   const dropCount = isOutside ? (DROP_COUNTS[weather] ?? 0) : 0;
 
   useEffect(() => {
@@ -239,10 +237,6 @@ export function WeatherLayer({ clock, isOutside }: { clock: GameClock; isOutside
 
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-      <div
-        className="absolute inset-0 mix-blend-multiply transition-[background-color,opacity] duration-[3000ms]"
-        style={{ backgroundColor: tint.color, opacity: isOutside ? tint.strength : 0 }}
-      />
       <canvas ref={canvas} className="absolute inset-0 size-full" />
       <div
         className={`absolute inset-0 bg-white transition-opacity duration-100 ${

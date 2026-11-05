@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mixColors, skyLook, worldTint } from './sky';
+import { lampLight, mixColors, skyLook, worldTint } from './sky';
 
 describe('mixColors', () => {
   it('goes from one colour to the other', () => {
@@ -44,5 +44,19 @@ describe('worldTint', () => {
   it('dims the world in the rain, without ever blacking it out', () => {
     expect(worldTint('day', 'rain').strength).toBeGreaterThan(0);
     expect(worldTint('night', 'storm').strength).toBeLessThanOrEqual(0.65);
+  });
+});
+
+describe('lampLight', () => {
+  it('lights the lamps from dusk until dawn, brightest at night', () => {
+    expect(lampLight('day', 'fewClouds')).toBe(0);
+    expect(lampLight('dusk', 'fewClouds')).toBeGreaterThan(0);
+    expect(lampLight('night', 'fewClouds')).toBe(1);
+    expect(lampLight('dawn', 'fewClouds')).toBeLessThan(lampLight('dusk', 'fewClouds'));
+  });
+
+  it('lights them on a stormy day', () => {
+    expect(lampLight('day', 'storm')).toBeGreaterThan(0);
+    expect(lampLight('night', 'storm')).toBe(1);
   });
 });
