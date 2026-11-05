@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.64](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.63...v0.1.64) (2026-11-05)
+
+### Features
+
+* **city:** add the statistics bureau, guarded by Brutus for admins only ([#66](https://github.com/MathieuMamath/tcg-master-set/issues/66)) ([4270d4d](https://github.com/MathieuMamath/tcg-master-set/commit/4270d4d8f7ca06d9ba7ec06be9e455996b6f4d22))
+
 ## [0.1.63](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.62...v0.1.63) (2026-11-05)
 
 ### Features
