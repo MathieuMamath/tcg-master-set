@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.65](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.64...v0.1.65) (2026-11-05)
+
+### Features
+
+* **city:** open Mme Hulotte's statistics reports on her computer ([#67](https://github.com/MathieuMamath/tcg-master-set/issues/67)) ([4175518](https://github.com/MathieuMamath/tcg-master-set/commit/417551815cf5805ca38151bb514a29f316e91196))
+
 ## [0.1.64](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.63...v0.1.64) (2026-11-05)
 
 ### Features
