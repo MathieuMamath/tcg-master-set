@@ -2,9 +2,11 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
+  createContext,
   type ReactNode,
   type Ref,
   type RefObject,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -66,7 +68,7 @@ import {
   WALKING_SPEED,
   type Walker,
 } from '@/game/side-walk';
-import { skyLook } from '@/game/sky';
+import { type SkyLook, skyLook } from '@/game/sky';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction } from '@/game/world';
 import {
@@ -386,9 +388,12 @@ const WINDOW_MARGIN = 13;
 // The sky shows this share of its picture at once, so that its clouds have room to drift.
 const SKY_SHOWN = 0.45;
 
-// A double window over the desk, onto a sky that will one day follow the time and the weather.
+// The sky of the moment, by the game's time and weather, for every place that shows it.
+const SkyContext = createContext<SkyLook>(skyLook('day', 'fewClouds'));
+
+// A double window over the desk, onto the sky of the moment.
 function SkyWindow({ x }: { x: number }) {
-  const look = skyLook('day', 'fewClouds');
+  const look = useContext(SkyContext);
   const sky = useMemo(() => {
     const map = texture(drawSky(look));
     map.wrapS = RepeatWrapping;
@@ -964,12 +969,12 @@ const STREET_FRONT_Z = 3;
 const CLOUD_SPAN = 84;
 const CLOUD_SPEED = 25;
 const CLOUDS = [
-  { x: -36, y: 5.8, size: 1.3 },
-  { x: -22, y: 6.6, size: 1.6 },
-  { x: -8, y: 5.6, size: 1.2 },
-  { x: 6, y: 6.9, size: 1.5 },
-  { x: 20, y: 6, size: 1.3 },
-  { x: 34, y: 6.8, size: 1.1 },
+  { x: -36, y: 5.8, size: 1.65 },
+  { x: -22, y: 6.6, size: 2.03 },
+  { x: -8, y: 5.6, size: 1.52 },
+  { x: 6, y: 6.9, size: 1.91 },
+  { x: 20, y: 6, size: 1.65 },
+  { x: 34, y: 6.8, size: 1.4 },
 ];
 const BUILDINGS_Z = -1.4;
 // Downtown seen from the village, between the sky and the farthest hills.
@@ -1152,7 +1157,7 @@ function SwayingTree({
 }
 
 function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
-  const look = skyLook('day', 'fewClouds');
+  const look = useContext(SkyContext);
   const fontsReady = useFontsReady();
   const textures = useMemo(
     () => ({
@@ -1223,7 +1228,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
   );
   const idlingBus = useRef<Group>(null);
   const sky = useMemo(() => texture(drawSkyGradient(look)), [look]);
-  const cloud = useMemo(() => texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)), [look]);
+  const cloud = useMemo(() => texture(cutOut(300, 190, drawCloud(look.cloud), 9, 63)), [look]);
   const clouds = useRef<(Group | null)[]>([]);
 
   // The clouds drift along, and come back round from the other side. The bus shakes a little,
@@ -1473,13 +1478,11 @@ const PARK_PEOPLE_Z = -0.5;
 // The Linden Park: lawns and trees under the sky, the bus stop on the left, Papy Caillou by his
 // bench, and Lucas fishing at the edge of the lake.
 function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
-  const look = skyLook('day', 'fewClouds');
+  const look = useContext(SkyContext);
   const fontsReady = useFontsReady();
   const { busStop, bench, papy, lake, lucas } = PARK_SPOTS;
-  const textures = useMemo(
+  const staticTextures = useMemo(
     () => ({
-      sky: texture(drawSkyGradient(look)),
-      cloud: texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)),
       ground: texture(drawParkGround()),
       lake: texture(drawLake()),
       edge: texture(drawCorrugatedEdge()),
@@ -1500,8 +1503,16 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       papy: texture(cutOut(PAPY_SIZE.width, PAPY_SIZE.height, drawPapy, 9, 118)),
       lucas: blinker(LUCAS_SIZE.width, LUCAS_SIZE.height, drawLucas, 9, 119),
     }),
+    [],
+  );
+  const skyTextures = useMemo(
+    () => ({
+      sky: texture(drawSkyGradient(look)),
+      cloud: texture(cutOut(300, 190, drawCloud(look.cloud), 9, 63)),
+    }),
     [look],
   );
+  const textures = { ...staticTextures, ...skyTextures };
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const shelter = useMemo(
     () => texture(cutOut(360, 320, drawBusShelter(signs.parkStop), 9, 120)),
@@ -1611,13 +1622,11 @@ function Downtown({
   signs: SceneSigns;
   speakerTops: RefObject<SpeakerTops>;
 }) {
-  const look = skyLook('day', 'fewClouds');
+  const look = useContext(SkyContext);
   const fontsReady = useFontsReady();
   const { busStop } = DOWNTOWN_SPOTS;
-  const textures = useMemo(
+  const staticTextures = useMemo(
     () => ({
-      sky: texture(drawSkyGradient(look)),
-      cloud: texture(cutOut(300, 150, drawCloud(look.cloud), 9, 63)),
       pavement: texture(drawPavement()),
       edge: texture(drawCorrugatedEdge()),
       shadow: texture(drawShadowBlob()),
@@ -1644,8 +1653,16 @@ function Downtown({
         ),
       ),
     }),
+    [],
+  );
+  const skyTextures = useMemo(
+    () => ({
+      sky: texture(drawSkyGradient(look)),
+      cloud: texture(cutOut(300, 190, drawCloud(look.cloud), 9, 63)),
+    }),
     [look],
   );
+  const textures = { ...staticTextures, ...skyTextures };
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const shelter = useMemo(
     () => texture(cutOut(360, 320, drawBusShelter(signs.downtownStop), 9, 160)),
@@ -2017,6 +2034,8 @@ type Props = {
   spot: RefObject<PlayerSpot | null>;
   // Told whenever the character arrives somewhere else, with where it stands there.
   onPlaceChange: (arrived: PlayerSpot) => void;
+  // The sky of the moment, by the game's time and weather.
+  sky: SkyLook;
 };
 
 // Matches the duration-300 class on the overlay.
@@ -2036,6 +2055,7 @@ export function PaperScene({
   startSpot,
   spot,
   onPlaceChange,
+  sky,
 }: Props) {
   const [visit, setVisit] = useState<{
     number: number;
@@ -2085,31 +2105,33 @@ export function PaperScene({
       >
         <ambientLight intensity={1.6} color="#fff4e4" />
         <directionalLight position={[-4, 8, 10]} intensity={1.2} />
-        <group key={visit.number}>
-          {visit.place === 'bedroom' && <Bedroom />}
-          {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
-          {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
-          {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
-          {visit.place === 'flat' && (
-            <Flat speakerTops={speakerTops} stains={stains} isLeaCalm={isLeaCalm} />
-          )}
-          {visit.place === 'arcade' && <Arcade />}
-          {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
-          {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
-          {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
-          <Pip
-            input={input}
-            room={SIDE_PLACES[visit.place]}
-            arrival={visit.arrival}
-            bubble={bubble}
-            speakerTops={speakerTops}
-            stains={visit.place === 'flat' ? stains : []}
-            spot={spot}
-            onInteractionChange={onInteractionChange}
-            onExit={goThrough}
-            onScrub={onScrub}
-          />
-        </group>
+        <SkyContext value={sky}>
+          <group key={visit.number}>
+            {visit.place === 'bedroom' && <Bedroom />}
+            {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
+            {visit.place === 'flat' && (
+              <Flat speakerTops={speakerTops} stains={stains} isLeaCalm={isLeaCalm} />
+            )}
+            {visit.place === 'arcade' && <Arcade />}
+            {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
+            <Pip
+              input={input}
+              room={SIDE_PLACES[visit.place]}
+              arrival={visit.arrival}
+              bubble={bubble}
+              speakerTops={speakerTops}
+              stains={visit.place === 'flat' ? stains : []}
+              spot={spot}
+              onInteractionChange={onInteractionChange}
+              onExit={goThrough}
+              onScrub={onScrub}
+            />
+          </group>
+        </SkyContext>
       </Canvas>
       <div
         aria-hidden="true"

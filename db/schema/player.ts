@@ -58,6 +58,20 @@ export const playerSpots = pgTable('player_spots', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// How far the player's sleeps moved the game's clock on, in game minutes, within a day. The clock
+// itself is shared and only for show.
+export const playerClocks = pgTable(
+  'player_clocks',
+  {
+    userId: text('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    offset: integer('offset').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [check('player_clocks_offset_within_a_day', sql`${table.offset} between 0 and 1439`)],
+);
+
 export const playerCards = pgTable(
   'player_cards',
   {

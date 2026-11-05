@@ -25,6 +25,7 @@ vi.mock('@/player/progress', () => ({
     raffleDrawnOn: null,
     activity: { done: [], isBonusClaimed: false },
     isAdmin: false,
+    clockOffset: 0,
   }),
 }));
 
@@ -48,6 +49,7 @@ function renderHome(locale: Locale, messages: typeof en) {
           raffleDrawnOn: null,
           activity: { done: [], isBonusClaimed: false },
           isAdmin: false,
+          clockOffset: 0,
         }}
       />
     </NextIntlClientProvider>,
