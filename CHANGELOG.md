@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.66](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.65...v0.1.66) (2026-11-05)
+
+### Features
+
+* **city:** plant trees and grass in the village and the park ([#68](https://github.com/MathieuMamath/tcg-master-set/issues/68)) ([0050793](https://github.com/MathieuMamath/tcg-master-set/commit/005079335d63d03dd4439d80785ab56b1d3a2ab4))
+
 ## [0.1.65](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.64...v0.1.65) (2026-11-05)
 
 ### Features
