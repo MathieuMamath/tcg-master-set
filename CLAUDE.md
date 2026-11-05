@@ -102,7 +102,7 @@ An admin is a player with a row in `player_roles`, set by hand in the database, 
 
 ## Languages
 
-Text lives in `messages/en.json` and `messages/fr.json`, which must define the same keys. A test enforces this. URLs carry the language, such as `/en` and `/fr`. Players change it in the settings menu, or with the switcher on the sign-up and sign-in pages.
+Text lives in `messages/en.json` and `messages/fr.json`, which must define the same keys. A test enforces this. Pip is only the avatar's look: no text calls the player Pip. Characters call them by their username, passed to a message as `{name}` from `usePlayerName()` in `components/game/player-name.tsx`, or simply say "you", and French texts don't assume the player's gender. URLs carry the language, such as `/en` and `/fr`. Players change it in the settings menu, or with the switcher on the sign-up and sign-in pages.
 
 ## Game code
 

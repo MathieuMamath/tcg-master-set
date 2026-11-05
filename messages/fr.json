@@ -42,8 +42,8 @@
     "hulotte": "Parler (Mme Hulotte)",
     "brutus": "Parler (Brutus)",
     "bed": "Dormir jusqu’au matin",
-    "notSleepy": "Pip n’a pas encore sommeil",
-    "sleeping": "Zzz… Bonne nuit, Pip.",
+    "notSleepy": "Tu n’as pas encore sommeil",
+    "sleeping": "Zzz… Bonne nuit, {name}.",
     "wakingUp": "Le jour se lève !"
   },
   "Shopkeeper": {
@@ -60,13 +60,13 @@
       "latest": "Bienvenue à la Tanière ! Ici, c’est toujours le plus frais.",
       "thisYear": "Bonjour ! J’ai rangé toutes les séries de cette année, par ordre de sortie.",
       "older": "Psst… J’ai gardé toutes les anciennes séries. Viens fouiller !",
-      "binderSeller": "Oh, te revoilà mon petit ! Tu viens chercher un classeur pour ta collection ?"
+      "binderSeller": "Oh, te revoilà mon trésor ! Tu viens chercher un classeur pour ta collection ?"
     },
     "thanks": {
       "latest": "Excellent choix, c’est tout frais !",
       "thisYear": "Bonne pioche, j’en suis sûre !",
       "older": "Hé hé, bonne chance pour tes cartes !",
-      "binderSeller": "Prends-en bien soin, mon petit !"
+      "binderSeller": "Prends-en bien soin, mon trésor !"
     },
     "notEnoughCoins": "Oups, il te manque des pièces.",
     "unavailable": "Oups, la caisse ne marche pas pour l'instant. Réessaie.",
@@ -210,7 +210,7 @@
     "grandma": {
       "name": "Léa",
       "lines": {
-        "greeting": "Désolée Pip, je croule sous le travail… Tu pourrais dépoussiérer mes murs à ma place ? J’ai une visio dans 30 secondes ! Je te donnerai 100 pièces.",
+        "greeting": "Désolée {name}, je croule sous le travail… Tu pourrais dépoussiérer mes murs à ma place ? J’ai une visio dans 30 secondes ! Je te donnerai 100 pièces.",
         "hurry": "Vite, ma visio va commencer !",
         "rewarded": "Tout brille ! Tu m’as sauvé la vie. Voici tes 100 pièces.",
         "failed": "Oh non, la visio a commencé… On réessaie ?",
@@ -223,7 +223,7 @@
     "grandpa": {
       "name": "Papy Caillou",
       "lines": {
-        "greeting": "Hé hé, une petite partie de memory, jeune homme ? Retrouve les 8 paires en 20 coups maximum… et je te donne 150 pièces. Mais je te préviens, je ne perds jamais !",
+        "greeting": "Hé hé, une petite partie de memory, {name} ? Retrouve les 8 paires en 20 coups maximum… et je te donne 150 pièces. Mais je te préviens, je ne perds jamais !",
         "rewarded": "Ça alors, tu m’as battu ! Tu as une sacrée mémoire. Voici tes 150 pièces, bien méritées.",
         "failed": "Ha ha ! Plus de coups ! Ne t’en fais pas, j’ai eu cent ans pour m’entraîner. On en refait une ?",
         "alreadyDone": "Une défaite par jour, c’est bien assez pour mon orgueil ! Reviens demain.",
@@ -497,8 +497,8 @@
     "latest": "Bienvenue à la Tanière !",
     "thisYear": "Bonjour, bonjour !",
     "older": "Psst… viens voir !",
-    "binderSeller": "Te revoilà, mon petit !",
-    "grandma": "Ah, Pip ! Tu tombes bien !",
+    "binderSeller": "Te revoilà, mon trésor !",
+    "grandma": "Ah, {name} ! Tu tombes bien !",
     "grandpa": "Une petite partie ?",
     "boy": "Hé ! Tu peux m’aider ?",
     "gaspard": "Psst… un petit défi ?",
@@ -694,13 +694,13 @@
     "loading": "Chargement",
     "tip": "Astuce :",
     "places": {
-      "bedroom": "La chambre de Pip",
+      "bedroom": "La chambre de {name}",
       "flat": "Chez Léa"
     },
     "tips": {
       "0": "Un doublon n’est jamais perdu : il rapporte des pièces selon sa rareté.",
       "1": "Termine les six quêtes du jour pour récupérer le bonus quotidien.",
-      "2": "La nuit, Pip peut dormir dans son lit jusqu’au matin.",
+      "2": "La nuit, tu peux dormir dans ton lit jusqu’au matin.",
       "3": "Lucas repêche parfois une boîte au trésor, avec un booster dedans !",
       "4": "Il faut le classeur d’une série, chez Mamie Noisette, pour en acheter les boosters.",
       "5": "Appuie sur Espace pour faire un dash.",

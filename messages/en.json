@@ -42,8 +42,8 @@
     "hulotte": "Talk (Mme Hulotte)",
     "brutus": "Talk (Brutus)",
     "bed": "Sleep until morning",
-    "notSleepy": "Pip isn’t sleepy yet",
-    "sleeping": "Zzz… Good night, Pip.",
+    "notSleepy": "You’re not sleepy yet",
+    "sleeping": "Zzz… Good night, {name}.",
     "wakingUp": "The sun is rising!"
   },
   "Shopkeeper": {
@@ -210,7 +210,7 @@
     "grandma": {
       "name": "Léa",
       "lines": {
-        "greeting": "Sorry Pip, I’m snowed under with work… Could you dust my walls for me? I’ve got a video call in 30 seconds! I’ll give you 100 coins.",
+        "greeting": "Sorry {name}, I’m snowed under with work… Could you dust my walls for me? I’ve got a video call in 30 seconds! I’ll give you 100 coins.",
         "hurry": "Quick, my call’s about to start!",
         "rewarded": "Spotless! You saved my life. Here are your 100 coins.",
         "failed": "Oh no, the call’s started… Shall we try again?",
@@ -223,7 +223,7 @@
     "grandpa": {
       "name": "Grandpa Pebble",
       "lines": {
-        "greeting": "Heh heh, fancy a game of memory, youngster? Find the 8 pairs in 20 moves at most… and I’ll give you 150 coins. But I warn you, I never lose!",
+        "greeting": "Heh heh, fancy a game of memory, {name}? Find the 8 pairs in 20 moves at most… and I’ll give you 150 coins. But I warn you, I never lose!",
         "rewarded": "Well I never, you beat me! What a memory. Here are your 150 coins, well earned.",
         "failed": "Ha ha! Out of moves! Don’t worry, I’ve had a hundred years to practise. Another round?",
         "alreadyDone": "One defeat a day is quite enough for my pride! Come back tomorrow.",
@@ -498,7 +498,7 @@
     "thisYear": "Hello, hello!",
     "older": "Psst… come and see!",
     "binderSeller": "There you are, dear!",
-    "grandma": "Ah, Pip! Just in time!",
+    "grandma": "Ah, {name}! Just in time!",
     "grandpa": "Fancy a game?",
     "boy": "Hey! Can you help me?",
     "gaspard": "Psst… fancy a little challenge?",
@@ -694,13 +694,13 @@
     "loading": "Loading",
     "tip": "Tip:",
     "places": {
-      "bedroom": "Pip’s bedroom",
+      "bedroom": "{name}’s bedroom",
       "flat": "Léa’s flat"
     },
     "tips": {
       "0": "A duplicate is never wasted: it pays coins according to its rarity.",
       "1": "Finish the day’s six quests to claim the daily bonus.",
-      "2": "At night, Pip can sleep in his bed until the morning.",
+      "2": "At night, you can sleep in your bed until the morning.",
       "3": "Lucas sometimes fishes out a treasure box, with a booster inside!",
       "4": "You need a set’s binder, from Mamie Noisette, to buy its boosters.",
       "5": "Press Space to dash.",
