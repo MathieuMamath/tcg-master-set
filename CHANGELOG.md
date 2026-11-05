@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.68](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.67...v0.1.68) (2026-11-05)
+
+### Features
+
+* **city:** light street lamps in the village, the park and the city at night ([#70](https://github.com/MathieuMamath/tcg-master-set/issues/70)) ([6d8d8d2](https://github.com/MathieuMamath/tcg-master-set/commit/6d8d8d260d6628fb0366bf429ae94479ccf63a5c))
+
 ## [0.1.67](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.66...v0.1.67) (2026-11-05)
 
 ### Features
