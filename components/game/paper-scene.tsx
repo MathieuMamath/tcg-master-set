@@ -1,6 +1,7 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useTranslations } from 'next-intl';
 import {
   createContext,
   type ReactNode,
@@ -169,6 +170,15 @@ import {
   solidTop,
 } from './paper-art';
 import { createPaperBalls, emitPaperBall, PaperBalls } from './paper-balls';
+import {
+  COVER_MILLISECONDS,
+  MIN_COVERED_MILLISECONDS,
+  TRAVEL_TIP_COUNT,
+  type TravelMode,
+  type TravelPhase,
+  TravelScreen,
+  UNCOVER_MILLISECONDS,
+} from './travel-screen';
 
 export type MovementInput = {
   keyboard: Direction;
@@ -2204,13 +2214,32 @@ type Props = {
   sky: SkyLook;
   // Outside, the light of the moment.
   light: OutdoorLight;
+  // Drawn over the scene but under the scenery of a trip, such as the rain.
+  children?: ReactNode;
 };
 
 // The places under the open sky, which the light of the time of day falls on.
 const OUTSIDE_PLACES: ReadonlySet<SidePlaceId> = new Set(['town', 'park', 'downtown']);
 
-// Matches the duration-300 class on the overlay.
-const FADE_MILLISECONDS = 300;
+// The places the bus serves: a trip between two of them is by bus.
+const BUS_STOPS: ReadonlySet<SidePlaceId> = new Set(['town', 'park', 'downtown']);
+// Should a place never say it is drawn, such as without WebGL, the scenery opens anyway.
+const MAX_COVERED_MILLISECONDS = 5000;
+// How long the ticket takes to show, before the new place is built behind it.
+const TICKET_UP_MILLISECONDS = 260;
+
+// Tells once a place has drawn its first frames: its drawings are made and sent to the screen, so
+// that the scenery can open on it rather than on the place before.
+function FirstFrames({ onDrawn }: { onDrawn: () => void }) {
+  const frames = useRef(0);
+  useFrame(() => {
+    frames.current += 1;
+    if (frames.current === 2) {
+      onDrawn();
+    }
+  });
+  return null;
+}
 
 // The paper world, seen from the side. Every visit starts afresh, so that the character arrives
 // at the door it came through.
@@ -2228,7 +2257,21 @@ export function PaperScene({
   onPlaceChange,
   sky,
   light,
+  children,
 }: Props) {
+  const tTravel = useTranslations('Travel');
+  // Each place by the name on its sign, or else its own.
+  const placeNames: Record<SidePlaceId, string> = {
+    bedroom: tTravel('places.bedroom'),
+    town: signs.busStop,
+    shop: signs.shop,
+    bookshop: signs.bookshop,
+    flat: tTravel('places.flat'),
+    arcade: signs.arcade,
+    park: signs.parkStop,
+    downtown: signs.downtownStop,
+    bureau: signs.bureau,
+  };
   const [visit, setVisit] = useState<{
     number: number;
     place: SidePlaceId;
@@ -2242,23 +2285,86 @@ export function PaperScene({
         }
       : { number: 0, place: 'bedroom', arrival: { x: BEDROOM.start, facing: 1 } },
   );
-  const [isFading, setIsFading] = useState(false);
+  // The scenery starts closed over the first place, and opens once it is drawn. `to` is where the
+  // trip leads, and `visit` the number of the visit it waits to see drawn.
+  const [travel, setTravel] = useState<{
+    phase: TravelPhase;
+    mode: TravelMode;
+    tip: number;
+    to: SidePlaceId;
+    facing: Facing;
+    visit: number;
+  }>(() => ({
+    phase: 'covered',
+    mode: 'walk',
+    tip: Math.floor(Math.random() * TRAVEL_TIP_COUNT),
+    to: startSpot?.place ?? 'bedroom',
+    facing: startSpot?.facing ?? 1,
+    visit: 0,
+  }));
+  const [drawnVisit, setDrawnVisit] = useState(-1);
+  const coveredAt = useRef(0);
   const speakerTops = useRef<SpeakerTops>({});
-  const fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const travelTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  useEffect(() => () => clearTimeout(fadeTimer.current), []);
+  useEffect(() => {
+    coveredAt.current = performance.now();
+    return () => clearTimeout(travelTimer.current);
+  }, []);
 
-  const goThrough = (exit: Travel) => {
-    if (isFading) {
+  // Once the new place is drawn, and the ticket has been up long enough to be read, the scenery
+  // opens, then goes away.
+  useEffect(() => {
+    if (travel.phase !== 'covered') {
       return;
     }
-    setIsFading(true);
+    const shown = performance.now() - coveredAt.current;
+    const wait =
+      drawnVisit === travel.visit
+        ? Math.max(0, MIN_COVERED_MILLISECONDS - shown)
+        : Math.max(0, MAX_COVERED_MILLISECONDS - shown);
+    const timer = setTimeout(
+      () => setTravel((current) => ({ ...current, phase: 'uncovering' })),
+      wait,
+    );
+    return () => clearTimeout(timer);
+  }, [travel.phase, travel.visit, drawnVisit]);
+
+  useEffect(() => {
+    if (travel.phase !== 'uncovering') {
+      return;
+    }
+    const timer = setTimeout(
+      () => setTravel((current) => ({ ...current, phase: 'idle' })),
+      UNCOVER_MILLISECONDS,
+    );
+    return () => clearTimeout(timer);
+  }, [travel.phase]);
+
+  const goThrough = (exit: Travel) => {
+    if (travel.phase !== 'idle') {
+      return;
+    }
     onInteractionChange(null);
-    fadeTimer.current = setTimeout(() => {
-      setVisit(({ number }) => ({ number: number + 1, place: exit.to, arrival: exit.arrival }));
-      setIsFading(false);
-      onPlaceChange({ place: exit.to, x: exit.arrival.x, facing: exit.arrival.facing });
-    }, FADE_MILLISECONDS);
+    setTravel((current) => ({
+      phase: 'covering',
+      mode: BUS_STOPS.has(visit.place) && BUS_STOPS.has(exit.to) ? 'bus' : 'walk',
+      tip:
+        (current.tip + 1 + Math.floor(Math.random() * (TRAVEL_TIP_COUNT - 1))) % TRAVEL_TIP_COUNT,
+      to: exit.to,
+      facing: exit.arrival.facing,
+      visit: visit.number + 1,
+    }));
+    // Once the scenery is closed and the ticket shown, the new place is built: that takes a moment,
+    // during which the page can't draw, so the ticket goes up first.
+    travelTimer.current = setTimeout(() => {
+      coveredAt.current = performance.now();
+      setTravel((current) => ({ ...current, phase: 'covered' }));
+      travelTimer.current = setTimeout(() => {
+        setVisit(({ number }) => ({ number: number + 1, place: exit.to, arrival: exit.arrival }));
+        onPlaceChange({ place: exit.to, x: exit.arrival.x, facing: exit.arrival.facing });
+      }, TICKET_UP_MILLISECONDS);
+    }, COVER_MILLISECONDS);
   };
 
   return (
@@ -2280,6 +2386,7 @@ export function PaperScene({
         <SkyContext value={sky}>
           <LightContext value={light}>
             <group key={visit.number}>
+              <FirstFrames onDrawn={() => setDrawnVisit(visit.number)} />
               {visit.place === 'bedroom' && <Bedroom />}
               {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
               {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
@@ -2308,11 +2415,14 @@ export function PaperScene({
           </LightContext>
         </SkyContext>
       </Canvas>
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 bg-ui-ink transition-opacity duration-300 ${
-          isFading ? 'opacity-100' : 'opacity-0'
-        }`}
+      {children}
+      <TravelScreen
+        phase={travel.phase}
+        placeName={placeNames[travel.to]}
+        mode={travel.mode}
+        facing={travel.facing}
+        tip={travel.tip}
+        busLine={signs.busLine}
       />
     </>
   );

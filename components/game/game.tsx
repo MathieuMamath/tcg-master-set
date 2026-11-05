@@ -790,8 +790,9 @@ export function Game({ player, sets, progress }: Props) {
         onPlaceChange={changePlace}
         sky={sky}
         light={light}
-      />
-      {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
+      >
+        {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
+      </PaperScene>
       <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
