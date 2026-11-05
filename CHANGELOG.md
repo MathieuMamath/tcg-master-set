@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.67](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.66...v0.1.67) (2026-11-05)
+
+### Features
+
+* **city:** add a day and night cycle with weather, and sleeping in Pip's bed ([#69](https://github.com/MathieuMamath/tcg-master-set/issues/69)) ([fe2432d](https://github.com/MathieuMamath/tcg-master-set/commit/fe2432de8466315dc87eebae80d96458a4b00824))
+
 ## [0.1.66](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.65...v0.1.66) (2026-11-05)
 
 ### Features
