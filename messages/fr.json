@@ -575,8 +575,103 @@
       "name": "Mme Hulotte",
       "title": "la chouette du bureau des statistiques",
       "lines": {
-        "greeting": "Bienvenue au bureau des statistiques ! Je classe encore mes dossiers et je prépare mes graphiques… Repasse bientôt, j’aurai plein de chiffres passionnants à te montrer !"
-      }
+        "greeting": "Bienvenue au bureau des statistiques ! Mes rapports sont à jour, tout est classé par période. Tu veux y jeter un œil ?"
+      },
+      "reports": "Voir les rapports"
+    }
+  },
+  "Stats": {
+    "title": "Les rapports de Mme Hulotte",
+    "aggregateNote": "Des chiffres sur tout le jeu, jamais sur un joueur en particulier.",
+    "close": "Fermer",
+    "periodLabel": "Période",
+    "periods": {
+      "day": "Aujourd’hui",
+      "week": "7 jours",
+      "month": "30 jours",
+      "all": "Depuis le début"
+    },
+    "tabs": {
+      "economy": "Économie",
+      "boosters": "Boosters",
+      "quests": "Quêtes",
+      "players": "Joueurs",
+      "log": "Journal"
+    },
+    "loading": "Mme Hulotte feuillette ses dossiers…",
+    "error": "Les rapports n’ont pas pu être chargés.",
+    "empty": "Rien sur cette période.",
+    "economy": {
+      "earned": "Pièces gagnées",
+      "spent": "Pièces dépensées",
+      "net": "Solde",
+      "earnedBySource": "Pièces gagnées, par origine",
+      "spentOn": "Pièces dépensées, par achat"
+    },
+    "sources": {
+      "daily-bonus": "Récompense du jour",
+      "duplicates": "Doublons",
+      "boosters": "Boosters",
+      "binders": "Classeurs"
+    },
+    "boosters": {
+      "bought": "Achetés",
+      "opened": "Ouverts",
+      "newCards": "Cartes nouvelles",
+      "godPacks": "God packs",
+      "bySet": "Boosters ouverts, par set",
+      "bestPulls": "Meilleure carte des boosters ouverts",
+      "tier": "Palier {tier}"
+    },
+    "quests": {
+      "dailyBonuses": "Récompenses du jour réclamées",
+      "byQuest": "Par quête",
+      "counts": "{started} commencées · {finished} terminées · {rejected} refusées"
+    },
+    "outcomes": {
+      "rewarded": "Payée",
+      "won": "Gagnée",
+      "lost": "Perdue",
+      "item": "Objet repêché",
+      "treasure": "Trésor",
+      "coins": "Pièces",
+      "booster": "Booster",
+      "none": "Rien",
+      "alreadyPaid": "Déjà payée",
+      "carved": "Découpé",
+      "broken": "Cassé",
+      "jackpot": "Gros lot",
+      "prize": "Boule rouge"
+    },
+    "players": {
+      "active": "Joueurs actifs",
+      "signUps": "Inscriptions",
+      "signIns": "Connexions",
+      "places": "Lieux visités"
+    },
+    "places": {
+      "bedroom": "La chambre",
+      "town": "Petit-Vallon",
+      "shop": "La boutique",
+      "bookshop": "La librairie",
+      "flat": "Chez Léa",
+      "arcade": "L’arcade",
+      "park": "Le parc",
+      "downtown": "La Grande Ville",
+      "bureau": "Le bureau des statistiques"
+    },
+    "log": {
+      "title": "Couverture du journal",
+      "hint": "Chaque type d’événement, combien sur la période, et le dernier enregistré. Un type jamais vu signale sans doute un oubli.",
+      "neverSeen": "Jamais vu"
+    },
+    "charts": {
+      "coins": "Pièces gagnées et dépensées",
+      "boosters": "Boosters achetés et ouverts",
+      "quests": "Quêtes terminées",
+      "finished": "Terminées",
+      "active": "Joueurs actifs",
+      "weekOf": "sem. du {day}"
     }
   }
 }

@@ -54,6 +54,7 @@ import { RaffleDialog } from './raffle-dialog';
 import { SaveNotice, useSaveNotice } from './save-notice';
 import { SettingsMenu } from './settings-menu';
 import { ShopDialog } from './shop-dialog';
+import { StatsDialog } from './stats-dialog';
 
 // Three.js needs the browser, and this keeps it out of the bundle of every other screen.
 const PaperScene = dynamic(() => import('./paper-scene').then((module) => module.PaperScene), {
@@ -139,6 +140,7 @@ export function Game({ player, sets, progress }: Props) {
   const [isBagOpen, setIsBagOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [activity, setActivity] = useState(progress.activity);
   const [collection, setCollection] = useState(progress.collection);
   const { isSaving, showSaveNotice } = useSaveNotice();
@@ -160,6 +162,7 @@ export function Game({ player, sets, progress }: Props) {
     isBagOpen ||
     isSettingsOpen ||
     isActivityOpen ||
+    isStatsOpen ||
     opening !== null ||
     memoryCards !== null ||
     isFishing ||
@@ -1019,7 +1022,15 @@ export function Game({ player, sets, progress }: Props) {
         />
       )}
       {talkingTo === 'hulotte' && (
-        <NpcDialog speaker="hulotte" line="greeting" onClose={() => setTalkingTo(null)} />
+        <NpcDialog
+          speaker="hulotte"
+          line="greeting"
+          action={{ label: tSpeakers('hulotte.reports'), onPress: () => setIsStatsOpen(true) }}
+          onClose={() => setTalkingTo(null)}
+        />
+      )}
+      {isStatsOpen && !isTalking && (
+        <StatsDialog sets={sets} onClose={() => setIsStatsOpen(false)} />
       )}
       {dalgonaShape && !isTalking && (
         <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
