@@ -25,7 +25,12 @@ import {
   totalBoosters,
   type Wallet,
 } from '@/game/shop-dialogue';
-import { BUREAU_ENTRANCE, isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
+import {
+  isDoorInteraction,
+  OFFICE_FLOORS,
+  type OfficeFloor,
+  type SidePlaceId,
+} from '@/game/side-rooms';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type {
@@ -43,7 +48,9 @@ import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { BusMap } from './bus-map';
+import { CouponRegister } from './coupon-register';
 import { DalgonaDialog } from './dalgona-dialog';
+import { ElevatorPanel } from './elevator-panel';
 import { FishingDialog } from './fishing-dialog';
 import { ClockBadge, useGameClock, WeatherLayer } from './game-clock';
 import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
@@ -79,6 +86,7 @@ function isTalk(interaction: Interaction): interaction is Extract<Talk, Interact
     interaction !== 'basketball' &&
     interaction !== 'scrub' &&
     interaction !== 'busStop' &&
+    interaction !== 'elevator' &&
     interaction !== 'bed'
   );
 }
@@ -136,6 +144,7 @@ export function Game({ player, sets, progress }: Props) {
   const [bereniceLine, setBereniceLine] = useState<QuestLine>('greeting');
   const [raffleDrawnOn, setRaffleDrawnOn] = useState(progress.raffleDrawnOn);
   const [isBusMapOpen, setIsBusMapOpen] = useState(false);
+  const [isElevatorOpen, setIsElevatorOpen] = useState(false);
   // The game's clock, moved on by the player's sleeps, and the night's sleep while it lasts.
   const [clockOffset, setClockOffset] = useState(progress.clockOffset);
   const clock = useGameClock(clockOffset);
@@ -163,6 +172,7 @@ export function Game({ player, sets, progress }: Props) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
+  const [isCouponRegisterOpen, setIsCouponRegisterOpen] = useState(false);
   const [activity, setActivity] = useState(progress.activity);
   const [collection, setCollection] = useState(progress.collection);
   const { isSaving, showSaveNotice } = useSaveNotice();
@@ -185,6 +195,7 @@ export function Game({ player, sets, progress }: Props) {
     isSettingsOpen ||
     isActivityOpen ||
     isStatsOpen ||
+    isCouponRegisterOpen ||
     opening !== null ||
     memoryCards !== null ||
     isFishing ||
@@ -192,6 +203,7 @@ export function Game({ player, sets, progress }: Props) {
     dalgonaShape !== null ||
     isRaffling ||
     isBusMapOpen ||
+    isElevatorOpen ||
     sleep !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
@@ -245,6 +257,8 @@ export function Game({ player, sets, progress }: Props) {
           input.current.wantsScrub = true;
         } else if (controls.current.interaction === 'busStop') {
           setIsBusMapOpen(true);
+        } else if (controls.current.interaction === 'elevator') {
+          setIsElevatorOpen(true);
         } else if (controls.current.interaction === 'bed') {
           controls.current.goToBed();
         } else {
@@ -299,6 +313,8 @@ export function Game({ player, sets, progress }: Props) {
       input.current.wantsScrub = true;
     } else if (interaction === 'busStop') {
       setIsBusMapOpen(true);
+    } else if (interaction === 'elevator') {
+      setIsElevatorOpen(true);
     } else if (interaction === 'bed') {
       goToBed();
     } else if (interaction) {
@@ -781,6 +797,11 @@ export function Game({ player, sets, progress }: Props) {
     setSleep(null);
   };
 
+  // To a floor of the administrative office, or out to the street, by Brutus or the lift.
+  const goToFloor = (floor: OfficeFloor) => {
+    input.current.travelTo = { to: floor.place, arrival: floor.arrival };
+  };
+
   const openActivity = () => {
     stopWalking();
     setIsActivityOpen(true);
@@ -997,7 +1018,13 @@ export function Game({ player, sets, progress }: Props) {
             onClose={() => setIsBagOpen(false)}
           />
         )}
-        {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
+        {isSettingsOpen && (
+          <SettingsMenu
+            sets={sets}
+            onRedeemed={(updated) => setWallet(updated)}
+            onClose={() => setIsSettingsOpen(false)}
+          />
+        )}
         {isActivityOpen && (
           <ActivityDialog
             activity={activity}
@@ -1104,20 +1131,20 @@ export function Game({ player, sets, progress }: Props) {
         )}
         {isRaffling && !isTalking && <RaffleDialog onDraw={drawRaffle} onEnd={endRaffle} />}
         {talkingTo === 'brutus' && (
-          // Brutus lets admins in, and turns everyone else away. The server checks the role again for
-          // everything in the bureau that matters.
+          // Brutus asks admins which floor they are going to, and turns everyone else away. The
+          // server checks the role again for everything in the office that matters.
           <NpcDialog
             speaker="brutus"
             line={progress.isAdmin ? 'welcome' : 'refused'}
-            action={
+            actions={
               progress.isAdmin
-                ? {
-                    label: tSpeakers('brutus.enter'),
-                    onPress: () => {
-                      input.current.travelTo = BUREAU_ENTRANCE;
-                    },
-                  }
-                : undefined
+                ? OFFICE_FLOORS.filter(({ floor }) => floor > 0).map((floor) => ({
+                    label: tSpeakers(
+                      floor.place === 'coupons' ? 'brutus.coupons' : 'brutus.office',
+                    ),
+                    onPress: () => goToFloor(floor),
+                  }))
+                : []
             }
             onClose={() => setTalkingTo(null)}
           />
@@ -1133,6 +1160,20 @@ export function Game({ player, sets, progress }: Props) {
         {isStatsOpen && !isTalking && (
           <StatsDialog sets={sets} onClose={() => setIsStatsOpen(false)} />
         )}
+        {talkingTo === 'trotte' && (
+          <NpcDialog
+            speaker="trotte"
+            line="greeting"
+            action={{
+              label: tSpeakers('trotte.register'),
+              onPress: () => setIsCouponRegisterOpen(true),
+            }}
+            onClose={() => setTalkingTo(null)}
+          />
+        )}
+        {isCouponRegisterOpen && !isTalking && (
+          <CouponRegister sets={sets} onClose={() => setIsCouponRegisterOpen(false)} />
+        )}
         {dalgonaShape && !isTalking && (
           <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
         )}
@@ -1143,7 +1184,8 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'gaspard' &&
           talkingTo !== 'berenice' &&
           talkingTo !== 'brutus' &&
-          talkingTo !== 'hulotte' && (
+          talkingTo !== 'hulotte' &&
+          talkingTo !== 'trotte' && (
             <ShopDialog
               stock={talkingTo}
               items={(talkingTo === 'binderSeller'
@@ -1169,6 +1211,16 @@ export function Game({ player, sets, progress }: Props) {
               onClose={() => setTalkingTo(null)}
             />
           )}
+        {isElevatorOpen && (
+          <ElevatorPanel
+            here={place}
+            onChoose={(floor) => {
+              goToFloor(floor);
+              setIsElevatorOpen(false);
+            }}
+            onClose={() => setIsElevatorOpen(false)}
+          />
+        )}
         {isBusMapOpen && stopAt(place) && (
           <BusMap
             here={stopAt(place)?.id ?? 'mainStreet'}

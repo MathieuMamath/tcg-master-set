@@ -34,6 +34,7 @@ import { type DashState, NO_DASH, tickDash } from '@/game/dash';
 import { type Direction, STILL } from '@/game/movement';
 import { SCRUBS_PER_STAIN, type Stain, stainAlong } from '@/game/quests';
 import {
+  ADMIN_PLACES,
   ARCADE_MACHINES,
   ARCADE_WALLS,
   BEDROOM,
@@ -44,6 +45,8 @@ import {
   BOOKSHOP_WALLS,
   BUREAU_FURNITURE,
   BUREAU_WALLS,
+  COUPONS_FURNITURE,
+  COUPONS_WALLS,
   DOWNTOWN_BACK_TOWERS,
   DOWNTOWN_ENDS,
   DOWNTOWN_SPOTS,
@@ -55,6 +58,7 @@ import {
   HULOTTE_X,
   interactionAlong,
   LEA_X,
+  OFFICE_FLOORS,
   PARK_ENDS,
   PARK_SPOTS,
   SHOP_COUNTERS,
@@ -66,6 +70,7 @@ import {
   speakerAlong,
   TOWN_BUILDINGS,
   TOWN_ENDS,
+  TROTTE_X,
 } from '@/game/side-rooms';
 import {
   cameraX as cameraTarget,
@@ -106,6 +111,8 @@ import {
   drawCloud,
   drawCorrugatedEdge,
   drawCounter,
+  drawCouponBoard,
+  drawCouponDesk,
   drawDalgonaAwning,
   drawDalgonaCart,
   drawDashboard,
@@ -113,10 +120,11 @@ import {
   drawDoor,
   drawDust,
   drawEdgeShadow,
+  drawElevator,
+  drawFilingCabinet,
   drawFlats,
   drawFrame,
   drawGaspard,
-  drawGlassDoor,
   drawHedgehog,
   drawHills,
   drawHouse,
@@ -124,13 +132,17 @@ import {
   drawLake,
   drawLampGlow,
   drawLea,
+  drawLooseSheets,
   drawLucas,
   drawMagazineRack,
   drawModernDesk,
   drawModernSofa,
   drawOfficeFloor,
   drawOfficeWall,
-  drawPanorama,
+  drawPanoramaCity,
+  drawPanoramaFrame,
+  drawPanoramaLights,
+  drawPaperStack,
   drawPapy,
   drawParkGround,
   drawPavement,
@@ -154,6 +166,7 @@ import {
   drawTallPlant,
   drawTower,
   drawTree,
+  drawTrotte,
   drawTuft,
   drawUprightCorrugatedEdge,
   drawWallpaper,
@@ -172,6 +185,7 @@ import {
   RACCOON_SIZE,
   SELLERS,
   solidTop,
+  TROTTE_SIZE,
 } from './paper-art';
 import { createPaperBalls, emitPaperBall, PaperBalls } from './paper-balls';
 import { usePlayerName } from './player-name';
@@ -213,7 +227,7 @@ export type SceneSigns = {
   parkStop: string;
   // The name of downtown's bus stop.
   downtownStop: string;
-  // On the plaque over the statistics bureau's door.
+  // On the plaque over the administrative office's door.
   bureau: string;
   // Painted on Gaspard's cart.
   dalgona: string;
@@ -2132,7 +2146,68 @@ const BRUTUS_HEIGHT = 2.9;
 const HULOTTE_HEIGHT = 2.8;
 const HULOTTE_Z = -0.9;
 
-// The statistics bureau, high in its tower: white walls and a polished floor, a window onto the
+// The office's window onto the big city: the live sky behind the towers, the towers darkening with
+// the evening and the night as outside, their windows lighting up after dusk, and the window's frame
+// over it all.
+function CityWindow({
+  x,
+  width,
+  textures,
+}: {
+  x: number;
+  width: number;
+  textures: { city: Texture; lights: Texture; frame: Texture; stars: Texture };
+}) {
+  const { offset, weather } = useContext(SkyClockContext);
+  const city = useRef<MeshBasicMaterial>(null);
+  const lights = useRef<MeshBasicMaterial>(null);
+  const target = useMemo(() => new Color(), []);
+  const easing = useEasing();
+  useFrame((_, delta) => {
+    const minute = nowMinute(offset);
+    const tint = worldTintAt(minute, weather);
+    const share = easing(delta);
+    city.current?.color.lerp(target.set(mixColors('#ffffff', tint.color, tint.strength)), share);
+    if (lights.current) {
+      const goal = lampLightAt(minute, weather);
+      lights.current.opacity += (goal - lights.current.opacity) * share;
+      lights.current.visible = lights.current.opacity > 0.01;
+    }
+  });
+  const height = 2.6;
+  const y = 2.1;
+  return (
+    <>
+      <SkyGradient
+        position={[x, y, WALL_Z + 0.004]}
+        width={width}
+        height={height}
+        starsMap={textures.stars}
+      />
+      <mesh position={[x, y, WALL_Z + 0.012]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial ref={city} map={textures.city} transparent depthWrite={false} />
+      </mesh>
+      <mesh position={[x, y, WALL_Z + 0.014]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial
+          ref={lights}
+          map={textures.lights}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[x, y, WALL_Z + 0.016]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial map={textures.frame} transparent depthWrite={false} />
+      </mesh>
+    </>
+  );
+}
+
+// The administrative office, high in its tower: white walls and a polished floor, a window onto the
 // big city with a sofa before it, a wall screen of dashboards, plants, and Mme Hulotte behind her
 // white desk.
 function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
@@ -2146,13 +2221,22 @@ function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
           paint(
             Math.round(DOOR_WIDTH * PIXELS_PER_UNIT),
             Math.round(DOOR_HEIGHT * PIXELS_PER_UNIT),
-            drawGlassDoor,
+            (drawing, width, height) => drawElevator(drawing, width, height, 'up'),
             163,
           ),
         ),
       },
       shadow: texture(drawShadowBlob()),
-      view: texture(paint(Math.round(view.width * PIXELS_PER_UNIT), 260, drawPanorama, 164)),
+      view: {
+        city: texture(paint(Math.round(view.width * PIXELS_PER_UNIT), 260, drawPanoramaCity, 164)),
+        lights: texture(
+          paint(Math.round(view.width * PIXELS_PER_UNIT), 260, drawPanoramaLights, 177),
+        ),
+        frame: texture(
+          paint(Math.round(view.width * PIXELS_PER_UNIT), 260, drawPanoramaFrame, 178),
+        ),
+        stars: texture(drawStarField()),
+      },
       screen: texture(paint(Math.round(screen.width * PIXELS_PER_UNIT), 130, drawDashboard, 165)),
       desk: texture(cutOut(320, 200, drawModernDesk, 9, 166)),
       plant: texture(cutOut(140, 300, drawTallPlant, 8, 168)),
@@ -2175,11 +2259,8 @@ function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
           },
         ]}
       />
-      {/* The window, floor to ceiling, and the wall screen. */}
-      <mesh position={[view.x, 2.1, WALL_Z + 0.01]}>
-        <planeGeometry args={[view.width, 2.6]} />
-        <meshBasicMaterial map={textures.view} />
-      </mesh>
+      {/* The window, floor to ceiling, onto the city under the live sky, and the wall screen. */}
+      <CityWindow x={view.x} width={view.width} textures={textures.view} />
       <mesh position={[screen.x, 2.55, WALL_Z + 0.02]}>
         <planeGeometry args={[screen.width, 1.3]} />
         <meshBasicMaterial map={textures.screen} />
@@ -2199,6 +2280,123 @@ function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
         x={HULOTTE_X}
         z={HULOTTE_Z}
         height={HULOTTE_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture map={textures.desk} x={desk.x} z={-0.5} height={1.7} shadow={textures.shadow} />
+    </>
+  );
+}
+
+// The coupon floor's paperwork: tall piles along the back wall, two short ones at the front, and
+// loose sheets and coupons all over the floor.
+const COUPON_STACKS = [
+  { x: -3.4, z: -1.25, height: 2.3 },
+  { x: -2.9, z: -0.85, height: 1.4 },
+  { x: 0.25, z: -1.3, height: 2.6 },
+  { x: -0.1, z: -0.95, height: 1.5 },
+  { x: 3.45, z: -1.35, height: 2.1 },
+  { x: -1.9, z: 2.25, height: 0.8 },
+  { x: 4.35, z: 2.15, height: 1 },
+];
+const COUPON_SHEETS = [
+  { x: -3.9, z: 1.9, turn: 0.3 },
+  { x: -2.3, z: 0.5, turn: -0.5 },
+  { x: -0.7, z: 1.7, turn: 0.9 },
+  { x: 0.9, z: 0.3, turn: -0.2 },
+  { x: 1.6, z: 2.3, turn: 0.6 },
+  { x: 3, z: 1.6, turn: -0.8 },
+  { x: 0.2, z: 2.6, turn: 0.1 },
+  { x: -3.2, z: -0.2, turn: 1.2 },
+];
+const TROTTE_HEIGHT = 2.7;
+const TROTTE_Z = -0.9;
+
+// The coupon floor, above the administrative office: Mlle Trotte at her desk, a cork board pinned
+// with coupons, a filing cabinet, and the lift in the left wall to go back down.
+function Coupons({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
+  const { plant, board, desk, cabinet } = COUPONS_FURNITURE;
+  const textures = useMemo(
+    () => ({
+      room: {
+        wall: texture(drawOfficeWall()),
+        floor: texture(drawOfficeFloor()),
+        door: texture(
+          paint(
+            Math.round(DOOR_WIDTH * PIXELS_PER_UNIT),
+            Math.round(DOOR_HEIGHT * PIXELS_PER_UNIT),
+            (drawing, width, height) => drawElevator(drawing, width, height, 'down'),
+            171,
+          ),
+        ),
+      },
+      shadow: texture(drawShadowBlob()),
+      board: texture(
+        cutOut(Math.round(board.width * PIXELS_PER_UNIT), 190, drawCouponBoard, 8, 172),
+      ),
+      desk: texture(cutOut(320, 200, drawCouponDesk, 9, 173)),
+      stacks: [1, 2, 3, 4].map((seed) =>
+        texture(cutOut(150, 420, drawPaperStack(seed * 13), 6, 177 + seed)),
+      ),
+      sheets: [1, 2, 3].map((seed) =>
+        texture(paint(280, 150, drawLooseSheets(seed * 7), 181 + seed)),
+      ),
+      cabinet: texture(cutOut(130, 260, drawFilingCabinet, 8, 174)),
+      plant: texture(cutOut(140, 300, drawTallPlant, 8, 175)),
+      trotte: blinker(TROTTE_SIZE.width, TROTTE_SIZE.height, drawTrotte, 9, 176),
+    }),
+    [],
+  );
+  return (
+    <>
+      <RoomShell walls={COUPONS_WALLS} doorSide="left" textures={textures.room} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[
+          { interaction: 'trotte', map: textures.trotte.open, height: TROTTE_HEIGHT, z: TROTTE_Z },
+        ]}
+      />
+      <group position={[board.x, 1.5, WALL_Z + 0.02]}>
+        <CutOut map={textures.board} height={1.9} />
+      </group>
+      <Furniture map={textures.plant} x={plant.x} z={-1.1} height={2} shadow={textures.shadow} />
+      {/* Papers everywhere: sheets and coupons fallen on the floor, and piles taller than her. */}
+      {COUPON_SHEETS.map(({ x, z, turn }, index) => (
+        <mesh
+          key={`${x}-${z}`}
+          rotation={[-Math.PI / 2, 0, turn]}
+          position={[x, 0.012 + index * 0.001, z]}
+        >
+          <planeGeometry args={[1.5, 0.8]} />
+          <meshBasicMaterial
+            map={textures.sheets[index % textures.sheets.length]}
+            transparent
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+      {COUPON_STACKS.map(({ x, z, height }, index) => (
+        <Furniture
+          key={`${x}-${z}`}
+          map={textures.stacks[index % textures.stacks.length]}
+          x={x}
+          z={z}
+          height={height}
+          shadow={textures.shadow}
+        />
+      ))}
+      <Furniture
+        map={textures.cabinet}
+        x={cabinet.x}
+        z={-1.2}
+        height={2.2}
+        shadow={textures.shadow}
+      />
+      <Character
+        map={textures.trotte.open}
+        blinks={textures.trotte}
+        x={TROTTE_X}
+        z={TROTTE_Z}
+        height={TROTTE_HEIGHT}
         shadow={textures.shadow}
       />
       <Furniture map={textures.desk} x={desk.x} z={-0.5} height={1.7} shadow={textures.shadow} />
@@ -2422,6 +2620,17 @@ const OUTSIDE_PLACES: ReadonlySet<SidePlaceId> = new Set(['town', 'park', 'downt
 
 // The places the bus serves: a trip between two of them is by bus.
 const BUS_STOPS: ReadonlySet<SidePlaceId> = new Set(['town', 'park', 'downtown']);
+// How a trip is made: by the office's lift between its floors, the street included, by bus between
+// the stops, or else on foot.
+function travelMode(from: SidePlaceId, to: SidePlaceId): TravelMode {
+  const fromFloor = OFFICE_FLOORS.find(({ place }) => place === from);
+  const toFloor = OFFICE_FLOORS.find(({ place }) => place === to);
+  if (fromFloor && toFloor && (ADMIN_PLACES.has(from) || ADMIN_PLACES.has(to))) {
+    return toFloor.floor > fromFloor.floor ? 'elevatorUp' : 'elevatorDown';
+  }
+  return BUS_STOPS.has(from) && BUS_STOPS.has(to) ? 'bus' : 'walk';
+}
+
 // Should a place never say it is drawn, such as without WebGL, the scenery opens anyway.
 const MAX_COVERED_MILLISECONDS = 5000;
 // How long the ticket takes to show, before the new place is built behind it.
@@ -2470,6 +2679,7 @@ export function PaperScene({
     park: signs.parkStop,
     downtown: signs.downtownStop,
     bureau: signs.bureau,
+    coupons: tTravel('places.coupons'),
   };
   const [visit, setVisit] = useState<{
     number: number;
@@ -2547,7 +2757,7 @@ export function PaperScene({
     onInteractionChange(null);
     setTravel((current) => ({
       phase: 'covering',
-      mode: BUS_STOPS.has(visit.place) && BUS_STOPS.has(exit.to) ? 'bus' : 'walk',
+      mode: travelMode(visit.place, exit.to),
       tip:
         (current.tip + 1 + Math.floor(Math.random() * (TRAVEL_TIP_COUNT - 1))) % TRAVEL_TIP_COUNT,
       to: exit.to,
@@ -2596,6 +2806,7 @@ export function PaperScene({
             {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
             {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
             {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
+            {visit.place === 'coupons' && <Coupons speakerTops={speakerTops} />}
             <Pip
               input={input}
               room={SIDE_PLACES[visit.place]}

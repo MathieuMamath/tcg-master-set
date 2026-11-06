@@ -10,7 +10,8 @@ export type SidePlaceId =
   | 'arcade'
   | 'park'
   | 'downtown'
-  | 'bureau';
+  | 'bureau'
+  | 'coupons';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -23,7 +24,6 @@ export const DOOR_INTERACTIONS = [
   'leaveFlat',
   'enterArcade',
   'leaveArcade',
-  'leaveBureau',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -171,7 +171,7 @@ export const PARK_SPOTS = {
 export const DOWNTOWN_ENDS = { left: -12, right: 18 };
 export const DOWNTOWN_SPOTS = {
   busStop: { x: -9.4, width: 3.6, signX: -10.9 },
-  // The statistics bureau's tower, its door in the middle, and Brutus guarding it on its right: the
+  // The administrative office's tower, its door in the middle, and Brutus guarding it on its right: the
   // way in is to talk to him.
   bureau: { x: 0.8, width: 4.8, height: 17, doorX: 0.8, brutusX: 2.5 },
 } as const;
@@ -190,7 +190,7 @@ export const DOWNTOWN_BACK_TOWERS = [
   { x: 14.4, width: 4.4, height: 13, look: 'curtain' },
 ] as const;
 
-// The statistics bureau, high in its tower: a window onto the big city, a wall screen of
+// The administrative office, high in its tower: a window onto the big city, a wall screen of
 // dashboards, Mme Hulotte's desk on the right, and the door in the left wall. Only admins get past
 // Brutus to come in.
 export const BUREAU_WALLS = { left: -6, right: 6 };
@@ -204,6 +204,25 @@ export const BUREAU_FURNITURE = {
   cornerPlant: { x: 5.2, width: 0.9 },
 } as const;
 export const HULOTTE_X = BUREAU_FURNITURE.desk.x;
+
+// The coupon floor, above the administrative office: Mlle Trotte's desk, a cork board of coupons,
+// a filing cabinet, and the lift in the left wall to go back down. Admins only, like the office.
+export const COUPONS_WALLS = { left: -5, right: 5 };
+export const COUPONS_FURNITURE = {
+  plant: { x: -4.2, width: 1 },
+  board: { x: -1.4, width: 2.8 },
+  desk: { x: 1.8, width: 2.8 },
+  cabinet: { x: 4.1, width: 1.1 },
+} as const;
+export const TROTTE_X = COUPONS_FURNITURE.desk.x + 0.2;
+
+const COUPONS_BOUNDS = {
+  minX: COUPONS_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: COUPONS_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+
+// The places only admins may be in, whose spot is neither saved nor restored for anyone else.
+export const ADMIN_PLACES: ReadonlySet<SidePlaceId> = new Set(['bureau', 'coupons']);
 
 const BUREAU_BOUNDS = {
   minX: BUREAU_WALLS.left + CHARACTER_HALF_WIDTH,
@@ -464,18 +483,28 @@ export const DOWNTOWN: SideRoom = {
   exits: [],
 };
 
-// Where Brutus lets an admin in, through the bureau's door.
-export const BUREAU_ENTRANCE = {
-  from: 'downtown',
-  to: 'bureau',
-  arrival: { x: BUREAU_BOUNDS.minX, facing: 1 },
-} as const satisfies { from: SidePlaceId; to: SidePlaceId; arrival: { x: number; facing: Facing } };
+// The administrative office's floors, served by its lift, from the street to the coupon floor. Brutus
+// lets admins in to any floor above the street, and the lift in each floor's left wall goes to the
+// others. Where the character then stands, facing which way.
+export type OfficeFloor = {
+  floor: number;
+  place: SidePlaceId;
+  arrival: { x: number; facing: Facing };
+};
+export const OFFICE_FLOORS: readonly OfficeFloor[] = [
+  { floor: 0, place: 'downtown', arrival: { x: DOWNTOWN_SPOTS.bureau.doorX, facing: 1 } },
+  { floor: 1, place: 'bureau', arrival: { x: BUREAU_BOUNDS.minX + 0.4, facing: 1 } },
+  { floor: 2, place: 'coupons', arrival: { x: COUPONS_BOUNDS.minX + 0.4, facing: 1 } },
+];
 
 export const BUREAU: SideRoom = {
   id: 'bureau',
   bounds: BUREAU_BOUNDS,
   start: BUREAU_BOUNDS.minX,
+  // The lift is in the left wall, where a door would be: it opens its panel of floors rather than
+  // leading anywhere by itself.
   interactions: [
+    { interaction: 'elevator', minX: BUREAU_BOUNDS.minX, maxX: BUREAU_BOUNDS.minX + DOOR_REACH },
     {
       interaction: 'hulotte',
       minX: HULOTTE_X - 1.2,
@@ -483,15 +512,23 @@ export const BUREAU: SideRoom = {
       speaker: { x: HULOTTE_X },
     },
   ],
-  exits: [
+  exits: [],
+};
+
+export const COUPONS: SideRoom = {
+  id: 'coupons',
+  bounds: COUPONS_BOUNDS,
+  start: COUPONS_BOUNDS.minX,
+  interactions: [
+    { interaction: 'elevator', minX: COUPONS_BOUNDS.minX, maxX: COUPONS_BOUNDS.minX + DOOR_REACH },
     {
-      interaction: 'leaveBureau',
-      minX: BUREAU_BOUNDS.minX,
-      maxX: BUREAU_BOUNDS.minX + DOOR_REACH,
-      to: 'downtown',
-      arrival: { x: DOWNTOWN_SPOTS.bureau.doorX, facing: 1 },
+      interaction: 'trotte',
+      minX: TROTTE_X - 1.2,
+      maxX: TROTTE_X + 1.2,
+      speaker: { x: TROTTE_X },
     },
   ],
+  exits: [],
 };
 
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
@@ -504,6 +541,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   park: PARK,
   downtown: DOWNTOWN,
   bureau: BUREAU,
+  coupons: COUPONS,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

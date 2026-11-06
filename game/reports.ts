@@ -17,6 +17,7 @@ export const SPEAKERS = [
   'berenice',
   'brutus',
   'hulotte',
+  'trotte',
 ] as const;
 
 export type Report =

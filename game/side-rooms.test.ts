@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
+  ADMIN_PLACES,
   ARCADE,
   ARCADE_MACHINES,
   ARCADE_WALLS,
@@ -10,7 +11,8 @@ import {
   BOOKSHOP_FURNITURE,
   BOOKSHOP_SELLER_X,
   BOOKSHOP_WALLS,
-  BUREAU_ENTRANCE,
+  BUREAU,
+  COUPONS,
   DOWNTOWN,
   DOWNTOWN_BACK_TOWERS,
   DOWNTOWN_ENDS,
@@ -23,6 +25,7 @@ import {
   interactionAlong,
   isDoorInteraction,
   LEA_X,
+  OFFICE_FLOORS,
   SHOP,
   SHOP_COUNTER_WIDTH,
   SHOP_COUNTERS,
@@ -54,11 +57,9 @@ describe.each(Object.values(SIDE_PLACES))('the $id', (place) => {
     }
   });
 
-  test('every door leads to a place with a door back, or a guard who lets the player in', () => {
+  test('every door leads to a place with a door back', () => {
     for (const exit of place.exits) {
-      const hasDoorBack = SIDE_PLACES[exit.to].exits.some(({ to }) => to === place.id);
-      const isGuarded = BUREAU_ENTRANCE.from === exit.to && BUREAU_ENTRANCE.to === place.id;
-      expect(hasDoorBack || isGuarded).toBe(true);
+      expect(SIDE_PLACES[exit.to].exits.some(({ to }) => to === place.id)).toBe(true);
     }
   });
 });
@@ -157,7 +158,7 @@ describe('downtown', () => {
     );
   });
 
-  test("the statistics bureau's door stands clear of its neighbours and of the bus stop", () => {
+  test("the administrative office's door stands clear of its neighbours and of the bus stop", () => {
     const { bureau, busStop } = DOWNTOWN_SPOTS;
 
     expect(interactionAlong(DOWNTOWN, bureau.doorX)).toBe('brutus');
@@ -303,5 +304,28 @@ describe('isDoorInteraction', () => {
     expect(isDoorInteraction('enterShop')).toBe(true);
     expect(isDoorInteraction('latest')).toBe(false);
     expect(isDoorInteraction(null)).toBe(false);
+  });
+});
+
+describe('the administrative office', () => {
+  test('its lift serves the street and every floor, each one arrived at within its walls', () => {
+    expect(OFFICE_FLOORS.map(({ place }) => place)).toEqual(['downtown', 'bureau', 'coupons']);
+    for (const { place, arrival } of OFFICE_FLOORS) {
+      expect(arrival.x).toBeGreaterThanOrEqual(SIDE_PLACES[place].bounds.minX);
+      expect(arrival.x).toBeLessThanOrEqual(SIDE_PLACES[place].bounds.maxX);
+    }
+  });
+
+  test('the lift is taken in the left wall of both floors, where their doors would be', () => {
+    for (const room of [BUREAU, COUPONS]) {
+      expect(interactionAlong(room, room.bounds.minX)).toBe('elevator');
+      expect(room.exits).toEqual([]);
+    }
+  });
+
+  test('both floors are for admins only', () => {
+    expect(ADMIN_PLACES.has('bureau')).toBe(true);
+    expect(ADMIN_PLACES.has('coupons')).toBe(true);
+    expect(ADMIN_PLACES.has('downtown')).toBe(false);
   });
 });

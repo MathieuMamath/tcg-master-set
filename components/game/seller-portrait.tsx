@@ -16,6 +16,7 @@ import {
   drawLucas,
   drawPapy,
   drawRaccoon,
+  drawTrotte,
   GASPARD_FACE,
   GASPARD_SIZE,
   HEDGEHOG_FACE,
@@ -31,12 +32,20 @@ import {
   RACCOON_FACE,
   RACCOON_SIZE,
   SELLERS,
+  TROTTE_FACE,
+  TROTTE_SIZE,
 } from './paper-art';
 
 const PORTRAIT_SIZE = 208;
 
 // The characters with a portrait: the sellers, and the quest givers.
-type Character = keyof typeof SELLERS | 'binderSeller' | QuestGiver | 'brutus' | 'hulotte';
+type Character =
+  | keyof typeof SELLERS
+  | 'binderSeller'
+  | QuestGiver
+  | 'brutus'
+  | 'hulotte'
+  | 'trotte';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -54,6 +63,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'hulotte') {
     return { draw: drawHulotte, size: HULOTTE_SIZE, face: HULOTTE_FACE };
+  }
+  if (stock === 'trotte') {
+    return { draw: drawTrotte, size: TROTTE_SIZE, face: TROTTE_FACE };
   }
   if (stock === 'berenice') {
     return { draw: drawBerenice, size: BERENICE_SIZE, face: BERENICE_FACE };
