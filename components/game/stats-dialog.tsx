@@ -275,6 +275,48 @@ export function StatsDialog({ sets, onClose }: Props) {
                       { label: t('economy.spent'), values: seriesOf('spent') },
                     ]}
                   />
+                  <Section title={t('economy.balances')}>
+                    <p className="mb-2 text-sm text-[#9aa7ba]">
+                      {t('economy.balancesHint', { players: stats.economy.balances.players })}
+                    </p>
+                    <div className="mb-3 grid gap-2 sm:grid-cols-2">
+                      <Tile
+                        label={t('economy.averageBalance')}
+                        value={
+                          stats.economy.balances.average === null
+                            ? '–'
+                            : format.number(stats.economy.balances.average)
+                        }
+                      />
+                      <Tile
+                        label={t('economy.medianBalance')}
+                        value={
+                          stats.economy.balances.median === null
+                            ? '–'
+                            : format.number(stats.economy.balances.median)
+                        }
+                      />
+                    </div>
+                    <Bars
+                      empty={t('empty')}
+                      rows={
+                        stats.economy.balances.players === 0
+                          ? []
+                          : stats.economy.balances.bands.map(({ from, players }, index, bands) => {
+                              const next = bands[index + 1];
+                              return {
+                                label: next
+                                  ? t('economy.band', {
+                                      from: format.number(from),
+                                      to: format.number(next.from - 1),
+                                    })
+                                  : t('economy.bandFrom', { from: format.number(from) }),
+                                value: players,
+                              };
+                            })
+                      }
+                    />
+                  </Section>
                   <Section title={t('economy.earnedBySource')}>
                     <Bars
                       empty={t('empty')}

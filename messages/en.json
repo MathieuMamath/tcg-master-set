@@ -612,7 +612,13 @@
       "spent": "Coins spent",
       "net": "Balance",
       "earnedBySource": "Coins earned, by source",
-      "spentOn": "Coins spent, by purchase"
+      "spentOn": "Coins spent, by purchase",
+      "balances": "Players' wealth",
+      "balancesHint": "Each player's coins after their last gain or spending in the period, over {players, plural, =0 {no player} one {# player} other {# players}}. Recorded since November 2026.",
+      "averageBalance": "Average balance",
+      "medianBalance": "Median balance",
+      "band": "{from} to {to} coins",
+      "bandFrom": "{from} coins and more"
     },
     "sources": {
       "daily-bonus": "Daily reward",
