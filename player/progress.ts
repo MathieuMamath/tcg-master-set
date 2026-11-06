@@ -1,9 +1,10 @@
-import { and, eq, gt, gte, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, sql } from 'drizzle-orm';
 import { isAdmin } from '@/auth/roles';
 import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
 import { loadLatestSoldSetId } from '@/cards/playable-sets';
 import { getDb } from '@/db/client';
 import {
+  gameEvents,
   playerBinders,
   playerBoosters,
   playerCards,
@@ -68,6 +69,7 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import { type PlayerSpot, parseSpot } from '@/game/spot';
+import { type Visit, visitSeconds } from '@/game/visits';
 import { recordEvent } from './events';
 
 // Either the database itself or a transaction of it.
@@ -930,5 +932,32 @@ export async function openOwnedBooster(
       isGodPack: opened.isGodPack,
       wallet: await loadWallet(transaction, userId),
     };
+  });
+}
+
+// Each opening of the game's page, for the statistics: the visits, where they came from and on what.
+export async function recordVisit(userId: string, locale: string, visit: Visit): Promise<void> {
+  await recordEvent(getDb(), userId, 'game.opened', { locale, ...visit });
+}
+
+// Leaving the page closes the last visit, timed by the server from its opening, unless it was
+// already closed or lasted longer than any real visit.
+export async function recordVisitEnd(userId: string, now = new Date()): Promise<void> {
+  await getDb().transaction(async (transaction) => {
+    const [last] = await transaction
+      .select({ type: gameEvents.type, occurredAt: gameEvents.occurredAt })
+      .from(gameEvents)
+      .where(
+        and(eq(gameEvents.userId, userId), sql`${gameEvents.type} in ('game.opened', 'game.left')`),
+      )
+      .orderBy(desc(gameEvents.occurredAt))
+      .limit(1);
+    if (last?.type !== 'game.opened') {
+      return;
+    }
+    const seconds = visitSeconds(last.occurredAt, now);
+    if (seconds !== null) {
+      await recordEvent(transaction, userId, 'game.left', { seconds });
+    }
   });
 }

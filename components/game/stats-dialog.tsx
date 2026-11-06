@@ -391,6 +391,17 @@ export function StatsDialog({ sets, onClose }: Props) {
               {!hasFailed && stats && tab === 'players' && (
                 <>
                   <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <Tile label={t('players.visits')} value={format.number(stats.players.visits)} />
+                    <Tile
+                      label={t('players.averageVisit')}
+                      value={
+                        stats.players.averageVisitSeconds === null
+                          ? '–'
+                          : t('players.minutes', {
+                              minutes: Math.round(stats.players.averageVisitSeconds / 60),
+                            })
+                      }
+                    />
                     <Tile label={t('players.active')} value={format.number(stats.players.active)} />
                     <Tile
                       label={t('players.signUps')}
@@ -407,6 +418,39 @@ export function StatsDialog({ sets, onClose }: Props) {
                     labels={stepLabels}
                     series={[{ label: t('players.active'), values: seriesOf('active') }]}
                   />
+                  <Section title={t('players.devices')}>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.players.devices.map(({ device, visits }) => ({
+                        label:
+                          device === 'phone' || device === 'desktop'
+                            ? t(`players.deviceNames.${device}`)
+                            : device,
+                        value: visits,
+                      }))}
+                    />
+                  </Section>
+                  <Section title={t('players.referrers')}>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.players.referrers.map(({ referrer, visits }) => ({
+                        label: referrer ?? t('players.direct'),
+                        value: visits,
+                      }))}
+                    />
+                  </Section>
+                  <Section title={t('players.locales')}>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.players.locales.map(({ locale: language, visits }) => ({
+                        label:
+                          language === 'fr' || language === 'en'
+                            ? t(`players.localeNames.${language}`)
+                            : language,
+                        value: visits,
+                      }))}
+                    />
+                  </Section>
                   <Section title={t('players.places')}>
                     <Bars
                       empty={t('empty')}

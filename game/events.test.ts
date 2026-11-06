@@ -13,6 +13,8 @@ test('lists every type of the catalogue once', () => {
     'quest.rejected': true,
     'daily_bonus.claimed': true,
     'place.entered': true,
+    'game.opened': true,
+    'game.left': true,
   };
 
   expect([...GAME_EVENT_TYPES].sort()).toEqual(Object.keys(catalogue).sort());

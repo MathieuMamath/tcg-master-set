@@ -44,6 +44,11 @@ export type GameEventDetails = {
   // Reported by the browser when it saves where the character stands, and not checked, since a
   // place gives no advantage.
   'place.entered': { place: string; from: string | null };
+  // The game's page was opened: in which language, on what kind of device, and from which domain
+  // the link came, null when typed in or from the game itself. Reported by the browser.
+  'game.opened': { locale: string; device: 'desktop' | 'phone'; referrer: string | null };
+  // The page was left, and how long it had been open, counted by the server from its opening.
+  'game.left': { seconds: number };
 };
 
 export type GameEventType = keyof GameEventDetails;
@@ -60,6 +65,8 @@ export const GAME_EVENT_TYPES = [
   'quest.rejected',
   'daily_bonus.claimed',
   'place.entered',
+  'game.opened',
+  'game.left',
 ] as const satisfies readonly GameEventType[];
 
 export type GameEvent = {

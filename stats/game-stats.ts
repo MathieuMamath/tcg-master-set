@@ -43,6 +43,13 @@ export type GameStats = {
     signIns: number;
     active: number;
     places: { place: string; visits: number }[];
+    // Openings of the game's page, how long they lasted on average, in seconds, and on what and
+    // from where: by device, by the domain of the link, null when typed in, and by language.
+    visits: number;
+    averageVisitSeconds: number | null;
+    devices: { device: string; visits: number }[];
+    referrers: { referrer: string | null; visits: number }[];
+    locales: { locale: string; visits: number }[];
   };
   // The period in steps, for the charts: hours today, days, or weeks since the start.
   series: { unit: BucketUnit; points: SeriesPoint[] };
@@ -64,7 +71,11 @@ type DetailField =
   | 'newCards'
   | 'duplicateCoins'
   | 'outcome'
-  | 'place';
+  | 'place'
+  | 'device'
+  | 'referrer'
+  | 'locale'
+  | 'seconds';
 
 const detail = (field: DetailField) => sql`${gameEvents.details}->>${sql.raw(`'${field}'`)}`;
 const detailNumber = (field: DetailField) => sql<number>`coalesce(sum((${detail(field)})::int), 0)`;
@@ -171,6 +182,25 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
     .from(gameEvents)
     .where(inPeriod(ofType('place.entered')))
     .groupBy(detail('place'));
+  // Visits: how many, how long, and on what and from where.
+  const visitsBy = async (field: DetailField) =>
+    database
+      .select({ value: detail(field), total: count() })
+      .from(gameEvents)
+      .where(inPeriod(ofType('game.opened')))
+      .groupBy(detail(field));
+  const [deviceRows, referrerRows, localeRows] = await Promise.all([
+    visitsBy('device'),
+    visitsBy('referrer'),
+    visitsBy('locale'),
+  ]);
+  const [visitLength] = await database
+    .select({ average: sql<number | null>`avg((${detail('seconds')})::int)` })
+    .from(gameEvents)
+    .where(inPeriod(ofType('game.left')));
+  const byVisits = (first: { visits: number }, second: { visits: number }) =>
+    second.visits - first.visits;
+
   // Everything charted over time, in one pass, step by step.
   const buckets = statsBuckets(period, now);
   const step = sql.raw(`'${buckets.unit}'`);
@@ -242,6 +272,23 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
       places: placeRows
         .map(({ place, total }) => ({ place: String(place), visits: Number(total) }))
         .sort((first, second) => second.visits - first.visits),
+      visits: await countOf('game.opened'),
+      averageVisitSeconds:
+        visitLength?.average === null || visitLength?.average === undefined
+          ? null
+          : Math.round(Number(visitLength.average)),
+      devices: deviceRows
+        .map(({ value, total }) => ({ device: String(value), visits: Number(total) }))
+        .sort(byVisits),
+      referrers: referrerRows
+        .map(({ value, total }) => ({
+          referrer: value === null ? null : String(value),
+          visits: Number(total),
+        }))
+        .sort(byVisits),
+      locales: localeRows
+        .map(({ value, total }) => ({ locale: String(value), visits: Number(total) }))
+        .sort(byVisits),
     },
     series: { unit: buckets.unit, points },
     events: GAME_EVENT_TYPES.map((type) => {
