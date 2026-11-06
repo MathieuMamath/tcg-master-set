@@ -76,11 +76,15 @@ function SealedPack({
   const tearTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [progress, setProgress] = useState(0);
   const [isTorn, setIsTorn] = useState(false);
+  // Read at once, unlike the state: a finger sends several moves before the next render, and
+  // each one past the line would otherwise cut the pack again, opening one booster each time.
+  const hasTorn = useRef(false);
 
   const tear = () => {
-    if (isTorn) {
+    if (hasTorn.current) {
       return;
     }
+    hasTorn.current = true;
     setIsTorn(true);
     setProgress(1);
     tearTimer.current = setTimeout(onTorn, TEAR_ANIMATION_MILLISECONDS);
