@@ -24,6 +24,7 @@ export type AuthErrorKey =
   | 'invalidEmail'
   | 'invalidUsername'
   | 'invalidPassword'
+  | 'passwordMismatch'
   | 'tooManyAttempts'
   | 'unavailable';
 

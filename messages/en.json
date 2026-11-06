@@ -188,6 +188,9 @@
     "usernameHint": "{min} to {max} letters, numbers, dots, dashes or underscores.",
     "email": "Email",
     "password": "Password",
+    "passwordConfirm": "Confirm your password",
+    "passwordMismatch": "The two passwords don't match.",
+    "showPassword": "Show password",
     "passwordHint": "At least {min} characters.",
     "signupAction": "Create my account",
     "loginAction": "Sign in",
@@ -202,6 +205,7 @@
       "invalidEmail": "This email address doesn't look valid.",
       "invalidUsername": "Please choose a username that follows the rules below it.",
       "invalidPassword": "Please choose a password that follows the rule below it.",
+      "passwordMismatch": "The two passwords don't match.",
       "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
       "unavailable": "Something went wrong. Please try again in a moment."
     }

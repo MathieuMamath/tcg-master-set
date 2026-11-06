@@ -188,6 +188,9 @@
     "usernameHint": "De {min} à {max} lettres, chiffres, points, tirets ou tirets bas.",
     "email": "E-mail",
     "password": "Mot de passe",
+    "passwordConfirm": "Confirme ton mot de passe",
+    "passwordMismatch": "Les deux mots de passe ne sont pas identiques.",
+    "showPassword": "Afficher le mot de passe",
     "passwordHint": "Au moins {min} caractères.",
     "signupAction": "Créer mon compte",
     "loginAction": "Se connecter",
@@ -202,6 +205,7 @@
       "invalidEmail": "Cette adresse e-mail ne semble pas valide.",
       "invalidUsername": "Choisis un pseudo qui respecte les règles indiquées dessous.",
       "invalidPassword": "Choisis un mot de passe qui respecte la règle indiquée dessous.",
+      "passwordMismatch": "Les deux mots de passe ne sont pas identiques.",
       "tooManyAttempts": "Trop de tentatives. Attends un instant avant de réessayer.",
       "unavailable": "Quelque chose s'est mal passé. Réessaie dans un instant."
     }
