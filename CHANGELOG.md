@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.72](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.71...v0.1.72) (2026-11-06)
+
+### Features
+
+* **city:** stand the outdoor places on a kraft table instead of the sky ([#74](https://github.com/MathieuMamath/tcg-master-set/issues/74)) ([2d82bb3](https://github.com/MathieuMamath/tcg-master-set/commit/2d82bb3d5ea8d423dd0e6104412e7ef550dd6a5a))
+
 ## [0.1.71](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.70...v0.1.71) (2026-11-05)
 
 ### Bug Fixes
