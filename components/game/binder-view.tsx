@@ -37,6 +37,7 @@ import {
 } from './binder-cover';
 import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
 import { isFocusLost, moveThroughChoices, moveThroughChoicesOnScreen } from './menu-focus';
+import { reportPlay } from './report';
 import { TornPaper } from './shop-dialog';
 import { TiltCard } from './tilt-card';
 import { useWideScreen } from './use-wide-screen';
@@ -520,6 +521,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
   }, [isBinderChosen]);
 
   const choose = (set: PlayableSet) => {
+    reportPlay({ type: 'binder.viewed', setId: set.id });
     setChosenSet(set);
     setIsOpening(true);
   };

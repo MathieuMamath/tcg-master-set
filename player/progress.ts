@@ -61,6 +61,7 @@ import {
   questDay,
 } from '@/game/quests';
 import { drawRaffle, RAFFLE_COINS, RAFFLE_QUEST, type RaffleOutcome } from '@/game/raffle';
+import type { Report } from '@/game/reports';
 import {
   BINDER_PRICE,
   BOOSTER_PRICE,
@@ -293,6 +294,7 @@ export async function sleepUntilMorning(userId: string, now = new Date()): Promi
       return null;
     }
     const slept = offsetAfterSleep(now, offset);
+    await recordEvent(transaction, userId, 'player.slept', { minute: minuteOfDay(now, offset) });
     await transaction
       .insert(playerClocks)
       .values({ userId, offset: slept })
@@ -990,4 +992,19 @@ export async function recordVisitEnd(userId: string, now = new Date()): Promise<
       await recordEvent(transaction, userId, 'game.left', { seconds });
     }
   });
+}
+
+// What the browser reports of how players play, for the statistics only.
+export async function recordReport(userId: string, report: Report): Promise<void> {
+  const database = getDb();
+  switch (report.type) {
+    case 'npc.talked':
+      return recordEvent(database, userId, 'npc.talked', report.details);
+    case 'shop.viewed':
+      return recordEvent(database, userId, 'shop.viewed', report.details);
+    case 'binder.viewed':
+      return recordEvent(database, userId, 'binder.viewed', report.details);
+    case 'booster.abandoned':
+      return recordEvent(database, userId, 'booster.abandoned', report.details);
+  }
 }

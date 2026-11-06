@@ -55,6 +55,7 @@ import { PlayerNameContext } from './player-name';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
 import { RaffleDialog } from './raffle-dialog';
+import { reportPlay } from './report';
 import { SaveNotice, useSaveNotice } from './save-notice';
 import { SettingsMenu } from './settings-menu';
 import { ShopDialog } from './shop-dialog';
@@ -348,6 +349,7 @@ export function Game({ player, sets, progress }: Props) {
   // Backing out of a sealed pack returns to the bag, to pick another one.
   const closeOpening = () => {
     if (opening?.status === 'sealed') {
+      reportPlay({ type: 'booster.abandoned', setId: opening.setId });
       setIsBagOpen(true);
     }
     setOpening(null);
@@ -437,6 +439,13 @@ export function Game({ player, sets, progress }: Props) {
       body: JSON.stringify({ locale, device, referrer }),
     }).catch(() => {});
   }, [locale]);
+
+  // Each conversation that starts, for the statistics.
+  useEffect(() => {
+    if (talkingTo !== null) {
+      reportPlay({ type: 'npc.talked', speaker: talkingTo });
+    }
+  }, [talkingTo]);
 
   // Leaving the page saves where the character stands and closes the visit, by beacons that
   // outlive the page.
