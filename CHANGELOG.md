@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.75](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.74...v0.1.75) (2026-11-06)
+
+### Features
+
+* **boosters:** record each booster's cards and show their drop rates in the reports ([#77](https://github.com/MathieuMamath/tcg-master-set/issues/77)) ([3dbe634](https://github.com/MathieuMamath/tcg-master-set/commit/3dbe634bc3d7291a602d885e3e25e455201fd547))
+
 ## [0.1.74](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.73...v0.1.74) (2026-11-06)
 
 ### Features
