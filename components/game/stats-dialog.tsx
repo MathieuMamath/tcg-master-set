@@ -7,9 +7,10 @@ import type { PlayableSet } from '@/game/card-sets';
 import { STATS_PERIODS, type StatsPeriod } from '@/game/stats';
 import type { GameStats, SeriesPoint } from '@/stats/game-stats';
 import { moveThroughChoices } from './menu-focus';
+import { CardDropPanel } from './stats-cards';
 import { TimeChart } from './stats-charts';
 
-const TABS = ['economy', 'boosters', 'quests', 'players', 'log'] as const;
+const TABS = ['economy', 'boosters', 'quests', 'players', 'cards', 'log'] as const;
 type Tab = (typeof TABS)[number];
 
 // The outcomes the statistics know how to name. Anything else shows as recorded.
@@ -250,8 +251,10 @@ export function StatsDialog({ sets, onClose }: Props) {
               aria-busy={!stats && !hasFailed}
               className="min-h-72 pt-2"
             >
-              {hasFailed && <p className="mt-4">{t('error')}</p>}
-              {!hasFailed && !stats && <p className="mt-4 text-[#9aa7ba]">{t('loading')}</p>}
+              {tab !== 'cards' && hasFailed && <p className="mt-4">{t('error')}</p>}
+              {tab !== 'cards' && !hasFailed && !stats && (
+                <p className="mt-4 text-[#9aa7ba]">{t('loading')}</p>
+              )}
               {!hasFailed && stats && tab === 'economy' && (
                 <>
                   <div className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -415,6 +418,7 @@ export function StatsDialog({ sets, onClose }: Props) {
                   </Section>
                 </>
               )}
+              {tab === 'cards' && <CardDropPanel sets={sets} />}
               {!hasFailed && stats && tab === 'log' && (
                 <Section title={t('log.title')}>
                   <p className="mb-2 text-sm text-[#9aa7ba]">{t('log.hint')}</p>

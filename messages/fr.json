@@ -601,6 +601,7 @@
       "boosters": "Boosters",
       "quests": "Quêtes",
       "players": "Joueurs",
+      "cards": "Cartes",
       "log": "Journal"
     },
     "loading": "Mme Hulotte feuillette ses dossiers…",
@@ -677,6 +678,18 @@
       "finished": "Terminées",
       "active": "Joueurs actifs",
       "weekOf": "sem. du {day}"
+    },
+    "cards": {
+      "title": "Tirages par classeur",
+      "hint": "Depuis le début, toutes les cartes sorties des boosters, pour vérifier les tirages. Seuls les boosters ouverts depuis l’enregistrement des cartes comptent.",
+      "setSummary": "{boosters, plural, =0 {Aucun booster} one {# booster} other {# boosters}} · {pulled} / {total} versions tirées",
+      "loading": "Chargement…",
+      "error": "Ces tirages n’ont pas pu être chargés.",
+      "back": "← Tous les classeurs",
+      "boostersOpened": "{count, plural, one {# booster ouvert} other {# boosters ouverts}} depuis le début. Le taux est la part des boosters qui ont donné cette carte.",
+      "noBoosters": "Aucun booster de ce classeur n’a encore été ouvert avec ses cartes enregistrées.",
+      "neverPulled": "Jamais tirée",
+      "pulls": "{count, plural, one {# fois} other {# fois}}"
     }
   },
   "Clock": {
