@@ -109,6 +109,7 @@ import {
   drawDesk,
   drawDoor,
   drawDust,
+  drawEdgeShadow,
   drawFlats,
   drawFrame,
   drawGaspard,
@@ -247,6 +248,31 @@ function texture(canvas: HTMLCanvasElement): Texture {
   map.colorSpace = SRGBColorSpace;
   map.anisotropy = 8;
   return map;
+}
+
+// Outside, the diorama stands on a table of kraft, the same as the page behind the rooms, so that
+// the sky never shows below its front edge. Being part of the scene, the table darkens at night
+// with the rest of the world, and the edge casts a soft shadow on it.
+const TABLE_COLOR = '#c8a574';
+const TABLE_DEPTH = 20;
+const EDGE_SHADOW_DEPTH = 0.9;
+
+function DioramaTable({ center, width }: { center: number; width: number }) {
+  const shadow = useMemo(() => texture(drawEdgeShadow()), []);
+  const top = -0.36;
+  const z = STREET_FRONT_Z + 0.07;
+  return (
+    <>
+      <mesh position={[center, top - TABLE_DEPTH / 2, z]}>
+        <planeGeometry args={[width + 70, TABLE_DEPTH]} />
+        <meshBasicMaterial color={TABLE_COLOR} toneMapped={false} />
+      </mesh>
+      <mesh position={[center, top - EDGE_SHADOW_DEPTH / 2, z + 0.01]}>
+        <planeGeometry args={[width, EDGE_SHADOW_DEPTH]} />
+        <meshBasicMaterial map={shadow} transparent depthWrite={false} toneMapped={false} />
+      </mesh>
+    </>
+  );
 }
 
 // Overshoots a little before settling, like a sheet of card flipped by hand.
@@ -1470,6 +1496,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         <planeGeometry args={[streetWidth, 8]} />
         <meshBasicMaterial map={textures.street} />
       </mesh>
+      <DioramaTable center={streetCenter} width={streetWidth} />
       <mesh position={[streetCenter, -0.18, STREET_FRONT_Z]}>
         <boxGeometry args={[streetWidth, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
@@ -1736,6 +1763,7 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         <planeGeometry args={[lakeWidth, 4.4]} />
         <meshBasicMaterial map={textures.lake} />
       </mesh>
+      <DioramaTable center={center} width={width} />
       <mesh position={[center, -0.18, STREET_FRONT_Z]}>
         <boxGeometry args={[width, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
@@ -1889,6 +1917,7 @@ function Downtown({
         <planeGeometry args={[width, 8]} />
         <meshBasicMaterial map={textures.pavement} />
       </mesh>
+      <DioramaTable center={center} width={width} />
       <mesh position={[center, -0.18, STREET_FRONT_Z]}>
         <boxGeometry args={[width, 0.36, 0.14]} />
         <meshBasicMaterial map={textures.edge} />
