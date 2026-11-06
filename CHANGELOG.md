@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.85](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.84...v0.1.85) (2026-11-06)
+
+### Bug Fixes
+
+* **npc:** put the focus on a dialog's first choice in every browser ([#87](https://github.com/MathieuMamath/tcg-master-set/issues/87)) ([851c309](https://github.com/MathieuMamath/tcg-master-set/commit/851c30904ae82b5fa007d29f8ac5e6a9efcd97d3))
+
 ## [0.1.84](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.83...v0.1.84) (2026-11-06)
 
 ### Bug Fixes
