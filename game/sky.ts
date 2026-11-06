@@ -1,4 +1,4 @@
-import type { TimeOfDay, Weather } from './clock';
+import { MINUTES_PER_DAY, type TimeOfDay, type Weather } from './clock';
 
 export type { TimeOfDay, Weather };
 
@@ -104,4 +104,61 @@ const LAMP_LIGHT: Record<TimeOfDay, number> = { dawn: 0.35, day: 0, dusk: 0.75, 
 export function lampLight(time: TimeOfDay, weather: Weather): number {
   const light = LAMP_LIGHT[time];
   return weather === 'storm' ? Math.max(light, 0.6) : light;
+}
+
+// The sky and the light move smoothly through the day: between these moments, each the heart of a
+// time of day, they blend from one look to the next, a little more every game minute.
+const DAY_MOMENTS: readonly [number, TimeOfDay][] = [
+  [0, 'night'],
+  [4 * 60 + 30, 'night'],
+  [6 * 60, 'dawn'],
+  [7 * 60 + 30, 'day'],
+  [17 * 60, 'day'],
+  [19 * 60, 'dusk'],
+  [21 * 60, 'night'],
+  [MINUTES_PER_DAY, 'night'],
+];
+
+// The two looks a minute falls between, and how far it is from the first to the second.
+function momentsAround(minute: number): { from: TimeOfDay; to: TimeOfDay; share: number } {
+  const wrapped = ((minute % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  for (let index = 1; index < DAY_MOMENTS.length; index++) {
+    const [end, to] = DAY_MOMENTS[index] ?? [MINUTES_PER_DAY, 'night'];
+    const [start, from] = DAY_MOMENTS[index - 1] ?? [0, 'night'];
+    if (wrapped <= end) {
+      return { from, to, share: end === start ? 0 : (wrapped - start) / (end - start) };
+    }
+  }
+  return { from: 'night', to: 'night', share: 0 };
+}
+
+// The sky's colours at a minute of the game's day, and how bright its stars are, from 0 to 1.
+export type SkyColors = { top: string; horizon: string; cloud: string; stars: number };
+
+export function skyAt(minute: number, weather: Weather): SkyColors {
+  const { from, to, share } = momentsAround(minute);
+  const start = skyLook(from, weather);
+  const end = skyLook(to, weather);
+  return {
+    top: mixColors(start.top, end.top, share),
+    horizon: mixColors(start.horizon, end.horizon, share),
+    cloud: mixColors(start.cloud, end.cloud, share),
+    stars: (start.stars ? 1 : 0) + ((end.stars ? 1 : 0) - (start.stars ? 1 : 0)) * share,
+  };
+}
+
+export function worldTintAt(minute: number, weather: Weather): WorldTint {
+  const { from, to, share } = momentsAround(minute);
+  const start = worldTint(from, weather);
+  const end = worldTint(to, weather);
+  return {
+    color: mixColors(start.color, end.color, share),
+    strength: start.strength + (end.strength - start.strength) * share,
+  };
+}
+
+export function lampLightAt(minute: number, weather: Weather): number {
+  const { from, to, share } = momentsAround(minute);
+  const start = lampLight(from, weather);
+  return start + (lampLight(to, weather) - start) * share;
 }

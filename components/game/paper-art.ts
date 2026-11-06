@@ -1,8 +1,6 @@
 // Drawings for the paper world, made on canvases in the browser and used as textures. Everything is
 // drawn by code, so that the repository holds no images.
 
-import type { SkyLook } from '@/game/sky';
-
 export function seededRandom(seed: number): () => number {
   let state = seed;
   return () => {
@@ -678,28 +676,21 @@ export function drawUprightCorrugatedEdge(length: number): HTMLCanvasElement {
   return canvas;
 }
 
-// A sky with soft clouds, made to repeat from side to side so that the clouds can drift.
-export function drawSky(look: SkyLook): HTMLCanvasElement {
+// The clouds seen through a window, white on nothing: the scene tints them with the sky of the
+// moment, and slides them along. Each is drawn again one sky further, so that it wraps.
+export function drawWindowClouds(): HTMLCanvasElement {
   const width = 1024;
   const height = 256;
   const canvas = createCanvas(width, height);
   const x = context(canvas);
-  const gradient = x.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, look.top);
-  gradient.addColorStop(1, look.horizon);
-  x.fillStyle = gradient;
-  x.fillRect(0, 0, width, height);
-  if (look.stars) {
-    drawStars(x, width, height, 90);
-  }
   const random = seededRandom(23);
-  for (let cloud = 0; cloud < look.cloudCount; cloud++) {
-    const centerX = ((cloud + random() * 0.6) / look.cloudCount) * width;
+  const count = 5;
+  x.fillStyle = '#ffffff';
+  for (let cloud = 0; cloud < count; cloud++) {
+    const centerX = ((cloud + random() * 0.6) / count) * width;
     const centerY = height * (0.25 + random() * 0.4);
     const size = 30 + random() * 26;
-    // Drawn a second time one sky further, so that a cloud crossing the edge stays whole.
     for (const shift of [0, -width, width]) {
-      x.fillStyle = look.cloud;
       for (const [offsetX, offsetY, scale] of [
         [-1.1, 0.25, 0.7],
         [0, 0, 1],
@@ -717,7 +708,6 @@ export function drawSky(look: SkyLook): HTMLCanvasElement {
       }
     }
   }
-  addGrain(canvas, 8, 29);
   return canvas;
 }
 
@@ -1004,20 +994,11 @@ function drawStars(x: CanvasRenderingContext2D, width: number, height: number, c
   }
 }
 
-// The sky behind a whole place. Plain colours stretch from a narrow strip, but stars need the
-// width of the place, or they would be drawn out into streaks.
-export function drawSkyGradient(look: SkyLook): HTMLCanvasElement {
-  // Tall enough with stars for them to stay round once stretched over the place.
-  const canvas = createCanvas(look.stars ? 2048 : 16, look.stars ? 384 : 256);
-  const x = context(canvas);
-  const gradient = x.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, look.top);
-  gradient.addColorStop(1, look.horizon);
-  x.fillStyle = gradient;
-  x.fillRect(0, 0, canvas.width, canvas.height);
-  if (look.stars) {
-    drawStars(x, canvas.width, canvas.height, 420);
-  }
+// The stars of a whole place's sky, on nothing, for the scene to fade in at night. Wide and tall
+// enough for them to stay round once stretched over the place.
+export function drawStarField(): HTMLCanvasElement {
+  const canvas = createCanvas(2048, 384);
+  drawStars(context(canvas), canvas.width, canvas.height, 420);
   return canvas;
 }
 
