@@ -107,6 +107,9 @@ type Props = {
 export function StatsDialog({ sets, onClose }: Props) {
   const t = useTranslations('Stats');
   const tQuests = useTranslations('Activity.quests');
+  const tQuest = useTranslations('Quest');
+  const tShopkeeper = useTranslations('Shopkeeper');
+  const tSpeakers = useTranslations('Speakers');
   const format = useFormatter();
   const dialog = useRef<HTMLDialogElement>(null);
   const firstButton = useRef<HTMLButtonElement>(null);
@@ -151,6 +154,21 @@ export function StatsDialog({ sets, onClose }: Props) {
   const setName = (setId: string) => sets.find(({ id }) => id === setId)?.name ?? setId;
   const outcomeName = (outcome: string) =>
     KNOWN_OUTCOMES.has(outcome) ? t(`outcomes.${outcome}` as 'outcomes.won') : outcome;
+  const speakerName = (speaker: string) => {
+    if (speaker === 'latest' || speaker === 'thisYear' || speaker === 'older') {
+      return tShopkeeper(`sellers.${speaker}`);
+    }
+    if (speaker === 'binderSeller') {
+      return tShopkeeper('names.binderSeller');
+    }
+    if (speaker === 'brutus' || speaker === 'hulotte') {
+      return tSpeakers(`${speaker}.name`);
+    }
+    if (DAILY_QUESTS.some(({ giver }) => giver === speaker)) {
+      return tQuest(`${speaker}.name` as 'grandma.name');
+    }
+    return speaker;
+  };
   const placeName = (place: string) =>
     KNOWN_PLACES.has(place) ? t(`places.${place}` as 'places.town') : place;
 
@@ -365,6 +383,51 @@ export function StatsDialog({ sets, onClose }: Props) {
                       { label: t('boosters.opened'), values: seriesOf('opened') },
                     ]}
                   />
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <Tile
+                      label={t('behaviour.shopViews')}
+                      value={format.number(
+                        stats.behaviour.shopViews.reduce((total, { count }) => total + count, 0),
+                      )}
+                    />
+                    <Tile
+                      label={t('behaviour.purchasesPerView')}
+                      value={(() => {
+                        const views = stats.behaviour.shopViews.reduce(
+                          (total, { count }) => total + count,
+                          0,
+                        );
+                        return views === 0
+                          ? '–'
+                          : format.number(stats.behaviour.purchases / views, {
+                              style: 'percent',
+                              maximumFractionDigits: 0,
+                            });
+                      })()}
+                    />
+                    <Tile
+                      label={t('behaviour.abandoned')}
+                      value={format.number(stats.behaviour.abandoned)}
+                    />
+                  </div>
+                  <Section title={t('behaviour.shopViewsBySeller')}>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.behaviour.shopViews.map(({ stock, count }) => ({
+                        label: speakerName(stock),
+                        value: count,
+                      }))}
+                    />
+                  </Section>
+                  <Section title={t('behaviour.binderViews')}>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.behaviour.binderViews.map(({ setId, count }) => ({
+                        label: setName(setId),
+                        value: count,
+                      }))}
+                    />
+                  </Section>
                   <Section title={t('boosters.bySet')}>
                     <Bars
                       empty={t('empty')}
@@ -490,6 +553,18 @@ export function StatsDialog({ sets, onClose }: Props) {
                             ? t(`players.localeNames.${language}`)
                             : language,
                         value: visits,
+                      }))}
+                    />
+                  </Section>
+                  <Section title={t('behaviour.talks')}>
+                    <p className="mb-2 text-sm text-[#9aa7ba]">
+                      {t('behaviour.sleeps', { count: stats.behaviour.sleeps })}
+                    </p>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.behaviour.talks.map(({ speaker, count }) => ({
+                        label: speakerName(speaker),
+                        value: count,
                       }))}
                     />
                   </Section>

@@ -11,6 +11,7 @@ import {
 } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
 import { moveThroughChoices } from './menu-focus';
+import { reportPlay } from './report';
 import { SellerPortrait } from './seller-portrait';
 import { type ShopItem, ShopWindow } from './shop-window';
 
@@ -193,7 +194,10 @@ export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
               type="button"
               // biome-ignore lint/a11y/noAutofocus: the conversation is answered with the keyboard.
               autoFocus
-              onClick={() => setIsBrowsing(true)}
+              onClick={() => {
+                reportPlay({ type: 'shop.viewed', stock });
+                setIsBrowsing(true);
+              }}
               className={`${CHOICE_CLASS} bg-ui-stamp text-ui-paper`}
             >
               {t(`browse.${stock}`)}

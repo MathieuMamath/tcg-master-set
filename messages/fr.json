@@ -711,6 +711,15 @@
       "noBoosters": "Aucun booster de ce classeur n’a encore été ouvert avec ses cartes enregistrées.",
       "neverPulled": "Jamais tirée",
       "pulls": "{count, plural, one {# fois} other {# fois}}"
+    },
+    "behaviour": {
+      "shopViews": "Vitrines ouvertes",
+      "purchasesPerView": "Achats par vitrine ouverte",
+      "abandoned": "Boosters reposés",
+      "shopViewsBySeller": "Vitrines ouvertes, par vendeuse",
+      "binderViews": "Classeurs consultés",
+      "talks": "Discussions avec les personnages",
+      "sleeps": "{count, plural, =0 {Aucune nuit de sommeil} one {# nuit de sommeil} other {# nuits de sommeil}} sur la période."
     }
   },
   "Clock": {

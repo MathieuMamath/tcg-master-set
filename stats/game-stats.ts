@@ -59,6 +59,17 @@ export type GameStats = {
     referrers: { referrer: string | null; visits: number }[];
     locales: { locale: string; visits: number }[];
   };
+  // How players play: conversations by character, shop windows looked through by seller and how
+  // many purchases they led to, binders opened by set, boosters put back before being cut, and
+  // nights slept.
+  behaviour: {
+    talks: { speaker: string; count: number }[];
+    shopViews: { stock: string; count: number }[];
+    purchases: number;
+    binderViews: { setId: string; count: number }[];
+    abandoned: number;
+    sleeps: number;
+  };
   // The period in steps, for the charts: hours today, days, or weeks since the start.
   series: { unit: BucketUnit; points: SeriesPoint[] };
   // Every type of the catalogue, with how many in the period and when one was last recorded, so
@@ -83,7 +94,9 @@ type DetailField =
   | 'device'
   | 'referrer'
   | 'locale'
-  | 'seconds';
+  | 'seconds'
+  | 'speaker'
+  | 'stock';
 
 const detail = (field: DetailField) => sql`${gameEvents.details}->>${sql.raw(`'${field}'`)}`;
 const detailNumber = (field: DetailField) => sql<number>`coalesce(sum((${detail(field)})::int), 0)`;
@@ -218,6 +231,23 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
   const byVisits = (first: { visits: number }, second: { visits: number }) =>
     second.visits - first.visits;
 
+  // How players play.
+  const countsBy = async (type: GameEventType, field: DetailField) =>
+    (
+      await database
+        .select({ value: detail(field), total: count() })
+        .from(gameEvents)
+        .where(inPeriod(ofType(type)))
+        .groupBy(detail(field))
+    )
+      .map(({ value, total }) => ({ value: String(value), count: Number(total) }))
+      .sort((first, second) => second.count - first.count);
+  const [talks, shopViews, binderViews] = await Promise.all([
+    countsBy('npc.talked', 'speaker'),
+    countsBy('shop.viewed', 'stock'),
+    countsBy('binder.viewed', 'setId'),
+  ]);
+
   // Everything charted over time, in one pass, step by step.
   const buckets = statsBuckets(period, now);
   const step = sql.raw(`'${buckets.unit}'`);
@@ -306,6 +336,14 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
       locales: localeRows
         .map(({ value, total }) => ({ locale: String(value), visits: Number(total) }))
         .sort(byVisits),
+    },
+    behaviour: {
+      talks: talks.map(({ value, count: total }) => ({ speaker: value, count: total })),
+      shopViews: shopViews.map(({ value, count: total }) => ({ stock: value, count: total })),
+      purchases: (await countOf('booster.bought')) + (await countOf('binder.bought')),
+      binderViews: binderViews.map(({ value, count: total }) => ({ setId: value, count: total })),
+      abandoned: await countOf('booster.abandoned'),
+      sleeps: await countOf('player.slept'),
     },
     series: { unit: buckets.unit, points },
     events: GAME_EVENT_TYPES.map((type) => {

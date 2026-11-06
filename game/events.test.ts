@@ -15,6 +15,11 @@ test('lists every type of the catalogue once', () => {
     'place.entered': true,
     'game.opened': true,
     'game.left': true,
+    'npc.talked': true,
+    'shop.viewed': true,
+    'binder.viewed': true,
+    'booster.abandoned': true,
+    'player.slept': true,
   };
 
   expect([...GAME_EVENT_TYPES].sort()).toEqual(Object.keys(catalogue).sort());

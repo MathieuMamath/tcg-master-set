@@ -711,6 +711,15 @@
       "noBoosters": "No booster of this binder has been opened with its cards recorded yet.",
       "neverPulled": "Never drawn",
       "pulls": "{count, plural, one {# time} other {# times}}"
+    },
+    "behaviour": {
+      "shopViews": "Shop windows opened",
+      "purchasesPerView": "Purchases per window opened",
+      "abandoned": "Boosters put back",
+      "shopViewsBySeller": "Shop windows opened, by seller",
+      "binderViews": "Binders looked at",
+      "talks": "Conversations with characters",
+      "sleeps": "{count, plural, =0 {No night slept} one {# night slept} other {# nights slept}} in the period."
     }
   },
   "Clock": {

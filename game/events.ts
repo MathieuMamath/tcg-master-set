@@ -51,6 +51,15 @@ export type GameEventDetails = {
   'game.opened': { locale: string; device: 'desktop' | 'phone'; referrer: string | null };
   // The page was left, and how long it had been open, counted by the server from its opening.
   'game.left': { seconds: number };
+  // How players play, reported by the browser for the statistics: a conversation with a character,
+  // by their id, a seller's shop window looked through, by her stock, a binder opened, and a
+  // booster taken out of the bag then put back before it was cut.
+  'npc.talked': { speaker: string };
+  'shop.viewed': { stock: string };
+  'binder.viewed': { setId: string };
+  'booster.abandoned': { setId: string };
+  // Pip went to bed, at this minute of the game's day, and woke up in the morning.
+  'player.slept': { minute: number };
 };
 
 // Every event that changes a player's coins also carries `coinsAfter`, their coins once it was
@@ -72,6 +81,11 @@ export const GAME_EVENT_TYPES = [
   'place.entered',
   'game.opened',
   'game.left',
+  'npc.talked',
+  'shop.viewed',
+  'binder.viewed',
+  'booster.abandoned',
+  'player.slept',
 ] as const satisfies readonly GameEventType[];
 
 export type GameEvent = {
