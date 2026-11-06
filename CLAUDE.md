@@ -72,7 +72,7 @@ Every booster holds ten cards, without energy or code bonus cards. A recipe adap
 
 Opening a booster also needs its set's binder. Boosters won from quests or coupons wait in the bag, `components/game/booster-bag.tsx`, greyed out with a tag, until the binder is bought, and `openOwnedBooster` in `player/progress.ts` refuses them with `needsBinder`.
 
-The server only takes the booster and draws the cards when the pack is cut. Until then the player can back out at no cost, and backing out can't be used to draw again.
+The server only takes the booster and draws the cards when the pack is cut. Until then the player can back out at no cost, and backing out can't be used to draw again. A cut sends a single request: the pack locks itself with a ref at the first tear, since a finger sends several moves before React draws again, and `cutBooster` in `components/game/game.tsx` lets only one request be on its way. Without both, one gesture opened several boosters.
 
 Opening a booster pays for its duplicates in the same transaction, from the values in `game/duplicate-coins.ts`. A duplicate is a version of a card the player already owns. The copy is kept, so that the binder still counts it.
 

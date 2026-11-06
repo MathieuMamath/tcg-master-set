@@ -211,6 +211,7 @@ export function Game({ player, sets, progress }: Props) {
   const boosterTotal = totalBoosters(wallet);
   const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
+  const isCutting = useRef(false);
   const controls = useRef({ interaction, isDialogOpen, isPapySaying, goToBed: () => {} });
   controls.current = { interaction, isDialogOpen, isPapySaying, goToBed: () => goToBed() };
 
@@ -337,11 +338,14 @@ export function Game({ player, sets, progress }: Props) {
     setOpening({ status: 'sealed', setId, setName: set.name, logoUrl: set.logoUrl });
   };
 
-  // The server takes the booster and keeps the cards. This only shows the result.
+  // The server takes the booster and keeps the cards. This only shows the result. One request at
+  // a time: a second cut while the first is on its way would open another booster, and its
+  // refusal, once the bag is empty, would hide the cards the first one drew.
   const cutBooster = async () => {
-    if (!opening) {
+    if (!opening || isCutting.current) {
       return;
     }
+    isCutting.current = true;
     const pack = { setId: opening.setId, setName: opening.setName, logoUrl: opening.logoUrl };
     setOpening({ status: 'cutting', ...pack });
 
@@ -359,6 +363,8 @@ export function Game({ player, sets, progress }: Props) {
       showSaveNotice();
     } catch {
       setOpening({ status: 'error', ...pack });
+    } finally {
+      isCutting.current = false;
     }
   };
 
