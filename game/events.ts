@@ -19,6 +19,9 @@ export type GameEventDetails = {
     bestTier: number;
     newCards: number;
     duplicateCoins: number;
+    // The ten cards drawn, each with its version, for checking the draws against the recipes.
+    // Only recorded from November 2026: older openings don't have it.
+    cards?: { cardId: string; variant: string }[];
   };
   // An attempt at a daily quest began. The raffle has no attempt, only its draw.
   'quest.started': { questId: string };

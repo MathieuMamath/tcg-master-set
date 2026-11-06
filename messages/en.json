@@ -601,6 +601,7 @@
       "boosters": "Boosters",
       "quests": "Quests",
       "players": "Players",
+      "cards": "Cards",
       "log": "Log"
     },
     "loading": "Mme Hulotte is leafing through her folders…",
@@ -677,6 +678,18 @@
       "finished": "Finished",
       "active": "Active players",
       "weekOf": "wk of {day}"
+    },
+    "cards": {
+      "title": "Draws by binder",
+      "hint": "Since the start, every card that came out of a booster, to check the draws. Only boosters opened since the cards are recorded count.",
+      "setSummary": "{boosters, plural, =0 {No booster} one {# booster} other {# boosters}} · {pulled} / {total} versions drawn",
+      "loading": "Loading…",
+      "error": "These draws couldn’t be loaded.",
+      "back": "← All binders",
+      "boostersOpened": "{count, plural, one {# booster opened} other {# boosters opened}} since the start. The rate is the share of boosters that gave this card.",
+      "noBoosters": "No booster of this binder has been opened with its cards recorded yet.",
+      "neverPulled": "Never drawn",
+      "pulls": "{count, plural, one {# time} other {# times}}"
     }
   },
   "Clock": {

@@ -921,6 +921,7 @@ export async function openOwnedBooster(
       bestTier: Math.max(0, ...cards.map(({ tier }) => tier)),
       newCards: cards.filter(({ isNew }) => isNew).length,
       duplicateCoins: duplicateTotal,
+      cards: opened.cards.map(({ cardId, variant }) => ({ cardId, variant })),
     });
 
     return {
