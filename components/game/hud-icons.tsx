@@ -21,7 +21,7 @@ export function BoosterIcon() {
       <g clipPath={`url(#${id}-outline)`}>
         <rect width="16" height="22" fill={`url(#${id}-paper)`} />
         <path
-          d="M-4 22 8 4M2 26 18 2M10 26 22 8"
+          d="M-8 15 4 -3M-4 22 12 -2M2 26 18 2M10 26 22 8"
           stroke="#fff"
           strokeOpacity="0.2"
           strokeWidth="2.5"

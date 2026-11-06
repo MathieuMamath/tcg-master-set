@@ -123,3 +123,5 @@ The game was first a 3D town of Kenney models, rebuilt place by place in paper. 
 Read [`AGENTS.md`](AGENTS.md) before writing Next.js code. `next dev` maintains that file, so leave its block as it is.
 
 Cache Components stays off until a feature needs it: player data must never be served from a cache.
+
+The favicon, `app/icon.svg`, is the HUD's booster pack. The home-screen icon, `app/apple-icon.tsx`, and the picture shown when a link is shared, `app/[locale]/opengraph-image.tsx`, are generated from it and the game's own fonts by `components/brand/assets.ts`. The layout's metadata makes their links whole from `APP_URL`, which must be the public address in production for WhatsApp, Discord and the like to show the preview. `proxy.ts` leaves `apple-icon` out of the language routing, as its address has no extension.

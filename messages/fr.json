@@ -1,6 +1,7 @@
 {
   "Metadata": {
-    "description": "Un petit jeu solo en 3D pour compléter ses classeurs de master set."
+    "description": "Un jeu solo et douillet en papier découpé : fais tes quêtes du jour, ouvre des boosters et complète tes classeurs de master set.",
+    "tagline": "Ouvre des boosters et complète tes classeurs, dans un petit monde en papier découpé."
   },
   "Home": {
     "title": "TCG Master Set"
