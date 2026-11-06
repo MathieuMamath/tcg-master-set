@@ -315,6 +315,18 @@ export function drawPip(
   x.fillStyle = '#f3c14b';
   ellipse(x, cx - 65, by - 50, 5, 5);
 }
+// The shadow a diorama's front edge casts on the table it stands on, darkest under the edge.
+export function drawEdgeShadow(): HTMLCanvasElement {
+  const canvas = createCanvas(4, 128);
+  const x = context(canvas);
+  const shadow = x.createLinearGradient(0, 0, 0, canvas.height);
+  shadow.addColorStop(0, 'rgb(60 40 20 / 45%)');
+  shadow.addColorStop(0.35, 'rgb(60 40 20 / 15%)');
+  shadow.addColorStop(1, 'rgb(60 40 20 / 0%)');
+  x.fillStyle = shadow;
+  x.fillRect(0, 0, canvas.width, canvas.height);
+  return canvas;
+}
 
 // The stage's front edge, in corrugated cardboard.
 export function drawCorrugatedEdge(width = 1024): HTMLCanvasElement {
