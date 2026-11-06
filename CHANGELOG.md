@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.86](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.85...v0.1.86) (2026-11-06)
+
+### Bug Fixes
+
+* **quests:** keep the dalgona's clock running when the time of day or weather changes ([#88](https://github.com/MathieuMamath/tcg-master-set/issues/88)) ([f77e7c7](https://github.com/MathieuMamath/tcg-master-set/commit/f77e7c74681eedd981e67f19abc32980a8ab7b66))
+
 ## [0.1.85](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.84...v0.1.85) (2026-11-06)
 
 ### Bug Fixes
