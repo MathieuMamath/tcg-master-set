@@ -51,6 +51,20 @@ pnpm dev
 
 `pnpm cards:import` copies the card sets from [TCGdex](https://tcgdex.dev/) into the database, so it needs a network connection. The game then runs at <http://localhost:3000>, where you create an account to play.
 
+## Deploying
+
+The `Dockerfile` builds the standalone Next.js server, run by a user without privileges, and needs neither a database nor a secret to build. The container listens on port 3000 and checks itself on `/api/health`, which answers 503 when the database can't be reached. It needs a PostgreSQL database and three variables, listed in [`.env.example`](.env.example): `DATABASE_URL`, `AUTH_SECRET`, and `APP_URL`, the public address, which sign-in and the link previews depend on.
+
+Deploying the image changes nothing in the database. The migrations, the runtime role and the cards are applied by hand, with the database owner's address, before the code that needs them goes live:
+
+```bash
+DATABASE_URL='<owner url>' pnpm db:migrate
+psql '<owner url>' -v app_password='<password>' -f db/prod-runtime-role.sql
+DATABASE_URL='<owner url>' pnpm cards:import all
+```
+
+The game connects as `tcg_app`, the role [`db/prod-runtime-role.sql`](db/prod-runtime-role.sql) creates: it reads and writes rows but can't change the schema. Tables made by later migrations get its rights on their own, as long as the owner that ran the script runs them. An admin is then made by hand, as [`CLAUDE.md`](CLAUDE.md) shows.
+
 ## Contributing
 
 Work reaches `main` through squashed pull requests with [Conventional Commit](https://www.conventionalcommits.org/) titles. Each merge automatically produces a version tag, a changelog entry and a GitHub Release. The commands, the rules and how the code is laid out are in [`CLAUDE.md`](CLAUDE.md).
