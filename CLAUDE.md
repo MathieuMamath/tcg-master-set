@@ -129,3 +129,5 @@ Read [`AGENTS.md`](AGENTS.md) before writing Next.js code. `next dev` maintains 
 Cache Components stays off until a feature needs it: player data must never be served from a cache.
 
 The favicon, `app/icon.svg`, is the HUD's booster pack. The home-screen icon, `app/apple-icon.tsx`, and the picture shown when a link is shared, `app/[locale]/opengraph-image.tsx`, are generated from it and the game's own fonts by `components/brand/assets.ts`. The layout's metadata makes their links whole from `APP_URL`, which must be the public address in production for WhatsApp, Discord and the like to show the preview. `proxy.ts` leaves `apple-icon` out of the language routing, as its address has no extension.
+
+The game shows its version faintly in the bottom-left corner, so that testers can say which one they play. `next.config.ts` passes the version from `package.json` as `APP_VERSION`; the release job bumps it after each merge, and its push deploys the new number.

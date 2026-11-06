@@ -962,6 +962,10 @@ export function Game({ player, sets, progress }: Props) {
             />
           </button>
         )}
+        {/* The game's version, tucked in a corner so that testers can say which one they play. */}
+        <p className="pointer-events-none absolute bottom-1 left-2 font-digits text-[0.65rem] text-ui-ink/45 select-none">
+          {t('version', { version: process.env.APP_VERSION ?? '' })}
+        </p>
         {interaction && !isDialogOpen && !isTalk(interaction) && (
           <button
             type="button"

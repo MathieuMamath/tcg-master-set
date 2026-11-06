@@ -7,6 +7,7 @@
     "title": "TCG Master Set"
   },
   "Game": {
+    "version": "v{version}",
     "keyboardHint": "Use the left and right arrow keys or A and D to walk, Space to dash, and Tab to reach the menus.",
     "webglUnavailable": "This game needs WebGL, which your browser doesn't support or has turned off.",
     "coins": "{count, plural, one {# coin} other {# coins}}",
