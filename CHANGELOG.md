@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.77](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.76...v0.1.77) (2026-11-06)
+
+### Features
+
+* **db:** record each player's coins after every gain or spending ([#79](https://github.com/MathieuMamath/tcg-master-set/issues/79)) ([f172a64](https://github.com/MathieuMamath/tcg-master-set/commit/f172a648295c946a53982b420a06c2017ffee9ff))
+
 ## [0.1.76](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.75...v0.1.76) (2026-11-06)
 
 ### Features
