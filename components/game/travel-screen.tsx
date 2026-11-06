@@ -2,13 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
-import { cutOut, drawBus, drawPip, seededRandom } from './paper-art';
+import { cutOut, drawBus, drawElevator, drawPip, seededRandom } from './paper-art';
 
 // Going from one place to another: two cardboard flats close over the stage like a diorama's
 // scenery, a ticket names where Pip is heading while he runs along, or the bus drives, and the
 // flats open again on the new place once it is drawn.
 export type TravelPhase = 'covering' | 'covered' | 'uncovering' | 'idle';
-export type TravelMode = 'walk' | 'bus';
+// On foot, by bus between the stops, or by the administrative office's lift between its floors.
+export type TravelMode = 'walk' | 'bus' | 'elevatorUp' | 'elevatorDown';
 
 // How long the flats take to close and to open, and the least time the ticket stays up.
 export const COVER_MILLISECONDS = 420;
@@ -94,6 +95,19 @@ export function TravelScreen({ phase, placeName, mode, facing: runFacing, tip, b
   const isClosed = phase === 'covering' || phase === 'covered';
   const pip = useMemo(() => cutOut(240, 300, drawPip, 10, 21), []);
   const bus = useMemo(() => cutOut(560, 250, drawBus(busLine), 9, 68), [busLine]);
+  const isElevator = mode === 'elevatorUp' || mode === 'elevatorDown';
+  const elevator = useMemo(
+    () =>
+      cutOut(
+        200,
+        240,
+        (drawing, width, height) =>
+          drawElevator(drawing, width, height, mode === 'elevatorDown' ? 'down' : 'up'),
+        8,
+        69,
+      ),
+    [mode],
+  );
   const flatStyle = (side: 'left' | 'right') => ({
     ...KRAFT,
     clipPath: side === 'left' ? LEFT_EDGE : RIGHT_EDGE,
@@ -131,13 +145,40 @@ export function TravelScreen({ phase, placeName, mode, facing: runFacing, tip, b
           <div className="relative flex w-[min(26rem,100%)] -rotate-2 flex-col items-center ui-scrap px-6 pt-5 pb-4 font-game text-ui-ink">
             <span aria-hidden="true" className="ui-tape" />
             <p className="text-lg text-ui-ink/70">
-              {mode === 'bus' ? t('nextStop') : t('headingTo')}
+              {mode === 'bus'
+                ? t('nextStop')
+                : mode === 'elevatorUp'
+                  ? t('goingUp')
+                  : mode === 'elevatorDown'
+                    ? t('goingDown')
+                    : t('headingTo')}
             </p>
             <p className="text-center font-display text-3xl leading-tight sm:text-4xl">
               {placeName}
             </p>
-            {/* Pip on his way, or the bus driving: only a picture of the trip. */}
-            <div aria-hidden="true" className="relative mt-3 h-28 w-full overflow-hidden">
+            {/* Pip on his way, the bus driving, or the lift going up or down: only a picture of
+                the trip. */}
+            {isElevator && (
+              <div
+                aria-hidden="true"
+                className="relative mt-3 flex h-28 w-full items-center justify-center gap-4"
+              >
+                <Drawing source={elevator} className="ui-travel-rumble h-26 w-auto max-w-none" />
+                <span className="flex h-24 w-10 flex-col items-center justify-center overflow-hidden rounded-full bg-ui-ink">
+                  <span
+                    className={`font-display text-2xl text-ui-accent ${
+                      mode === 'elevatorUp' ? 'ui-travel-rise' : 'ui-travel-sink'
+                    }`}
+                  >
+                    {mode === 'elevatorUp' ? '▲' : '▼'}
+                  </span>
+                </span>
+              </div>
+            )}
+            <div
+              aria-hidden="true"
+              className={`relative mt-3 h-28 w-full overflow-hidden ${isElevator ? 'hidden' : ''}`}
+            >
               <div
                 className="ui-travel-ground absolute inset-x-0 bottom-3 h-1 rounded-full opacity-30"
                 style={{

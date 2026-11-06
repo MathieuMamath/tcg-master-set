@@ -564,6 +564,29 @@ him, the bus rumbling, and dots that wait. */
   animation: ui-travel-dot 900ms ease-in-out infinite;
 }
 
+@keyframes ui-travel-rise {
+  from {
+    transform: translateY(2.4rem);
+    opacity: 0;
+  }
+  40%,
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-2.4rem);
+    opacity: 0;
+  }
+}
+
+.ui-travel-rise {
+  animation: ui-travel-rise 900ms ease-in-out infinite;
+}
+
+.ui-travel-sink {
+  animation: ui-travel-rise 900ms ease-in-out infinite reverse;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ui-binder-open,
   .ui-binder-move,
@@ -590,7 +613,9 @@ him, the bus rumbling, and dots that wait. */
   .ui-travel-run,
   .ui-travel-rumble,
   .ui-travel-ground,
-  .ui-travel-dot {
+  .ui-travel-dot,
+  .ui-travel-rise,
+  .ui-travel-sink {
     animation: none;
   }
 }

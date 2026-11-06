@@ -60,6 +60,24 @@ export type GameEventDetails = {
   'booster.abandoned': { setId: string };
   // Pip went to bed, at this minute of the game's day, and woke up in the morning.
   'player.slept': { minute: number };
+  // An admin made a coupon on Mlle Trotte's floor: what it gives, and until when.
+  'coupon.created': {
+    couponId: number;
+    code: string;
+    coins: number;
+    boosterSetId: string | null;
+    boosters: number;
+    expiresAt: string | null;
+  };
+  // A player used a coupon from the settings, and what it gave them.
+  'coupon.redeemed': {
+    couponId: number;
+    code: string;
+    coins: number;
+    boosterSetId: string | null;
+    boosters: number;
+    coinsAfter: number;
+  };
 };
 
 // Every event that changes a player's coins also carries `coinsAfter`, their coins once it was
@@ -86,6 +104,8 @@ export const GAME_EVENT_TYPES = [
   'binder.viewed',
   'booster.abandoned',
   'player.slept',
+  'coupon.created',
+  'coupon.redeemed',
 ] as const satisfies readonly GameEventType[];
 
 export type GameEvent = {

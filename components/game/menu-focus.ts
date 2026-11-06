@@ -16,7 +16,21 @@ function moveFocus(container: HTMLElement, step: -1 | 1) {
   choices[nextChoice(current, step, choices.length)]?.focus();
 }
 
+// While typing in a field, its letters and arrows are the field's own: no choice is moved to.
+function isTyping(target: EventTarget): boolean {
+  if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
+    return true;
+  }
+  return (
+    target instanceof HTMLInputElement &&
+    !['button', 'checkbox', 'radio', 'submit', 'reset'].includes(target.type)
+  );
+}
+
 export function moveThroughChoices(event: KeyboardEvent<HTMLElement>) {
+  if (isTyping(event.target)) {
+    return;
+  }
   const step = verticalStep(event.code) ?? horizontalStep(event.code);
   if (step) {
     event.preventDefault();
@@ -27,6 +41,9 @@ export function moveThroughChoices(event: KeyboardEvent<HTMLElement>) {
 // For things laid out in two dimensions, such as binder pages: each arrow goes to the nearest
 // choice on screen that lies that way.
 export function moveThroughChoicesOnScreen(event: KeyboardEvent<HTMLElement>) {
+  if (isTyping(event.target)) {
+    return;
+  }
   const x = horizontalStep(event.code) ?? 0;
   const y = verticalStep(event.code) ?? 0;
   if (x === 0 && y === 0) {

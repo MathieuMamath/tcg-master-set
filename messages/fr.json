@@ -39,13 +39,14 @@
     "busStop": "Lire le plan du bus",
     "gaspard": "Parler (Gaspard)",
     "berenice": "Parler (Bérénice)",
-    "leaveBureau": "Sortir",
     "hulotte": "Parler (Mme Hulotte)",
     "brutus": "Parler (Brutus)",
     "bed": "Dormir jusqu’au matin",
     "notSleepy": "Tu n’as pas encore sommeil",
     "sleeping": "Zzz… Bonne nuit, {name}.",
-    "wakingUp": "Le jour se lève !"
+    "wakingUp": "Le jour se lève !",
+    "trotte": "Parler (Mlle Trotte)",
+    "elevator": "Prendre l’ascenseur"
   },
   "Shopkeeper": {
     "names": {
@@ -492,7 +493,7 @@
     "arcade": "Arcade",
     "dalgona": "Dalgona",
     "raffle": "Tombola",
-    "bureau": "Bureau des statistiques"
+    "bureau": "Bureau administratif"
   },
   "Hails": {
     "latest": "Bienvenue à la Tanière !",
@@ -505,7 +506,8 @@
     "gaspard": "Psst… un petit défi ?",
     "berenice": "Tentez votre chance !",
     "hulotte": "Ah, un visiteur !",
-    "brutus": "Halte !"
+    "brutus": "Halte !",
+    "trotte": "Un coupon à tamponner ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -569,20 +571,29 @@
     "leave": "Au revoir",
     "brutus": {
       "name": "Brutus",
-      "title": "le vigile du bureau des statistiques",
+      "title": "le vigile du bureau administratif",
       "lines": {
-        "refused": "Halte. Le bureau des statistiques est réservé au personnel autorisé. Circulez… mais belle écharpe, cela dit.",
-        "welcome": "Ah, c’est vous. Le bureau vous attend, Mme Hulotte est à son poste. Entrez, je vous prie."
+        "refused": "Halte. Le bureau administratif est réservé au personnel autorisé. Circulez… mais belle écharpe, cela dit.",
+        "welcome": "Ah, c’est vous. Où allez-vous ? Le bureau de Mme Hulotte, ou l’étage des coupons de Mlle Trotte ?"
       },
-      "enter": "Entrer"
+      "office": "Bureau administratif",
+      "coupons": "Étage des coupons"
     },
     "hulotte": {
       "name": "Mme Hulotte",
-      "title": "la chouette du bureau des statistiques",
+      "title": "la chouette du bureau administratif",
       "lines": {
-        "greeting": "Bienvenue au bureau des statistiques ! Mes rapports sont à jour, tout est classé par période. Tu veux y jeter un œil ?"
+        "greeting": "Bienvenue au bureau administratif ! Mes rapports sont à jour, tout est classé par période. Tu veux y jeter un œil ?"
       },
       "reports": "Voir les rapports"
+    },
+    "trotte": {
+      "name": "Mlle Trotte",
+      "title": "la souris de l’étage des coupons",
+      "lines": {
+        "greeting": "Bonjour ! Ici, on fabrique les coupons, et je les tamponne un par un. Tu veux ouvrir le registre ?"
+      },
+      "register": "Ouvrir le registre"
     }
   },
   "Stats": {
@@ -685,7 +696,8 @@
       "arcade": "L’arcade",
       "park": "Le parc",
       "downtown": "La Grande Ville",
-      "bureau": "Le bureau des statistiques"
+      "bureau": "Le bureau administratif",
+      "coupons": "L’étage des coupons"
     },
     "log": {
       "title": "Couverture du journal",
@@ -739,7 +751,8 @@
     "tip": "Astuce :",
     "places": {
       "bedroom": "La chambre de {name}",
-      "flat": "Chez Léa"
+      "flat": "Chez Léa",
+      "coupons": "L’étage des coupons"
     },
     "tips": {
       "0": "Un doublon n’est jamais perdu : il rapporte des pièces selon sa rareté.",
@@ -750,6 +763,63 @@
       "5": "Appuie sur Espace pour faire un dash.",
       "6": "Une fois sur deux mille, un booster est un god pack rempli de cartes rares.",
       "7": "Bérénice offre un tour de tombola gratuit chaque jour."
+    },
+    "goingUp": "L’ascenseur monte vers",
+    "goingDown": "L’ascenseur descend vers"
+  },
+  "Coupons": {
+    "register": {
+      "title": "Le registre de Mlle Trotte",
+      "close": "Fermer",
+      "code": "Code du coupon",
+      "generate": "Générer",
+      "coinsField": "Pièces offertes",
+      "boostersField": "Boosters offerts",
+      "set": "Série des boosters",
+      "expiresOn": "Expire le (facultatif)",
+      "stamp": "Tamponner le coupon",
+      "stamped": "Le coupon {code} est tamponné !",
+      "list": "Coupons créés",
+      "loading": "Chargement…",
+      "empty": "Aucun coupon pour l’instant.",
+      "coins": "{count, plural, one {# pièce} other {# pièces}}",
+      "boosters": "{count, plural, one {# booster} other {# boosters}} {set}",
+      "neverExpires": "Sans expiration",
+      "expires": "Expire le {date}",
+      "expired": "Expiré depuis le {date}",
+      "redemptions": "{count, plural, =0 {Jamais utilisé} one {Utilisé # fois} other {Utilisé # fois}}",
+      "errors": {
+        "code": "Le code doit faire de 3 à 24 caractères : lettres, chiffres ou tirets.",
+        "coins": "Le nombre de pièces n’est pas valable.",
+        "boosters": "Le nombre de boosters n’est pas valable.",
+        "set": "Choisis la série des boosters.",
+        "reward": "Un coupon doit offrir des pièces, des boosters, ou les deux.",
+        "expiry": "La date d’expiration doit être aujourd’hui ou plus tard.",
+        "taken": "Ce code existe déjà.",
+        "unavailable": "Le registre est indisponible pour le moment."
+      }
+    },
+    "redeem": {
+      "label": "Un coupon ?",
+      "placeholder": "CODE",
+      "use": "Utiliser",
+      "redeemed": "Coupon utilisé : {gifts} !",
+      "coins": "{count, plural, one {# pièce} other {# pièces}}",
+      "boosters": "{count, plural, one {# booster} other {# boosters}} {set}",
+      "unknown": "Ce code ne correspond à aucun coupon.",
+      "expired": "Ce coupon a expiré.",
+      "alreadyUsed": "Tu as déjà utilisé ce coupon.",
+      "unavailable": "Impossible d’utiliser le coupon pour le moment."
+    }
+  },
+  "Elevator": {
+    "title": "Ascenseur",
+    "here": "Vous êtes ici",
+    "stay": "Rester ici",
+    "floors": {
+      "street": "Rez-de-chaussée · sortir dans la rue",
+      "office": "Bureau administratif",
+      "coupons": "Étage des coupons"
     }
   }
 }

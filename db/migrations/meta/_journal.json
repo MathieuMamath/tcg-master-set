@@ -92,6 +92,13 @@
       "when": 1793911177556,
       "tag": "0012_white_roulette",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793982081628,
+      "tag": "0013_brief_hulk",
+      "breakpoints": true
     }
   ]
 }

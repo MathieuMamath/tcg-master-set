@@ -1,5 +1,6 @@
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
+import { ADMIN_PLACES } from '@/game/side-rooms';
 import { parseSpot } from '@/game/spot';
 import { savePlayerSpot } from '@/player/progress';
 
@@ -15,8 +16,8 @@ export async function POST(request: Request) {
     if (!player) {
       return Response.json({ error: 'not-signed-in' }, { status: 401 });
     }
-    // Only admins get past Brutus, so a spot in the bureau is only kept for them.
-    if (spot.place !== 'bureau' || (await isAdmin(player.id))) {
+    // Only admins get past Brutus, so a spot in the office or upstairs is only kept for them.
+    if (!ADMIN_PLACES.has(spot.place) || (await isAdmin(player.id))) {
       await savePlayerSpot(player.id, spot);
     }
     return new Response(null, { status: 204 });

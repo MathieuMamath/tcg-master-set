@@ -39,13 +39,14 @@
     "busStop": "Read the bus map",
     "gaspard": "Talk (Gaspard)",
     "berenice": "Talk (Bérénice)",
-    "leaveBureau": "Leave",
     "hulotte": "Talk (Mme Hulotte)",
     "brutus": "Talk (Brutus)",
     "bed": "Sleep until morning",
     "notSleepy": "You’re not sleepy yet",
     "sleeping": "Zzz… Good night, {name}.",
-    "wakingUp": "The sun is rising!"
+    "wakingUp": "The sun is rising!",
+    "trotte": "Talk (Mlle Trotte)",
+    "elevator": "Take the lift"
   },
   "Shopkeeper": {
     "names": {
@@ -492,7 +493,7 @@
     "arcade": "Arcade",
     "dalgona": "Dalgona",
     "raffle": "Raffle",
-    "bureau": "Statistics Bureau"
+    "bureau": "Administrative Office"
   },
   "Hails": {
     "latest": "Welcome to the Den!",
@@ -505,7 +506,8 @@
     "gaspard": "Psst… fancy a little challenge?",
     "berenice": "Try your luck!",
     "hulotte": "Ah, a visitor!",
-    "brutus": "Halt!"
+    "brutus": "Halt!",
+    "trotte": "A coupon to stamp?"
   },
   "Bus": {
     "title": "Bus map",
@@ -569,20 +571,29 @@
     "leave": "Goodbye",
     "brutus": {
       "name": "Brutus",
-      "title": "the guard of the statistics bureau",
+      "title": "the guard of the administrative office",
       "lines": {
-        "refused": "Stop right there. The statistics bureau is for authorised staff only. Move along… nice scarf, though.",
-        "welcome": "Ah, it’s you. The bureau is expecting you, Mme Hulotte is at her desk. Step inside, please."
+        "refused": "Stop right there. The administrative office is for authorised staff only. Move along… nice scarf, though.",
+        "welcome": "Ah, it’s you. Where to? Mme Hulotte’s office, or Mlle Trotte’s coupon floor?"
       },
-      "enter": "Go in"
+      "office": "Administrative office",
+      "coupons": "Coupon floor"
     },
     "hulotte": {
       "name": "Mme Hulotte",
-      "title": "the owl of the statistics bureau",
+      "title": "the owl of the administrative office",
       "lines": {
-        "greeting": "Welcome to the statistics bureau! My reports are up to date, all sorted by period. Would you like a look?"
+        "greeting": "Welcome to the administrative office! My reports are up to date, all sorted by period. Would you like a look?"
       },
       "reports": "See the reports"
+    },
+    "trotte": {
+      "name": "Mlle Trotte",
+      "title": "the mouse of the coupon floor",
+      "lines": {
+        "greeting": "Hello! This is where coupons are made, and I stamp every one of them. Shall I open the register?"
+      },
+      "register": "Open the register"
     }
   },
   "Stats": {
@@ -685,7 +696,8 @@
       "arcade": "The arcade",
       "park": "The park",
       "downtown": "The Big City",
-      "bureau": "The statistics bureau"
+      "bureau": "The administrative office",
+      "coupons": "The coupon floor"
     },
     "log": {
       "title": "Log coverage",
@@ -739,7 +751,8 @@
     "tip": "Tip:",
     "places": {
       "bedroom": "{name}’s bedroom",
-      "flat": "Léa’s flat"
+      "flat": "Léa’s flat",
+      "coupons": "The coupon floor"
     },
     "tips": {
       "0": "A duplicate is never wasted: it pays coins according to its rarity.",
@@ -750,6 +763,63 @@
       "5": "Press Space to dash.",
       "6": "One booster in two thousand is a god pack full of rare cards.",
       "7": "Bérénice gives a free turn of her raffle every day."
+    },
+    "goingUp": "The lift is going up to",
+    "goingDown": "The lift is going down to"
+  },
+  "Coupons": {
+    "register": {
+      "title": "Mlle Trotte’s register",
+      "close": "Close",
+      "code": "Coupon code",
+      "generate": "Generate",
+      "coinsField": "Coins given",
+      "boostersField": "Boosters given",
+      "set": "Boosters’ set",
+      "expiresOn": "Expires on (optional)",
+      "stamp": "Stamp the coupon",
+      "stamped": "Coupon {code} is stamped!",
+      "list": "Coupons made",
+      "loading": "Loading…",
+      "empty": "No coupon yet.",
+      "coins": "{count, plural, one {# coin} other {# coins}}",
+      "boosters": "{count, plural, one {# booster} other {# boosters}} {set}",
+      "neverExpires": "Never expires",
+      "expires": "Expires on {date}",
+      "expired": "Expired on {date}",
+      "redemptions": "{count, plural, =0 {Never used} one {Used once} other {Used # times}}",
+      "errors": {
+        "code": "The code must be 3 to 24 letters, digits or dashes.",
+        "coins": "The number of coins isn’t valid.",
+        "boosters": "The number of boosters isn’t valid.",
+        "set": "Choose the boosters’ set.",
+        "reward": "A coupon must give coins, boosters, or both.",
+        "expiry": "The expiry date must be today or later.",
+        "taken": "This code already exists.",
+        "unavailable": "The register is unavailable for now."
+      }
+    },
+    "redeem": {
+      "label": "A coupon?",
+      "placeholder": "CODE",
+      "use": "Use",
+      "redeemed": "Coupon used: {gifts}!",
+      "coins": "{count, plural, one {# coin} other {# coins}}",
+      "boosters": "{count, plural, one {# booster} other {# boosters}} {set}",
+      "unknown": "This code doesn’t match any coupon.",
+      "expired": "This coupon has expired.",
+      "alreadyUsed": "You’ve already used this coupon.",
+      "unavailable": "The coupon can’t be used right now."
+    }
+  },
+  "Elevator": {
+    "title": "Lift",
+    "here": "You are here",
+    "stay": "Stay here",
+    "floors": {
+      "street": "Ground floor · out to the street",
+      "office": "Administrative office",
+      "coupons": "Coupon floor"
     }
   }
 }

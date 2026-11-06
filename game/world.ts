@@ -21,10 +21,12 @@ export type Interaction =
   | 'leaveFlat'
   | 'enterArcade'
   | 'leaveArcade'
-  | 'leaveBureau'
-  // Brutus, the bulldog who guards the statistics bureau, and Mme Hulotte, the owl who keeps it.
+  // Brutus, the bulldog who guards the administrative office, and Mme Hulotte, the owl who keeps it.
   | 'brutus'
   | 'hulotte'
+  // Mlle Trotte, the mouse who keeps the coupon floor, and the administrative office's lift.
+  | 'trotte'
+  | 'elevator'
   // Scrubbing the dust off a wall, during Léa's quest.
   | 'scrub'
   // Reading the bus stop's sign, which opens the map of the stops.

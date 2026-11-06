@@ -1,8 +1,10 @@
 'use client';
 
 import { type Locale, useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { authClient } from '@/auth/client';
+import type { PlayableSet } from '@/game/card-sets';
+import type { Wallet } from '@/game/shop-dialogue';
 import { useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { moveThroughChoices } from './menu-focus';
@@ -11,11 +13,60 @@ import { moveThroughChoices } from './menu-focus';
 const LANGUAGE_NAMES: Record<Locale, string> = { en: 'English', fr: 'Français' };
 
 type Props = {
+  sets: readonly PlayableSet[];
+  // A coupon used here gives coins or boosters, shown at once in the game's counters.
+  onRedeemed: (wallet: Wallet) => void;
   onClose: () => void;
 };
 
-export function SettingsMenu({ onClose }: Props) {
+export function SettingsMenu({ sets, onRedeemed, onClose }: Props) {
   const t = useTranslations('Settings');
+  const tCoupon = useTranslations('Coupons.redeem');
+  const [code, setCode] = useState('');
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [result, setResult] = useState<{ kind: 'done' | 'error'; text: string } | null>(null);
+
+  // The server alone checks the code and pays: this only shows what it answered.
+  const redeem = async (event: FormEvent) => {
+    event.preventDefault();
+    if (isRedeeming || code.trim() === '') {
+      return;
+    }
+    setIsRedeeming(true);
+    setResult(null);
+    try {
+      const response = await fetch('/api/coupons/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const answer = await response.json();
+      if (answer.status === 'redeemed') {
+        onRedeemed(answer.wallet);
+        const setName = sets.find(({ id }) => id === answer.boosterSetId)?.name ?? '';
+        const gifts = [
+          answer.coins > 0 ? tCoupon('coins', { count: answer.coins }) : null,
+          answer.boosters > 0
+            ? tCoupon('boosters', { count: answer.boosters, set: setName })
+            : null,
+        ].filter(Boolean);
+        setResult({ kind: 'done', text: tCoupon('redeemed', { gifts: gifts.join(' + ') }) });
+        setCode('');
+      } else {
+        const status = ['unknown', 'expired', 'alreadyUsed'].includes(answer.status)
+          ? answer.status
+          : 'unknown';
+        setResult({ kind: 'error', text: tCoupon(status as 'unknown') });
+      }
+    } catch {
+      setResult({ kind: 'error', text: tCoupon('unavailable') });
+    } finally {
+      setIsRedeeming(false);
+    }
+  };
   const currentLanguage = useLocale();
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -62,10 +113,40 @@ export function SettingsMenu({ onClose }: Props) {
           ))}
         </div>
       </fieldset>
+      <form onSubmit={redeem} className="mt-5">
+        <label htmlFor="coupon-code" className="font-semibold">
+          {tCoupon('label')}
+        </label>
+        <div className="mt-2 flex gap-2">
+          <input
+            id="coupon-code"
+            value={code}
+            onChange={(event) => setCode(event.target.value)}
+            maxLength={24}
+            autoComplete="off"
+            spellCheck={false}
+            placeholder={tCoupon('placeholder')}
+            className="w-full min-w-0 rounded-xs border-2 border-ui-ink/20 bg-ui-paper px-2 py-1 font-digits uppercase outline-none focus-visible:border-ui-stamp"
+          />
+          <button
+            type="submit"
+            aria-disabled={isRedeeming}
+            className="shrink-0 cursor-pointer ui-paper-button bg-ui-accent px-3 py-1 font-semibold outline-offset-2 focus-visible:outline-2 aria-disabled:cursor-wait"
+          >
+            {tCoupon('use')}
+          </button>
+        </div>
+        <p
+          role="status"
+          className={`mt-1 min-h-6 text-sm ${result?.kind === 'error' ? 'text-ui-danger' : 'text-ui-gain'}`}
+        >
+          {result?.text}
+        </p>
+      </form>
       <button
         type="button"
         onClick={signOut}
-        className="mt-5 w-full cursor-pointer ui-paper-button bg-ui-paper py-1 font-semibold hover:bg-ui-ink/10"
+        className="mt-2 w-full cursor-pointer ui-paper-button bg-ui-paper py-1 font-semibold hover:bg-ui-ink/10"
       >
         {t('signOut')}
       </button>

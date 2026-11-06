@@ -26,7 +26,7 @@ beforeEach(() => {
   vi.mocked(isAdmin).mockResolvedValue(false);
 });
 
-test('keeps a spot in the statistics bureau for an admin only', async () => {
+test('keeps a spot in the administrative office for an admin only', async () => {
   const inBureau = { place: 'bureau', x: 0, facing: 1 };
 
   expect((await save(inBureau)).status).toBe(204);
