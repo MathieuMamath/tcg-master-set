@@ -653,7 +653,22 @@
       "active": "Joueurs actifs",
       "signUps": "Inscriptions",
       "signIns": "Connexions",
-      "places": "Lieux visités"
+      "places": "Lieux visités",
+      "visits": "Visites",
+      "averageVisit": "Visite moyenne",
+      "minutes": "{minutes, plural, one {# min} other {# min}}",
+      "devices": "Appareils",
+      "referrers": "D’où viennent les visites",
+      "direct": "Accès direct",
+      "locales": "Langues",
+      "deviceNames": {
+        "desktop": "Ordinateur",
+        "phone": "Téléphone"
+      },
+      "localeNames": {
+        "fr": "Français",
+        "en": "Anglais"
+      }
     },
     "places": {
       "bedroom": "La chambre",
