@@ -70,6 +70,8 @@ The game plays with the sets in `game/card-sets.ts` that have been imported, and
 
 Every booster holds ten cards, without energy or code bonus cards. A recipe adapts the slots to its set's rarities, and every version of every card must stay obtainable: `pnpm cards:import` warns about any that aren't. Cards are revealed from the most common to the best, following the recipe's `revealOrder`. As the game's own rule for every set, one booster in two thousand is instead a god pack of ten hits, which the opening only announces once the pack is cut.
 
+Opening a booster also needs its set's binder. Boosters won from quests or coupons wait in the bag, `components/game/booster-bag.tsx`, greyed out with a tag, until the binder is bought, and `openOwnedBooster` in `player/progress.ts` refuses them with `needsBinder`.
+
 The server only takes the booster and draws the cards when the pack is cut. Until then the player can back out at no cost, and backing out can't be used to draw again.
 
 Opening a booster pays for its duplicates in the same transaction, from the values in `game/duplicate-coins.ts`. A duplicate is a version of a card the player already owns. The copy is kept, so that the binder still counts it.
