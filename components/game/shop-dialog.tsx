@@ -10,7 +10,7 @@ import {
   type ShopkeeperStock,
 } from '@/game/shop-dialogue';
 import { revealedLength } from '@/game/typewriter';
-import { moveThroughChoices } from './menu-focus';
+import { focusFirstChoice, moveThroughChoices, openDialog } from './menu-focus';
 import { reportPlay } from './report';
 import { SellerPortrait } from './seller-portrait';
 import { type ShopItem, ShopWindow } from './shop-window';
@@ -128,7 +128,7 @@ export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
   const title = t(`titles.${stock}`);
 
   useEffect(() => {
-    dialog.current?.showModal();
+    openDialog(dialog.current);
   }, []);
 
   // Back from the window to the conversation, where the seller thanks the player if they bought
@@ -136,7 +136,7 @@ export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
   const stopBrowsing = () => {
     setIsBrowsing(false);
     setSpeech(({ turn }) => ({ line: hasBought.current ? 'thanks' : 'greeting', turn: turn + 1 }));
-    requestAnimationFrame(() => dialog.current?.querySelector<HTMLElement>('button')?.focus());
+    requestAnimationFrame(() => dialog.current && focusFirstChoice(dialog.current));
   };
 
   return (
@@ -192,8 +192,6 @@ export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
           <form method="dialog" className="mt-2.5 flex flex-wrap gap-2.5">
             <button
               type="button"
-              // biome-ignore lint/a11y/noAutofocus: the conversation is answered with the keyboard.
-              autoFocus
               onClick={() => {
                 reportPlay({ type: 'shop.viewed', stock });
                 setIsBrowsing(true);

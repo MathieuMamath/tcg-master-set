@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type { QuestGiver } from '@/game/world';
-import { moveThroughChoices } from './menu-focus';
+import { focusFirstChoice, moveThroughChoices, openDialog } from './menu-focus';
 import { usePlayerName } from './player-name';
 import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, SpeechBox, TypedLine } from './shop-dialog';
@@ -43,7 +43,7 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
     speech.line !== 'alreadyDone';
 
   useEffect(() => {
-    dialog.current?.showModal();
+    openDialog(dialog.current);
   }, []);
 
   return (
@@ -83,6 +83,8 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
                 setIsAsking(false);
                 if (answer) {
                   setSpeech(({ turn }) => ({ line: answer, turn: turn + 1 }));
+                  // The answer may take the accept button away, and the focus with it.
+                  requestAnimationFrame(() => dialog.current && focusFirstChoice(dialog.current));
                 } else {
                   dialog.current?.close();
                 }

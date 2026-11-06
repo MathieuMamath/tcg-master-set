@@ -10,6 +10,25 @@ function choicesIn(container: HTMLElement): HTMLElement[] {
   ).filter((choice) => !choice.closest('[inert]'));
 }
 
+// Opens a dialog over the game and puts the focus on what the player presses first: the element
+// marked `data-first-focus`, or else the first choice. Browsers disagree on where an opening
+// dialog puts the focus, and Safari doesn't count buttons as reachable from the keyboard by
+// default, so it may land on the dialog itself: a dialog never leaves the focus to them.
+export function openDialog(dialog: HTMLDialogElement | null) {
+  if (!dialog) {
+    return;
+  }
+  if (!dialog.open) {
+    dialog.showModal();
+  }
+  focusFirstChoice(dialog);
+}
+
+// Puts the focus back on a dialog's first choice, after its content changed.
+export function focusFirstChoice(container: HTMLElement) {
+  (container.querySelector<HTMLElement>('[data-first-focus]') ?? choicesIn(container)[0])?.focus();
+}
+
 function moveFocus(container: HTMLElement, step: -1 | 1) {
   const choices = choicesIn(container);
   const current = choices.indexOf(document.activeElement as HTMLElement);

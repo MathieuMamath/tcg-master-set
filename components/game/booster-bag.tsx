@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type { PlayableSet, SetId } from '@/game/card-sets';
-import { moveThroughChoices } from './menu-focus';
+import { moveThroughChoices, openDialog } from './menu-focus';
 import { PackBody, PackEdge, packEdgeStyle } from './pack-art';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
@@ -23,7 +23,7 @@ export function BoosterBag({ boosters, binders, onPick, onClose }: Props) {
   const [lockedPick, setLockedPick] = useState<string | null>(null);
 
   useEffect(() => {
-    dialog.current?.showModal();
+    openDialog(dialog.current);
   }, []);
 
   return (

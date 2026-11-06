@@ -7,7 +7,7 @@ import type { PlayableSet } from '@/game/card-sets';
 import type { Wallet } from '@/game/shop-dialogue';
 import { useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { moveThroughChoices } from './menu-focus';
+import { moveThroughChoices, openDialog } from './menu-focus';
 
 // Each language is written in its own language, so these names are not translated.
 const LANGUAGE_NAMES: Record<Locale, string> = { en: 'English', fr: 'Français' };
@@ -72,7 +72,7 @@ export function SettingsMenu({ sets, onRedeemed, onClose }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    dialog.current?.showModal();
+    openDialog(dialog.current);
   }, []);
 
   const signOut = async () => {
@@ -106,6 +106,8 @@ export function SettingsMenu({ sets, onRedeemed, onClose }: Props) {
                 name="language"
                 className="sr-only"
                 checked={language === currentLanguage}
+                // The current language is where the menu opens, as before.
+                data-first-focus={language === currentLanguage || undefined}
                 onChange={() => router.replace('/', { locale: language })}
               />
               {LANGUAGE_NAMES[language]}
