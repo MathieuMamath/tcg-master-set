@@ -1018,6 +1018,7 @@ export function Game({ player, sets, progress }: Props) {
         {isBagOpen && (
           <BoosterBag
             boosters={ownedBoosters}
+            binders={binders}
             onPick={pickBooster}
             onClose={() => setIsBagOpen(false)}
           />

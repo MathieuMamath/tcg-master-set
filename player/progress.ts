@@ -898,13 +898,15 @@ export async function buyBinder(
   });
 }
 
-// Returns null when the player has no booster of this set. Everything that can fail on reading
-// the catalogue happens first, so that a failure never costs a booster.
+// Returns null when the player has no booster of this set, and 'needsBinder' when they haven't
+// bought its binder yet: boosters won from quests or coupons wait in the bag until it is bought.
+// Everything that can fail on reading the catalogue happens first, so that a failure never costs
+// a booster.
 export async function openOwnedBooster(
   userId: string,
   setId: SetId,
   locale: string,
-): Promise<OpenedBooster | null> {
+): Promise<OpenedBooster | 'needsBinder' | null> {
   const pool = await loadBoosterPool(setId);
   const opened = openBooster(pool, boosterRecipe(setId, pool));
   if (!opened) {
@@ -913,6 +915,14 @@ export async function openOwnedBooster(
   const details = await loadOpenedCards(opened.cards, setId, locale);
 
   return getDb().transaction(async (transaction) => {
+    const [binder] = await transaction
+      .select({ setId: playerBinders.setId })
+      .from(playerBinders)
+      .where(and(eq(playerBinders.userId, userId), eq(playerBinders.setId, setId)));
+    if (!binder) {
+      return 'needsBinder' as const;
+    }
+
     const [taken] = await transaction
       .update(playerBoosters)
       .set({ count: sql`${playerBoosters.count} - 1` })

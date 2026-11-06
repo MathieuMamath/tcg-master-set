@@ -42,6 +42,15 @@ test('refuses to open a booster the player does not have', async () => {
   expect((await open('en')).status).toBe(409);
 });
 
+test("refuses to open a booster before its set's binder is bought", async () => {
+  vi.mocked(openOwnedBooster).mockResolvedValue('needsBinder');
+
+  const response = await open('en');
+
+  expect(response.status).toBe(409);
+  expect(await response.json()).toEqual({ error: 'needs-binder' });
+});
+
 test('refuses a visitor who is not signed in', async () => {
   vi.mocked(getPlayer).mockResolvedValue(null);
 

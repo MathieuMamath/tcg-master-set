@@ -23,6 +23,9 @@ export async function POST(request: Request) {
     }
 
     const opened = await openOwnedBooster(player.id, setId, locale);
+    if (opened === 'needsBinder') {
+      return Response.json({ error: 'needs-binder' }, { status: 409 });
+    }
     if (!opened) {
       return Response.json({ error: 'no-booster' }, { status: 409 });
     }
