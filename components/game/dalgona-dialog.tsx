@@ -174,6 +174,11 @@ export function DalgonaDialog({ shape, onFinish, onEnd }: Props) {
   const [step, setStep] = useState<Step>('playing');
   const [carving, setCarving] = useState<Carving>(FRESH_CARVING);
   const [isPressing, setIsPressing] = useState(false);
+  // The game page draws again whenever the time of day or the weather changes, handing over a new
+  // `onFinish` each time. Read through a ref, it never restarts the game below, whose clock would
+  // otherwise start over and freeze the biscuit for as long as it had already been played.
+  const latestOnFinish = useRef(onFinish);
+  latestOnFinish.current = onFinish;
   const [result, setResult] = useState<DalgonaResult | null>(null);
   const game = useRef({
     startedAt: 0,
@@ -209,11 +214,13 @@ export function DalgonaDialog({ shape, onFinish, onEnd }: Props) {
     }
     setIsPressing(false);
     setStep('checking');
-    const answer = await onFinish(state.presses);
+    const answer = await latestOnFinish.current(state.presses);
     setResult(answer);
     setStep('result');
-  }, [onFinish]);
+  }, []);
 
+  // Opened and started once: the game's clock only ever starts here.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the shape is fixed for the whole game.
   useEffect(() => {
     dialog.current?.showModal();
     carveButton.current?.focus();
@@ -231,7 +238,7 @@ export function DalgonaDialog({ shape, onFinish, onEnd }: Props) {
     };
     state.frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(state.frame);
-  }, [shape, finish, livePresses]);
+  }, []);
 
   useEffect(() => {
     if (step === 'result') {
