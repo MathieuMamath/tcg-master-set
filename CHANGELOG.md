@@ -4,6 +4,8 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.80](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.79...v0.1.80) (2026-11-06)
+
 ## [0.1.79](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.78...v0.1.79) (2026-11-06)
 
 ### Features
