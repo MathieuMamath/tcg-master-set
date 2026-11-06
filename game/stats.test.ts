@@ -1,5 +1,11 @@
-import { expect, test } from 'vitest';
-import { isStatsPeriod, periodStart, statsBuckets, WEEKS_SINCE_START } from './stats';
+import { describe, expect, it, test } from 'vitest';
+import {
+  balanceSummary,
+  isStatsPeriod,
+  periodStart,
+  statsBuckets,
+  WEEKS_SINCE_START,
+} from './stats';
 
 const NOW = new Date('2026-11-05T15:30:00Z');
 
@@ -57,4 +63,28 @@ test('since the start is charted by the week, from Mondays', () => {
   // 5 November 2026 is a Thursday: its week starts on Monday the 2nd.
   expect(buckets.keys.at(-1)).toBe('2026-11-02');
   expect(buckets.keys[0]).toBe('2026-08-17');
+});
+
+describe('balanceSummary', () => {
+  it("sums up the players' coins without naming anyone", () => {
+    expect(balanceSummary([100, 3000, 700, 9000])).toEqual({
+      players: 4,
+      average: 3200,
+      median: 1850,
+      bands: [
+        { from: 0, players: 1 },
+        { from: 500, players: 1 },
+        { from: 2000, players: 1 },
+        { from: 5000, players: 1 },
+      ],
+    });
+  });
+
+  it('takes the middle balance of an odd count', () => {
+    expect(balanceSummary([10, 30, 20]).median).toBe(20);
+  });
+
+  it('has nothing to say without any player', () => {
+    expect(balanceSummary([])).toMatchObject({ players: 0, average: null, median: null });
+  });
 });

@@ -58,3 +58,38 @@ export function statsBuckets(period: StatsPeriod, now: Date): StatsBuckets {
   );
   return { unit: 'day', start: first, keys };
 }
+
+// How rich the players are: each player's coins after their last gain or spending, summed up in
+// aggregate, never player by player.
+export const COIN_BANDS = [0, 500, 2000, 5000] as const;
+
+export type BalanceSummary = {
+  players: number;
+  average: number | null;
+  median: number | null;
+  // How many players hold at least each band's floor, up to the next one.
+  bands: { from: number; players: number }[];
+};
+
+export function balanceSummary(balances: readonly number[]): BalanceSummary {
+  const sorted = [...balances].sort((first, second) => first - second);
+  const middle = Math.floor(sorted.length / 2);
+  const median =
+    sorted.length === 0
+      ? null
+      : sorted.length % 2 === 1
+        ? (sorted[middle] ?? 0)
+        : Math.round(((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2);
+  return {
+    players: sorted.length,
+    average:
+      sorted.length === 0
+        ? null
+        : Math.round(sorted.reduce((total, coins) => total + coins, 0) / sorted.length),
+    median,
+    bands: COIN_BANDS.map((from, index) => {
+      const to = COIN_BANDS[index + 1] ?? Number.POSITIVE_INFINITY;
+      return { from, players: sorted.filter((coins) => coins >= from && coins < to).length };
+    }),
+  };
+}

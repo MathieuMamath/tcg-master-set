@@ -612,7 +612,13 @@
       "spent": "Pièces dépensées",
       "net": "Solde",
       "earnedBySource": "Pièces gagnées, par origine",
-      "spentOn": "Pièces dépensées, par achat"
+      "spentOn": "Pièces dépensées, par achat",
+      "balances": "Richesse des joueurs",
+      "balancesHint": "Les pièces de chaque joueur après son dernier gain ou sa dernière dépense de la période, sur {players, plural, =0 {aucun joueur} one {# joueur} other {# joueurs}}. Enregistré depuis novembre 2026.",
+      "averageBalance": "Solde moyen",
+      "medianBalance": "Solde médian",
+      "band": "{from} à {to} pièces",
+      "bandFrom": "{from} pièces et plus"
     },
     "sources": {
       "daily-bonus": "Récompense du jour",

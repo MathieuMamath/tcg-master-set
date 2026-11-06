@@ -107,6 +107,16 @@ export type OpenedBooster = {
 };
 
 // A new player's wallet is created on first need, whatever the first request is.
+// The player's coins at this point of a transaction, for the event of what just changed them, so
+// that the log can tell how players' wealth moves over time.
+async function coinsNow(database: Reader, userId: string): Promise<number> {
+  const [wallet] = await database
+    .select({ coins: playerWallets.coins })
+    .from(playerWallets)
+    .where(eq(playerWallets.userId, userId));
+  return wallet?.coins ?? 0;
+}
+
 async function loadWallet(database: Reader, userId: string): Promise<Wallet> {
   await database
     .insert(playerWallets)
@@ -195,7 +205,10 @@ export async function claimDailyBonus(userId: string): Promise<DailyBonusClaim> 
       .update(playerWallets)
       .set({ coins: sql`${playerWallets.coins} + ${DAILY_BONUS_COINS}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
-    await recordEvent(transaction, userId, 'daily_bonus.claimed', { coins: DAILY_BONUS_COINS });
+    await recordEvent(transaction, userId, 'daily_bonus.claimed', {
+      coinsAfter: await coinsNow(transaction, userId),
+      coins: DAILY_BONUS_COINS,
+    });
     return {
       isClaimed: true,
       activity: { ...activity, isBonusClaimed: true },
@@ -354,6 +367,7 @@ export async function finishGrandmaQuest(
       .set({ coins: sql`${playerWallets.coins} + ${QUEST_REWARD}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
     await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
       questId: GRANDMA_QUEST,
       outcome: 'rewarded',
       coins: QUEST_REWARD,
@@ -429,6 +443,7 @@ export async function flipGrandpaCard(
         .set({ startedAt: null, memoryGame: null })
         .where(quest);
       await recordEvent(transaction, userId, 'quest.finished', {
+        coinsAfter: await coinsNow(transaction, userId),
         questId: GRANDPA_QUEST,
         outcome: 'lost',
         coins: 0,
@@ -447,6 +462,7 @@ export async function flipGrandpaCard(
       .set({ coins: sql`${playerWallets.coins} + ${MEMORY_REWARD}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
     await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
       questId: GRANDPA_QUEST,
       outcome: 'won',
       coins: MEMORY_REWARD,
@@ -544,6 +560,7 @@ export async function finishBasketball(
 
     const paidReward = boosterSetId ? 'booster' : reward === 'none' ? 'none' : 'coins';
     await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
       questId: BASKETBALL_QUEST,
       outcome: wasAlreadyPaid ? 'alreadyPaid' : paidReward,
       coins: paidReward === 'coins' ? BASKETBALL_COINS : 0,
@@ -637,6 +654,7 @@ export async function finishDalgona(
         .where(eq(playerWallets.userId, userId));
     }
     await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
       questId: DALGONA_QUEST,
       outcome: isCarved ? 'carved' : 'broken',
       coins,
@@ -687,6 +705,7 @@ export async function drawRaffleBall(userId: string): Promise<RaffleDraw> {
         .where(eq(playerWallets.userId, userId));
     }
     await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
       questId: RAFFLE_QUEST,
       outcome,
       coins,
@@ -747,6 +766,7 @@ export async function reelInItem(userId: string): Promise<FishingCatch> {
         .where(eq(playerWallets.userId, userId));
     }
     await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
       questId: FISHING_QUEST,
       outcome: item === 'treasure' ? 'treasure' : 'item',
       coins: boosterSetId ? 0 : ITEM_COINS,
@@ -818,7 +838,12 @@ export async function buyBooster(
         target: [playerBoosters.userId, playerBoosters.setId],
         set: { count: sql`${playerBoosters.count} + ${quantity}` },
       });
-    await recordEvent(transaction, userId, 'booster.bought', { setId, quantity, coins: price });
+    await recordEvent(transaction, userId, 'booster.bought', {
+      coinsAfter: await coinsNow(transaction, userId),
+      setId,
+      quantity,
+      coins: price,
+    });
     return { wallet: await loadWallet(transaction, userId), line: 'thanks' as const };
   });
 }
@@ -857,7 +882,11 @@ export async function buyBinder(
       return result('notEnoughCoins');
     }
 
-    await recordEvent(transaction, userId, 'binder.bought', { setId, coins: BINDER_PRICE });
+    await recordEvent(transaction, userId, 'binder.bought', {
+      coinsAfter: await coinsNow(transaction, userId),
+      setId,
+      coins: BINDER_PRICE,
+    });
     return result('thanks');
   });
 }
@@ -918,6 +947,7 @@ export async function openOwnedBooster(
       .set({ coins: sql`${playerWallets.coins} + ${duplicateTotal}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
     await recordEvent(transaction, userId, 'booster.opened', {
+      coinsAfter: await coinsNow(transaction, userId),
       setId,
       isGodPack: opened.isGodPack,
       bestTier: Math.max(0, ...cards.map(({ tier }) => tier)),

@@ -2,7 +2,14 @@ import { and, count, countDistinct, eq, gte, max, type SQL, sql } from 'drizzle-
 import { getDb } from '@/db/client';
 import { gameEvents } from '@/db/schema';
 import { GAME_EVENT_TYPES, type GameEventType } from '@/game/events';
-import { type BucketUnit, periodStart, type StatsPeriod, statsBuckets } from '@/game/stats';
+import {
+  type BalanceSummary,
+  type BucketUnit,
+  balanceSummary,
+  periodStart,
+  type StatsPeriod,
+  statsBuckets,
+} from '@/game/stats';
 
 // The game's statistics, worked out from the event log on the server. Everything here counts and
 // adds up across players: no player's id, name or email ever leaves this module.
@@ -21,7 +28,8 @@ export type SeriesPoint = {
 
 export type GameStats = {
   period: StatsPeriod;
-  economy: { earned: CoinFlow[]; spent: CoinFlow[] };
+  // Coins earned and spent, and how rich the players are by the end of the period.
+  economy: { earned: CoinFlow[]; spent: CoinFlow[]; balances: BalanceSummary };
   boosters: {
     bought: number;
     opened: number;
@@ -117,6 +125,15 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
     { source: 'boosters', coins: await sumOf('booster.bought', 'coins') },
     { source: 'binders', coins: await sumOf('binder.bought', 'coins') },
   ];
+
+  // Each player's coins after their last gain or spending in the period, only to be summed up.
+  const latestBalances = await database.execute<{ coins: number }>(sql`
+    select distinct on (${gameEvents.userId}) (${gameEvents.details}->>'coinsAfter')::int as coins
+    from ${gameEvents}
+    where ${gameEvents.details} ? 'coinsAfter'
+      ${since ? sql`and ${gameEvents.occurredAt} >= ${since}` : sql``}
+    order by ${gameEvents.userId}, ${gameEvents.occurredAt} desc`);
+  const balances = balanceSummary(latestBalances.rows.map(({ coins }) => Number(coins)));
 
   // Boosters bought and opened, set by set, and the best pull of each opened pack.
   const boughtBySet = await database
@@ -252,7 +269,7 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
 
   return {
     period,
-    economy: { earned, spent },
+    economy: { earned, spent, balances },
     boosters: {
       bought: bySet.reduce((total, { bought }) => total + bought, 0),
       opened: bySet.reduce((total, { opened }) => total + opened, 0),
