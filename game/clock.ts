@@ -29,6 +29,13 @@ export function minuteOfDay(now: Date, offset: number): number {
   return minutes < 0 ? minutes + MINUTES_PER_DAY : minutes;
 }
 
+// The minute of the game's day with its fraction, for what moves smoothly along with the clock,
+// such as the colour of the sky.
+export function exactMinuteOfDay(nowMilliseconds: number, offset: number): number {
+  const minutes = (nowMilliseconds / 1000 + offset) % MINUTES_PER_DAY;
+  return minutes < 0 ? minutes + MINUTES_PER_DAY : minutes;
+}
+
 export function timeOfDay(minute: number): TimeOfDay {
   if (minute >= NIGHT || minute < DAWN) {
     return 'night';

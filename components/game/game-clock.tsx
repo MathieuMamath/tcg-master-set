@@ -130,7 +130,10 @@ export function ClockBadge({ offset, clock }: { offset: number; clock: GameClock
   );
 }
 
-type Drop = { x: number; y: number; speed: number; size: number; sway: number };
+type Drop = { x: number; y: number; speed: number; size: number; sway: number; isSnow: boolean };
+
+// How long a shower takes to build up once the weather turns.
+const WEATHER_RAMP_SECONDS = 6;
 
 const DROP_COUNTS: Partial<Record<Weather, number>> = { rain: 140, storm: 220, snow: 110 };
 
@@ -140,50 +143,72 @@ export function WeatherLayer({ clock, isOutside }: { clock: GameClock; isOutside
   const canvas = useRef<HTMLCanvasElement>(null);
   const [flash, setFlash] = useState(false);
   const { weather } = clock;
-  const dropCount = isOutside ? (DROP_COUNTS[weather] ?? 0) : 0;
+  // Read by the drawing loop, which outlives a change of weather so that rain or snow comes and
+  // goes gradually rather than all at once.
+  const target = useRef({ count: 0, isSnow: false });
+  target.current = { count: DROP_COUNTS[weather] ?? 0, isSnow: weather === 'snow' };
 
+  // Restarted on each place outside, which starts with the weather already falling.
   useEffect(() => {
     const element = canvas.current;
     const drawing = element?.getContext('2d');
-    if (!element || !drawing || dropCount === 0) {
+    if (!element || !drawing || !isOutside) {
       return;
     }
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isSnow = weather === 'snow';
-    let drops: Drop[] = [];
-    const resize = () => {
-      element.width = element.clientWidth;
-      element.height = element.clientHeight;
-      drops = Array.from({ length: calm ? Math.round(dropCount / 3) : dropCount }, () => ({
+    const wanted = () => (calm ? Math.round(target.current.count / 3) : target.current.count);
+    const spawn = (y: number): Drop => {
+      const isSnow = target.current.isSnow;
+      return {
         x: Math.random() * element.width,
-        y: Math.random() * element.height,
+        y,
         speed: isSnow ? 40 + Math.random() * 50 : 700 + Math.random() * 400,
         size: isSnow ? 2 + Math.random() * 3 : 12 + Math.random() * 10,
         sway: Math.random() * Math.PI * 2,
-      }));
+        isSnow,
+      };
+    };
+    const resize = () => {
+      element.width = element.clientWidth;
+      element.height = element.clientHeight;
     };
     resize();
+    let drops: Drop[] = Array.from({ length: wanted() }, () =>
+      spawn(Math.random() * element.height),
+    );
+    let owed = 0;
     window.addEventListener('resize', resize);
     let frame = 0;
     let last = performance.now();
     const draw = (now: number) => {
       const delta = Math.min(0.05, (now - last) / 1000);
       last = now;
+      // New drops start above the screen, a few at a time, so that a shower builds up.
+      const count = wanted();
+      if (drops.length < count) {
+        owed += (count / WEATHER_RAMP_SECONDS) * delta;
+        while (owed >= 1 && drops.length < count) {
+          drops.push(spawn(-20 - Math.random() * 40));
+          owed -= 1;
+        }
+      }
       drawing.clearRect(0, 0, element.width, element.height);
       drawing.lineCap = 'round';
-      for (const drop of drops) {
+      drops = drops.filter((drop) => {
         drop.y += drop.speed * (calm ? 0.4 : 1) * delta;
         drop.sway += delta;
-        const driftX = isSnow ? Math.sin(drop.sway) * 0.6 : -drop.speed * 0.18 * delta;
-        drop.x += driftX;
-        if (drop.y > element.height + 20) {
-          drop.y = -20;
-          drop.x = Math.random() * element.width;
-        }
+        drop.x += drop.isSnow ? Math.sin(drop.sway) * 0.6 : -drop.speed * 0.18 * delta;
         if (drop.x < -20) {
           drop.x += element.width + 40;
         }
-        if (isSnow) {
+        if (drop.y > element.height + 20) {
+          // A drop that has fallen goes round again, unless the shower is easing off.
+          if (drops.length > wanted()) {
+            return false;
+          }
+          Object.assign(drop, spawn(-20));
+        }
+        if (drop.isSnow) {
           drawing.fillStyle = 'rgb(255 255 255 / 90%)';
           drawing.beginPath();
           drawing.arc(drop.x, drop.y, drop.size, 0, Math.PI * 2);
@@ -196,7 +221,8 @@ export function WeatherLayer({ clock, isOutside }: { clock: GameClock; isOutside
           drawing.lineTo(drop.x + drop.size * 0.18, drop.y - drop.size);
           drawing.stroke();
         }
-      }
+        return true;
+      });
       frame = requestAnimationFrame(draw);
     };
     frame = requestAnimationFrame(draw);
@@ -205,7 +231,7 @@ export function WeatherLayer({ clock, isOutside }: { clock: GameClock; isOutside
       window.removeEventListener('resize', resize);
       drawing.clearRect(0, 0, element.width, element.height);
     };
-  }, [dropCount, weather]);
+  }, [isOutside]);
 
   // A storm's lightning: a soft flash every so often, left out for players who ask for less motion.
   useEffect(() => {

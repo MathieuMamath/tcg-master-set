@@ -18,15 +18,18 @@ import {
   CanvasTexture,
   Color,
   DoubleSide,
+  Float32BufferAttribute,
   type Group,
   type Mesh,
   type MeshBasicMaterial,
   MultiplyBlending,
+  PlaneGeometry,
   RepeatWrapping,
   SRGBColorSpace,
   type Texture,
   Vector3,
 } from 'three';
+import { exactMinuteOfDay, type Weather } from '@/game/clock';
 import { type DashState, NO_DASH, tickDash } from '@/game/dash';
 import { type Direction, STILL } from '@/game/movement';
 import { SCRUBS_PER_STAIN, type Stain, stainAlong } from '@/game/quests';
@@ -72,7 +75,7 @@ import {
   WALKING_SPEED,
   type Walker,
 } from '@/game/side-walk';
-import { mixColors, type SkyLook, skyLook, type WorldTint } from '@/game/sky';
+import { lampLightAt, mixColors, skyAt, skyLook, worldTintAt } from '@/game/sky';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction } from '@/game/world';
 import {
@@ -141,10 +144,9 @@ import {
   drawShadowBlob,
   drawShop,
   drawSign,
-  drawSky,
-  drawSkyGradient,
   drawSkyline,
   drawSofa,
+  drawStarField,
   drawStationeryTable,
   drawStreet,
   drawStreetLamp,
@@ -155,6 +157,7 @@ import {
   drawTuft,
   drawUprightCorrugatedEdge,
   drawWallpaper,
+  drawWindowClouds,
   drawWindowFrame,
   type Eyes,
   GASPARD_SIZE,
@@ -432,32 +435,192 @@ const WINDOW_MARGIN = 13;
 // The sky shows this share of its picture at once, so that its clouds have room to drift.
 const SKY_SHOWN = 0.45;
 
-// The sky of the moment, by the game's time and weather, for every place that shows it.
-const SkyContext = createContext<SkyLook>(skyLook('day', 'fewClouds'));
+// The game's clock as this player sees it, moved on by their sleeps, and the weather of the moment:
+// the sky, the light and the lamps follow them smoothly, frame by frame.
+export type SkyClock = { offset: number; weather: Weather };
+const SkyClockContext = createContext<SkyClock>({ offset: 0, weather: 'fewClouds' });
+// How fast the sky and the light catch up with a change of weather, in shares of the way per
+// second: a few seconds, rather than all at once. The time of day itself moves on continuously.
+const WEATHER_EASING = 0.35;
 
-// Outside, the light of the moment: the tint laid over the world, and how bright the lamps shine.
-export type OutdoorLight = { tint: WorldTint; lamps: number };
-const LightContext = createContext<OutdoorLight>({
-  tint: { color: '#ffffff', strength: 0 },
-  lamps: 0,
-});
-// How fast the light moves to a new time of day, in shares of the way per second.
-const LIGHT_EASING = 0.6;
+// The share of the way to go this frame: eased, or all of it when the clock has just jumped on,
+// after a night's sleep, behind the sleep screen.
+function useEasing() {
+  const { offset } = useContext(SkyClockContext);
+  const lastOffset = useRef(offset);
+  return (delta: number, speed = 1) => {
+    if (lastOffset.current !== offset) {
+      lastOffset.current = offset;
+      return 1;
+    }
+    return Math.min(1, delta * WEATHER_EASING * speed);
+  };
+}
+
+function nowMinute(offset: number): number {
+  return exactMinuteOfDay(Date.now(), offset);
+}
+
+type LiveSky = {
+  top: Color;
+  horizon: Color;
+  cloud: Color;
+  stars: number;
+  drift: number;
+  cloudCount: number;
+};
+
+// The sky of this very moment, kept up to date every frame and eased towards a new weather.
+function useLiveSky(): LiveSky {
+  const { offset, weather } = useContext(SkyClockContext);
+  const live = useRef<LiveSky | null>(null);
+  if (!live.current) {
+    const sky = skyAt(nowMinute(offset), weather);
+    const look = skyLook('day', weather);
+    live.current = {
+      top: new Color(sky.top),
+      horizon: new Color(sky.horizon),
+      cloud: new Color(sky.cloud),
+      stars: sky.stars,
+      drift: look.drift,
+      cloudCount: look.cloudCount,
+    };
+  }
+  const target = useMemo(
+    () => ({ top: new Color(), horizon: new Color(), cloud: new Color() }),
+    [],
+  );
+  const easing = useEasing();
+  useFrame((_, delta) => {
+    const current = live.current;
+    if (!current) {
+      return;
+    }
+    const sky = skyAt(nowMinute(offset), weather);
+    const look = skyLook('day', weather);
+    const share = easing(delta);
+    current.top.lerp(target.top.set(sky.top), share);
+    current.horizon.lerp(target.horizon.set(sky.horizon), share);
+    current.cloud.lerp(target.cloud.set(sky.cloud), share);
+    current.stars += (sky.stars - current.stars) * share;
+    current.drift += (look.drift - current.drift) * share;
+    current.cloudCount += (look.cloudCount - current.cloudCount) * share;
+  });
+  return live.current;
+}
+
+// A plane coloured from top to bottom by the live sky, with its stars faded in over it at night.
+function SkyGradient({
+  position,
+  width,
+  height,
+  starsMap,
+}: {
+  position: [number, number, number];
+  width: number;
+  height: number;
+  starsMap: Texture;
+}) {
+  const sky = useLiveSky();
+  const geometry = useMemo(() => {
+    const plane = new PlaneGeometry(width, height);
+    plane.setAttribute('color', new Float32BufferAttribute(new Float32Array(12), 3));
+    return plane;
+  }, [width, height]);
+  const stars = useRef<MeshBasicMaterial>(null);
+  useFrame(() => {
+    const colors = geometry.getAttribute('color');
+    // The plane's two top corners take the top colour, and its two bottom ones the horizon.
+    [sky.top, sky.top, sky.horizon, sky.horizon].forEach((color, corner) => {
+      colors.setXYZ(corner, color.r, color.g, color.b);
+    });
+    colors.needsUpdate = true;
+    if (stars.current) {
+      stars.current.opacity = sky.stars;
+      stars.current.visible = sky.stars > 0.01;
+    }
+  });
+  return (
+    <>
+      <mesh position={position} geometry={geometry}>
+        <meshBasicMaterial vertexColors toneMapped={false} />
+      </mesh>
+      <mesh position={[position[0], position[1], position[2] + 0.01]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial
+          ref={stars}
+          map={starsMap}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+    </>
+  );
+}
+
+// A cloud of the live sky: tinted with it, and faded in or out as the weather brings more clouds
+// or fewer. `rank` orders the clouds, the first ones always shown.
+function LiveCloud({ map, height, rank }: { map: Texture; height: number; rank: number }) {
+  const sky = useLiveSky();
+  const material = useRef<MeshBasicMaterial>(null);
+  const image = map.image as HTMLCanvasElement;
+  const width = (height * image.width) / image.height;
+  useFrame((_, delta) => {
+    if (!material.current) {
+      return;
+    }
+    material.current.color.copy(sky.cloud);
+    const shown = rank < sky.cloudCount + 1.5 ? 1 : 0;
+    material.current.opacity +=
+      (shown - material.current.opacity) * Math.min(1, delta * WEATHER_EASING * 2);
+    material.current.visible = material.current.opacity > 0.01;
+  });
+  return (
+    <mesh position={[0, height / 2, 0]}>
+      <planeGeometry args={[width, height]} />
+      <meshBasicMaterial
+        ref={material}
+        map={map}
+        transparent
+        alphaTest={0.02}
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+// The textures every outdoor sky shares: its stars, and a white cloud for the sky to tint.
+function useSkyTextures() {
+  return useMemo(
+    () => ({
+      stars: texture(drawStarField()),
+      cloud: texture(cutOut(300, 190, drawCloud('#ffffff'), 9, 63)),
+    }),
+    [],
+  );
+}
+
 // Drawn after the world and before the lamps' halos, so that the night darkens everything but them.
 const VEIL_ORDER = 10;
 const GLOW_ORDER = 11;
 
 // The light of the time of day, laid over the whole view by multiplying its colours, just in front
-// of the camera. It moves softly from one time of day to the next.
+// of the camera. It follows the clock minute by minute, and eases into a new weather.
 function LightVeil() {
-  const { tint } = useContext(LightContext);
+  const { offset, weather } = useContext(SkyClockContext);
   const veil = useRef<Mesh>(null);
   const material = useRef<MeshBasicMaterial>(null);
-  const target = useMemo(
-    () => new Color(mixColors('#ffffff', tint.color, tint.strength)),
-    [tint.color, tint.strength],
-  );
+  const tintOf = () => {
+    const tint = worldTintAt(nowMinute(offset), weather);
+    return mixColors('#ffffff', tint.color, tint.strength);
+  };
+  const [first] = useState(tintOf);
+  const target = useMemo(() => new Color(), []);
   const ahead = useMemo(() => new Vector3(), []);
+  const easing = useEasing();
   useFrame(({ camera }, delta) => {
     if (!veil.current || !material.current) {
       return;
@@ -465,14 +628,14 @@ function LightVeil() {
     camera.getWorldDirection(ahead);
     veil.current.position.copy(camera.position).addScaledVector(ahead, 0.2);
     veil.current.quaternion.copy(camera.quaternion);
-    material.current.color.lerp(target, Math.min(1, delta * LIGHT_EASING));
+    material.current.color.lerp(target.set(tintOf()), easing(delta));
   });
   return (
     <mesh ref={veil} renderOrder={VEIL_ORDER} frustumCulled={false}>
       <planeGeometry args={[4, 4]} />
       <meshBasicMaterial
         ref={material}
-        color={target}
+        color={first}
         blending={MultiplyBlending}
         premultipliedAlpha
         transparent
@@ -499,18 +662,21 @@ function StreetLamp({
   height: number;
   textures: { lamp: Texture; glow: Texture; shadow: Texture };
 }) {
-  const { lamps } = useContext(LightContext);
+  const { offset, weather } = useContext(SkyClockContext);
   const drawing = LAMP_DRAWINGS[style];
   const width = (height * drawing.width) / drawing.height;
   const lightX = x - width / 2 + width * drawing.lightX;
   const lightY = height * (1 - drawing.lightY);
   const halo = useRef<MeshBasicMaterial>(null);
   const pool = useRef<MeshBasicMaterial>(null);
+  const easing = useEasing();
   useFrame((_, delta) => {
+    const lamps = lampLightAt(nowMinute(offset), weather);
+    const share = easing(delta, 2);
     for (const material of [halo.current, pool.current]) {
       if (material) {
         const goal = material === pool.current ? lamps * 0.55 : lamps;
-        material.opacity += (goal - material.opacity) * Math.min(1, delta * LIGHT_EASING * 2);
+        material.opacity += (goal - material.opacity) * share;
         material.visible = material.opacity > 0.01;
       }
     }
@@ -564,22 +730,24 @@ function useLampTextures(style: LampStyle) {
   }, [style]);
 }
 
-// A double window over the desk, onto the sky of the moment.
+// A double window over the desk, onto the live sky, its clouds drifting by.
 function SkyWindow({ x }: { x: number }) {
-  const look = useContext(SkyContext);
-  const sky = useMemo(() => {
-    const map = texture(drawSky(look));
-    map.wrapS = RepeatWrapping;
-    map.repeat.set(SKY_SHOWN, 1);
-    return map;
-  }, [look]);
+  const sky = useLiveSky();
+  const layers = useMemo(() => {
+    const clouds = texture(drawWindowClouds());
+    clouds.wrapS = RepeatWrapping;
+    clouds.repeat.set(SKY_SHOWN, 1);
+    return { clouds, stars: texture(drawStarField()) };
+  }, []);
+  const cloudMaterial = useRef<MeshBasicMaterial>(null);
   const frame = useMemo(
     () => texture(cutOut(WINDOW.width, WINDOW.height, drawWindowFrame, 9, 51)),
     [],
   );
 
   useFrame((_, delta) => {
-    sky.offset.x = (sky.offset.x + delta * look.drift) % 1;
+    layers.clouds.offset.x = (layers.clouds.offset.x + delta * sky.drift) % 1;
+    cloudMaterial.current?.color.copy(sky.cloud);
   });
 
   const frameHeight = (WINDOW.height + WINDOW_MARGIN * 2) / PIXELS_PER_UNIT;
@@ -588,9 +756,21 @@ function SkyWindow({ x }: { x: number }) {
   const openingCenterY = WINDOW.centerY + WINDOW_SILL / 2 / PIXELS_PER_UNIT;
   return (
     <>
-      <mesh position={[x, openingCenterY, WALL_Z + 0.01]}>
+      <SkyGradient
+        position={[x, openingCenterY, WALL_Z + 0.005]}
+        width={openingWidth}
+        height={openingHeight}
+        starsMap={layers.stars}
+      />
+      <mesh position={[x, openingCenterY, WALL_Z + 0.017]}>
         <planeGeometry args={[openingWidth, openingHeight]} />
-        <meshBasicMaterial map={sky} />
+        <meshBasicMaterial
+          ref={cloudMaterial}
+          map={layers.clouds}
+          transparent
+          depthWrite={false}
+          toneMapped={false}
+        />
       </mesh>
       {/* Light on the glass. */}
       <mesh position={[x, openingCenterY, WALL_Z + 0.02]} rotation={[0, 0, -0.5]}>
@@ -1356,7 +1536,6 @@ function SwayingTree({
 }
 
 function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
-  const look = useContext(SkyContext);
   const fontsReady = useFontsReady();
   const textures = useMemo(
     () => ({
@@ -1426,8 +1605,8 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
     [fontsReady, signs.busStop, signs.busLine],
   );
   const idlingBus = useRef<Group>(null);
-  const sky = useMemo(() => texture(drawSkyGradient(look)), [look]);
-  const cloud = useMemo(() => texture(cutOut(300, 190, drawCloud(look.cloud), 9, 63)), [look]);
+  const skyTextures = useSkyTextures();
+  const sky = useLiveSky();
   const clouds = useRef<(Group | null)[]>([]);
 
   // The clouds drift along, and come back round from the other side. The bus shakes a little,
@@ -1438,7 +1617,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
     }
     for (const group of clouds.current) {
       if (group) {
-        group.position.x += delta * look.drift * CLOUD_SPEED;
+        group.position.x += delta * sky.drift * CLOUD_SPEED;
         if (group.position.x > CLOUD_SPAN / 2) {
           group.position.x -= CLOUD_SPAN;
         }
@@ -1462,12 +1641,14 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
   return (
     <>
       {/* Wider than the street, as far away it fills more of the view at both ends. */}
-      <mesh position={[streetCenter, 7, -10]}>
-        <planeGeometry args={[streetWidth + 70, 26]} />
-        <meshBasicMaterial map={sky} />
-      </mesh>
+      <SkyGradient
+        position={[streetCenter, 7, -10]}
+        width={streetWidth + 70}
+        height={26}
+        starsMap={skyTextures.stars}
+      />
       <group position={[streetCenter, 0, 0]}>
-        {CLOUDS.slice(0, look.cloudCount + 2).map(({ x, y, size }, index) => (
+        {CLOUDS.map(({ x, y, size }, index) => (
           <group
             key={x}
             ref={(group) => {
@@ -1475,7 +1656,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
             }}
             position={[x, y, -8]}
           >
-            <CutOut map={cloud} height={size} />
+            <LiveCloud map={skyTextures.cloud} height={size} rank={index} />
           </group>
         ))}
       </group>
@@ -1680,7 +1861,6 @@ const PARK_PEOPLE_Z = -0.5;
 // The Linden Park: lawns and trees under the sky, the bus stop on the left, Papy Caillou by his
 // bench, and Lucas fishing at the edge of the lake.
 function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
-  const look = useContext(SkyContext);
   const fontsReady = useFontsReady();
   const { busStop, bench, papy, lake, lucas } = PARK_SPOTS;
   const staticTextures = useMemo(
@@ -1707,14 +1887,8 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
     }),
     [],
   );
-  const skyTextures = useMemo(
-    () => ({
-      sky: texture(drawSkyGradient(look)),
-      cloud: texture(cutOut(300, 190, drawCloud(look.cloud), 9, 63)),
-    }),
-    [look],
-  );
-  const textures = { ...staticTextures, ...skyTextures };
+  const skyTextures = useSkyTextures();
+  const textures = staticTextures;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const shelter = useMemo(
     () => texture(cutOut(360, 320, drawBusShelter(signs.parkStop), 9, 120)),
@@ -1732,17 +1906,19 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
           { interaction: 'boy', map: textures.lucas.open, height: LUCAS_HEIGHT, z: PARK_PEOPLE_Z },
         ]}
       />
-      <mesh position={[center, 7, -10]}>
-        <planeGeometry args={[width + 70, 26]} />
-        <meshBasicMaterial map={textures.sky} />
-      </mesh>
+      <SkyGradient
+        position={[center, 7, -10]}
+        width={width + 70}
+        height={26}
+        starsMap={skyTextures.stars}
+      />
       {[
         [-12, 6.2, 1.4],
         [2, 6.8, 1.6],
         [16, 5.9, 1.2],
-      ].map(([cloudX, cloudY, size]) => (
+      ].map(([cloudX, cloudY, size], index) => (
         <group key={cloudX} position={[center + cloudX, cloudY, -8]}>
-          <CutOut map={textures.cloud} height={size} />
+          <LiveCloud map={skyTextures.cloud} height={size} rank={index} />
         </group>
       ))}
       {HILL_ROWS.map(({ z, height }, index) => (
@@ -1826,7 +2002,6 @@ function Downtown({
   signs: SceneSigns;
   speakerTops: RefObject<SpeakerTops>;
 }) {
-  const look = useContext(SkyContext);
   const fontsReady = useFontsReady();
   const { busStop } = DOWNTOWN_SPOTS;
   const staticTextures = useMemo(
@@ -1859,14 +2034,8 @@ function Downtown({
     }),
     [],
   );
-  const skyTextures = useMemo(
-    () => ({
-      sky: texture(drawSkyGradient(look)),
-      cloud: texture(cutOut(300, 190, drawCloud(look.cloud), 9, 63)),
-    }),
-    [look],
-  );
-  const textures = { ...staticTextures, ...skyTextures };
+  const skyTextures = useSkyTextures();
+  const textures = staticTextures;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const shelter = useMemo(
     () => texture(cutOut(360, 320, drawBusShelter(signs.downtownStop), 9, 160)),
@@ -1895,17 +2064,19 @@ function Downtown({
   const center = (DOWNTOWN_ENDS.left + DOWNTOWN_ENDS.right) / 2;
   return (
     <>
-      <mesh position={[center, 7, -10]}>
-        <planeGeometry args={[width + 70, 40]} />
-        <meshBasicMaterial map={textures.sky} />
-      </mesh>
+      <SkyGradient
+        position={[center, 7, -10]}
+        width={width + 70}
+        height={40}
+        starsMap={skyTextures.stars}
+      />
       {[
         [-14, 8.5, 1.4],
         [6, 9.4, 1.7],
         [20, 7.8, 1.2],
-      ].map(([cloudX, cloudY, size]) => (
+      ].map(([cloudX, cloudY, size], index) => (
         <group key={cloudX} position={[center + cloudX, cloudY, -8]}>
-          <CutOut map={textures.cloud} height={size} />
+          <LiveCloud map={skyTextures.cloud} height={size} rank={index} />
         </group>
       ))}
       {DOWNTOWN_BACK_TOWERS.map(({ x, height }, index) => (
@@ -2240,10 +2411,8 @@ type Props = {
   spot: RefObject<PlayerSpot | null>;
   // Told whenever the character arrives somewhere else, with where it stands there.
   onPlaceChange: (arrived: PlayerSpot) => void;
-  // The sky of the moment, by the game's time and weather.
-  sky: SkyLook;
-  // Outside, the light of the moment.
-  light: OutdoorLight;
+  // The game's clock as this player sees it, and the weather of the moment.
+  skyClock: SkyClock;
   // Drawn over the scene but under the scenery of a trip, such as the rain.
   children?: ReactNode;
 };
@@ -2285,8 +2454,7 @@ export function PaperScene({
   startSpot,
   spot,
   onPlaceChange,
-  sky,
-  light,
+  skyClock,
   children,
 }: Props) {
   const tTravel = useTranslations('Travel');
@@ -2414,37 +2582,35 @@ export function PaperScene({
       >
         <ambientLight intensity={1.6} color="#fff4e4" />
         <directionalLight position={[-4, 8, 10]} intensity={1.2} />
-        <SkyContext value={sky}>
-          <LightContext value={light}>
-            <group key={visit.number}>
-              <FirstFrames onDrawn={() => setDrawnVisit(visit.number)} />
-              {visit.place === 'bedroom' && <Bedroom />}
-              {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
-              {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
-              {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
-              {visit.place === 'flat' && (
-                <Flat speakerTops={speakerTops} stains={stains} isLeaCalm={isLeaCalm} />
-              )}
-              {visit.place === 'arcade' && <Arcade />}
-              {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
-              {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
-              {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
-              <Pip
-                input={input}
-                room={SIDE_PLACES[visit.place]}
-                arrival={visit.arrival}
-                bubble={bubble}
-                speakerTops={speakerTops}
-                stains={visit.place === 'flat' ? stains : []}
-                spot={spot}
-                onInteractionChange={onInteractionChange}
-                onExit={goThrough}
-                onScrub={onScrub}
-              />
-            </group>
-            {OUTSIDE_PLACES.has(visit.place) && <LightVeil />}
-          </LightContext>
-        </SkyContext>
+        <SkyClockContext value={skyClock}>
+          <group key={visit.number}>
+            <FirstFrames onDrawn={() => setDrawnVisit(visit.number)} />
+            {visit.place === 'bedroom' && <Bedroom />}
+            {visit.place === 'town' && <Town signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'shop' && <Shop signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'bookshop' && <Bookshop speakerTops={speakerTops} />}
+            {visit.place === 'flat' && (
+              <Flat speakerTops={speakerTops} stains={stains} isLeaCalm={isLeaCalm} />
+            )}
+            {visit.place === 'arcade' && <Arcade />}
+            {visit.place === 'park' && <Park signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
+            {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
+            <Pip
+              input={input}
+              room={SIDE_PLACES[visit.place]}
+              arrival={visit.arrival}
+              bubble={bubble}
+              speakerTops={speakerTops}
+              stains={visit.place === 'flat' ? stains : []}
+              spot={spot}
+              onInteractionChange={onInteractionChange}
+              onExit={goThrough}
+              onScrub={onScrub}
+            />
+          </group>
+          {OUTSIDE_PLACES.has(visit.place) && <LightVeil />}
+        </SkyClockContext>
       </Canvas>
       {children}
       <TravelScreen

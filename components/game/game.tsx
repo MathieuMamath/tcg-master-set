@@ -9,7 +9,7 @@ import { canClaimDailyBonus, DAILY_QUEST_GOAL, type DailyActivity } from '@/game
 import { addToCollection } from '@/game/binder';
 import { stopAt } from '@/game/bus';
 import type { PlayableSet, SetId } from '@/game/card-sets';
-import { isValidOffset } from '@/game/clock';
+import { isValidOffset, weatherAt } from '@/game/clock';
 import type { DalgonaShape, Press } from '@/game/dalgona';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
@@ -25,7 +25,6 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import { BUREAU_ENTRANCE, isDoorInteraction, type SidePlaceId } from '@/game/side-rooms';
-import { lampLight, skyLook, worldTint } from '@/game/sky';
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction, QuestGiver } from '@/game/world';
 import type {
@@ -136,16 +135,10 @@ export function Game({ player, sets, progress }: Props) {
   // The game's clock, moved on by the player's sleeps, and the night's sleep while it lasts.
   const [clockOffset, setClockOffset] = useState(progress.clockOffset);
   const clock = useGameClock(clockOffset);
-  const sky = useMemo(
-    () => skyLook(clock?.time ?? 'day', clock?.weather ?? 'fewClouds'),
-    [clock?.time, clock?.weather],
-  );
-  const light = useMemo(
-    () => ({
-      tint: worldTint(clock?.time ?? 'day', clock?.weather ?? 'fewClouds'),
-      lamps: lampLight(clock?.time ?? 'day', clock?.weather ?? 'fewClouds'),
-    }),
-    [clock?.time, clock?.weather],
+  // The scene only loads in the browser, so it can read the weather before the first check.
+  const skyClock = useMemo(
+    () => ({ offset: clockOffset, weather: clock?.weather ?? weatherAt(new Date(), clockOffset) }),
+    [clockOffset, clock?.weather],
   );
   const [sleep, setSleep] = useState<'asleep' | 'waking' | null>(null);
   // Where the character is, for the bus map to know which stop it is read at.
@@ -790,8 +783,7 @@ export function Game({ player, sets, progress }: Props) {
           startSpot={progress.spot}
           spot={spot}
           onPlaceChange={changePlace}
-          sky={sky}
-          light={light}
+          skyClock={skyClock}
         >
           {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
         </PaperScene>
