@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
-import { moveThroughChoices } from './menu-focus';
+import { moveThroughChoices, openDialog } from './menu-focus';
 import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, SpeechBox, TypedLine } from './shop-dialog';
 
@@ -25,7 +25,7 @@ export function NpcDialog({ speaker, line, action, actions = [], onClose }: Prop
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    dialog.current?.showModal();
+    openDialog(dialog.current);
   }, []);
 
   return (
@@ -47,24 +47,17 @@ export function NpcDialog({ speaker, line, action, actions = [], onClose }: Prop
           text={t(`${speaker}.lines.${line}` as 'brutus.lines.refused')}
         />
         <form method="dialog" className="mt-2.5 flex flex-wrap gap-2.5">
-          {choices.map((choice, index) => (
+          {choices.map((choice) => (
             <button
               key={choice.label}
               type="submit"
-              // biome-ignore lint/a11y/noAutofocus: the first offer is the first choice, for the keyboard too.
-              autoFocus={index === 0}
               onClick={choice.onPress}
               className={`${CHOICE_CLASS} bg-ui-stamp! text-ui-paper`}
             >
               {choice.label}
             </button>
           ))}
-          <button
-            type="submit"
-            // biome-ignore lint/a11y/noAutofocus: the dialog is closed with the keyboard too.
-            autoFocus={choices.length === 0}
-            className={CHOICE_CLASS}
-          >
+          <button type="submit" className={CHOICE_CLASS}>
             {t('leave')}
           </button>
         </form>

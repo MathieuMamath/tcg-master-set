@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { BUS_STOPS, type BusStop, type BusStopId } from '@/game/bus';
-import { moveThroughChoices } from './menu-focus';
+import { moveThroughChoices, openDialog } from './menu-focus';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
 type Props = {
@@ -40,7 +40,7 @@ export function BusMap({ here, onTravel, onClose }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    dialog.current?.showModal();
+    openDialog(dialog.current);
   }, []);
 
   return (
@@ -188,8 +188,8 @@ export function BusMap({ here, onTravel, onClose }: Props) {
         <form method="dialog" className="mt-4 flex">
           <button
             type="submit"
-            // biome-ignore lint/a11y/noAutofocus: the map is closed with the keyboard too.
-            autoFocus
+            // The map is closed with the keyboard too.
+            data-first-focus
             className={CHOICE_CLASS}
           >
             {t('close')}
