@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.89](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.88...v0.1.89) (2026-11-07)
+
+### Features
+
+* **shop:** put every set on sale and share the boosters between the triplets ([#91](https://github.com/MathieuMamath/tcg-master-set/issues/91)) ([a83eef0](https://github.com/MathieuMamath/tcg-master-set/commit/a83eef0dd8e0390550f88b262400fc864cfad665))
+
 ## [0.1.88](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.87...v0.1.88) (2026-11-07)
 
 ### Bug Fixes
