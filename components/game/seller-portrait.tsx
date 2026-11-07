@@ -16,6 +16,7 @@ import {
   drawLucas,
   drawPapy,
   drawRaccoon,
+  drawRamenChef,
   drawTrotte,
   GASPARD_FACE,
   GASPARD_SIZE,
@@ -31,6 +32,8 @@ import {
   PAPY_SIZE,
   RACCOON_FACE,
   RACCOON_SIZE,
+  RAMEN_CHEF_FACE,
+  RAMEN_CHEF_SIZE,
   SELLERS,
   TROTTE_FACE,
   TROTTE_SIZE,
@@ -45,7 +48,8 @@ type Character =
   | QuestGiver
   | 'brutus'
   | 'hulotte'
-  | 'trotte';
+  | 'trotte'
+  | 'ramenChef';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -69,6 +73,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'berenice') {
     return { draw: drawBerenice, size: BERENICE_SIZE, face: BERENICE_FACE };
+  }
+  if (stock === 'ramenChef') {
+    return { draw: drawRamenChef, size: RAMEN_CHEF_SIZE, face: RAMEN_CHEF_FACE };
   }
   if (stock === 'gaspard') {
     return { draw: drawGaspard, size: GASPARD_SIZE, face: GASPARD_FACE };

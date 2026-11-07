@@ -487,6 +487,19 @@ export function StatsDialog({ sets, onClose }: Props) {
                                 ))}
                               </p>
                             )}
+                            {quest.stars.length > 0 && (
+                              <p className="mt-1 flex flex-wrap gap-1.5 text-sm">
+                                {quest.stars.map(({ stars, count }) => (
+                                  <span key={stars} className="rounded-full bg-[#3a3320] px-2">
+                                    <span aria-hidden="true" className="text-[#f2c14e]">
+                                      {stars === 0 ? '☆' : '★'.repeat(stars)}
+                                    </span>
+                                    <span className="sr-only">{t('quests.stars', { stars })}</span>{' '}
+                                    · {format.number(count)}
+                                  </span>
+                                ))}
+                              </p>
+                            )}
                           </li>
                         ))}
                       </ul>

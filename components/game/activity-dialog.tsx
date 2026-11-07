@@ -55,7 +55,12 @@ function BallPortrait() {
 }
 
 function QuestPortrait({ giver }: { giver: DailyQuestGiver }) {
-  return giver === 'basketball' ? <BallPortrait /> : <SellerPortrait stock={giver} />;
+  if (giver === 'basketball') {
+    return <BallPortrait />;
+  }
+  // The ramen shop's three jobs are all Yuzu's.
+  const isRamen = giver === 'ramenDishes' || giver === 'ramenKitchen' || giver === 'ramenService';
+  return <SellerPortrait stock={isRamen ? 'ramenChef' : giver} />;
 }
 
 type Props = {
@@ -142,7 +147,7 @@ export function ActivityDialog({ activity, onClaim, onClose }: Props) {
                 </h3>
                 <p className="flex items-center gap-1.5 text-lg">
                   <CoinIcon />
-                  {t('bonus.reward', { count: DAILY_BONUS_COINS })}
+                  {t('bonus.reward', { count: DAILY_BONUS_COINS, goal: DAILY_QUEST_GOAL })}
                 </p>
               </div>
               <button
@@ -159,9 +164,10 @@ export function ActivityDialog({ activity, onClaim, onClose }: Props) {
             </div>
             <div className="mt-3 flex items-center gap-3">
               <ol aria-hidden="true" className="flex gap-1.5">
-                {DAILY_QUESTS.map(({ giver }, index) => (
+                {Array.from({ length: DAILY_QUEST_GOAL }, (_, index) => (
                   <li
-                    key={giver}
+                    // biome-ignore lint/suspicious/noArrayIndexKey: one mark per quest to go, in order.
+                    key={index}
                     className={`grid size-7 place-items-center rounded-full border-2 font-digits text-sm font-bold ${
                       index < doneCount
                         ? 'border-[#3f7d48] bg-[#3f7d48] text-ui-paper'
@@ -173,7 +179,10 @@ export function ActivityDialog({ activity, onClaim, onClose }: Props) {
                 ))}
               </ol>
               <p className="font-digits font-bold">
-                {t('bonus.progress', { done: doneCount, total: DAILY_QUEST_GOAL })}
+                {t('bonus.progress', {
+                  done: Math.min(doneCount, DAILY_QUEST_GOAL),
+                  total: DAILY_QUEST_GOAL,
+                })}
               </p>
             </div>
           </section>

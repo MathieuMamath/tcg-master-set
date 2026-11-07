@@ -41,15 +41,21 @@ describe('dailyActivity', () => {
 describe('the daily bonus', () => {
   const everyQuest = days(Object.fromEntries(DAILY_QUESTS.map(({ id }) => [id, '2026-11-04'])));
 
-  test('needs all six quests of the day, and pays 600 coins', () => {
+  test('needs any six quests of the day, and pays 600 coins', () => {
     expect(DAILY_QUEST_GOAL).toBe(6);
     expect(DAILY_BONUS_COINS).toBe(600);
+    expect(DAILY_QUESTS.length).toBeGreaterThan(DAILY_QUEST_GOAL);
+    const lastSix = days(
+      Object.fromEntries(DAILY_QUESTS.slice(-6).map(({ id }) => [id, '2026-11-04'])),
+    );
+    expect(canClaimDailyBonus(dailyActivity(lastSix, NOW))).toBe(true);
     expect(canClaimDailyBonus(dailyActivity(everyQuest, NOW))).toBe(true);
   });
 
-  test('cannot be claimed with a quest left', () => {
-    const fiveQuests = new Map(everyQuest);
-    fiveQuests.delete(DAILY_QUESTS[3].id);
+  test('cannot be claimed with fewer than six quests', () => {
+    const fiveQuests = days(
+      Object.fromEntries(DAILY_QUESTS.slice(0, 5).map(({ id }) => [id, '2026-11-04'])),
+    );
 
     expect(canClaimDailyBonus(dailyActivity(fiveQuests, NOW))).toBe(false);
   });

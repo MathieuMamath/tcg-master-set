@@ -18,6 +18,7 @@ export const SPEAKERS = [
   'brutus',
   'hulotte',
   'trotte',
+  'ramenChef',
 ] as const;
 
 export type Report =

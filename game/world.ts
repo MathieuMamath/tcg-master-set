@@ -32,4 +32,8 @@ export type Interaction =
   // Reading the bus stop's sign, which opens the map of the stops.
   | 'busStop'
   // Going to bed, which only sends Pip to sleep at night.
-  | 'bed';
+  | 'bed'
+  // The ramen shop downtown, and its chef, who hires the player for its three jobs.
+  | 'enterRamen'
+  | 'leaveRamen'
+  | 'ramenChef';

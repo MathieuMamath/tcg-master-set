@@ -47,7 +47,10 @@
     "sleeping": "Zzz… Good night, {name}.",
     "wakingUp": "The sun is rising!",
     "trotte": "Talk (Mlle Trotte)",
-    "elevator": "Take the lift"
+    "elevator": "Take the lift",
+    "enterRamen": "Go into Ramen Yuzu",
+    "leaveRamen": "Leave",
+    "ramenChef": "Talk (Yuzu)"
   },
   "Shopkeeper": {
     "names": {
@@ -501,7 +504,8 @@
     "arcade": "Arcade",
     "dalgona": "Dalgona",
     "raffle": "Raffle",
-    "bureau": "Administrative Office"
+    "bureau": "Administrative Office",
+    "ramen": "Ramen Yuzu"
   },
   "Hails": {
     "latest": "A mega welcome!",
@@ -515,7 +519,8 @@
     "berenice": "Try your luck!",
     "hulotte": "Ah, a visitor!",
     "brutus": "Halt!",
-    "trotte": "A coupon to stamp?"
+    "trotte": "A coupon to stamp?",
+    "ramenChef": "Feeling peckish?"
   },
   "Bus": {
     "title": "Bus map",
@@ -538,7 +543,7 @@
     },
     "bonus": {
       "title": "Daily reward",
-      "reward": "{count, number} coins for finishing every quest of the day",
+      "reward": "{count, number} coins for finishing any {goal} quests of the day",
       "progress": "{done} / {total} quests",
       "claim": "Claim",
       "claimed": "Claimed!"
@@ -567,6 +572,18 @@
       "berenice": {
         "name": "Bérénice’s raffle",
         "where": "In the street, near the arcade"
+      },
+      "ramenDishes": {
+        "name": "Yuzu’s washing-up",
+        "where": "At Ramen Yuzu, downtown"
+      },
+      "ramenKitchen": {
+        "name": "Kitchen help at Yuzu’s",
+        "where": "At Ramen Yuzu, downtown"
+      },
+      "ramenService": {
+        "name": "Waiting tables at Yuzu’s",
+        "where": "At Ramen Yuzu, downtown"
       }
     },
     "status": {
@@ -657,7 +674,8 @@
     "quests": {
       "dailyBonuses": "Daily rewards claimed",
       "byQuest": "By quest",
-      "counts": "{started} started · {finished} finished · {rejected} refused"
+      "counts": "{started} started · {finished} finished · {rejected} refused",
+      "stars": "{stars, plural, =0 {No star} one {# star} other {# stars}}"
     },
     "outcomes": {
       "rewarded": "Paid",
@@ -760,7 +778,8 @@
     "places": {
       "bedroom": "{name}’s bedroom",
       "flat": "Léa’s flat",
-      "coupons": "The coupon floor"
+      "coupons": "The coupon floor",
+      "ramen": "Ramen Yuzu"
     },
     "tips": {
       "0": "A duplicate is never wasted: it pays coins according to its rarity.",
@@ -848,7 +867,141 @@
       "dalgonaGiveUp": "In the dalgona, Space on “Give up” now gives up instead of carving.",
       "setLogos": "A few sets showed their name instead of their logo. Their logos are back.",
       "everySetOnSale": "Every set is on sale! Granny Hazel has every binder, and the Den’s triplets share the boosters: the 30th anniversary and the Mega Evolutions at Filou’s, the sets of old at Frimousse’s, the newer ones at Fripouille’s.",
-      "newsSheet": "This very sheet! It tells you what changed in the game whenever you come by, and you can read it again from the settings."
+      "newsSheet": "This very sheet! It tells you what changed in the game whenever you come by, and you can read it again from the settings.",
+      "ramenShop": "Ramen Yuzu opens downtown, between the towers! Yuzu the red panda hires you for three little jobs paid in coins: washing up, the kitchen and waiting tables.",
+      "anySixQuests": "The daily bonus now takes any 6 quests of your choice: no need to do them all."
+    }
+  },
+  "Ramen": {
+    "name": "Yuzu",
+    "title": "the chef of Ramen Yuzu",
+    "leave": "Goodbye!",
+    "jobs": {
+      "dishes": "Wash up",
+      "kitchen": "Help in the kitchen",
+      "service": "Wait tables"
+    },
+    "lines": {
+      "greeting": "Welcome to Ramen Yuzu, {name}! Everything’s vegetarian and homemade. I’m always a pair of paws short: will you lend me a hand? I pay in coins.",
+      "rewarded": "What a shift! Here are {coins} coins, well earned. Come back any time.",
+      "alreadyPaid": "Thanks for the help! I already paid you for that job today, but it’s lovely to see you.",
+      "failed": "Oops, that was a busy shift… No pay this time, but we can go again whenever you like!",
+      "unavailable": "Oh dear, the gas went out. Come back in a moment!"
+    },
+    "shift": {
+      "titles": {
+        "dishes": "Washing up",
+        "kitchen": "In the kitchen",
+        "service": "Waiting tables"
+      },
+      "start": "Let’s go!",
+      "timeLeft": "{seconds} s",
+      "mistakes": "Mistakes",
+      "checking": "Yuzu is counting…",
+      "over": "Shift over!",
+      "back": "Go back to Yuzu",
+      "giveUp": "Stop",
+      "error": "The shift couldn’t be counted. Try again in a moment.",
+      "ingredients": {
+        "noodles": "Noodles",
+        "miso": "Miso",
+        "tofu": "Tofu",
+        "egg": "Egg",
+        "onion": "Spring onion",
+        "mushroom": "Mushrooms"
+      },
+      "dishes": {
+        "shoyu": "Shoyu",
+        "miso": "Miso",
+        "curry": "Curry",
+        "veggie": "Veggie"
+      },
+      "table": "Table {number}"
+    },
+    "service": {
+      "howTo": "The village’s folk sit down and order. The bowl in hand goes to a table that ordered it: tap the table, or press its number. Serve quickly for a tip, and don’t leave anyone waiting too long!",
+      "pay": "{score} points for {coins} coins",
+      "points": "Points",
+      "inHand": "In hand",
+      "cooking": "Cooking…",
+      "result": "{points, plural, one {# point} other {# points}}",
+      "stars": "{count, plural, =0 {No stars} one {# star} other {# stars}}",
+      "tableWithOrder": "Table {number}, order: {dish}",
+      "moments": {
+        "served": "+1",
+        "tip": "Tip!",
+        "angry": "Grr!",
+        "wrong": "Not that!",
+        "cleared": "Clean!"
+      },
+      "yuzu": {
+        "start": "Here come the guests, over to you!",
+        "served": "Nicely served!",
+        "quick": "So quick, what a tip!",
+        "combo": "Combo ×{count}!",
+        "angry": "Oh no, they left angry…",
+        "wrong": "That’s not their order!",
+        "hurry": "Quick, table {number} is getting impatient!",
+        "calm": "You’re doing great!",
+        "clear": "Clear table {number}, people are waiting!"
+      },
+      "tableToClear": "Table {number}, to clear",
+      "toClear": "To clear",
+      "queue": "{count, plural, =0 {Nobody at the door} one {# at the door:} other {# at the door:}}"
+    },
+    "dishes": {
+      "howTo": "Dirty bowls pile up in the tub. Scrub each bowl until its stains are gone (you can rub the bowl with your finger too), rinse it, then stack it. Bring your pile to Yuzu whenever you like: the taller it is, the bigger the bonus… but a pile too tall may topple! And if the tub overflows, bowls break.",
+      "actions": {
+        "scrub": "Scrub",
+        "rinse": "Rinse",
+        "stack": "Stack",
+        "deliver": "Bring ({count})"
+      },
+      "tub": "Tub: {count} / {limit}",
+      "carrying": "Carrying the pile…",
+      "empty": "Tub empty!",
+      "stains": "{count, plural, one {# stain} other {# stains}}",
+      "toRinse": "To rinse",
+      "rinsed": "Clean, stack it!",
+      "pile": "Pile: {count} (+{bonus})",
+      "pileEmpty": "No pile yet",
+      "moments": {
+        "delivered": "+{count} (+{bonus})",
+        "toppled": "Crash!",
+        "broke": "Crack!",
+        "overflow": "Overflow!"
+      },
+      "yuzu": {
+        "start": "Here come the bowls, get scrubbing!",
+        "calm": "Sparkling, keep going!",
+        "tall": "Your pile is swaying… bring it over?",
+        "tubFull": "The tub is about to overflow, quick!",
+        "carrying": "Thanks, put it down there!",
+        "delivered": "{count} bowls, bonus +{bonus}!",
+        "toppled": "Oh no, all {count} bowls on the floor!",
+        "broke": "Ouch, it slipped!",
+        "overflow": "The tub overflowed!"
+      }
+    },
+    "kitchen": {
+      "howTo": "The bowl rides along the belt: put the ticket’s ingredients in it, in any order, before it reaches the end. A bowl finished quickly earns a bonus. Mind your mistakes: one wrong ingredient spoils the bowl!",
+      "ticket": "Ticket",
+      "edge": "End of the belt",
+      "moments": {
+        "served": "+1",
+        "quick": "Quick!",
+        "spoiled": "Spoiled!",
+        "dropped": "Dropped!"
+      },
+      "yuzu": {
+        "start": "The belt is rolling, over to you!",
+        "calm": "Keep the pace!",
+        "served": "Perfect, next!",
+        "quick": "What speed!",
+        "combo": "Combo ×{count}!",
+        "spoiled": "That wasn’t on the ticket!",
+        "dropped": "It fell off the belt…"
+      }
     }
   }
 }

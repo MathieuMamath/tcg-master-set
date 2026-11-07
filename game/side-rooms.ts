@@ -11,7 +11,8 @@ export type SidePlaceId =
   | 'park'
   | 'downtown'
   | 'bureau'
-  | 'coupons';
+  | 'coupons'
+  | 'ramen';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -24,6 +25,8 @@ export const DOOR_INTERACTIONS = [
   'leaveFlat',
   'enterArcade',
   'leaveArcade',
+  'enterRamen',
+  'leaveRamen',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -167,13 +170,15 @@ export const PARK_SPOTS = {
 } as const;
 
 // Downtown, behind the village, reached by bus: a wide modern pavement under towers so tall that
-// they rise out of sight. The bus stop is on the far left.
-export const DOWNTOWN_ENDS = { left: -12, right: 18 };
+// they rise out of sight, with smaller houses between them. The bus stop is on the far left.
+export const DOWNTOWN_ENDS = { left: -12, right: 30 };
 export const DOWNTOWN_SPOTS = {
   busStop: { x: -9.4, width: 3.6, signX: -10.9 },
   // The administrative office's tower, its door in the middle, and Brutus guarding it on its right: the
   // way in is to talk to him.
   bureau: { x: 0.8, width: 4.8, height: 17, doorX: 0.8, brutusX: 2.5 },
+  // The ramen shop, a low wooden house between two towers, its door under the curtain.
+  ramen: { x: 22.4, width: 5.4, height: 5, doorX: 22.4 },
 } as const;
 // The towers along the pavement, and a farther row behind them, from left to right.
 export const DOWNTOWN_TOWERS = [
@@ -181,6 +186,7 @@ export const DOWNTOWN_TOWERS = [
   { x: 6.4, width: 4.6, height: 12, look: 'setback' },
   { x: 11.8, width: 5, height: 15, look: 'ribbon' },
   { x: 16.6, width: 3.8, height: 13.5, look: 'diagrid' },
+  { x: 28.2, width: 4.4, height: 14, look: 'setback' },
 ] as const;
 export const DOWNTOWN_BACK_TOWERS = [
   { x: -8, width: 4, height: 10, look: 'ribbon' },
@@ -188,6 +194,8 @@ export const DOWNTOWN_BACK_TOWERS = [
   { x: 3.6, width: 4.2, height: 14, look: 'diagrid' },
   { x: 9.2, width: 3.8, height: 10.5, look: 'cylinder' },
   { x: 14.4, width: 4.4, height: 13, look: 'curtain' },
+  { x: 20.4, width: 4, height: 11.5, look: 'ribbon' },
+  { x: 25.8, width: 4.2, height: 12.5, look: 'cylinder' },
 ] as const;
 
 // The administrative office, high in its tower: a window onto the big city, a wall screen of
@@ -219,6 +227,22 @@ export const TROTTE_X = COUPONS_FURNITURE.desk.x + 0.2;
 const COUPONS_BOUNDS = {
   minX: COUPONS_WALLS.left + CHARACTER_HALF_WIDTH,
   maxX: COUPONS_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+
+// The ramen shop, inside: the chef behind her counter with its stools, the big pot steaming in the
+// kitchen behind, a menu board, two tables by the window, and the door in the right wall.
+export const RAMEN_WALLS = { left: -6, right: 6 };
+export const RAMEN_FURNITURE = {
+  pot: { x: -4.6, width: 1.6 },
+  counter: { x: -1.6, width: 4.6 },
+  menu: { x: 1.8, width: 2 },
+  tables: { x: 3.6, width: 2.2 },
+} as const;
+export const RAMEN_CHEF_X = RAMEN_FURNITURE.counter.x;
+
+const RAMEN_BOUNDS = {
+  minX: RAMEN_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: RAMEN_WALLS.right - CHARACTER_HALF_WIDTH,
 };
 
 // The places only admins may be in, whose spot is neither saved nor restored for anyone else.
@@ -479,8 +503,39 @@ export const DOWNTOWN: SideRoom = {
     },
   ],
   // Downtown is left by bus, from the stop's sign. The bureau has no door of its own to use: Brutus
-  // lets admins in.
-  exits: [],
+  // lets admins in. The ramen shop's door opens onto the pavement.
+  exits: [
+    {
+      interaction: 'enterRamen',
+      minX: DOWNTOWN_SPOTS.ramen.doorX - DOOR_REACH,
+      maxX: DOWNTOWN_SPOTS.ramen.doorX + DOOR_REACH,
+      to: 'ramen',
+      arrival: { x: RAMEN_BOUNDS.maxX, facing: -1 },
+    },
+  ],
+};
+
+export const RAMEN: SideRoom = {
+  id: 'ramen',
+  bounds: RAMEN_BOUNDS,
+  start: RAMEN_BOUNDS.maxX,
+  interactions: [
+    {
+      interaction: 'ramenChef',
+      minX: RAMEN_CHEF_X - 1.6,
+      maxX: RAMEN_CHEF_X + 1.6,
+      speaker: { x: RAMEN_CHEF_X },
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveRamen',
+      minX: RAMEN_BOUNDS.maxX - DOOR_REACH,
+      maxX: RAMEN_BOUNDS.maxX,
+      to: 'downtown',
+      arrival: { x: DOWNTOWN_SPOTS.ramen.doorX, facing: 1 },
+    },
+  ],
 };
 
 // The administrative office's floors, served by its lift, from the street to the coupon floor. Brutus
@@ -542,6 +597,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   downtown: DOWNTOWN,
   bureau: BUREAU,
   coupons: COUPONS,
+  ramen: RAMEN,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

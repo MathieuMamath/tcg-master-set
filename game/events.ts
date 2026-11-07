@@ -37,6 +37,8 @@ export type GameEventDetails = {
     moves?: number;
     shape?: string;
     item?: string;
+    // The stars a shift at the ramen shop earned, from 0 to 3, by the thresholds of the day.
+    stars?: number;
     coinsAfter?: number;
   };
   // The server refused to finish an attempt: out of time, or with moves that can't have happened.

@@ -64,6 +64,7 @@ import { PlayerNameContext } from './player-name';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
 import { RaffleDialog } from './raffle-dialog';
+import { RamenDialog } from './ramen-dialog';
 import { reportPlay } from './report';
 import { SaveNotice, useSaveNotice } from './save-notice';
 import { SettingsMenu } from './settings-menu';
@@ -80,7 +81,7 @@ const INTERACT_KEY = 'KeyE';
 // Where the browser keeps the id of the last "What's new?" note it showed.
 const NEWS_SEEN_KEY = 'tcg-master-set:news-seen';
 
-type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker;
+type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker | 'ramenChef';
 
 // Talking to someone gets a speech bubble over their head, and everything else a prompt at the
 // bottom of the screen.
@@ -869,6 +870,7 @@ export function Game({ player, sets, progress }: Props) {
             latest: tShopkeeper('names.latest'),
             thisYear: tShopkeeper('names.thisYear'),
             older: tShopkeeper('names.older'),
+            ramen: tTown('ramen'),
           }}
           stains={quest?.stains ?? []}
           isLeaCalm={cleanedOn === questDay(new Date())}
@@ -933,14 +935,15 @@ export function Game({ player, sets, progress }: Props) {
             <button
               type="button"
               aria-label={tActivity('open', {
-                done: activity.done.length,
+                done: Math.min(activity.done.length, DAILY_QUEST_GOAL),
                 total: DAILY_QUEST_GOAL,
               })}
               onClick={openActivity}
               className="relative flex -rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
             >
               <ActivityIcon />
-              {activity.done.length}/{DAILY_QUEST_GOAL}
+              {/* Quests past the bonus's six are extra, so the count stops there. */}
+              {Math.min(activity.done.length, DAILY_QUEST_GOAL)}/{DAILY_QUEST_GOAL}
               {/* A reward waits to be claimed. */}
               {canClaimDailyBonus(activity) && (
                 <span
@@ -1220,6 +1223,17 @@ export function Game({ player, sets, progress }: Props) {
         {isCouponRegisterOpen && !isTalking && (
           <CouponRegister sets={sets} onClose={() => setIsCouponRegisterOpen(false)} />
         )}
+        {talkingTo === 'ramenChef' && (
+          <RamenDialog
+            onShiftEnd={(updated, hasPaid) => {
+              setWallet(updated);
+              if (hasPaid) {
+                showSaveNotice();
+              }
+            }}
+            onClose={() => setTalkingTo(null)}
+          />
+        )}
         {dalgonaShape && !isTalking && (
           <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
         )}
@@ -1231,7 +1245,8 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'berenice' &&
           talkingTo !== 'brutus' &&
           talkingTo !== 'hulotte' &&
-          talkingTo !== 'trotte' && (
+          talkingTo !== 'trotte' &&
+          talkingTo !== 'ramenChef' && (
             <ShopDialog
               stock={talkingTo}
               items={(talkingTo === 'binderSeller'

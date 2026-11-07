@@ -61,6 +61,9 @@ import {
   OFFICE_FLOORS,
   PARK_ENDS,
   PARK_SPOTS,
+  RAMEN_CHEF_X,
+  RAMEN_FURNITURE,
+  RAMEN_WALLS,
   SHOP_COUNTERS,
   SHOP_WALLS,
   SIDE_PLACES,
@@ -152,6 +155,15 @@ import {
   drawRaccoon,
   drawRaffleBooth,
   drawRaffleCounter,
+  drawRamenChef,
+  drawRamenCounter,
+  drawRamenFloor,
+  drawRamenMenu,
+  drawRamenPot,
+  drawRamenShop,
+  drawRamenTables,
+  drawRamenWall,
+  drawRedLantern,
   drawReeds,
   drawShadowBlob,
   drawShop,
@@ -183,6 +195,7 @@ import {
   PAPY_SIZE,
   paint,
   RACCOON_SIZE,
+  RAMEN_CHEF_SIZE,
   SELLERS,
   solidTop,
   TROTTE_SIZE,
@@ -236,6 +249,8 @@ export type SceneSigns = {
   latest: string;
   thisYear: string;
   older: string;
+  // On the board over Ramen Yuzu's door, downtown.
+  ramen: string;
 };
 
 const PIP_Z = 1.25;
@@ -1477,7 +1492,7 @@ const LAMP_Z = -0.25;
 const LAMP_HEIGHTS: Record<LampStyle, number> = { classic: 3.3, modern: 4.2 };
 const TOWN_LAMPS = [-17.6, -9.4, 2.05, 9.4, 25.8];
 const PARK_LAMPS = [-5.1, 2.7, 9.8];
-const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2];
+const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8];
 
 function Lamps({ style, xs }: { style: LampStyle; xs: readonly number[] }) {
   const textures = useLampTextures(style);
@@ -2074,6 +2089,21 @@ function Downtown({
     () => texture(cutOut(BRUTUS_SIZE.width, BRUTUS_SIZE.height, drawBrutus, 9, 162)),
     [],
   );
+  const { ramen } = DOWNTOWN_SPOTS;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const ramenShop = useMemo(
+    () =>
+      texture(
+        cutOut(
+          Math.round(ramen.width * PIXELS_PER_UNIT),
+          Math.round(ramen.height * PIXELS_PER_UNIT),
+          drawRamenShop(signs.ramen),
+          9,
+          163,
+        ),
+      ),
+    [fontsReady, signs.ramen, ramen.width, ramen.height],
+  );
   const width = DOWNTOWN_ENDS.right - DOWNTOWN_ENDS.left + 20;
   const center = (DOWNTOWN_ENDS.left + DOWNTOWN_ENDS.right) / 2;
   return (
@@ -2128,6 +2158,14 @@ function Downtown({
         x={bureau.x}
         z={DOWNTOWN_TOWERS_Z}
         height={bureau.height}
+        shadow={textures.shadow}
+      />
+      {/* Ramen Yuzu, low between two towers. */}
+      <Furniture
+        map={ramenShop}
+        x={ramen.x}
+        z={DOWNTOWN_TOWERS_Z + 0.2}
+        height={ramen.height}
         shadow={textures.shadow}
       />
       {/* Brutus, by the bureau's door. His dark glasses hide his eyes, so he never blinks. */}
@@ -2400,6 +2438,90 @@ function Coupons({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
         shadow={textures.shadow}
       />
       <Furniture map={textures.desk} x={desk.x} z={-0.5} height={1.7} shadow={textures.shadow} />
+    </>
+  );
+}
+
+const RAMEN_CHEF_HEIGHT = 2.6;
+const RAMEN_CHEF_Z = -1.1;
+
+// Inside Ramen Yuzu: warm plaster over dark wood, the stockpot steaming in the kitchen, Yuzu behind
+// her counter of bowls and stools, the menu on the wall, two tables, and red lanterns overhead.
+function Ramen({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
+  const { pot, counter, menu, tables } = RAMEN_FURNITURE;
+  const textures = useMemo(
+    () => ({
+      room: {
+        wall: texture(drawRamenWall()),
+        floor: texture(drawRamenFloor()),
+        door: texture(
+          paint(
+            Math.round(DOOR_WIDTH * PIXELS_PER_UNIT),
+            Math.round(DOOR_HEIGHT * PIXELS_PER_UNIT),
+            drawDoor,
+            193,
+          ),
+        ),
+      },
+      shadow: texture(drawShadowBlob()),
+      pot: texture(cutOut(220, 300, drawRamenPot, 8, 194)),
+      counter: texture(
+        cutOut(Math.round(counter.width * PIXELS_PER_UNIT), 190, drawRamenCounter, 9, 195),
+      ),
+      menu: texture(cutOut(Math.round(menu.width * PIXELS_PER_UNIT), 120, drawRamenMenu, 7, 196)),
+      tables: texture(
+        cutOut(Math.round(tables.width * PIXELS_PER_UNIT), 190, drawRamenTables, 8, 197),
+      ),
+      lantern: texture(cutOut(70, 110, drawRedLantern, 6, 198)),
+      chef: blinker(RAMEN_CHEF_SIZE.width, RAMEN_CHEF_SIZE.height, drawRamenChef, 9, 199),
+    }),
+    [],
+  );
+  return (
+    <>
+      <RoomShell walls={RAMEN_WALLS} doorSide="right" textures={textures.room} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[
+          {
+            interaction: 'ramenChef',
+            map: textures.chef.open,
+            height: RAMEN_CHEF_HEIGHT,
+            z: RAMEN_CHEF_Z,
+          },
+        ]}
+      />
+      <group position={[menu.x, 2.6, WALL_Z + 0.02]}>
+        <CutOut map={textures.menu} height={1.2} />
+      </group>
+      {[-3.2, 0, 3].map((lanternX) => (
+        <group key={lanternX} position={[lanternX, 3.1, WALL_Z + 0.3]}>
+          <CutOut map={textures.lantern} height={0.9} />
+        </group>
+      ))}
+      <Furniture map={textures.pot} x={pot.x} z={-1.2} height={2.2} shadow={textures.shadow} />
+      <Character
+        map={textures.chef.open}
+        blinks={textures.chef}
+        x={RAMEN_CHEF_X}
+        z={RAMEN_CHEF_Z}
+        height={RAMEN_CHEF_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={textures.counter}
+        x={counter.x}
+        z={-0.6}
+        height={1.35}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={textures.tables}
+        x={tables.x}
+        z={-0.9}
+        height={1.9}
+        shadow={textures.shadow}
+      />
     </>
   );
 }
@@ -2680,6 +2802,7 @@ export function PaperScene({
     downtown: signs.downtownStop,
     bureau: signs.bureau,
     coupons: tTravel('places.coupons'),
+    ramen: signs.ramen,
   };
   const [visit, setVisit] = useState<{
     number: number;
@@ -2807,6 +2930,7 @@ export function PaperScene({
             {visit.place === 'downtown' && <Downtown signs={signs} speakerTops={speakerTops} />}
             {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
             {visit.place === 'coupons' && <Coupons speakerTops={speakerTops} />}
+            {visit.place === 'ramen' && <Ramen speakerTops={speakerTops} />}
             <Pip
               input={input}
               room={SIDE_PLACES[visit.place]}
