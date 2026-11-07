@@ -136,22 +136,6 @@ export const PLAYABLE_SET_IDS = [
 
 export type SetId = (typeof PLAYABLE_SET_IDS)[number];
 
-// The sets a shopkeeper can sell. The others only have a binder for now.
-export const SOLD_SET_IDS: readonly SetId[] = [
-  '30th',
-  'me05',
-  'me04',
-  'me03',
-  'me02.5',
-  'me02',
-  'me01',
-  'sv10.5w',
-  'sv10.5b',
-  'sv10',
-  'sv09',
-  'swsh3',
-];
-
 export type PlayableSet = {
   id: SetId;
   name: string;
@@ -162,8 +146,4 @@ export type PlayableSet = {
 
 export function isPlayableSet(id: string | null): id is SetId {
   return PLAYABLE_SET_IDS.some((playable) => playable === id);
-}
-
-export function isSoldSet(id: string | null): id is SetId {
-  return SOLD_SET_IDS.some((sold) => sold === id);
 }

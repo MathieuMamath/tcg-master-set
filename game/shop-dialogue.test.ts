@@ -43,53 +43,52 @@ describe('setsSoldBy', () => {
     set('me05', '2026-07-01'),
     set('30th', '2026-09-01'),
     set('sv10', '2025-05-01'),
-    set('me03', '2026-03-01'),
-    set('me04', '2026-05-01'),
-    set('me02', '2026-01-01'),
+    set('base1', '1999-01-09'),
+    set('me01', '2025-09-01'),
+    set('xy1', '2014-02-05'),
+    set('dp1', '2007-05-01'),
+    set('neo1', '2000-12-16'),
   ];
-  const ids = (stock: (typeof SHOPKEEPER_STOCKS)[number], year = 2026) =>
-    setsSoldBy(stock, SETS, year).map(({ id }) => id);
+  const ids = (stock: (typeof SHOPKEEPER_STOCKS)[number]) =>
+    setsSoldBy(stock, SETS).map(({ id }) => id);
 
-  test('no shopkeeper sells a set that only has a binder', () => {
-    const withUnsold = [set('base1', '2026-10-01'), ...SETS];
-
-    for (const stock of SHOPKEEPER_STOCKS) {
-      expect(setsSoldBy(stock, withUnsold, 2026).map(({ id }) => id)).not.toContain('base1');
-    }
+  test('the eldest sells the 30th anniversary and the Mega Evolution sets, newest first', () => {
+    expect(ids('latest')).toEqual(['30th', 'me05', 'me01']);
   });
 
-  test('the library only sells binders of the sets on sale, newest first', () => {
-    const withUnsold = [set('base1', '2026-10-01'), ...SETS];
+  test('the middle one sells the older half of the rest, newest first', () => {
+    expect(ids('thisYear')).toEqual(['dp1', 'neo1', 'base1']);
+  });
 
-    expect(bindersForSale(withUnsold).map(({ id }) => id)).toEqual([
+  test('the youngest sells the newer half', () => {
+    expect(ids('older')).toEqual(['sv10', 'swsh3', 'xy1']);
+  });
+
+  test('with an odd number left, the middle one takes the extra set', () => {
+    const odd = [...SETS, set('ex1', '2003-06-18')];
+
+    expect(setsSoldBy('thisYear', odd)).toHaveLength(4);
+    expect(setsSoldBy('older', odd)).toHaveLength(3);
+  });
+
+  test('every set is sold by exactly one shopkeeper', () => {
+    const sold = SHOPKEEPER_STOCKS.flatMap((stock) => ids(stock));
+
+    expect([...sold].sort()).toEqual(SETS.map(({ id }) => id).sort());
+  });
+
+  test("the library sells every set's binder, newest first", () => {
+    expect(bindersForSale(SETS).map(({ id }) => id)).toEqual([
       '30th',
       'me05',
-      'me04',
-      'me03',
-      'me02',
+      'me01',
       'sv10',
       'swsh3',
+      'xy1',
+      'dp1',
+      'neo1',
+      'base1',
     ]);
-  });
-
-  test('the first shopkeeper sells the three newest sets', () => {
-    expect(ids('latest')).toEqual(['30th', 'me05', 'me04']);
-  });
-
-  test('the second sells the rest of this year', () => {
-    expect(ids('thisYear')).toEqual(['me03', 'me02']);
-  });
-
-  test('the third sells every older set', () => {
-    expect(ids('older')).toEqual(['sv10', 'swsh3']);
-  });
-
-  test('every set is sold by exactly one shopkeeper, whatever the year', () => {
-    for (const year of [2026, 2027]) {
-      const sold = SHOPKEEPER_STOCKS.flatMap((stock) => ids(stock, year));
-
-      expect([...sold].sort()).toEqual(SETS.map(({ id }) => id).sort());
-    }
   });
 });
 

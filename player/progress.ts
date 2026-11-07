@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, gte, sql } from 'drizzle-orm';
 import { isAdmin } from '@/auth/roles';
 import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
-import { loadLatestSoldSetId } from '@/cards/playable-sets';
+import { loadNewestSetId } from '@/cards/playable-sets';
 import { getDb } from '@/db/client';
 import {
   couponRedemptions,
@@ -513,7 +513,7 @@ export async function finishBasketball(
   userId: string,
   shots: unknown,
 ): Promise<BasketballResult | null> {
-  const latestSetId = await loadLatestSoldSetId();
+  const latestSetId = await loadNewestSetId();
 
   return getDb().transaction(async (transaction) => {
     const now = new Date();
@@ -743,7 +743,7 @@ export type FishingCatch = {
 // again. The treasure box pays in coins too if no set has been imported, since it has no booster
 // to give.
 export async function reelInItem(userId: string): Promise<FishingCatch> {
-  const latestSetId = await loadLatestSoldSetId();
+  const latestSetId = await loadNewestSetId();
 
   return getDb().transaction(async (transaction) => {
     const now = new Date();

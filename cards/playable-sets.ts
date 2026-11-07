@@ -1,13 +1,7 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cardSets, cardSetTranslations, cards, cardVariants } from '@/db/schema';
-import {
-  isPlayableSet,
-  PLAYABLE_SET_IDS,
-  type PlayableSet,
-  type SetId,
-  SOLD_SET_IDS,
-} from '@/game/card-sets';
+import { isPlayableSet, PLAYABLE_SET_IDS, type PlayableSet, type SetId } from '@/game/card-sets';
 
 // Only the sets that have been imported, so that the game never offers an empty one.
 export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {
@@ -54,12 +48,12 @@ export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {
   });
 }
 
-// The newest set the shop sells, among those that have been imported.
-export async function loadLatestSoldSetId(): Promise<SetId | null> {
+// The newest set the game plays with, among those that have been imported.
+export async function loadNewestSetId(): Promise<SetId | null> {
   const [latest] = await getDb()
     .select({ id: cardSets.id })
     .from(cardSets)
-    .where(inArray(cardSets.id, [...SOLD_SET_IDS]))
+    .where(inArray(cardSets.id, [...PLAYABLE_SET_IDS]))
     .orderBy(desc(cardSets.releaseDate))
     .limit(1);
   return latest && isPlayableSet(latest.id) ? latest.id : null;

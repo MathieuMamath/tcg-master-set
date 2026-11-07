@@ -1,5 +1,4 @@
 import type { PlayableSet, SetId } from './card-sets';
-import { isSoldSet } from './card-sets';
 
 export const BOOSTER_PRICE = 100;
 export const BINDER_PRICE = 500;
@@ -47,35 +46,36 @@ export function totalBoosters(wallet: Wallet): number {
   return Object.values(wallet.boosters).reduce((total, count) => total + count, 0);
 }
 
+// The raccoon triplets of the Card Den, by the ids their first stock had: `latest` is Filou, the
+// eldest, `thisYear` Frimousse, the middle one, and `older` Fripouille, the youngest. The ids
+// stay, because the event log records them.
 export const SHOPKEEPER_STOCKS = ['latest', 'thisYear', 'older'] as const;
 
 export type ShopkeeperStock = (typeof SHOPKEEPER_STOCKS)[number];
 
-const LATEST_SET_COUNT = 3;
-
-// One shopkeeper has the three newest sets, one the rest of this year, one all the others.
-export function setsSoldBy(
-  stock: ShopkeeperStock,
-  sets: readonly PlayableSet[],
-  currentYear: number,
-): PlayableSet[] {
-  const newestFirst = sets
-    .filter(({ id }) => isSoldSet(id))
-    .sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
-  if (stock === 'latest') {
-    return newestFirst.slice(0, LATEST_SET_COUNT);
-  }
-
-  const isThisYear = ({ releaseDate }: PlayableSet) => releaseDate.startsWith(`${currentYear}-`);
-  return newestFirst
-    .slice(LATEST_SET_COUNT)
-    .filter((set) => (stock === 'thisYear' ? isThisYear(set) : !isThisYear(set)));
+// The eldest's own shelf: the 30th anniversary set and the Mega Evolution series.
+function isEldestSet(id: SetId): boolean {
+  return id === '30th' || id.startsWith('me');
 }
 
-// The binders on sale are those of the sets on sale, newest first. Opening a set's binder is what
-// lets the player buy its boosters.
+const newestFirst = (a: PlayableSet, b: PlayableSet) => b.releaseDate.localeCompare(a.releaseDate);
+
+// Every set is on sale, each from one of the triplets. The eldest has the 30th anniversary and the
+// Mega Evolution sets. The others share the rest by age: the middle one takes the older half, the
+// youngest the newer one. Each shows hers newest first.
+export function setsSoldBy(stock: ShopkeeperStock, sets: readonly PlayableSet[]): PlayableSet[] {
+  if (stock === 'latest') {
+    return sets.filter(({ id }) => isEldestSet(id)).sort(newestFirst);
+  }
+  const oldestFirst = sets.filter(({ id }) => !isEldestSet(id)).sort((a, b) => newestFirst(b, a));
+  const half = Math.ceil(oldestFirst.length / 2);
+  return (stock === 'thisYear' ? oldestFirst.slice(0, half) : oldestFirst.slice(half)).sort(
+    newestFirst,
+  );
+}
+
+// Mamie Noisette sells every set's binder, newest first. Owning a set's binder is what lets the
+// player buy its boosters.
 export function bindersForSale(sets: readonly PlayableSet[]): PlayableSet[] {
-  return sets
-    .filter(({ id }) => isSoldSet(id))
-    .sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
+  return [...sets].sort(newestFirst);
 }

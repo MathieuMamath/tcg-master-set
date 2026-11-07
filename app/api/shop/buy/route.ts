@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { isSoldSet } from '@/game/card-sets';
+import { isPlayableSet } from '@/game/card-sets';
 import { parseBoosterQuantity } from '@/game/shop-dialogue';
 import { buyBooster } from '@/player/progress';
 
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const setId = parameters.get('set');
   const quantity = parseBoosterQuantity(parameters.get('quantity'));
 
-  if (!isSoldSet(setId)) {
+  if (!isPlayableSet(setId)) {
     return Response.json({ error: 'unknown-set' }, { status: 400 });
   }
   if (quantity === null) {

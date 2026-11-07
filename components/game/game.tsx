@@ -1201,7 +1201,7 @@ export function Game({ player, sets, progress }: Props) {
               stock={talkingTo}
               items={(talkingTo === 'binderSeller'
                 ? bindersForSale(sets)
-                : setsSoldBy(talkingTo, sets, new Date().getFullYear())
+                : setsSoldBy(talkingTo, sets)
               ).map((set) => {
                 const hasBinder = binders.includes(set.id);
                 return {
