@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.88](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.87...v0.1.88) (2026-11-07)
+
+### Bug Fixes
+
+* **cards:** show set logos that TCGdex only has as WebP ([#90](https://github.com/MathieuMamath/tcg-master-set/issues/90)) ([bf4043c](https://github.com/MathieuMamath/tcg-master-set/commit/bf4043c27b178d5bd5cab083d4a57ad356b27250))
+
 ## [0.1.87](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.86...v0.1.87) (2026-11-07)
 
 ### Bug Fixes
