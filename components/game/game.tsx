@@ -14,6 +14,7 @@ import { isValidOffset, weatherAt } from '@/game/clock';
 import type { DalgonaShape, Press } from '@/game/dalgona';
 import type { MemoryStatus } from '@/game/memory-game';
 import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
+import { latestNewsId, NEWS, type NewsItem, parseLastSeenId, unreadNews } from '@/game/news';
 import { nextProverb, pickProverb } from '@/game/proverbs';
 import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests';
 import {
@@ -56,6 +57,7 @@ import { ClockBadge, useGameClock, WeatherLayer } from './game-clock';
 import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
 import { Joystick } from './joystick';
 import { MemoryDialog } from './memory-dialog';
+import { NewsSheet } from './news-sheet';
 import { NpcDialog, type Speaker } from './npc-dialog';
 import type { MovementInput } from './paper-scene';
 import { PlayerNameContext } from './player-name';
@@ -74,6 +76,9 @@ const PaperScene = dynamic(() => import('./paper-scene').then((module) => module
 });
 
 const INTERACT_KEY = 'KeyE';
+
+// Where the browser keeps the id of the last "What's new?" note it showed.
+const NEWS_SEEN_KEY = 'tcg-master-set:news-seen';
 
 type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker;
 
@@ -170,6 +175,8 @@ export function Game({ player, sets, progress }: Props) {
   const [isBinderOpen, setIsBinderOpen] = useState(false);
   const [isBagOpen, setIsBagOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  // The "What's new?" sheet, with the notes it tells besides the pinned ones.
+  const [newsShown, setNewsShown] = useState<readonly NewsItem[] | null>(null);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isCouponRegisterOpen, setIsCouponRegisterOpen] = useState(false);
@@ -190,6 +197,7 @@ export function Game({ player, sets, progress }: Props) {
   const isPapySaying = interaction === 'grandpa' && memoryWonOn === questDay(new Date());
   const isDialogOpen =
     isTalking ||
+    newsShown !== null ||
     isBinderOpen ||
     isBagOpen ||
     isSettingsOpen ||
@@ -296,6 +304,28 @@ export function Game({ player, sets, progress }: Props) {
       window.removeEventListener('blur', releaseKeys);
     };
   }, []);
+
+  // On arrival, the sheet tells what changed since the last note this browser showed. Kept in the
+  // browser only: another device, or cleared site data, shows the recent notes again.
+  useEffect(() => {
+    try {
+      const unread = unreadNews(parseLastSeenId(localStorage.getItem(NEWS_SEEN_KEY)));
+      if (unread.length > 0) {
+        setNewsShown(unread);
+      }
+    } catch {
+      // No storage, such as in a private window: the sheet stays in the settings.
+    }
+  }, []);
+
+  const closeNews = () => {
+    setNewsShown(null);
+    try {
+      localStorage.setItem(NEWS_SEEN_KEY, String(latestNewsId()));
+    } catch {
+      // Without storage, the next visit tells the news again.
+    }
+  };
 
   const stopWalking = () => {
     input.current.keyboard = STILL;
@@ -1033,9 +1063,14 @@ export function Game({ player, sets, progress }: Props) {
           <SettingsMenu
             sets={sets}
             onRedeemed={(updated) => setWallet(updated)}
+            onShowNews={() => {
+              setIsSettingsOpen(false);
+              setNewsShown(NEWS);
+            }}
             onClose={() => setIsSettingsOpen(false)}
           />
         )}
+        {newsShown && <NewsSheet items={newsShown} onClose={closeNews} />}
         {isActivityOpen && (
           <ActivityDialog
             activity={activity}

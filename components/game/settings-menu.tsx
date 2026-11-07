@@ -16,12 +16,15 @@ type Props = {
   sets: readonly PlayableSet[];
   // A coupon used here gives coins or boosters, shown at once in the game's counters.
   onRedeemed: (wallet: Wallet) => void;
+  // Opens the "What's new?" sheet with every note.
+  onShowNews: () => void;
   onClose: () => void;
 };
 
-export function SettingsMenu({ sets, onRedeemed, onClose }: Props) {
+export function SettingsMenu({ sets, onRedeemed, onShowNews, onClose }: Props) {
   const t = useTranslations('Settings');
   const tCoupon = useTranslations('Coupons.redeem');
+  const tNews = useTranslations('News');
   const [code, setCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [result, setResult] = useState<{ kind: 'done' | 'error'; text: string } | null>(null);
@@ -145,6 +148,13 @@ export function SettingsMenu({ sets, onRedeemed, onClose }: Props) {
           {result?.text}
         </p>
       </form>
+      <button
+        type="button"
+        onClick={onShowNews}
+        className="mt-2 w-full cursor-pointer ui-paper-button bg-ui-paper py-1 font-semibold hover:bg-ui-ink/10"
+      >
+        {tNews('open')}
+      </button>
       <button
         type="button"
         onClick={signOut}

@@ -829,5 +829,26 @@
       "office": "Administrative office",
       "coupons": "Coupon floor"
     }
+  },
+  "News": {
+    "open": "What’s new?",
+    "title": "What’s new?",
+    "intro": "What changed in the village since you last came by.",
+    "pinned": "Headline",
+    "feature": "New",
+    "fix": "Fix",
+    "close": "Got it!",
+    "items": {
+      "versionBadge": "The game’s version number now shows small in the bottom-left corner. Handy when you tell us about a problem!",
+      "passwordEye": "An eye shows your password as you type it, and signing up asks you to confirm it.",
+      "binderNeeded": "A booster won before you own its binder now waits in your bag until you buy the binder from Granny Hazel.",
+      "singleBoosterCut": "On phones, cutting a pack could open several boosters at once, or show an error instead of the cards. One swipe now opens a single booster.",
+      "dialogFocus": "After a game, the button of the character’s answer is ready to press, whatever your browser.",
+      "dalgonaFreeze": "Gaspard’s biscuit no longer freezes when the time of day or the weather changes mid-game.",
+      "dalgonaGiveUp": "In the dalgona, Space on “Give up” now gives up instead of carving.",
+      "setLogos": "A few sets showed their name instead of their logo. Their logos are back.",
+      "everySetOnSale": "Every set is on sale! Granny Hazel has every binder, and the Den’s triplets share the boosters: the 30th anniversary and the Mega Evolutions at Filou’s, the sets of old at Frimousse’s, the newer ones at Fripouille’s.",
+      "newsSheet": "This very sheet! It tells you what changed in the game whenever you come by, and you can read it again from the settings."
+    }
   }
 }

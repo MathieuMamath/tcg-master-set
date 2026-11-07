@@ -36,6 +36,8 @@ If the change touches the UI or the paper scene, the gate proves none of what ma
 
 Every PR carries its own documentation. Ask what this change makes untrue in `README.md`, `CLAUDE.md` and this file, and fix it in the same PR. Prefer deleting a claim to updating it. If a decision is reversed, keep the reasoning and mark it superseded.
 
+A change players can see, a feature or a fix they would notice, also gets its note in the "What's new?" sheet: an entry at the end of `NEWS` in `game/news.ts`, with the next id and today's date, and its text under `News.items` in both `messages/en.json` and `messages/fr.json`, written for players, in a sentence or two. Pin it with `isPinned` only when the owner asks. Purely technical changes get no note.
+
 ## 4. Push
 
 ```bash
