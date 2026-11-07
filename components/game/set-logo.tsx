@@ -1,14 +1,28 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { logoFiles } from '@/cards/tcgdex';
 import { clearEdgeBackground } from '@/game/logo-background';
 
+// The first of the logo's files that loads.
+async function loadImage(logoUrl: string): Promise<HTMLImageElement> {
+  for (const file of logoFiles(logoUrl)) {
+    const image = new Image();
+    // Without this, the browser refuses to let the canvas read the image.
+    image.crossOrigin = 'anonymous';
+    image.src = file;
+    try {
+      await image.decode();
+      return image;
+    } catch {
+      // Missing in this format: the next one may have it.
+    }
+  }
+  throw new Error(`No logo at ${logoUrl}`);
+}
+
 async function loadLogo(logoUrl: string) {
-  const image = new Image();
-  // Without this, the browser refuses to let the canvas read the image.
-  image.crossOrigin = 'anonymous';
-  image.src = `${logoUrl}.png`;
-  await image.decode();
+  const image = await loadImage(logoUrl);
 
   const canvas = document.createElement('canvas');
   canvas.width = image.naturalWidth;

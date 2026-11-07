@@ -4,6 +4,7 @@ import {
   CARD_LOCALES,
   catalogueSummary,
   expectedLogoUrl,
+  logoFiles,
   mergeCardLanguages,
   type ParsedCard,
   parseCard,
@@ -150,4 +151,11 @@ describe('catalogueSummary', () => {
       missingImages: ['set-1-1'],
     });
   });
+});
+
+test('tries a set logo as PNG, then as WebP', () => {
+  expect(logoFiles('https://assets.test.invalid/fr/ex/ex12/logo')).toEqual([
+    'https://assets.test.invalid/fr/ex/ex12/logo.png',
+    'https://assets.test.invalid/fr/ex/ex12/logo.webp',
+  ]);
 });

@@ -14,6 +14,7 @@ import {
   type CatalogueCard,
   catalogueSummary,
   expectedLogoUrl,
+  logoFiles,
   mergeCardLanguages,
   type ParsedCard,
   type ParsedSet,
@@ -115,12 +116,16 @@ async function withLogo(locale: CardLocale, set: ParsedSet) {
     return { locale, set };
   }
 
-  // Checked as an image, because the image server answers 200 for addresses that don't exist.
+  // Checked as an image, because the image server answers 200 for addresses that don't exist, and
+  // in each format, as some logos only exist as one of them.
   const logoUrl = expectedLogoUrl(locale, set.seriesId, set.id);
-  const response = await fetch(`${logoUrl}.png`, { method: 'HEAD' });
-  const isImage = response.ok && response.headers.get('content-type')?.startsWith('image/');
-
-  return { locale, set: isImage ? { ...set, logoUrl } : set };
+  for (const file of logoFiles(logoUrl)) {
+    const response = await fetch(file, { method: 'HEAD' });
+    if (response.ok && response.headers.get('content-type')?.startsWith('image/')) {
+      return { locale, set: { ...set, logoUrl } };
+    }
+  }
+  return { locale, set };
 }
 
 async function fetchSet(id: string) {

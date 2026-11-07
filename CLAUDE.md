@@ -64,7 +64,7 @@ Production runs the `Dockerfile` and never migrates on its own: a migration is a
 
 ## Cards
 
-The card catalogue comes from [TCGdex](https://tcgdex.dev/) and only lives in the database, never in the repository. Tests use placeholder data. `pnpm cards:import` copies a set in one transaction and can run again safely. Card images stay hosted by TCGdex.
+The card catalogue comes from [TCGdex](https://tcgdex.dev/) and only lives in the database, never in the repository. Tests use placeholder data. `pnpm cards:import` copies a set in one transaction and can run again safely. Card images stay hosted by TCGdex. So do set logos, which TCGdex has as PNG, WebP or both: `logoFiles` in `cards/tcgdex.ts` lists them in the order to try, for the game and for the import alike.
 
 The game plays with the sets in `game/card-sets.ts` that have been imported, and shopkeepers only sell those in `SOLD_SET_IDS`. A player can only buy a set's boosters after buying its binder from Mamie Noisette, the hedgehog who keeps the bookshop, and the binder list only shows the binders they bought. Talking to a seller offers to open her shop window, `components/game/shop-window.tsx`: every item in a grid, and the chosen one's details with the button to buy it. Boosters can be bought several at a time, up to `MAX_BOOSTER_QUANTITY` in `game/shop-dialogue.ts`, paid for and added in one transaction. A set without its own recipe in `game/booster.ts` gets one built from its rarities, and a set without its own pack theme in `components/game/pack-art.tsx` takes the colour of its logo from `game/set-colors.ts`.
 
