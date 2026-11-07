@@ -17,9 +17,9 @@
     "countDown": "−{count}",
     "binderButton": "Binder",
     "autoSaving": "Auto-saving...",
-    "latest": "Talk (new releases)",
-    "thisYear": "Talk (this year)",
-    "older": "Talk (earlier sets)",
+    "latest": "Talk (Mega Marvels)",
+    "thisYear": "Talk (Bygone Treasures)",
+    "older": "Talk (Lucky Picks)",
     "binderSeller": "Talk (binders)",
     "dash": "Dash",
     "grandma": "Talk (Léa)",
@@ -51,24 +51,24 @@
   },
   "Shopkeeper": {
     "names": {
-      "latest": "New releases",
-      "thisYear": "This year",
-      "older": "Earlier sets",
+      "latest": "Mega Marvels",
+      "thisYear": "Bygone Treasures",
+      "older": "Lucky Picks",
       "binderSeller": "Granny Hazel",
       "park": "Park",
       "arcade": "Arcade",
       "basketball": "Basketball"
     },
     "greetings": {
-      "latest": "Welcome to the Den! Here, it’s always the freshest.",
-      "thisYear": "Hello! I’ve shelved all of this year’s sets, in order of release.",
-      "older": "Psst… I’ve kept all the older sets. Come and rummage!",
+      "latest": "Welcome to Mega Marvels! The 30th anniversary and every Mega Evolution set, no less.",
+      "thisYear": "Hello! The sets of yesteryear rest here, right from the very first ones. Take your time.",
+      "older": "Psst… All the more recent sets are with me. A lucky pick is waiting!",
       "binderSeller": "Oh, there you are, dear! Have you come for a binder for your collection?"
     },
     "thanks": {
-      "latest": "Great pick, it’s brand new!",
-      "thisYear": "A fine choice, I’m sure of it!",
-      "older": "Hee hee, good luck with your cards!",
+      "latest": "Mega choice! May luck be with you.",
+      "thisYear": "A true classic. Happy opening!",
+      "older": "Hee hee, I can feel a lucky pick!",
       "binderSeller": "Take good care of it, dear!"
     },
     "notEnoughCoins": "Sorry, you don't have enough coins.",
@@ -87,9 +87,9 @@
       "binderSeller": "the neighbourhood bookseller"
     },
     "browse": {
-      "latest": "Show me what’s new!",
-      "thisYear": "What do you have from this year?",
-      "older": "Show me your treasures!",
+      "latest": "Show me the Mega Evolutions!",
+      "thisYear": "Show me the sets of old!",
+      "older": "What have you got on the shelves?",
       "binderSeller": "Can I see your binders, Granny?"
     },
     "nothing": {
@@ -504,9 +504,9 @@
     "bureau": "Administrative Office"
   },
   "Hails": {
-    "latest": "Welcome to the Den!",
-    "thisYear": "Hello, hello!",
-    "older": "Psst… come and see!",
+    "latest": "A mega welcome!",
+    "thisYear": "Feeling nostalgic?",
+    "older": "Psst… feeling lucky?",
     "binderSeller": "There you are, dear!",
     "grandma": "Ah, {name}! Just in time!",
     "grandpa": "Fancy a game?",

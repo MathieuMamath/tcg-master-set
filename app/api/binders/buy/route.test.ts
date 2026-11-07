@@ -37,8 +37,8 @@ test('refuses a visitor who is not signed in', async () => {
   expect((await buy('swsh3')).status).toBe(401);
 });
 
-test('refuses the binder of a set that is not on sale', async () => {
-  expect((await buy('base1')).status).toBe(400);
+test('refuses the binder of a set the game does not play with', async () => {
+  expect((await buy('other')).status).toBe(400);
   expect(buyBinder).not.toHaveBeenCalled();
 });
 

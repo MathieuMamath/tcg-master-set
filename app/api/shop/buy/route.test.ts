@@ -49,8 +49,8 @@ test('hides database errors from the player', async () => {
   expect(await response.text()).not.toContain('secret-host');
 });
 
-test('refuses a set that has a binder but is not for sale', async () => {
-  const response = await buy('base1');
+test('refuses a set the game does not play with', async () => {
+  const response = await buy('other');
 
   expect(response.status).toBe(400);
   expect(buyBooster).not.toHaveBeenCalled();

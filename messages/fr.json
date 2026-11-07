@@ -17,9 +17,9 @@
     "countDown": "−{count}",
     "binderButton": "Classeur",
     "autoSaving": "Sauvegarde automatique...",
-    "latest": "Parler (nouveautés)",
-    "thisYear": "Parler (cette année)",
-    "older": "Parler (précédentes)",
+    "latest": "Parler (Méga Merveilles)",
+    "thisYear": "Parler (Trésors d’Antan)",
+    "older": "Parler (Bonnes Pioches)",
     "binderSeller": "Parler (classeurs)",
     "dash": "Dash",
     "grandma": "Parler (Léa)",
@@ -51,24 +51,24 @@
   },
   "Shopkeeper": {
     "names": {
-      "latest": "Nouveautés",
-      "thisYear": "Cette année",
-      "older": "Collections précédentes",
+      "latest": "Méga Merveilles",
+      "thisYear": "Trésors d’Antan",
+      "older": "Bonnes Pioches",
       "binderSeller": "Mamie Noisette",
       "park": "Parc",
       "arcade": "Arcade",
       "basketball": "Basket"
     },
     "greetings": {
-      "latest": "Bienvenue à la Tanière ! Ici, c’est toujours le plus frais.",
-      "thisYear": "Bonjour ! J’ai rangé toutes les séries de cette année, par ordre de sortie.",
-      "older": "Psst… J’ai gardé toutes les anciennes séries. Viens fouiller !",
+      "latest": "Bienvenue aux Méga Merveilles ! Les 30 ans et toutes les Méga-Évolutions, rien que ça.",
+      "thisYear": "Bonjour ! Ici dorment les séries d’antan, depuis les toutes premières. Prends ton temps.",
+      "older": "Psst… Toutes les séries plus récentes, c’est chez moi. Une bonne pioche t’attend !",
       "binderSeller": "Oh, te revoilà mon trésor ! Tu viens chercher un classeur pour ta collection ?"
     },
     "thanks": {
-      "latest": "Excellent choix, c’est tout frais !",
-      "thisYear": "Bonne pioche, j’en suis sûre !",
-      "older": "Hé hé, bonne chance pour tes cartes !",
+      "latest": "Méga choix ! Que la chance soit avec toi.",
+      "thisYear": "Un vrai classique, bonne ouverture !",
+      "older": "Hé hé, je sens la bonne pioche !",
       "binderSeller": "Prends-en bien soin, mon trésor !"
     },
     "notEnoughCoins": "Oups, il te manque des pièces.",
@@ -87,9 +87,9 @@
       "binderSeller": "la libraire du quartier"
     },
     "browse": {
-      "latest": "Montre-moi les nouveautés !",
-      "thisYear": "Qu’as-tu de cette année ?",
-      "older": "Fais voir tes trésors !",
+      "latest": "Montre-moi les Méga-Évolutions !",
+      "thisYear": "Fais voir les séries d’antan !",
+      "older": "Qu’est-ce que tu as en rayon ?",
       "binderSeller": "Je peux voir tes classeurs, Mamie ?"
     },
     "nothing": {
@@ -504,9 +504,9 @@
     "bureau": "Bureau administratif"
   },
   "Hails": {
-    "latest": "Bienvenue à la Tanière !",
-    "thisYear": "Bonjour, bonjour !",
-    "older": "Psst… viens voir !",
+    "latest": "Méga bienvenue !",
+    "thisYear": "Un brin de nostalgie ?",
+    "older": "Psst… bonne pioche ?",
     "binderSeller": "Te revoilà, mon trésor !",
     "grandma": "Ah, {name} ! Tu tombes bien !",
     "grandpa": "Une petite partie ?",
