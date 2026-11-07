@@ -829,5 +829,26 @@
       "office": "Bureau administratif",
       "coupons": "Étage des coupons"
     }
+  },
+  "News": {
+    "open": "Quoi de neuf ?",
+    "title": "Quoi de neuf ?",
+    "intro": "Ce qui a changé au village depuis ta dernière visite.",
+    "pinned": "À la une",
+    "feature": "Nouveauté",
+    "fix": "Correctif",
+    "close": "C’est noté !",
+    "items": {
+      "versionBadge": "Le numéro de version du jeu s’affiche en petit, en bas à gauche de l’écran. Pratique pour nous signaler un souci !",
+      "passwordEye": "Un œil permet d’afficher ton mot de passe pendant que tu le tapes, et l’inscription demande de le confirmer.",
+      "binderNeeded": "Un booster gagné sans son classeur attend désormais dans ton sac, jusqu’à ce que tu achètes le classeur chez Mamie Noisette.",
+      "singleBoosterCut": "Sur téléphone, découper un paquet pouvait ouvrir plusieurs boosters d’un coup, ou afficher une erreur à la place des cartes. Un geste n’ouvre plus qu’un seul booster.",
+      "dialogFocus": "Après une partie, le bouton de la réponse du personnage est directement sélectionné, quel que soit ton navigateur.",
+      "dalgonaFreeze": "Le biscuit de Gaspard ne se fige plus quand l’heure ou la météo change en pleine partie.",
+      "dalgonaGiveUp": "Au dalgona, Espace sur « Abandonner » abandonne bien la partie, au lieu de graver.",
+      "setLogos": "Quelques séries affichaient leur nom à la place de leur logo. Leurs logos sont de retour.",
+      "everySetOnSale": "Toutes les séries sont en vente ! Mamie Noisette a tous les classeurs, et les triplées de la Tanière se partagent les boosters : les 30 ans et les Méga-Évolutions chez Filou, les séries d’antan chez Frimousse, les plus récentes chez Fripouille.",
+      "newsSheet": "Cette feuille ! Elle te raconte ce qui change dans le jeu à chaque visite, et tu peux la relire depuis les réglages."
+    }
   }
 }
