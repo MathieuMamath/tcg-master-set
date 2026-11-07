@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BISCUIT_BOX,
   BISCUIT_RADIUS,
@@ -276,6 +276,13 @@ export function DalgonaDialog({ shape, onFinish, onEnd }: Props) {
     }
   };
 
+  // Space presses the focused button, such as "Give up", rather than carving. E carves from
+  // anywhere, as no button answers to it.
+  const isOnOtherButton = (event: KeyboardEvent) =>
+    event.code === 'Space' &&
+    event.target instanceof HTMLButtonElement &&
+    event.target !== carveButton.current;
+
   const secondsLeft = Math.max(0, Math.ceil((GAME_MS - carving.ms) / 1000));
   const progress = carving.distance / outlineLength(shape);
   const resultText =
@@ -291,7 +298,7 @@ export function DalgonaDialog({ shape, onFinish, onEnd }: Props) {
       aria-labelledby="dalgona-title"
       onClose={() => (step === 'result' ? showGaspard() : onEnd('failed'))}
       onKeyDown={(event) => {
-        if (step === 'playing' && CARVE_KEYS.has(event.code)) {
+        if (step === 'playing' && CARVE_KEYS.has(event.code) && !isOnOtherButton(event)) {
           // Held down, rather than clicked: the button's own click would come on letting go.
           event.preventDefault();
           if (!event.repeat) {
@@ -303,8 +310,11 @@ export function DalgonaDialog({ shape, onFinish, onEnd }: Props) {
       }}
       onKeyUp={(event) => {
         if (CARVE_KEYS.has(event.code)) {
-          event.preventDefault();
           pressUp();
+          // A button presses on Space's release, which must still reach "Give up".
+          if (!isOnOtherButton(event)) {
+            event.preventDefault();
+          }
         }
       }}
       className="ui-pop-in m-auto w-[min(28rem,calc(100%-1rem))] max-w-none overflow-visible bg-transparent font-game text-ui-ink backdrop:bg-ui-ink/50"
