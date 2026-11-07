@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.87](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.86...v0.1.87) (2026-11-07)
+
+### Bug Fixes
+
+* **quests:** let Space press the dalgona's Give up button ([#89](https://github.com/MathieuMamath/tcg-master-set/issues/89)) ([16a3a35](https://github.com/MathieuMamath/tcg-master-set/commit/16a3a35d69ca6761ddb226e652341c85f447c4f4))
+
 ## [0.1.86](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.85...v0.1.86) (2026-11-06)
 
 ### Bug Fixes
