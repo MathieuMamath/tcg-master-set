@@ -64,6 +64,15 @@ import {
   questDay,
 } from '@/game/quests';
 import { drawRaffle, RAFFLE_COINS, RAFFLE_QUEST, type RaffleOutcome } from '@/game/raffle';
+import {
+  canFinishShift,
+  playShift,
+  RAMEN_QUESTS,
+  type RamenJob,
+  shiftCoins,
+  shiftSeed,
+  shiftStars,
+} from '@/game/ramen';
 import type { Report } from '@/game/reports';
 import {
   BINDER_PRICE,
@@ -581,6 +590,97 @@ export async function finishBasketball(
       reward: paidReward,
       wasAlreadyPaid,
       boosterSetId,
+      wallet: await loadWallet(transaction, userId),
+    };
+  });
+}
+
+// A shift at the ramen shop begins: its moment is the seed of its orders, sent to the browser to
+// show them. Starting again replaces a shift that was left halfway.
+export async function startRamenShift(userId: string, job: RamenJob): Promise<{ seed: number }> {
+  const questId = RAMEN_QUESTS[job];
+  return getDb().transaction(async (transaction) => {
+    const startedAt = new Date();
+    await transaction
+      .insert(playerQuests)
+      .values({ userId, questId, startedAt })
+      .onConflictDoUpdate({
+        target: [playerQuests.userId, playerQuests.questId],
+        set: { startedAt },
+      });
+    await recordEvent(transaction, userId, 'quest.started', { questId });
+    return { seed: shiftSeed(startedAt) };
+  });
+}
+
+export type RamenShiftResult = {
+  score: number;
+  mistakes: number;
+  coins: number;
+  // The shift earned coins, but the day's pay was already given.
+  wasAlreadyPaid: boolean;
+  wallet: Wallet;
+};
+
+// Null when no shift is under way, or when its presses can't have happened. The row is locked and
+// the shift used up with its pay, so that it can only pay once a day. A shift that earns nothing
+// leaves the day's pay to be won.
+export async function finishRamenShift(
+  userId: string,
+  job: RamenJob,
+  actions: unknown,
+): Promise<RamenShiftResult | null> {
+  const questId = RAMEN_QUESTS[job];
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    await loadWallet(transaction, userId);
+    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId));
+    const [attempt] = await transaction
+      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(quest)
+      .for('update');
+    const result = attempt?.startedAt
+      ? playShift(job, shiftSeed(attempt.startedAt), actions)
+      : null;
+    if (
+      !attempt?.startedAt ||
+      !result ||
+      !canFinishShift(attempt.startedAt, now, result.endedAtMs, job)
+    ) {
+      if (attempt?.startedAt) {
+        await recordEvent(transaction, userId, 'quest.rejected', { questId });
+      }
+      return null;
+    }
+
+    const earned = shiftCoins(job, result.score);
+    const wasAlreadyPaid = earned > 0 && !canStartQuest(attempt, now);
+    const coins = wasAlreadyPaid ? 0 : earned;
+    await transaction
+      .update(playerQuests)
+      .set({ startedAt: null, ...(coins > 0 ? { completedOn: questDay(now) } : {}) })
+      .where(quest);
+    if (coins > 0) {
+      await transaction
+        .update(playerWallets)
+        .set({ coins: sql`${playerWallets.coins} + ${coins}`, updatedAt: new Date() })
+        .where(eq(playerWallets.userId, userId));
+    }
+    await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
+      questId,
+      outcome: wasAlreadyPaid ? 'alreadyPaid' : coins > 0 ? 'coins' : 'none',
+      coins,
+      boosterSetId: null,
+      score: result.score,
+      stars: shiftStars(job, result.score),
+    });
+    return {
+      score: result.score,
+      mistakes: result.mistakes,
+      coins,
+      wasAlreadyPaid,
       wallet: await loadWallet(transaction, userId),
     };
   });

@@ -587,6 +587,141 @@ him, the bus rumbling, and dots that wait. */
   animation: ui-travel-rise 900ms ease-in-out infinite reverse;
 }
 
+/* Ramen Yuzu's service: points rising from a table, an angry guest, a guest sitting down, and the
+   bowl in hand. */
+@keyframes ui-float-up {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(0.9);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -2.6rem) scale(1.1);
+  }
+}
+
+@keyframes ui-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-5px) rotate(-3deg);
+  }
+  40%,
+  80% {
+    transform: translateX(5px) rotate(3deg);
+  }
+}
+
+@keyframes ui-seat-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.8rem) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-in-hand {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(2deg);
+  }
+}
+
+@keyframes ui-wobble {
+  0%,
+  100% {
+    transform: rotate(calc(var(--wobble, 0deg) * -1));
+  }
+  50% {
+    transform: rotate(var(--wobble, 0deg));
+  }
+}
+
+@keyframes ui-bubble {
+  from {
+    opacity: 0.9;
+    transform: translateY(0) scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-2.2rem) scale(1.2);
+  }
+}
+
+@keyframes ui-belt {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 2rem;
+  }
+}
+
+@keyframes ui-scrub {
+  0%,
+  100% {
+    transform: translate(-60%, -50%) rotate(-12deg);
+  }
+  50% {
+    transform: translate(-30%, -40%) rotate(10deg);
+  }
+}
+
+@keyframes ui-pour {
+  from {
+    background-position-y: 0;
+  }
+  to {
+    background-position-y: 1.5rem;
+  }
+}
+
+.ui-scrub {
+  animation: ui-scrub 220ms ease-in-out infinite;
+}
+
+.ui-pour {
+  animation: ui-pour 300ms linear infinite;
+}
+
+.ui-wobble {
+  animation: ui-wobble 900ms ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.ui-bubble {
+  animation: ui-bubble 700ms ease-out forwards;
+}
+
+.ui-belt {
+  animation: ui-belt 600ms linear infinite;
+}
+
+.ui-float-up {
+  animation: ui-float-up 900ms ease-out forwards;
+}
+
+.ui-shake {
+  animation: ui-shake 360ms ease-in-out;
+}
+
+.ui-seat-in {
+  animation: ui-seat-in 260ms ease-out;
+}
+
+.ui-in-hand {
+  animation: ui-in-hand 900ms ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ui-binder-open,
   .ui-binder-move,
@@ -615,7 +750,15 @@ him, the bus rumbling, and dots that wait. */
   .ui-travel-ground,
   .ui-travel-dot,
   .ui-travel-rise,
-  .ui-travel-sink {
+  .ui-travel-sink,
+  .ui-shake,
+  .ui-seat-in,
+  .ui-in-hand,
+  .ui-wobble,
+  .ui-bubble,
+  .ui-belt,
+  .ui-scrub,
+  .ui-pour {
     animation: none;
   }
 }

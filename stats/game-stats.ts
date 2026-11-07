@@ -44,6 +44,8 @@ export type GameStats = {
     finished: number;
     rejected: number;
     outcomes: { outcome: string; count: number }[];
+    // Finished attempts by the stars they earned, for the quests that give stars.
+    stars: { stars: number; count: number }[];
   }[];
   dailyBonuses: number;
   players: {
@@ -90,6 +92,7 @@ type DetailField =
   | 'newCards'
   | 'duplicateCoins'
   | 'outcome'
+  | 'stars'
   | 'place'
   | 'device'
   | 'referrer'
@@ -186,6 +189,11 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
     .from(gameEvents)
     .where(inPeriod(ofType('quest.finished')))
     .groupBy(detail('questId'), detail('outcome'));
+  const starRows = await database
+    .select({ questId: detail('questId'), stars: detail('stars'), total: count() })
+    .from(gameEvents)
+    .where(inPeriod(ofType('quest.finished'), sql`${gameEvents.details} ? 'stars'`))
+    .groupBy(detail('questId'), detail('stars'));
   const questIds = [...new Set(questRows.map(({ questId }) => String(questId)))].sort();
   const questTotal = (type: GameEventType, questId: string) =>
     Number(
@@ -200,6 +208,10 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
       .filter((row) => String(row.questId) === questId)
       .map(({ outcome, total }) => ({ outcome: String(outcome), count: Number(total) }))
       .sort((first, second) => second.count - first.count),
+    stars: starRows
+      .filter((row) => String(row.questId) === questId)
+      .map(({ stars, total }) => ({ stars: Number(stars), count: Number(total) }))
+      .sort((first, second) => first.stars - second.stars),
   }));
 
   // Players: who joined, came back, played, and where they went. Counted, never named.

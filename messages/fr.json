@@ -47,7 +47,10 @@
     "sleeping": "Zzz… Bonne nuit, {name}.",
     "wakingUp": "Le jour se lève !",
     "trotte": "Parler (Mlle Trotte)",
-    "elevator": "Prendre l’ascenseur"
+    "elevator": "Prendre l’ascenseur",
+    "enterRamen": "Entrer chez Ramen Yuzu",
+    "leaveRamen": "Sortir",
+    "ramenChef": "Parler (Yuzu)"
   },
   "Shopkeeper": {
     "names": {
@@ -501,7 +504,8 @@
     "arcade": "Arcade",
     "dalgona": "Dalgona",
     "raffle": "Tombola",
-    "bureau": "Bureau administratif"
+    "bureau": "Bureau administratif",
+    "ramen": "Ramen Yuzu"
   },
   "Hails": {
     "latest": "Méga bienvenue !",
@@ -515,7 +519,8 @@
     "berenice": "Tentez votre chance !",
     "hulotte": "Ah, un visiteur !",
     "brutus": "Halte !",
-    "trotte": "Un coupon à tamponner ?"
+    "trotte": "Un coupon à tamponner ?",
+    "ramenChef": "Une petite faim ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -538,7 +543,7 @@
     },
     "bonus": {
       "title": "Récompense du jour",
-      "reward": "{count, number} pièces en terminant toutes les quêtes du jour",
+      "reward": "{count, number} pièces en terminant {goal} quêtes du jour, au choix",
       "progress": "{done} / {total} quêtes",
       "claim": "Récupérer",
       "claimed": "Récupérée !"
@@ -567,6 +572,18 @@
       "berenice": {
         "name": "La tombola de Bérénice",
         "where": "Dans la rue, près de l’arcade"
+      },
+      "ramenDishes": {
+        "name": "La plonge de Yuzu",
+        "where": "Chez Ramen Yuzu, en ville"
+      },
+      "ramenKitchen": {
+        "name": "Commis chez Yuzu",
+        "where": "Chez Ramen Yuzu, en ville"
+      },
+      "ramenService": {
+        "name": "Le service chez Yuzu",
+        "where": "Chez Ramen Yuzu, en ville"
       }
     },
     "status": {
@@ -657,7 +674,8 @@
     "quests": {
       "dailyBonuses": "Récompenses du jour réclamées",
       "byQuest": "Par quête",
-      "counts": "{started} commencées · {finished} terminées · {rejected} refusées"
+      "counts": "{started} commencées · {finished} terminées · {rejected} refusées",
+      "stars": "{stars, plural, =0 {Aucune étoile} one {# étoile} other {# étoiles}}"
     },
     "outcomes": {
       "rewarded": "Payée",
@@ -760,7 +778,8 @@
     "places": {
       "bedroom": "La chambre de {name}",
       "flat": "Chez Léa",
-      "coupons": "L’étage des coupons"
+      "coupons": "L’étage des coupons",
+      "ramen": "Ramen Yuzu"
     },
     "tips": {
       "0": "Un doublon n’est jamais perdu : il rapporte des pièces selon sa rareté.",
@@ -848,7 +867,141 @@
       "dalgonaGiveUp": "Au dalgona, Espace sur « Abandonner » abandonne bien la partie, au lieu de graver.",
       "setLogos": "Quelques séries affichaient leur nom à la place de leur logo. Leurs logos sont de retour.",
       "everySetOnSale": "Toutes les séries sont en vente ! Mamie Noisette a tous les classeurs, et les triplées de la Tanière se partagent les boosters : les 30 ans et les Méga-Évolutions chez Filou, les séries d’antan chez Frimousse, les plus récentes chez Fripouille.",
-      "newsSheet": "Cette feuille ! Elle te raconte ce qui change dans le jeu à chaque visite, et tu peux la relire depuis les réglages."
+      "newsSheet": "Cette feuille ! Elle te raconte ce qui change dans le jeu à chaque visite, et tu peux la relire depuis les réglages.",
+      "ramenShop": "Ramen Yuzu ouvre en ville, entre les tours ! Yuzu la panda roux t’embauche pour trois petits boulots payés en pièces : la plonge, la cuisine et le service en salle.",
+      "anySixQuests": "Le bonus du jour se gagne maintenant avec 6 quêtes au choix : plus besoin de toutes les faire."
+    }
+  },
+  "Ramen": {
+    "name": "Yuzu",
+    "title": "la cheffe de Ramen Yuzu",
+    "leave": "Au revoir !",
+    "jobs": {
+      "dishes": "Faire la plonge",
+      "kitchen": "Aider en cuisine",
+      "service": "Servir en salle"
+    },
+    "lines": {
+      "greeting": "Bienvenue chez Ramen Yuzu, {name} ! Tout est végétarien et fait maison. Il me manque toujours une paire de pattes : tu me donnes un coup de main ? Je paie en pièces.",
+      "rewarded": "Quel travail ! Voilà {coins} pièces, bien méritées. Reviens quand tu veux.",
+      "alreadyPaid": "Merci pour l’aide ! Je t’ai déjà payé ce poste aujourd’hui, mais ça me fait plaisir de te voir.",
+      "failed": "Oups, c’était un service un peu agité… Pas de paie cette fois, mais on recommence quand tu veux !",
+      "unavailable": "Aïe, le gaz a coupé. Repasse dans un instant !"
+    },
+    "shift": {
+      "titles": {
+        "dishes": "La plonge",
+        "kitchen": "En cuisine",
+        "service": "Le service"
+      },
+      "start": "C’est parti !",
+      "timeLeft": "{seconds} s",
+      "mistakes": "Erreurs",
+      "checking": "Yuzu fait les comptes…",
+      "over": "Fin du service !",
+      "back": "Retourner voir Yuzu",
+      "giveUp": "Arrêter",
+      "error": "Le service n’a pas pu être compté. Réessaie dans un instant.",
+      "ingredients": {
+        "noodles": "Nouilles",
+        "miso": "Miso",
+        "tofu": "Tofu",
+        "egg": "Œuf",
+        "onion": "Oignons",
+        "mushroom": "Champignons"
+      },
+      "dishes": {
+        "shoyu": "Shoyu",
+        "miso": "Miso",
+        "curry": "Curry",
+        "veggie": "Légumes"
+      },
+      "table": "Table {number}"
+    },
+    "service": {
+      "howTo": "Les habitants du village s’installent et commandent. Le bol en main va à une table qui l’a commandé : touche la table, ou appuie sur son numéro. Sers vite pour un pourboire, et ne laisse personne attendre trop longtemps !",
+      "pay": "{score} points pour {coins} pièces",
+      "points": "Points",
+      "inHand": "En main",
+      "cooking": "En cuisine…",
+      "result": "{points, plural, one {# point} other {# points}}",
+      "stars": "{count, plural, =0 {Aucune étoile} one {# étoile} other {# étoiles}}",
+      "tableWithOrder": "Table {number}, commande : {dish}",
+      "moments": {
+        "served": "+1",
+        "tip": "Pourboire !",
+        "angry": "Grr !",
+        "wrong": "Pas ça !",
+        "cleared": "Propre !"
+      },
+      "yuzu": {
+        "start": "Les clients arrivent, à toi de jouer !",
+        "served": "Bien servi !",
+        "quick": "Super rapide, joli pourboire !",
+        "combo": "Combo ×{count} !",
+        "angry": "Oh non, il est parti fâché…",
+        "wrong": "Ce n’est pas sa commande !",
+        "hurry": "Vite, la table {number} s’impatiente !",
+        "calm": "Tu t’en sors très bien !",
+        "clear": "Débarrasse la table {number}, on attend !"
+      },
+      "tableToClear": "Table {number}, à débarrasser",
+      "toClear": "À débarrasser",
+      "queue": "{count, plural, =0 {Personne à la porte} one {# à la porte :} other {# à la porte :}}"
+    },
+    "dishes": {
+      "howTo": "Les bols sales s’entassent dans le bac. Frotte chaque bol pour faire partir ses taches (tu peux aussi frotter le bol du doigt), rince-le, puis empile-le. Apporte ta pile à Yuzu quand tu veux : plus elle est haute, plus le bonus est gros… mais une pile trop haute peut s’écrouler ! Et si le bac déborde, des bols se cassent.",
+      "actions": {
+        "scrub": "Frotter",
+        "rinse": "Rincer",
+        "stack": "Empiler",
+        "deliver": "Apporter ({count})"
+      },
+      "tub": "Bac : {count} / {limit}",
+      "carrying": "Tu portes la pile…",
+      "empty": "Bac vide !",
+      "stains": "{count, plural, one {# tache} other {# taches}}",
+      "toRinse": "À rincer",
+      "rinsed": "Propre, à empiler !",
+      "pile": "Pile : {count} (+{bonus})",
+      "pileEmpty": "Pile vide",
+      "moments": {
+        "delivered": "+{count} (+{bonus})",
+        "toppled": "Patatras !",
+        "broke": "Crac !",
+        "overflow": "Ça déborde !"
+      },
+      "yuzu": {
+        "start": "Les bols arrivent, au travail !",
+        "calm": "Ça brille, continue !",
+        "tall": "Ta pile tangue… tu me l’apportes ?",
+        "tubFull": "Le bac va déborder, vite !",
+        "carrying": "Merci, pose-la là !",
+        "delivered": "{count} bols, bonus +{bonus} !",
+        "toppled": "Oh non, les {count} bols par terre !",
+        "broke": "Aïe, il a glissé !",
+        "overflow": "Le bac a débordé !"
+      }
+    },
+    "kitchen": {
+      "howTo": "Le bol avance sur le tapis : mets-y les ingrédients du ticket, dans n’importe quel ordre, avant qu’il arrive au bout. Un bol fini vite rapporte un bonus. Attention aux erreurs : un mauvais ingrédient gâche le bol !",
+      "ticket": "Ticket",
+      "edge": "Bout du tapis",
+      "moments": {
+        "served": "+1",
+        "quick": "Rapide !",
+        "spoiled": "Gâché !",
+        "dropped": "Tombé !"
+      },
+      "yuzu": {
+        "start": "Le tapis démarre, à toi !",
+        "calm": "On garde le rythme !",
+        "served": "Parfait, au suivant !",
+        "quick": "Quelle vitesse !",
+        "combo": "Combo ×{count} !",
+        "spoiled": "Ce n’était pas sur le ticket !",
+        "dropped": "Il est tombé du tapis…"
+      }
     }
   }
 }
