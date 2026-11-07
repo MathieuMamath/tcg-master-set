@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.91](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.90...v0.1.91) (2026-11-07)
+
+### Features
+
+* **quests:** open Ramen Yuzu downtown with three shift games ([#93](https://github.com/MathieuMamath/tcg-master-set/issues/93)) ([2df9f92](https://github.com/MathieuMamath/tcg-master-set/commit/2df9f92ce2eee1e7ec18ff9053403b9efa9d9e4b))
+
 ## [0.1.90](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.89...v0.1.90) (2026-11-07)
 
 ### Features
