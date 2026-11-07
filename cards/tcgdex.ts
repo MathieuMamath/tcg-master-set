@@ -78,6 +78,14 @@ function requiredCount(source: Json, field: string, context: string): number {
 }
 
 // Where the image server keeps a logo, for the recent sets whose API response leaves it out.
+// A set logo's file, in the order to try them: TCGdex has most logos in both formats, but some
+// only as PNG and others only as WebP.
+export const LOGO_EXTENSIONS = ['png', 'webp'] as const;
+
+export function logoFiles(logoUrl: string): string[] {
+  return LOGO_EXTENSIONS.map((extension) => `${logoUrl}.${extension}`);
+}
+
 export function expectedLogoUrl(locale: CardLocale, seriesId: string, setId: string) {
   return `${ASSETS_URL}/${locale}/${seriesId}/${setId}/logo`;
 }
