@@ -114,6 +114,8 @@ export const playerQuests = pgTable(
     questId: text('quest_id').notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }),
     completedOn: text('completed_on'),
+    // The coins paid on `completedOn`, for the quests that pay more as a better score comes.
+    paidCoins: integer('paid_coins').notNull().default(0),
     // The memory game under way, for the quest whose board the browser must not know.
     memoryGame: jsonb('memory_game').$type<MemoryGame>(),
   },

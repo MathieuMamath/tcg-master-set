@@ -50,7 +50,10 @@
     "elevator": "Take the lift",
     "enterRamen": "Go into Ramen Yuzu",
     "leaveRamen": "Leave",
-    "ramenChef": "Talk (Yuzu)"
+    "ramenChef": "Talk (Yuzu)",
+    "enterDojo": "Go into the dojo",
+    "leaveDojo": "Leave",
+    "dojoMaster": "Talk (Master Kaito)"
   },
   "Shopkeeper": {
     "names": {
@@ -505,7 +508,8 @@
     "dalgona": "Dalgona",
     "raffle": "Raffle",
     "bureau": "Administrative Office",
-    "ramen": "Ramen Yuzu"
+    "ramen": "Ramen Yuzu",
+    "dojo": "Dojo Kaito"
   },
   "Hails": {
     "latest": "A mega welcome!",
@@ -520,7 +524,8 @@
     "hulotte": "Ah, a visitor!",
     "brutus": "Halt!",
     "trotte": "A coupon to stamp?",
-    "ramenChef": "Feeling peckish?"
+    "ramenChef": "Feeling peckish?",
+    "dojoMaster": "Up for some training?"
   },
   "Bus": {
     "title": "Bus map",
@@ -584,6 +589,14 @@
       "ramenService": {
         "name": "Waiting tables at Yuzu’s",
         "where": "At Ramen Yuzu, downtown"
+      },
+      "dojoSlicing": {
+        "name": "Slicing at Kaito’s",
+        "where": "At the dojo, downtown"
+      },
+      "dojoArchery": {
+        "name": "Archery at Kaito’s",
+        "where": "At the dojo, downtown"
       }
     },
     "status": {
@@ -869,7 +882,40 @@
       "everySetOnSale": "Every set is on sale! Granny Hazel has every binder, and the Den’s triplets share the boosters: the 30th anniversary and the Mega Evolutions at Filou’s, the sets of old at Frimousse’s, the newer ones at Fripouille’s.",
       "newsSheet": "This very sheet! It tells you what changed in the game whenever you come by, and you can read it again from the settings.",
       "ramenShop": "Ramen Yuzu opens downtown, between the towers! Yuzu the red panda hires you for three little jobs paid in coins: washing up, the kitchen and waiting tables.",
-      "anySixQuests": "The daily bonus now takes any 6 quests of your choice: no need to do them all."
+      "anySixQuests": "The daily bonus now takes any 6 quests of your choice: no need to do them all.",
+      "dojo": "The dojo opens downtown, next to Ramen Yuzu! Master Kaito, an old badger, trains you in vegetable slicing and archery: two new daily quests paid in coins. At the dojo as at Yuzu’s, replay as often as you like: each new star of the day pays you the difference in coins, up to 300 coins for three stars."
+    }
+  },
+  "Shift": {
+    "titles": {
+      "dishes": "Washing up",
+      "kitchen": "In the kitchen",
+      "service": "Waiting tables",
+      "slicing": "Slicing",
+      "archery": "Archery"
+    },
+    "start": "Let’s go!",
+    "timeLeft": "{seconds} s",
+    "mistakes": "Mistakes",
+    "giveUp": "Stop",
+    "error": "The shift couldn’t be counted. Try again in a moment.",
+    "pay": "{score} points for {coins} coins",
+    "points": "Points",
+    "result": "{points, plural, one {# point} other {# points}}",
+    "earned": "+{coins} coins",
+    "allEarned": "Every reward of the day is earned!",
+    "stars": "{count, plural, =0 {No stars} one {# star} other {# stars}}",
+    "hosts": {
+      "ramenChef": {
+        "checking": "Yuzu is counting…",
+        "over": "Shift over!",
+        "back": "Go back to Yuzu"
+      },
+      "dojoMaster": {
+        "checking": "Kaito is counting…",
+        "over": "Lesson over!",
+        "back": "Go back to Kaito"
+      }
     }
   },
   "Ramen": {
@@ -883,25 +929,14 @@
     },
     "lines": {
       "greeting": "Welcome to Ramen Yuzu, {name}! Everything’s vegetarian and homemade. I’m always a pair of paws short: will you lend me a hand? I pay in coins.",
-      "rewarded": "What a shift! Here are {coins} coins, well earned. Come back any time.",
-      "alreadyPaid": "Thanks for the help! I already paid you for that job today, but it’s lovely to see you.",
+      "rewarded": "What a shift! Here are {coins} coins, well earned. One more star, and I’ll pay you the difference.",
+      "rewardedAll": "Three stars, what a shift! Here are {coins} coins. You have earned every reward of this job for today.",
+      "alreadyPaid": "Thanks for the help! I already paid you for a score like that today: earn one more star to get more.",
+      "allEarned": "You have already earned every reward of this job today. Stay and help for the fun of it, or come back tomorrow!",
       "failed": "Oops, that was a busy shift… No pay this time, but we can go again whenever you like!",
       "unavailable": "Oh dear, the gas went out. Come back in a moment!"
     },
     "shift": {
-      "titles": {
-        "dishes": "Washing up",
-        "kitchen": "In the kitchen",
-        "service": "Waiting tables"
-      },
-      "start": "Let’s go!",
-      "timeLeft": "{seconds} s",
-      "mistakes": "Mistakes",
-      "checking": "Yuzu is counting…",
-      "over": "Shift over!",
-      "back": "Go back to Yuzu",
-      "giveUp": "Stop",
-      "error": "The shift couldn’t be counted. Try again in a moment.",
       "ingredients": {
         "noodles": "Noodles",
         "miso": "Miso",
@@ -920,12 +955,8 @@
     },
     "service": {
       "howTo": "The village’s folk sit down and order. The bowl in hand goes to a table that ordered it: tap the table, or press its number. Serve quickly for a tip, and don’t leave anyone waiting too long!",
-      "pay": "{score} points for {coins} coins",
-      "points": "Points",
       "inHand": "In hand",
       "cooking": "Cooking…",
-      "result": "{points, plural, one {# point} other {# points}}",
-      "stars": "{count, plural, =0 {No stars} one {# star} other {# stars}}",
       "tableWithOrder": "Table {number}, order: {dish}",
       "moments": {
         "served": "+1",
@@ -1001,6 +1032,68 @@
         "combo": "Combo ×{count}!",
         "spoiled": "That wasn’t on the ticket!",
         "dropped": "It fell off the belt…"
+      }
+    }
+  },
+  "Dojo": {
+    "name": "Master Kaito",
+    "title": "the dojo’s master",
+    "leave": "Goodbye, master!",
+    "jobs": {
+      "slicing": "Slice vegetables",
+      "archery": "Practise archery"
+    },
+    "lines": {
+      "greeting": "Welcome to the dojo, {name}. Here we sharpen the hand and the mind. A slicing lesson, or an archery lesson? Every lesson well done earns a few coins.",
+      "rewarded": "Fine mastery. Here are {coins} coins: you earned them. One more star, and I’ll pay you the difference.",
+      "rewardedAll": "Three stars! Here are {coins} coins. You have earned every reward of this lesson for today.",
+      "alreadyPaid": "Good. I already paid you for a score like that today: earn one more star to get more.",
+      "allEarned": "You have already earned every reward of this lesson today. Train for the fun of it, or come back tomorrow!",
+      "failed": "Bamboo bends but does not break. No coins this time: try again whenever you like.",
+      "unavailable": "Hmm, the dojo is meditating. Come back in a moment."
+    },
+    "slicing": {
+      "howTo": "Vegetables are thrown into the air. Slice them before they fall: sweep the blade through them with the mouse or a finger, or press 1 to 4 to slice a whole lane. At the top of their flight, the cut is clean. Several at once is a combo. But leave the clay pots alone!",
+      "lane": "Lane {number}",
+      "board": "Slicing area: sweep the blade through the vegetables",
+      "moments": {
+        "cut": "+1",
+        "clean": "Clean!",
+        "combo": "Combo ×{count}!",
+        "pot": "Crack!",
+        "dropped": "Missed!"
+      },
+      "kaito": {
+        "start": "Breathe. The first vegetable is coming.",
+        "cut": "Good.",
+        "clean": "A perfect cut!",
+        "combo": "Several in one stroke, superb!",
+        "pot": "Not the pot! It was my grandmother’s…",
+        "dropped": "A vegetable on the floor… don’t let them slip by.",
+        "calm": "Your blade is getting steady."
+      }
+    },
+    "archery": {
+      "howTo": "In the dojo’s garden, ten arrows at the target. A line sweeps across the target from left to right: press Space, the button or touch the range to hold it. A second line then sweeps up and down: press again to hold it and shoot, where the two lines cross. The wind pushes the arrow sideways: hold the first line a little into the wind!",
+      "aimX": "Hold the left–right line",
+      "aimY": "Hold the up–down line and shoot",
+      "wait": "Next arrow…",
+      "arrows": "{count, plural, =0 {No arrows left} one {# arrow} other {# arrows}}",
+      "wind": "Wind: {strength, select, calm {calm} light {light} other {strong}}{direction, select, left {, to the left} right {, to the right} other {}}",
+      "target": "Target: {count, plural, =0 {no arrows in it} one {# arrow in it} other {# arrows in it}}",
+      "moments": {
+        "bullseye": "Bullseye!",
+        "hit": "+{points}",
+        "miss": "Missed…",
+        "streak": "Streak! +{points}"
+      },
+      "kaito": {
+        "start": "The wind speaks. Listen to it.",
+        "bullseye": "Bullseye. Magnificent.",
+        "hit": "Not bad. Again.",
+        "miss": "The target is in front of you, not beside it.",
+        "streak": "Twice in the centre! I am proud.",
+        "wind": "The wind is strong: aim against it."
       }
     }
   }

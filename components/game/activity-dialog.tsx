@@ -58,9 +58,10 @@ function QuestPortrait({ giver }: { giver: DailyQuestGiver }) {
   if (giver === 'basketball') {
     return <BallPortrait />;
   }
-  // The ramen shop's three jobs are all Yuzu's.
+  // The ramen shop's three jobs are all Yuzu's, and the dojo's two trainings Maître Kaito's.
   const isRamen = giver === 'ramenDishes' || giver === 'ramenKitchen' || giver === 'ramenService';
-  return <SellerPortrait stock={isRamen ? 'ramenChef' : giver} />;
+  const isDojo = giver === 'dojoSlicing' || giver === 'dojoArchery';
+  return <SellerPortrait stock={isRamen ? 'ramenChef' : isDojo ? 'dojoMaster' : giver} />;
 }
 
 type Props = {

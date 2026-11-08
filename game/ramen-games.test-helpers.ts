@@ -1,6 +1,6 @@
-import type { ShiftAction } from './ramen';
 import { canDo, dirtyBowls, simulateDishes } from './ramen-dishes';
 import { isBowlInZone, KITCHEN_INGREDIENTS, kitchenOrders, simulateKitchen } from './ramen-kitchen';
+import type { ShiftAction } from './shifts';
 
 // A perfect washer, every quarter of a second: scrub, rinse, stack, and carry the pile at five.
 export function perfectDishes(seed: number, until = 45_000): ShiftAction[] {

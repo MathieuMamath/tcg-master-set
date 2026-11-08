@@ -163,7 +163,7 @@ describe('downtown', () => {
 
     expect(interactionAlong(DOWNTOWN, bureau.doorX)).toBe('brutus');
     expect(speakerAlong(DOWNTOWN, bureau.doorX)?.x).toBe(bureau.brutusX);
-    expect(DOWNTOWN.exits.map(({ to }) => to)).toEqual(['ramen']);
+    expect(DOWNTOWN.exits.map(({ to }) => to)).toEqual(['ramen', 'dojo']);
     expect(busStop.x + busStop.width / 2).toBeLessThan(bureau.x - bureau.width / 2);
     for (const tower of DOWNTOWN_TOWERS) {
       expect(Math.abs(tower.x - bureau.x)).toBeGreaterThan((tower.width + bureau.width) / 2 - 0.6);

@@ -20,13 +20,13 @@ import { drawSinkBackdrop, drawSponge, drawWashBowl } from './paper-art';
 import {
   CanvasArt,
   digitKeys,
+  HostSays,
   pressHandlers,
   ScoreLine,
   type ShiftEnd,
   ShiftFrame,
   useShift,
-  YuzuSays,
-} from './ramen-shift';
+} from './shift';
 
 const MOMENT_MS = 900;
 const REMARK_MS = 1600;
@@ -51,6 +51,7 @@ export function DishesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
 
   return (
     <ShiftFrame
+      host="ramenChef"
       job="dishes"
       phase={phase}
       secondsLeft={secondsLeft}
@@ -116,7 +117,7 @@ export function DishesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
               </button>
             ))}
           </div>
-          <YuzuSays text={remarkOf(state, t)} />
+          <HostSays host="ramenChef" text={remarkOf(state, t)} />
         </>
       )}
     </ShiftFrame>

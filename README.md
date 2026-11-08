@@ -4,7 +4,7 @@ A cozy single-player game about collecting, in a world of paper cut-outs. You pl
 
 There are no duels and no real money.
 
-> **Status:** playable. The town, its shops, six daily quests and the binders are in. More places, quests and polish will follow.
+> **Status:** playable. The town, its shops, eleven daily quests and the binders are in. More places, quests and polish will follow.
 
 ## The game
 
@@ -14,13 +14,15 @@ The world is a paper diorama seen from the side: Pip walks left and right, and g
 - **The Card Den**, where the raccoon triplets sell booster packs, and **the Page Nook**, where Mamie Noisette the hedgehog sells binders. A set's boosters are sold once its binder is bought.
 - **Booster openings**: ten cards a pack, revealed from the most common to the best, with light effects that climb up to the best card.
 - **The binder**: a book of pages for each set, which turn like a real binder's, with every version of every card to collect.
-- **Six daily quests**, each paid once a day:
+- **Eleven daily quests**, each paid once a day:
   - dusting Léa's flat;
   - Papy Caillou's memory game at the park;
   - fishing out Lucas's things from the lake;
   - the arcade's basketball machine;
   - carving Gaspard's dalgona biscuit;
-  - a free turn of Bérénice's raffle drum.
+  - a free turn of Bérénice's raffle drum;
+  - three jobs for Yuzu at Ramen Yuzu, in the big city: washing up, helping in the kitchen and waiting tables;
+  - two lessons from Maître Kaito at the dojo, next door: slicing vegetables and archery.
 - **The activity tracker** counts the day's quests, and doing any six of them earns a daily bonus.
 - **Day, night and weather**: the game's own clock runs a day in 24 minutes, with rain, storms and winter snow. Street lamps light up at night, and Pip can sleep in his bed until the morning.
 - **The administrative office**, in the big city, where only admins get past the guard at the door: the game's statistics, and upstairs, the coupons that players then use in the settings for coins or boosters.

@@ -7,8 +7,8 @@
 // Everything follows from the seed and the presses, so that the browser draws the same shift the
 // server plays again: `simulateKitchen` is both.
 
-import type { ShiftAction } from './ramen';
 import { seededRandom } from './seeded-random';
+import type { ShiftAction } from './shifts';
 
 export const KITCHEN_INGREDIENTS = ['noodles', 'miso', 'tofu', 'egg', 'onion', 'mushroom'] as const;
 export type KitchenIngredient = (typeof KITCHEN_INGREDIENTS)[number];

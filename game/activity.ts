@@ -4,7 +4,7 @@ import { FISHING_QUEST } from './fishing';
 import { GRANDPA_QUEST } from './memory-game';
 import { GRANDMA_QUEST, questDay } from './quests';
 import { RAFFLE_QUEST } from './raffle';
-import { RAMEN_QUESTS } from './ramen';
+import { SHIFT_QUESTS } from './shifts';
 
 // The day's quests, in the order the activity tracker lists them, each with who gives it. A quest
 // counts as done once it is used up for the day: paid, or drawn for the raffle, won or not.
@@ -16,9 +16,12 @@ export const DAILY_QUESTS = [
   { id: DALGONA_QUEST, giver: 'gaspard' },
   { id: RAFFLE_QUEST, giver: 'berenice' },
   // The ramen shop's three jobs, all given by its chef.
-  { id: RAMEN_QUESTS.dishes, giver: 'ramenDishes' },
-  { id: RAMEN_QUESTS.kitchen, giver: 'ramenKitchen' },
-  { id: RAMEN_QUESTS.service, giver: 'ramenService' },
+  { id: SHIFT_QUESTS.dishes, giver: 'ramenDishes' },
+  { id: SHIFT_QUESTS.kitchen, giver: 'ramenKitchen' },
+  { id: SHIFT_QUESTS.service, giver: 'ramenService' },
+  // The dojo's two trainings, both given by its master.
+  { id: SHIFT_QUESTS.slicing, giver: 'dojoSlicing' },
+  { id: SHIFT_QUESTS.archery, giver: 'dojoArchery' },
 ] as const;
 
 export type DailyQuest = (typeof DAILY_QUESTS)[number];

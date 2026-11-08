@@ -1,37 +1,43 @@
 import { describe, expect, test } from 'vitest';
-import {
-  canFinishShift,
-  isRamenJob,
-  playShift,
-  RAMEN_JOBS,
-  SHIFT_RULES,
-  type ShiftAction,
-  shiftCoins,
-  shiftSeed,
-  shiftStars,
-} from './ramen';
+import { ARCHERY_ACTIONS } from './dojo-archery';
+import { perfectArchery, perfectSlicing } from './dojo-games.test-helpers';
+import { SLICING_STROKES } from './dojo-slicing';
 import { DISH_ACTIONS } from './ramen-dishes';
 import { perfectDishes, perfectKitchen } from './ramen-games.test-helpers';
 import { KITCHEN_INGREDIENTS } from './ramen-kitchen';
 import { SERVICE_TABLES } from './ramen-service';
 import { perfectService } from './ramen-service.test-helpers';
+import {
+  canFinishShift,
+  isShiftJob,
+  playShift,
+  SHIFT_JOBS,
+  SHIFT_RULES,
+  type ShiftAction,
+  shiftCoins,
+  shiftPayout,
+  shiftSeed,
+  shiftStars,
+} from './shifts';
 
 const SEED = 20261107;
 
 describe('the jobs', () => {
   test('are known by their names only', () => {
-    expect(RAMEN_JOBS.every(isRamenJob)).toBe(true);
-    expect(isRamenJob('cleaning')).toBe(false);
+    expect(SHIFT_JOBS.every(isShiftJob)).toBe(true);
+    expect(isShiftJob('cleaning')).toBe(false);
   });
 
   test('have as many buttons as their choices', () => {
     expect(SHIFT_RULES.dishes.choices).toBe(DISH_ACTIONS.length);
     expect(SHIFT_RULES.kitchen.choices).toBe(KITCHEN_INGREDIENTS.length);
     expect(SHIFT_RULES.service.choices).toBe(SERVICE_TABLES);
+    expect(SHIFT_RULES.slicing.choices).toBe(SLICING_STROKES);
+    expect(SHIFT_RULES.archery.choices).toBe(ARCHERY_ACTIONS.length);
   });
 
   test('pay nothing below the first step, then more for a better score', () => {
-    for (const job of RAMEN_JOBS) {
+    for (const job of SHIFT_JOBS) {
       const [first, second] = SHIFT_RULES[job].pay;
       expect(shiftCoins(job, first.score - 1)).toBe(0);
       expect(shiftCoins(job, first.score)).toBe(first.coins);
@@ -41,7 +47,7 @@ describe('the jobs', () => {
   });
 
   test('earn a star for each step of pay, and a third well beyond', () => {
-    for (const job of RAMEN_JOBS) {
+    for (const job of SHIFT_JOBS) {
       const [first, second] = SHIFT_RULES[job].pay;
       expect(shiftStars(job, first.score - 1)).toBe(0);
       expect(shiftStars(job, first.score)).toBe(1);
@@ -55,17 +61,61 @@ describe('the jobs', () => {
   });
 });
 
+describe('shiftPayout', () => {
+  test('pays nothing below the first step', () => {
+    expect(shiftPayout('kitchen', 0, null)).toMatchObject({ coins: 0, wasAlreadyPaid: false });
+  });
+
+  test("pays Yuzu's jobs the difference too", () => {
+    const [one, , three] = SHIFT_RULES.kitchen.pay;
+    expect(shiftPayout('kitchen', three.score, one.coins)).toEqual({
+      coins: three.coins - one.coins,
+      paidToday: three.coins,
+      wasAlreadyPaid: false,
+      hasEarnedAll: true,
+    });
+  });
+
+  test('pays a lesson the difference each new star brings, up to the last', () => {
+    const [one, two, three] = SHIFT_RULES.slicing.pay;
+    const first = shiftPayout('slicing', one.score, null);
+    expect(first).toMatchObject({ coins: one.coins, hasEarnedAll: false });
+    const better = shiftPayout('slicing', two.score, first.paidToday);
+    expect(better).toMatchObject({ coins: two.coins - one.coins, paidToday: two.coins });
+    const same = shiftPayout('slicing', two.score, better.paidToday);
+    expect(same).toMatchObject({ coins: 0, wasAlreadyPaid: true, hasEarnedAll: false });
+    const best = shiftPayout('slicing', three.score, same.paidToday);
+    expect(best).toMatchObject({ coins: three.coins - two.coins, hasEarnedAll: true });
+    expect(shiftPayout('slicing', three.score + 50, best.paidToday)).toMatchObject({
+      coins: 0,
+      hasEarnedAll: true,
+    });
+  });
+
+  test('pays a lesson its three stars at once from a first great shift', () => {
+    const three = SHIFT_RULES.archery.pay[2];
+    expect(shiftPayout('archery', three.score, null)).toMatchObject({
+      coins: three.coins,
+      hasEarnedAll: true,
+    });
+    expect(shiftStars('archery', three.score)).toBe(3);
+    expect(shiftStars('archery', three.score - 1)).toBe(2);
+  });
+});
+
 describe('playShift', () => {
-  test('a perfect shift pays the most, in every job', () => {
+  test('a perfect shift earns two stars at least, in every job', () => {
     const perfect = {
       dishes: perfectDishes(SEED),
       kitchen: perfectKitchen(SEED),
       service: perfectService(SEED, 60_000),
+      slicing: perfectSlicing(SEED),
+      archery: perfectArchery(SEED),
     };
-    for (const job of RAMEN_JOBS) {
+    for (const job of SHIFT_JOBS) {
       const result = playShift(job, SEED, perfect[job]);
       expect(result?.mistakes, job).toBe(0);
-      expect(shiftCoins(job, result?.score ?? 0), job).toBe(SHIFT_RULES[job].pay[1].coins);
+      expect(shiftStars(job, result?.score ?? 0), job).toBeGreaterThanOrEqual(2);
     }
   });
 

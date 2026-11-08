@@ -36,4 +36,8 @@ export type Interaction =
   // The ramen shop downtown, and its chef, who hires the player for its three jobs.
   | 'enterRamen'
   | 'leaveRamen'
-  | 'ramenChef';
+  | 'ramenChef'
+  // The dojo downtown, and its master, who trains the player in slicing and archery.
+  | 'enterDojo'
+  | 'leaveDojo'
+  | 'dojoMaster';

@@ -1,10 +1,10 @@
 import { getPlayer } from '@/auth/session';
-import { isRamenJob } from '@/game/ramen';
-import { startRamenShift } from '@/player/progress';
+import { isShiftJob } from '@/game/shifts';
+import { finishShift } from '@/player/progress';
 
 export async function POST(request: Request) {
   const job = new URL(request.url).searchParams.get('job');
-  if (!isRamenJob(job)) {
+  if (!isShiftJob(job)) {
     return Response.json({ error: 'unknown-job' }, { status: 400 });
   }
 
@@ -13,7 +13,12 @@ export async function POST(request: Request) {
     if (!player) {
       return Response.json({ error: 'not-signed-in' }, { status: 401 });
     }
-    return Response.json(await startRamenShift(player.id, job));
+    // Anything unreadable is simply not a list of presses, which the rules refuse.
+    const body = await request.json().catch(() => null);
+    const result = await finishShift(player.id, job, body?.actions);
+    return result
+      ? Response.json(result)
+      : Response.json({ error: 'cannot-finish' }, { status: 409 });
   } catch (error) {
     // Logged as text: the full error object carries the database client's internals.
     console.error(

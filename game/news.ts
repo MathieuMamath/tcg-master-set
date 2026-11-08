@@ -27,6 +27,7 @@ export const NEWS: readonly NewsItem[] = [
   { id: 10, key: 'newsSheet', date: '2026-11-07', kind: 'feature' },
   { id: 11, key: 'ramenShop', date: '2026-11-07', kind: 'feature' },
   { id: 12, key: 'anySixQuests', date: '2026-11-07', kind: 'feature' },
+  { id: 13, key: 'dojo', date: '2026-11-08', kind: 'feature' },
 ];
 
 // A player who never saw the sheet only gets the latest notes, rather than the whole history.
