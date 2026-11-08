@@ -230,7 +230,8 @@ describe('openBooster', () => {
 
     expect(godPacks).toBeGreaterThan(25);
     expect(godPacks).toBeLessThan(80);
-  });
+    // A hundred thousand boosters take a few seconds, more on a slow CI runner.
+  }, 20_000);
 
   test('falls back on a usual booster when the set has too few hits', () => {
     const fewHits = POOL.filter(
