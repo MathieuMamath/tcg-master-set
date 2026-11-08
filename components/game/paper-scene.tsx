@@ -37,6 +37,7 @@ import {
   ADMIN_PLACES,
   ARCADE_MACHINES,
   ARCADE_WALLS,
+  ARCHIVIST_X,
   BEDROOM,
   BEDROOM_FURNITURE,
   BEDROOM_WALLS,
@@ -91,6 +92,7 @@ import { lampLightAt, mixColors, skyAt, skyLook, worldTintAt } from '@/game/sky'
 import type { PlayerSpot } from '@/game/spot';
 import type { Interaction } from '@/game/world';
 import {
+  ARCHIVIST_SIZE,
   BERENICE_SIZE,
   BRUTUS_SIZE,
   cutOut,
@@ -99,6 +101,7 @@ import {
   drawArcadeCabinet,
   drawArcadeCarpet,
   drawArcadeDoor,
+  drawArchivist,
   drawBalloon,
   drawBasketballMachine,
   drawBed,
@@ -2429,6 +2432,7 @@ function Downtown({
 const BRUTUS_HEIGHT = 2.9;
 const PHOTOGRAPHER_HEIGHT = 2.7;
 const HULOTTE_HEIGHT = 2.8;
+const ARCHIVIST_HEIGHT = 2.6;
 const HULOTTE_Z = -0.9;
 
 // The office's window onto the big city: the live sky behind the towers, the towers darkening with
@@ -2527,6 +2531,7 @@ function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
       plant: texture(cutOut(140, 300, drawTallPlant, 8, 168)),
       sofa: texture(cutOut(340, 150, drawModernSofa, 9, 169)),
       hulotte: blinker(HULOTTE_SIZE.width, HULOTTE_SIZE.height, drawHulotte, 9, 167),
+      archivist: blinker(ARCHIVIST_SIZE.width, ARCHIVIST_SIZE.height, drawArchivist, 9, 179),
     }),
     [],
   );
@@ -2540,6 +2545,12 @@ function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
             interaction: 'hulotte',
             map: textures.hulotte.open,
             height: HULOTTE_HEIGHT,
+            z: HULOTTE_Z,
+          },
+          {
+            interaction: 'archivist',
+            map: textures.archivist.open,
+            height: ARCHIVIST_HEIGHT,
             z: HULOTTE_Z,
           },
         ]}
@@ -2557,6 +2568,15 @@ function Bureau({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
         x={cornerPlant.x}
         z={-1.2}
         height={1.7}
+        shadow={textures.shadow}
+      />
+      {/* Bastien, the archivist, by the wall screen. */}
+      <Character
+        map={textures.archivist.open}
+        blinks={textures.archivist}
+        x={ARCHIVIST_X}
+        z={HULOTTE_Z}
+        height={ARCHIVIST_HEIGHT}
         shadow={textures.shadow}
       />
       <Character

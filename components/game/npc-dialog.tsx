@@ -7,7 +7,14 @@ import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, SpeechBox, TypedLine } from './shop-dialog';
 
 // The characters who only have something to say, with nothing to buy or play.
-export type Speaker = 'brutus' | 'hulotte' | 'trotte' | 'painter' | 'ronron' | 'kitten';
+export type Speaker =
+  | 'brutus'
+  | 'hulotte'
+  | 'archivist'
+  | 'trotte'
+  | 'painter'
+  | 'ronron'
+  | 'kitten';
 
 type Props = {
   speaker: Speaker;

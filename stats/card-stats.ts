@@ -1,8 +1,18 @@
 import { and, count, eq, sql } from 'drizzle-orm';
 import { loadBinderCatalogue } from '@/cards/binder-catalogue';
+import { loadBoosterPool } from '@/cards/booster-pool';
 import { getDb } from '@/db/client';
 import { gameEvents } from '@/db/schema';
-import { type CardDrop, type CardPulls, cardDrops } from '@/game/card-stats';
+import { slotKey } from '@/game/binder';
+import { boosterRecipe, expectedPulls } from '@/game/booster';
+import { PLAYABLE_SET_IDS } from '@/game/card-sets';
+import {
+  type CardDrop,
+  type CardPulls,
+  type CardStatsRow,
+  cardDrops,
+  dropRate,
+} from '@/game/card-stats';
 
 // The draws of the boosters, card by card, worked out from the event log on the server. Only
 // openings that recorded their cards count, and nothing about who opened them leaves this module.
@@ -62,4 +72,60 @@ export async function loadSetDrops(setId: string, locale: string): Promise<SetDr
     boosters,
     drops: cardDrops(catalogue.cards, rows, boosters),
   };
+}
+
+// Every version of every imported set, with how often it came out and how often its recipe says it
+// should, for the full export Bastien hands over. Only aggregates, like the rest of this module.
+export async function loadCardStatsRows(locale: string): Promise<CardStatsRow[]> {
+  const database = getDb();
+  const [boosters, pulls] = await Promise.all([
+    database.execute<{ set_id: string; boosters: number; god_packs: number }>(sql`
+      select ${setOf} as set_id, count(*)::int as boosters,
+        count(*) filter (where (${gameEvents.details}->>'isGodPack')::boolean)::int as god_packs
+      from ${gameEvents}
+      where ${gameEvents.type} = ${OPENED} and ${hasCards}
+      group by 1`),
+    database.execute<{ set_id: string; card_id: string; variant: string; pulls: number }>(sql`
+      select ${setOf} as set_id, card->>'cardId' as card_id, card->>'variant' as variant,
+        count(*)::int as pulls
+      from ${gameEvents}, jsonb_array_elements(${gameEvents.details}->'cards') as card
+      where ${gameEvents.type} = ${OPENED}
+      group by 1, 2, 3`),
+  ]);
+  const pulled = new Map(
+    pulls.rows.map((row) => [
+      `${row.set_id}|${slotKey(row.card_id, row.variant)}`,
+      Number(row.pulls),
+    ]),
+  );
+  const rows: CardStatsRow[] = [];
+  for (const setId of PLAYABLE_SET_IDS) {
+    const pool = await loadBoosterPool(setId);
+    if (pool.length === 0) {
+      continue;
+    }
+    const catalogue = await loadBinderCatalogue(setId, locale);
+    const expected = expectedPulls(pool, boosterRecipe(setId, pool));
+    const opened = boosters.rows.find((row) => row.set_id === setId);
+    const setBoosters = Number(opened?.boosters ?? 0);
+    const rarities = new Map(pool.map((card) => [card.id, card.rarity]));
+    for (const { key, card, variant } of cardDrops(catalogue.cards, [], 0)) {
+      const count = pulled.get(`${setId}|${key}`) ?? 0;
+      rows.push({
+        setId,
+        setName: catalogue.setName,
+        boosters: setBoosters,
+        godPacks: Number(opened?.god_packs ?? 0),
+        cardId: card.id,
+        number: card.localId,
+        name: card.name,
+        rarity: rarities.get(card.id) ?? null,
+        variant,
+        pulls: count,
+        observed: dropRate(count, setBoosters),
+        expected: expected.get(key) ?? null,
+      });
+    }
+  }
+  return rows;
 }

@@ -63,7 +63,8 @@
     "searched": {
       "nothing": "Rien ici… Mistigri est ailleurs.",
       "unavailable": "Impossible de fouiller pour l’instant."
-    }
+    },
+    "archivist": "Parler (Bastien)"
   },
   "Shopkeeper": {
     "names": {
@@ -541,7 +542,8 @@
     "postman": "Du courrier à trier ?",
     "painter": "Tu as l’œil, toi ?",
     "ronron": "Tu n’as pas vu mon petit ?",
-    "photographer": "Une photo du ciel ?"
+    "photographer": "Une photo du ciel ?",
+    "archivist": "Besoin des archives ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -717,6 +719,14 @@
       "lines": {
         "found": "Ah, tu m’as trouvé ! Bon, d’accord, je rentre voir Mamie Ronron. Elle a dit qu’elle te donnerait 200 pièces pour la peine !"
       }
+    },
+    "archivist": {
+      "name": "Bastien",
+      "title": "l’archiviste du bureau",
+      "lines": {
+        "greeting": "Bonjour ! Ici, je garde toutes les archives des boosters. Je peux t’imprimer les statistiques complètes des cartes : chaque version de chaque série, combien de fois elle est sortie, et combien de fois elle aurait dû sortir."
+      },
+      "export": "Exporter les statistiques des cartes"
     }
   },
   "Stats": {

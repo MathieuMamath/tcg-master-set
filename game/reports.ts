@@ -17,6 +17,7 @@ export const SPEAKERS = [
   'berenice',
   'brutus',
   'hulotte',
+  'archivist',
   'trotte',
   'ramenChef',
   'dojoMaster',

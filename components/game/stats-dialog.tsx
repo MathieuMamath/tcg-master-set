@@ -178,6 +178,7 @@ export function StatsDialog({ sets, onClose }: Props) {
     if (
       speaker === 'brutus' ||
       speaker === 'hulotte' ||
+      speaker === 'archivist' ||
       speaker === 'trotte' ||
       speaker === 'painter' ||
       speaker === 'ronron'

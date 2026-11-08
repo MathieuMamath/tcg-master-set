@@ -9084,3 +9084,144 @@ export function drawHidingProp(look: 'crates' | 'bush' | 'flowers' | 'log') {
     }
   };
 }
+
+// --- Bastien, the administrative office's archivist. --------------------------------------------
+
+const BEAVER_BROWN = '#9a6a42';
+const BEAVER_DARK = '#6e4a2c';
+
+export const ARCHIVIST_SIZE = { width: 300, height: 380 };
+export const ARCHIVIST_FACE = { x: 156, y: 128, size: 170 };
+
+// Bastien, the beaver who keeps the office's archives: brown fur, big front teeth, a flat scaly
+// tail, a green visor and sleeve garters, and a stack of printed tables in his arms.
+export function drawArchivist(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eyes: Eyes = 'open',
+) {
+  const x = drawing;
+  const cx = width / 2;
+  const bottom = height - 6;
+  const bodyY = bottom - 104;
+  const headY = bodyY - 116;
+  x.lineCap = 'round';
+  x.lineJoin = 'round';
+  // The flat tail, behind, crossed with scales.
+  x.fillStyle = '#5a3c26';
+  x.beginPath();
+  x.ellipse(cx - 92, bottom - 30, 54, 22, -0.35, 0, Math.PI * 2);
+  x.fill();
+  x.strokeStyle = '#7a5434';
+  x.lineWidth = 2.5;
+  for (let line = -2; line <= 2; line++) {
+    x.beginPath();
+    x.moveTo(cx - 130, bottom - 30 + line * 8 + 14);
+    x.lineTo(cx - 56, bottom - 30 + line * 8 - 12);
+    x.stroke();
+  }
+  // Feet, and the round body in a white shirt and a brown waistcoat.
+  x.fillStyle = BEAVER_DARK;
+  ellipse(x, cx - 30, bottom - 8, 26, 11);
+  ellipse(x, cx + 30, bottom - 8, 26, 11);
+  x.fillStyle = BEAVER_BROWN;
+  ellipse(x, cx, bodyY + 20, 70, 84);
+  x.fillStyle = '#f3ece2';
+  x.beginPath();
+  x.moveTo(cx - 30, bodyY - 60);
+  x.lineTo(cx + 30, bodyY - 60);
+  x.lineTo(cx + 20, bodyY + 80);
+  x.lineTo(cx - 20, bodyY + 80);
+  x.closePath();
+  x.fill();
+  x.fillStyle = '#5a6b4a';
+  for (const side of [-1, 1]) {
+    x.beginPath();
+    x.moveTo(cx + side * 30, bodyY - 60);
+    x.quadraticCurveTo(cx + side * 70, bodyY, cx + side * 56, bodyY + 86);
+    x.lineTo(cx + side * 18, bodyY + 90);
+    x.closePath();
+    x.fill();
+  }
+  x.fillStyle = '#d0443a';
+  x.beginPath();
+  x.moveTo(cx, bodyY - 56);
+  x.lineTo(cx - 10, bodyY - 66);
+  x.lineTo(cx - 10, bodyY - 46);
+  x.closePath();
+  x.fill();
+  x.beginPath();
+  x.moveTo(cx, bodyY - 56);
+  x.lineTo(cx + 10, bodyY - 66);
+  x.lineTo(cx + 10, bodyY - 46);
+  x.closePath();
+  x.fill();
+  // The stack of printed tables, held in both arms, sleeve garters on the arms.
+  x.fillStyle = '#fbf6ea';
+  for (let sheet = 0; sheet < 4; sheet++) {
+    roundedRect(x, cx - 46 + sheet * 2, bodyY - 2 - sheet * 7, 92, 52, 3);
+    x.fill();
+  }
+  x.strokeStyle = 'rgb(44 42 53 / 35%)';
+  x.lineWidth = 2;
+  for (let row = 0; row < 4; row++) {
+    x.beginPath();
+    x.moveTo(cx - 34, bodyY - 12 + row * 9);
+    x.lineTo(cx + 36, bodyY - 12 + row * 9);
+    x.stroke();
+  }
+  x.fillStyle = '#3c78b4';
+  for (const [barX, barHeight] of [
+    [-28, 10],
+    [-18, 16],
+    [-8, 8],
+  ] as const) {
+    x.fillRect(cx + barX, bodyY + 30 - barHeight, 7, barHeight);
+  }
+  x.fillStyle = BEAVER_BROWN;
+  ellipse(x, cx - 52, bodyY + 18, 18, 16);
+  ellipse(x, cx + 54, bodyY + 18, 18, 16);
+  x.fillStyle = '#d0443a';
+  x.fillRect(cx - 66, bodyY - 14, 28, 7);
+  x.fillRect(cx + 40, bodyY - 14, 28, 7);
+  // The head, round ears, a pale muzzle with big front teeth, and a dark nose.
+  x.fillStyle = BEAVER_DARK;
+  ellipse(x, cx - 46, headY - 40, 16, 16);
+  ellipse(x, cx + 46, headY - 40, 16, 16);
+  x.fillStyle = BEAVER_BROWN;
+  ellipse(x, cx, headY, 64, 58);
+  x.fillStyle = '#d9b48a';
+  ellipse(x, cx, headY + 26, 36, 26);
+  x.fillStyle = '#2c2a35';
+  ellipse(x, cx, headY + 10, 11, 8);
+  x.fillStyle = '#fbf6ea';
+  roundedRect(x, cx - 12, headY + 30, 11, 18, 3);
+  x.fill();
+  roundedRect(x, cx + 1, headY + 30, 11, 18, 3);
+  x.fill();
+  x.strokeStyle = 'rgb(44 42 53 / 40%)';
+  x.lineWidth = 1.5;
+  x.beginPath();
+  x.moveTo(cx, headY + 30);
+  x.lineTo(cx, headY + 48);
+  x.stroke();
+  drawEye(x, cx - 24, headY - 10, eyes, { width: 8 });
+  drawEye(x, cx + 24, headY - 10, eyes, { width: 8 });
+  x.fillStyle = 'rgb(240 110 100 / 30%)';
+  ellipse(x, cx - 40, headY + 16, 10, 6);
+  ellipse(x, cx + 40, headY + 16, 10, 6);
+  // The green visor, on its band round the head.
+  x.fillStyle = 'rgb(76 160 110 / 85%)';
+  x.beginPath();
+  x.moveTo(cx - 60, headY - 48);
+  x.quadraticCurveTo(cx, headY - 36, cx + 60, headY - 48);
+  x.lineTo(cx + 52, headY - 26);
+  x.quadraticCurveTo(cx, headY - 16, cx - 52, headY - 26);
+  x.closePath();
+  x.fill();
+  x.fillStyle = '#2f6b48';
+  x.beginPath();
+  x.ellipse(cx, headY - 48, 62, 8, 0, Math.PI, 0);
+  x.fill();
+}
