@@ -74,7 +74,13 @@ function QuestPortrait({ giver }: { giver: DailyQuestGiver }) {
               ? 'gardener'
               : giver === 'grandpaStones'
                 ? 'grandpa'
-                : giver
+                : giver === 'bookshopQuiz'
+                  ? 'binderSeller'
+                  : giver === 'bereniceBalloons'
+                    ? 'berenice'
+                    : giver === 'postMail'
+                      ? 'postman'
+                      : giver
       }
     />
   );

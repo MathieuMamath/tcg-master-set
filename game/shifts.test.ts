@@ -20,6 +20,7 @@ import {
   shiftSeed,
   shiftStars,
 } from './shifts';
+import { perfectBalloons, perfectMail } from './village-games.test-helpers';
 
 const SEED = 20261107;
 
@@ -114,6 +115,8 @@ describe('playShift', () => {
       archery: perfectArchery(SEED),
       cleanup: perfectCleanup(SEED),
       stones: perfectStones(SEED),
+      balloons: perfectBalloons(SEED),
+      mail: perfectMail(SEED),
     };
     for (const job of SHIFT_JOBS) {
       const result = playShift(job, SEED, perfect[job]);

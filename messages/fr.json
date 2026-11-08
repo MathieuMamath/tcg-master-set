@@ -54,7 +54,8 @@
     "enterDojo": "Entrer au dojo",
     "leaveDojo": "Sortir",
     "dojoMaster": "Parler (Maître Kaito)",
-    "gardener": "Parler (Pépin)"
+    "gardener": "Parler (Pépin)",
+    "postman": "Parler (Gustave)"
   },
   "Shopkeeper": {
     "names": {
@@ -510,7 +511,8 @@
     "raffle": "Tombola",
     "bureau": "Bureau administratif",
     "ramen": "Ramen Yuzu",
-    "dojo": "Dojo Kaito"
+    "dojo": "Dojo Kaito",
+    "post": "Poste du village"
   },
   "Hails": {
     "latest": "Méga bienvenue !",
@@ -527,7 +529,8 @@
     "trotte": "Un coupon à tamponner ?",
     "ramenChef": "Une petite faim ?",
     "dojoMaster": "Un peu d’entraînement ?",
-    "gardener": "Un coup de main au jardin ?"
+    "gardener": "Un coup de main au jardin ?",
+    "postman": "Du courrier à trier ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -611,6 +614,18 @@
       "grandpaStones": {
         "name": "Les ricochets de Papy",
         "where": "Au lac du parc des Tilleuls"
+      },
+      "bookshopQuiz": {
+        "name": "Le quiz de Mamie Noisette",
+        "where": "À la librairie"
+      },
+      "bereniceBalloons": {
+        "name": "Le Pop’Ballons de Bérénice",
+        "where": "Au stand de tombola"
+      },
+      "postMail": {
+        "name": "Le courrier de Gustave",
+        "where": "À la poste du village"
       }
     },
     "status": {
@@ -898,7 +913,8 @@
       "ramenShop": "Ramen Yuzu ouvre en ville, entre les tours ! Yuzu la panda roux t’embauche pour trois petits boulots payés en pièces : la plonge, la cuisine et le service en salle.",
       "anySixQuests": "Le bonus du jour se gagne maintenant avec 6 quêtes au choix : plus besoin de toutes les faire.",
       "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Au dojo comme chez Yuzu, rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces, jusqu’à 300 pièces pour trois étoiles.",
-      "parkQuests": "Au parc des Tilleuls, Pépin l’écureuil jardinier te confie la pelouse à nettoyer et ses fleurs à arroser, et Papy Caillou t’apprend les ricochets : trois nouvelles quêtes du jour. Le nettoyage et les ricochets se rejouent pour chaque étoile, et l’arrosage, tout doux, se fait une fois par jour."
+      "parkQuests": "Au parc des Tilleuls, Pépin l’écureuil jardinier te confie la pelouse à nettoyer et ses fleurs à arroser, et Papy Caillou t’apprend les ricochets : trois nouvelles quêtes du jour. Le nettoyage et les ricochets se rejouent pour chaque étoile, et l’arrosage, tout doux, se fait une fois par jour.",
+      "villageQuests": "Du nouveau au village ! Mamie Noisette pose son quiz du jour, Bérénice lance le Pop’Ballons à son stand, et Gustave le héron ouvre la poste du village, entre la boutique et la librairie : trois nouvelles quêtes du jour."
     }
   },
   "Shift": {
@@ -909,7 +925,9 @@
       "slicing": "La découpe",
       "archery": "Le tir à l’arc",
       "cleanup": "Le grand nettoyage",
-      "stones": "Les ricochets"
+      "stones": "Les ricochets",
+      "balloons": "Pop’Ballons",
+      "mail": "Le tri du courrier"
     },
     "start": "C’est parti !",
     "notNow": "Pas maintenant",
@@ -943,6 +961,16 @@
         "checking": "Papy compte les rebonds…",
         "over": "Plus de galets !",
         "back": "Retourner voir Papy"
+      },
+      "berenice": {
+        "checking": "Bérénice compte les ballons…",
+        "over": "Plus de ballons !",
+        "back": "Retourner voir Bérénice"
+      },
+      "postman": {
+        "checking": "Gustave compte les lettres…",
+        "over": "Fin de la tournée !",
+        "back": "Retourner voir Gustave"
       }
     }
   },
@@ -1224,6 +1252,184 @@
         "champion": "Ça, c’est un lancer de champion !",
         "calm": "Prends ton temps.",
         "wind": "Le vent souffle fort : décale ton angle."
+      }
+    }
+  },
+  "Balloons": {
+    "name": "Bérénice",
+    "title": "la chèvre de la tombola",
+    "leave": "À plus tard !",
+    "jobs": {
+      "balloons": "Jouer au Pop’Ballons"
+    },
+    "lines": {
+      "greeting": "Envie d’éclater quelques ballons, {name} ?",
+      "rewarded": "Bravo ! Voilà {coins} pièces. Une étoile de plus, et je te paie la différence.",
+      "rewardedAll": "Trois étoiles, champion du Pop’Ballons ! Voilà {coins} pièces : tu as tout gagné pour aujourd’hui.",
+      "alreadyPaid": "Joli ! Ce score-là, je te l’ai déjà payé aujourd’hui : décroche une étoile de plus pour gagner davantage.",
+      "allEarned": "Tu as déjà gagné toutes les récompenses du Pop’Ballons aujourd’hui. Joue pour le plaisir, ou reviens demain !",
+      "failed": "Oups, trop de ballons de travers ! On recommence ?",
+      "unavailable": "Zut, ma pompe à ballons fait des siennes. Repasse dans un instant !"
+    },
+    "balloons": {
+      "howTo": "Des ballons de quatre couleurs montent dans quatre colonnes, et j’annonce une couleur, qui change souvent. Clique ou touche un ballon pour l’éclater, ou appuie sur 1 à 4 pour éclater le plus haut d’une colonne, avant qu’il s’envole. La bonne couleur rapporte un point, une autre est une erreur. Cinq bons d’affilée, c’est un bonus !",
+      "lane": "Colonne {number}",
+      "board": "Les ballons : les {color} à éclater",
+      "colors": {
+        "red": "rouges",
+        "blue": "bleus",
+        "yellow": "jaunes",
+        "green": "verts"
+      },
+      "call": "Les {color} !",
+      "moments": {
+        "popped": "+1",
+        "streak": "Série ! +2",
+        "wrong": "Raté !"
+      },
+      "berenice": {
+        "start": "Prêt ? Écoute bien la couleur !",
+        "popped": "Pop ! Bien joué !",
+        "streak": "Quelle série !",
+        "wrong": "Oh, pas cette couleur-là !",
+        "calm": "Vise les {color} !"
+      }
+    }
+  },
+  "Post": {
+    "name": "Gustave",
+    "title": "le facteur du village",
+    "leave": "Au revoir !",
+    "jobs": {
+      "mail": "Trier le courrier"
+    },
+    "lines": {
+      "greeting": "Bonjour, {name} ! Le courrier déborde, tu m’aides à le trier ? Je paie en pièces, et plus tu fais d’étoiles, plus je paie.",
+      "rewarded": "Merci ! Voilà {coins} pièces. Une étoile de plus, et je te paie la différence.",
+      "rewardedAll": "Trois étoiles, un vrai pro du tri ! Voilà {coins} pièces : tu as tout gagné pour aujourd’hui.",
+      "alreadyPaid": "Merci ! Ce score-là, je te l’ai déjà payé aujourd’hui : décroche une étoile de plus pour gagner davantage.",
+      "allEarned": "Tu as déjà gagné toutes les récompenses du tri aujourd’hui. Trie pour le plaisir, ou reviens demain !",
+      "failed": "Aïe, quelques lettres se sont égarées… On recommence ?",
+      "unavailable": "Hum, mon sac de courrier s’est coincé. Repasse dans un instant !"
+    },
+    "mail": {
+      "howTo": "Les lettres arrivent une à une sur le comptoir. Range chacune dans le casier de son timbre, avec les touches 1 à 4 ou un clic. Les lettres express, bordées de rouge, valent double si tu es rapide. Un colis se range en deux appuis. Un mauvais casier, ou une lettre qui tombe du comptoir, c’est une erreur.",
+      "pigeonholes": {
+        "house": "Maisons",
+        "bowl": "Restaurants",
+        "leaf": "Parc",
+        "book": "Librairie"
+      },
+      "kinds": {
+        "letter": "Une lettre",
+        "express": "Une lettre express",
+        "parcel": "Un colis"
+      },
+      "counter": "Sur le comptoir : {kind}, pour {to}",
+      "empty": "Le comptoir est vide",
+      "parcelHint": "Encore une fois !",
+      "moments": {
+        "filed": "+1",
+        "express": "Express ! +2",
+        "parcel": "Colis ! +2",
+        "half": "Encore !",
+        "wrong": "Mauvais casier !",
+        "slipped": "Tombée !"
+      },
+      "gustave": {
+        "start": "Voici le premier pli !",
+        "filed": "Parfait.",
+        "express": "Vite et bien, bravo !",
+        "parcel": "Un colis bien rangé !",
+        "half": "Un colis, ça se pousse deux fois.",
+        "wrong": "Oh, pas dans ce casier…",
+        "slipped": "Une lettre est tombée !",
+        "calm": "Tu as l’œil du métier."
+      }
+    }
+  },
+  "Quiz": {
+    "title": "Le quiz de Mamie Noisette",
+    "start": "Le quiz du jour",
+    "howTo": "Cinq questions sur le village et ses habitants, trois réponses à chaque fois. Prends ton temps ! Chaque bonne réponse rapporte {coins} pièces, une fois par jour.",
+    "question": "Question {number} sur {total}",
+    "result": "{right, plural, =0 {Aucune bonne réponse} one {# bonne réponse} other {# bonnes réponses}} sur {total}",
+    "thanks": "Bravo, {name} ! Voilà {coins} pièces pour ta culture du village.",
+    "noCoins": "Hé hé, pas facile ! Reviens demain, il y aura d’autres questions.",
+    "alreadyDone": "Tu as déjà fait le quiz aujourd’hui, {name}. Reviens demain pour de nouvelles questions !",
+    "error": "Oh, j’ai perdu mes fiches… Repasse dans un instant.",
+    "close": "Fermer",
+    "stop": "Arrêter",
+    "right": "Bonne réponse",
+    "wrong": "Raté, c’était : {answer}",
+    "questions": {
+      "gaspard": {
+        "text": "Quel animal est Gaspard, au stand de dalgona ?",
+        "answers": ["Un renard", "Un blaireau", "Un raton laveur"]
+      },
+      "yuzu": {
+        "text": "Que cuisine Yuzu dans son restaurant ?",
+        "answers": ["Des ramens végétariens", "Des pizzas", "Des crêpes"]
+      },
+      "pepin": {
+        "text": "Que porte Pépin sur la tête ?",
+        "answers": ["Un chapeau de paille", "Une casquette", "Un bandeau"]
+      },
+      "kaito": {
+        "text": "Quel animal est Maître Kaito ?",
+        "answers": ["Un blaireau", "Un panda roux", "Un héron"]
+      },
+      "berenice": {
+        "text": "Que propose Bérénice sur son stand ?",
+        "answers": ["Une tombola", "Des glaces", "Des classeurs"]
+      },
+      "lucas": {
+        "text": "Que repêche-t-on pour Lucas dans le lac ?",
+        "answers": ["Ses affaires tombées à l’eau", "Des poissons rouges", "Des pièces d’or"]
+      },
+      "lea": {
+        "text": "Quel animal est Léa, la voisine ?",
+        "answers": ["Une lapine", "Une hérissonne", "Une souris"]
+      },
+      "mamie": {
+        "text": "Que vend Mamie Noisette dans sa librairie ?",
+        "answers": ["Des classeurs", "Des boosters", "Des bols de ramen"]
+      },
+      "triplets": {
+        "text": "Qui tient la Tanière des cartes ?",
+        "answers": ["Trois ratons laveurs", "Trois écureuils", "Trois loutres"]
+      },
+      "hulotte": {
+        "text": "Quel animal est Mme Hulotte, au bureau ?",
+        "answers": ["Une chouette", "Une pie", "Une tortue"]
+      },
+      "brutus": {
+        "text": "Qui garde l’entrée du bureau, en ville ?",
+        "answers": ["Un bouledogue", "Un renard", "Un castor"]
+      },
+      "bus": {
+        "text": "Où peut-on aller en bus ?",
+        "answers": ["Au parc et en ville", "À la plage", "À la montagne"]
+      },
+      "dalgona": {
+        "text": "Que faut-il faire au stand de Gaspard ?",
+        "answers": [
+          "Découper une forme dans un biscuit",
+          "Lancer des fléchettes",
+          "Pêcher des canards"
+        ]
+      },
+      "papy": {
+        "text": "Quel animal est Papy Caillou ?",
+        "answers": ["Une tortue", "Un hérisson", "Un castor"]
+      },
+      "clock": {
+        "text": "Combien de temps dure une journée au village ?",
+        "answers": ["24 minutes", "24 heures", "Une heure"]
+      },
+      "gustave": {
+        "text": "Quel animal est Gustave, le facteur ?",
+        "answers": ["Un héron", "Une cigogne", "Un pélican"]
       }
     }
   }

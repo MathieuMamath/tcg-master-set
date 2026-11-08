@@ -42,4 +42,6 @@ export type Interaction =
   | 'leaveDojo'
   | 'dojoMaster'
   // Pépin, the squirrel who tends Linden Park's garden, and has its lawn cleaned and beds watered.
-  | 'gardener';
+  | 'gardener'
+  // Gustave, the heron who keeps the village's post stand and has the mail sorted.
+  | 'postman';
