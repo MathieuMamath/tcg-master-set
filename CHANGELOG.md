@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.94](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.93...v0.1.94) (2026-11-08)
+
+### Features
+
+* **quests:** add Mamie Noisette's quiz, Bérénice's Pop'Balloons and Gustave's mail ([#96](https://github.com/MathieuMamath/tcg-master-set/issues/96)) ([4914c0d](https://github.com/MathieuMamath/tcg-master-set/commit/4914c0dc65330f9f73eff22166cebb16340ac73f))
+
 ## [0.1.93](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.92...v0.1.93) (2026-11-08)
 
 ### Features
