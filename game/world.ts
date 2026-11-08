@@ -40,4 +40,6 @@ export type Interaction =
   // The dojo downtown, and its master, who trains the player in slicing and archery.
   | 'enterDojo'
   | 'leaveDojo'
-  | 'dojoMaster';
+  | 'dojoMaster'
+  // Pépin, the squirrel who tends Linden Park's garden, and has its lawn cleaned and beds watered.
+  | 'gardener';

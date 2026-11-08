@@ -24,12 +24,14 @@ type Props = {
   line: QuestLine;
   // Null while a quest is running, when there is nothing to accept.
   onAccept: (() => Promise<QuestLine | null>) | null;
+  // Another thing the quest giver offers, such as Papy Caillou's skipping stones.
+  extra?: { label: string; onPress: () => void };
   onClose: () => void;
 };
 
 // Mounted only while talking. Accepting starts the quest, and closes the conversation unless the
 // quest giver answers with something else.
-export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props) {
+export function QuestDialog({ giver, line: firstLine, onAccept, extra, onClose }: Props) {
   const t = useTranslations('Quest');
   const playerName = usePlayerName();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -91,6 +93,15 @@ export function QuestDialog({ giver, line: firstLine, onAccept, onClose }: Props
               }}
             >
               {speech.line === 'failed' ? t('retry') : t(`${giver}.accept`)}
+            </button>
+          )}
+          {extra && (
+            <button
+              type="button"
+              onClick={extra.onPress}
+              className={`${CHOICE_CLASS} bg-ui-stamp text-ui-paper`}
+            >
+              {extra.label}
             </button>
           )}
           <button type="submit" className={CHOICE_CLASS}>

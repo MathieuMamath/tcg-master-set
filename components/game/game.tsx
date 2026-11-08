@@ -71,6 +71,7 @@ import type { ShiftHost } from './shift';
 import { ShiftDialog } from './shift-dialog';
 import { ShopDialog } from './shop-dialog';
 import { StatsDialog } from './stats-dialog';
+import { WateringDialog } from './watering-dialog';
 
 // Three.js needs the browser, and this keeps it out of the bundle of every other screen.
 const PaperScene = dynamic(() => import('./paper-scene').then((module) => module.PaperScene), {
@@ -82,7 +83,8 @@ const INTERACT_KEY = 'KeyE';
 // Where the browser keeps the id of the last "What's new?" note it showed.
 const NEWS_SEEN_KEY = 'tcg-master-set:news-seen';
 
-type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker | ShiftHost;
+// Papy Caillou is both a quest giver and the host of the skipping stones, a conversation of its own.
+type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker | ShiftHost | 'grandpaStones';
 
 // Talking to someone gets a speech bubble over their head, and everything else a prompt at the
 // bottom of the screen.
@@ -137,13 +139,13 @@ export function Game({ player, sets, progress }: Props) {
   const [questLine, setQuestLine] = useState<QuestLine>('greeting');
   const [memoryCards, setMemoryCards] = useState<readonly MemoryCard[] | null>(null);
   const [grandpaLine, setGrandpaLine] = useState<QuestLine>('greeting');
-  const [memoryWonOn, setMemoryWonOn] = useState(progress.memoryWonOn);
   const [cleanedOn, setCleanedOn] = useState(progress.cleanedOn);
   // The saying Papy Caillou shares once beaten, picked anew at each visit to the park.
   const [proverb, setProverb] = useState(() => pickProverb());
   const [isFishing, setIsFishing] = useState(false);
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
+  const [isWatering, setIsWatering] = useState(false);
   // The shape Gaspard handed over, while the player carves it.
   const [dalgonaShape, setDalgonaShape] = useState<DalgonaShape | null>(null);
   const [gaspardLine, setGaspardLine] = useState<QuestLine>('greeting');
@@ -191,12 +193,17 @@ export function Game({ player, sets, progress }: Props) {
   const tActivity = useTranslations('Activity');
   const tSpeakers = useTranslations('Speakers');
   const tShopkeeper = useTranslations('Shopkeeper');
+  const tStones = useTranslations('Stones');
+  const tGarden = useTranslations('Garden');
   const tTown = useTranslations('Town');
   const tHails = useTranslations('Hails');
   const tBus = useTranslations('Bus');
   const tQuest = useTranslations('Quest');
   // Beaten for the day, Papy Caillou only shares a saying: there is nothing to talk about.
-  const isPapySaying = interaction === 'grandpa' && memoryWonOn === questDay(new Date());
+  // Papy's memory game, won for the day, as the day's activity says: read again from the server
+  // whenever a dialog closes, so that it never drifts from the database.
+  const isMemoryWon = activity.done.includes('grandpa');
+  const isPapySaying = interaction === 'grandpa' && isMemoryWon;
   const isDialogOpen =
     isTalking ||
     newsShown !== null ||
@@ -210,6 +217,7 @@ export function Game({ player, sets, progress }: Props) {
     memoryCards !== null ||
     isFishing ||
     isPlayingBasketball ||
+    isWatering ||
     dalgonaShape !== null ||
     isRaffling ||
     isBusMapOpen ||
@@ -222,8 +230,8 @@ export function Game({ player, sets, progress }: Props) {
   const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
   const isCutting = useRef(false);
-  const controls = useRef({ interaction, isDialogOpen, isPapySaying, goToBed: () => {} });
-  controls.current = { interaction, isDialogOpen, isPapySaying, goToBed: () => goToBed() };
+  const controls = useRef({ interaction, isDialogOpen, goToBed: () => {} });
+  controls.current = { interaction, isDialogOpen, goToBed: () => goToBed() };
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -251,11 +259,7 @@ export function Game({ player, sets, progress }: Props) {
       if (controls.current.isDialogOpen) {
         return;
       }
-      if (
-        event.code === INTERACT_KEY &&
-        controls.current.interaction &&
-        !controls.current.isPapySaying
-      ) {
+      if (event.code === INTERACT_KEY && controls.current.interaction) {
         event.preventDefault();
         releaseKeys();
         if (controls.current.interaction === 'binder') {
@@ -494,9 +498,9 @@ export function Game({ player, sets, progress }: Props) {
     }).catch(() => {});
   }, [locale]);
 
-  // Each conversation that starts, for the statistics.
+  // Each conversation that starts, for the statistics. Papy's skipping stones carry on his.
   useEffect(() => {
-    if (talkingTo !== null) {
+    if (talkingTo !== null && talkingTo !== 'grandpaStones') {
       reportPlay({ type: 'npc.talked', speaker: talkingTo });
     }
   }, [talkingTo]);
@@ -603,7 +607,11 @@ export function Game({ player, sets, progress }: Props) {
     setMemoryCards(null);
     if (ending?.status === 'won') {
       showSaveNotice();
-      setMemoryWonOn(questDay(new Date()));
+      setActivity((current) =>
+        current.done.includes('grandpa')
+          ? current
+          : { ...current, done: [...current.done, 'grandpa'] },
+      );
     }
     if (ending) {
       setWallet(ending.wallet);
@@ -958,12 +966,15 @@ export function Game({ player, sets, progress }: Props) {
           </div>
         </div>
         {isPapySaying && !isDialogOpen && (
-          // Papy Caillou's saying, in his speech bubble: something to read, not to press.
-          <p
-            ref={bubble as RefObject<HTMLParagraphElement | null>}
+          // Papy Caillou's saying, in his speech bubble, once his memory game is won for the day.
+          // Pressing it, or the interact key, still talks to him, for his skipping stones.
+          <button
+            ref={bubble as RefObject<HTMLButtonElement | null>}
+            type="button"
             aria-live="polite"
+            onClick={interact}
             style={{ transform: 'translate(-200vw, 0)' }}
-            className="pointer-events-none absolute top-0 left-0 pb-2.5 font-game text-ui-ink"
+            className="group absolute top-0 left-0 cursor-pointer pb-2.5 font-game text-ui-ink"
           >
             <span className="ui-pop-in block w-max max-w-[min(22rem,80vw)] rounded-[2rem] bg-ui-paper px-6 py-3 text-center shadow-[3px_4px_0_var(--ui-shadow)]">
               <span className="block text-lg leading-snug">
@@ -972,12 +983,18 @@ export function Game({ player, sets, progress }: Props) {
               <span className="mt-1 block text-sm text-ui-ink/60">
                 {tQuest(`grandpa.proverbs.${proverb}.source` as 'grandpa.proverbs.1.source')}
               </span>
+              <span className="mt-1.5 flex items-center justify-center gap-2 text-base">
+                <kbd className="rounded-full bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
+                  E
+                </kbd>
+                {t('grandpa')}
+              </span>
             </span>
             <span
               aria-hidden="true"
               className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
             />
-          </p>
+          </button>
         )}
         {interaction && !isDialogOpen && !isPapySaying && isTalk(interaction) && (
           // A speech bubble that the scene moves just above the head of who the player can talk to.
@@ -1108,8 +1125,15 @@ export function Game({ player, sets, progress }: Props) {
         {talkingTo === 'grandpa' && (
           <QuestDialog
             giver="grandpa"
-            line={grandpaLine}
+            // His memory game, once won for the day, leaves only his skipping stones to offer.
+            line={isMemoryWon ? 'alreadyDone' : grandpaLine}
             onAccept={startMemoryGame}
+            extra={{
+              label: tStones('jobs.stones'),
+              // Papy's skipping stones are a shift of their own, with him as its host, opened
+              // straight onto the game.
+              onPress: () => setTalkingTo('grandpaStones'),
+            }}
             onClose={() => {
               setTalkingTo(null);
               setGrandpaLine((line) =>
@@ -1123,6 +1147,15 @@ export function Game({ player, sets, progress }: Props) {
             cards={memoryCards}
             onEnd={endMemoryGame}
             onGiveUp={() => setMemoryCards(null)}
+          />
+        )}
+        {isWatering && (
+          <WateringDialog
+            onWatered={(updated) => {
+              setWallet(updated);
+              showSaveNotice();
+            }}
+            onClose={() => setIsWatering(false)}
           />
         )}
         {isPlayingBasketball && (
@@ -1225,9 +1258,28 @@ export function Game({ player, sets, progress }: Props) {
         {isCouponRegisterOpen && !isTalking && (
           <CouponRegister sets={sets} onClose={() => setIsCouponRegisterOpen(false)} />
         )}
-        {(talkingTo === 'ramenChef' || talkingTo === 'dojoMaster') && (
+        {(talkingTo === 'ramenChef' ||
+          talkingTo === 'dojoMaster' ||
+          talkingTo === 'gardener' ||
+          talkingTo === 'grandpaStones') && (
           <ShiftDialog
-            host={talkingTo}
+            host={talkingTo === 'grandpaStones' ? 'grandpa' : talkingTo}
+            startJob={talkingTo === 'grandpaStones' ? 'stones' : undefined}
+            extra={
+              talkingTo === 'gardener'
+                ? {
+                    label: tGarden('jobs.watering'),
+                    doneLine: activity.done.includes('gardenWatering')
+                      ? tGarden('watering.alreadyDone', { name: player.username })
+                      : null,
+                    // Pépin's flower beds are a chore of their own, once a day.
+                    onPress: () => {
+                      setTalkingTo(null);
+                      setIsWatering(true);
+                    },
+                  }
+                : undefined
+            }
             onShiftEnd={(updated, hasPaid) => {
               setWallet(updated);
               if (hasPaid) {
@@ -1250,7 +1302,9 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'hulotte' &&
           talkingTo !== 'trotte' &&
           talkingTo !== 'ramenChef' &&
-          talkingTo !== 'dojoMaster' && (
+          talkingTo !== 'dojoMaster' &&
+          talkingTo !== 'gardener' &&
+          talkingTo !== 'grandpaStones' && (
             <ShopDialog
               stock={talkingTo}
               items={(talkingTo === 'binderSeller'

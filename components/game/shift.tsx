@@ -2,10 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 import {
+  createContext,
   type KeyboardEvent,
   type ReactNode,
   type RefObject,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -23,8 +25,13 @@ import { focusFirstChoice, moveThroughChoices } from './menu-focus';
 import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
-// Who a shift is played for: Yuzu at the ramen shop, or Maître Kaito at the dojo.
-export type ShiftHost = 'ramenChef' | 'dojoMaster';
+// Whether the shift was opened straight from a conversation, such as Papy Caillou's, so that its
+// first screen has nowhere to go back to: its button then just closes it.
+export const ShiftOpenedDirectly = createContext(false);
+
+// Who a shift is played for: Yuzu at the ramen shop, Maître Kaito at the dojo, Pépin in the park's
+// garden, or Papy Caillou at the lake.
+export type ShiftHost = 'ramenChef' | 'dojoMaster' | 'gardener' | 'grandpa';
 
 // How a shift ends for its host's conversation: what the server counted, nothing it could count, or
 // the player stopping.
@@ -99,9 +106,11 @@ export function useShift<State extends Simulated>(
     return () => cancelAnimationFrame(frame);
   }, [isPlaying, startedAt]);
 
-  // The shift ends when its time is up, or at its last mistake.
+  // The shift ends when its time is up, or once its end has come: its last mistake, or its last
+  // pebble or arrow landing, which can come a moment after it was thrown. The server counts the
+  // shift from that end, so it must not be sent before.
   useEffect(() => {
-    if (state && (state.endedAt !== null || elapsed >= shiftMs)) {
+    if (state && ((state.endedAt !== null && elapsed >= state.endedAt) || elapsed >= shiftMs)) {
       finish(points(state));
     }
   }, [state, elapsed, shiftMs, finish, points]);
@@ -283,6 +292,7 @@ export function ShiftFrame({
 }) {
   const t = useTranslations('Shift');
   const tHost = useTranslations(`Shift.hosts.${host}`);
+  const isOpenedDirectly = useContext(ShiftOpenedDirectly);
   const rules = SHIFT_RULES[job];
 
   useEffect(() => {
@@ -336,7 +346,7 @@ export function ShiftFrame({
                 {t('start')}
               </button>
               <button type="button" onClick={() => onDone('gaveUp')} className={CHOICE_CLASS}>
-                {tHost('back')}
+                {isOpenedDirectly ? t('notNow') : tHost('back')}
               </button>
             </div>
           </>

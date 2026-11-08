@@ -2,17 +2,19 @@
 
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { DOJO_JOBS, RAMEN_JOBS, type ShiftJob } from '@/game/shifts';
+import { DOJO_JOBS, GARDEN_JOBS, RAMEN_JOBS, type ShiftJob, STONES_JOBS } from '@/game/shifts';
 import type { Wallet } from '@/game/shop-dialogue';
 import { ArcheryShift } from './dojo-archery-scene';
 import { SlicingShift } from './dojo-slicing-scene';
 import { focusFirstChoice, moveThroughChoices, openDialog } from './menu-focus';
+import { CleanupShift } from './park-cleanup-scene';
+import { StonesShift } from './park-stones-scene';
 import { usePlayerName } from './player-name';
 import { DishesShift } from './ramen-dishes-scene';
 import { KitchenShift } from './ramen-kitchen-scene';
 import { ServiceShift } from './ramen-service-scene';
 import { SellerPortrait } from './seller-portrait';
-import type { ShiftEnd, ShiftHost } from './shift';
+import { type ShiftEnd, type ShiftHost, ShiftOpenedDirectly } from './shift';
 import { CHOICE_CLASS, SpeechBox, TypedLine } from './shop-dialog';
 
 type HostLine =
@@ -32,6 +34,8 @@ type View =
 const HOSTS = {
   ramenChef: { namespace: 'Ramen', jobs: RAMEN_JOBS },
   dojoMaster: { namespace: 'Dojo', jobs: DOJO_JOBS },
+  gardener: { namespace: 'Garden', jobs: GARDEN_JOBS },
+  grandpa: { namespace: 'Stones', jobs: STONES_JOBS },
 } as const satisfies Record<ShiftHost, { namespace: string; jobs: readonly ShiftJob[] }>;
 
 // Each shift's game.
@@ -41,24 +45,36 @@ const SHIFTS: Record<ShiftJob, (props: { onDone: (end: ShiftEnd) => void }) => R
   service: ServiceShift,
   slicing: SlicingShift,
   archery: ArcheryShift,
+  cleanup: CleanupShift,
+  stones: StonesShift,
 };
 
 type Props = {
   host: ShiftHost;
+  // A shift to open straight onto, when the conversation that led here already offered it.
+  startJob?: ShiftJob;
+  // Another thing the host offers, such as Pépin's flower beds to water, and what the host says
+  // instead when it is done for the day, which leaves nothing to open.
+  extra?: { label: string; onPress: () => void; doneLine: string | null };
   // The coins after a shift, and whether it paid, for the counters and the save notice.
   onShiftEnd: (wallet: Wallet, hasPaid: boolean) => void;
   onClose: () => void;
 };
 
-// A host of shifts: Yuzu at Ramen Yuzu, who offers her three jobs, or Maître Kaito at the dojo, who
-// offers his two lessons. The shift itself plays here, and the host answers with what it paid. The
-// server plays every shift again and pays, once a day per job.
-export function ShiftDialog({ host, onShiftEnd, onClose }: Props) {
+// A host of shifts: Yuzu at Ramen Yuzu, who offers her three jobs, Maître Kaito at the dojo, who
+// offers his two lessons, Pépin in the park's garden, with his two chores, or Papy Caillou, with his
+// skipping stones. The shift itself plays here, and the host answers with what it paid. The
+// server plays every shift again and pays each new star of the day.
+export function ShiftDialog({ host, startJob, extra, onShiftEnd, onClose }: Props) {
   const { namespace, jobs } = HOSTS[host];
   const t = useTranslations(namespace);
   const playerName = usePlayerName();
   const dialog = useRef<HTMLDialogElement>(null);
-  const [view, setView] = useState<View>({ kind: 'talk', line: 'greeting', coins: 0, turn: 0 });
+  const [view, setView] = useState<View>(
+    startJob
+      ? { kind: 'shift', job: startJob }
+      : { kind: 'talk', line: 'greeting', coins: 0, turn: 0 },
+  );
   const isShift = view.kind === 'shift';
 
   useEffect(() => {
@@ -72,17 +88,28 @@ export function ShiftDialog({ host, onShiftEnd, onClose }: Props) {
     return () => cancelAnimationFrame(frame);
   }, [view.kind, view.kind === 'talk' ? view.turn : view.job]);
 
-  const backToHost = (line: HostLine, coins = 0) =>
+  // What the host said about the extra once it is done for the day, in place of their line.
+  const [extraSaid, setExtraSaid] = useState<string | null>(null);
+
+  const backToHost = (line: HostLine, coins = 0) => {
+    setExtraSaid(null);
     setView((current) => ({
       kind: 'talk',
       line,
       coins,
       turn: current.kind === 'talk' ? current.turn + 1 : 1,
     }));
+  };
 
   const endShift = (result: ShiftEnd) => {
     if (result === 'gaveUp') {
-      backToHost('greeting');
+      // A shift opened straight from another conversation goes back to the game, rather than to a
+      // second greeting.
+      if (startJob) {
+        dialog.current?.close();
+      } else {
+        backToHost('greeting');
+      }
       return;
     }
     if (!result) {
@@ -109,8 +136,9 @@ export function ShiftDialog({ host, onShiftEnd, onClose }: Props) {
       aria-labelledby={isShift ? 'shift-title' : 'shift-host'}
       onClose={onClose}
       onCancel={(event) => {
-        // Escape stops a shift and goes back to its host, rather than leaving the place.
-        if (isShift) {
+        // Escape stops a shift and goes back to its host, rather than leaving the place, unless the
+        // shift was opened straight from another conversation.
+        if (isShift && !startJob) {
           event.preventDefault();
           backToHost('greeting');
         }
@@ -125,7 +153,11 @@ export function ShiftDialog({ host, onShiftEnd, onClose }: Props) {
       {view.kind === 'shift' ? (
         (() => {
           const Shift = SHIFTS[view.job];
-          return <Shift onDone={endShift} />;
+          return (
+            <ShiftOpenedDirectly value={startJob !== undefined}>
+              <Shift onDone={endShift} />
+            </ShiftOpenedDirectly>
+          );
         })()
       ) : (
         <SpeechBox
@@ -135,8 +167,8 @@ export function ShiftDialog({ host, onShiftEnd, onClose }: Props) {
           portrait={<SellerPortrait stock={host} />}
         >
           <TypedLine
-            key={view.turn}
-            text={t(`lines.${view.line}`, { name: playerName, coins: view.coins })}
+            key={extraSaid ? `extra-${view.turn}` : view.turn}
+            text={extraSaid ?? t(`lines.${view.line}`, { name: playerName, coins: view.coins })}
           />
           <form method="dialog" className="mt-2.5 flex flex-wrap gap-2.5">
             {jobs.map((job) => (
@@ -149,6 +181,23 @@ export function ShiftDialog({ host, onShiftEnd, onClose }: Props) {
                 {t(`jobs.${job}`)}
               </button>
             ))}
+            {extra && extraSaid === null && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (extra.doneLine === null) {
+                    extra.onPress();
+                    return;
+                  }
+                  setExtraSaid(extra.doneLine);
+                  // The button goes, and the focus with it.
+                  requestAnimationFrame(() => dialog.current && focusFirstChoice(dialog.current));
+                }}
+                className={`${CHOICE_CLASS} bg-ui-stamp! text-ui-paper`}
+              >
+                {extra.label}
+              </button>
+            )}
             <button type="submit" className={CHOICE_CLASS}>
               {t('leave')}
             </button>

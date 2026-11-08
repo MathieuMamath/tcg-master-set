@@ -136,7 +136,10 @@ import {
   drawElevator,
   drawFilingCabinet,
   drawFlats,
+  drawFlowerBeds,
+  drawFountain,
   drawFrame,
+  drawGardener,
   drawGardenView,
   drawGaspard,
   drawHedgehog,
@@ -182,6 +185,7 @@ import {
   drawSign,
   drawSkyline,
   drawSofa,
+  drawSortingBins,
   drawStarField,
   drawStationeryTable,
   drawStreet,
@@ -198,6 +202,7 @@ import {
   drawWindowClouds,
   drawWindowFrame,
   type Eyes,
+  GARDENER_SIZE,
   GASPARD_SIZE,
   HEDGEHOG_SIZE,
   HULOTTE_SIZE,
@@ -1505,7 +1510,7 @@ const WIND_SWAY = 0.025;
 const LAMP_Z = -0.25;
 const LAMP_HEIGHTS: Record<LampStyle, number> = { classic: 3.3, modern: 4.2 };
 const TOWN_LAMPS = [-17.6, -9.4, 2.05, 9.4, 25.8];
-const PARK_LAMPS = [-5.1, 2.7, 9.8];
+const PARK_LAMPS = [-16.6, -5.1, 2.7, 9.8];
 const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8, 30.4, 38];
 
 function Lamps({ style, xs }: { style: LampStyle; xs: readonly number[] }) {
@@ -1857,6 +1862,10 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
 // A wood of round trees and pines along the back of the lawn, the pines mostly further back, and
 // more beyond the lake.
 const PARK_TREES = [
+  { x: -19.8, z: -3.4, height: 5, kind: 'pine', seed: 14 },
+  { x: -17.2, z: -3.2, height: 4.2, kind: 'round', seed: 15 },
+  { x: -14.4, z: -3.6, height: 4.8, kind: 'pine', seed: 16 },
+  { x: -12.2, z: -3, height: 3.8, kind: 'round', seed: 17 },
   { x: -10.4, z: -3.6, height: 5.2, kind: 'pine', seed: 6 },
   { x: -9.2, z: -3, height: 4.2, kind: 'round', seed: 1 },
   { x: -7.8, z: -3.4, height: 4.6, kind: 'pine', seed: 7 },
@@ -1880,6 +1889,11 @@ const PARK_TREES = [
 // Tufts of grass on the lawn: at the foot of the trees and the bench, never on the lake, and
 // along the front edge, in front of Pip.
 const PARK_TUFTS = [
+  { x: -19.4, z: -1, height: 0.8 },
+  { x: -13.6, z: -0.9, height: 0.75 },
+  { x: -18.6, z: 2.6, height: 0.8 },
+  { x: -14.8, z: 2.7, height: 0.75 },
+  { x: -11.6, z: 2.62, height: 0.85 },
   { x: -9.6, z: -1, height: 0.8 },
   { x: -5.2, z: -0.9, height: 0.9 },
   { x: -4.1, z: -1, height: 0.7 },
@@ -1900,12 +1914,13 @@ const PARK_TUFTS = [
 const PAPY_HEIGHT = 2.9;
 const LUCAS_HEIGHT = 2.6;
 const PARK_PEOPLE_Z = -0.5;
+const GARDENER_HEIGHT = 2.5;
 
-// The Linden Park: lawns and trees under the sky, the bus stop on the left, Papy Caillou by his
-// bench, and Lucas fishing at the edge of the lake.
+// The Linden Park: lawns and trees under the sky, Pépin's garden on the far left, the bus stop,
+// Papy Caillou by his bench, and Lucas fishing at the edge of the lake.
 function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
   const fontsReady = useFontsReady();
-  const { busStop, bench, papy, lake, lucas } = PARK_SPOTS;
+  const { busStop, bench, papy, lake, lucas, fountain, flowerBeds, gardener, bins } = PARK_SPOTS;
   const staticTextures = useMemo(
     () => ({
       ground: texture(drawParkGround()),
@@ -1927,6 +1942,10 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       ),
       papy: texture(cutOut(PAPY_SIZE.width, PAPY_SIZE.height, drawPapy, 9, 118)),
       lucas: blinker(LUCAS_SIZE.width, LUCAS_SIZE.height, drawLucas, 9, 119),
+      gardener: blinker(GARDENER_SIZE.width, GARDENER_SIZE.height, drawGardener, 9, 230),
+      flowerBeds: texture(cutOut(380, 150, drawFlowerBeds, 7, 231)),
+      fountain: texture(cutOut(160, 220, drawFountain, 7, 232)),
+      bins: texture(cutOut(150, 110, drawSortingBins, 7, 233)),
     }),
     [],
   );
@@ -1945,6 +1964,12 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       <SpeakerTopsOf
         speakerTops={speakerTops}
         speakers={[
+          {
+            interaction: 'gardener',
+            map: textures.gardener.open,
+            height: GARDENER_HEIGHT,
+            z: PARK_PEOPLE_Z,
+          },
           { interaction: 'grandpa', map: textures.papy, height: PAPY_HEIGHT, z: PARK_PEOPLE_Z },
           { interaction: 'boy', map: textures.lucas.open, height: LUCAS_HEIGHT, z: PARK_PEOPLE_Z },
         ]}
@@ -2004,6 +2029,31 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
           <CutOut map={textures.tufts[index % 4]} height={height} />
         </Swaying>
       ))}
+      {/* Pépin's garden: the fountain, the flower beds, Pépin, and the sorting bins. */}
+      <Furniture
+        map={textures.fountain}
+        x={fountain.x}
+        z={-1.2}
+        height={1.9}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={textures.flowerBeds}
+        x={flowerBeds.x}
+        z={-1}
+        height={1.4}
+        shadow={textures.shadow}
+      />
+      <Character
+        map={textures.gardener.open}
+        blinks={textures.gardener}
+        // The drawing leaves room for the tail on its right, so it moves right to stay centred.
+        x={gardener.x + 0.2}
+        z={PARK_PEOPLE_Z}
+        height={GARDENER_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture map={textures.bins} x={bins.x} z={-0.9} height={1} shadow={textures.shadow} />
       <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
       <Furniture map={textures.bench} x={bench.x} z={-1.1} height={1.4} shadow={textures.shadow} />
       <Character

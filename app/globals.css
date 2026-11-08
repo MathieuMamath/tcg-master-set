@@ -666,6 +666,16 @@ him, the bus rumbling, and dots that wait. */
   }
 }
 
+/* A strip made of two copies of a scenery, sliding left by one copy and starting over. */
+@keyframes ui-scroll-half {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @keyframes ui-scrub {
   0%,
   100% {
@@ -756,6 +766,10 @@ him, the bus rumbling, and dots that wait. */
   animation: ui-belt 600ms linear infinite;
 }
 
+.ui-scroll-half {
+  animation: ui-scroll-half var(--scroll-time) linear infinite;
+}
+
 .ui-float-up {
   animation: ui-float-up 900ms ease-out forwards;
 }
@@ -807,6 +821,7 @@ him, the bus rumbling, and dots that wait. */
   .ui-wobble,
   .ui-bubble,
   .ui-belt,
+  .ui-scroll-half,
   .ui-scrub,
   .ui-pour,
   .ui-flutter,

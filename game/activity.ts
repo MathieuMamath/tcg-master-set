@@ -2,6 +2,7 @@ import { BASKETBALL_QUEST } from './basketball';
 import { DALGONA_QUEST } from './dalgona';
 import { FISHING_QUEST } from './fishing';
 import { GRANDPA_QUEST } from './memory-game';
+import { WATERING_QUEST } from './park-watering';
 import { GRANDMA_QUEST, questDay } from './quests';
 import { RAFFLE_QUEST } from './raffle';
 import { SHIFT_QUESTS } from './shifts';
@@ -22,6 +23,10 @@ export const DAILY_QUESTS = [
   // The dojo's two trainings, both given by its master.
   { id: SHIFT_QUESTS.slicing, giver: 'dojoSlicing' },
   { id: SHIFT_QUESTS.archery, giver: 'dojoArchery' },
+  // Linden Park: Pépin's clean-up and watering, and Papy Caillou's skipping stones.
+  { id: SHIFT_QUESTS.cleanup, giver: 'gardenCleanup' },
+  { id: WATERING_QUEST, giver: 'gardenWatering' },
+  { id: SHIFT_QUESTS.stones, giver: 'grandpaStones' },
 ] as const;
 
 export type DailyQuest = (typeof DAILY_QUESTS)[number];

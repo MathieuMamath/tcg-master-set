@@ -53,7 +53,8 @@
     "ramenChef": "Talk (Yuzu)",
     "enterDojo": "Go into the dojo",
     "leaveDojo": "Leave",
-    "dojoMaster": "Talk (Master Kaito)"
+    "dojoMaster": "Talk (Master Kaito)",
+    "gardener": "Talk (Pépin)"
   },
   "Shopkeeper": {
     "names": {
@@ -242,7 +243,7 @@
         "greeting": "Heh heh, fancy a game of memory, {name}? Find the 8 pairs in 20 moves at most… and I’ll give you 150 coins. But I warn you, I never lose!",
         "rewarded": "Well I never, you beat me! What a memory. Here are your 150 coins, well earned.",
         "failed": "Ha ha! Out of moves! Don’t worry, I’ve had a hundred years to practise. Another round?",
-        "alreadyDone": "One defeat a day is quite enough for my pride! Come back tomorrow.",
+        "alreadyDone": "One defeat at memory a day is quite enough for my pride! But if you fancy skipping a few stones, I’m your man.",
         "unavailable": "Hmm, I’ve mislaid my cards… Try again in a moment."
       },
       "accept": "Let’s play!",
@@ -525,7 +526,8 @@
     "brutus": "Halt!",
     "trotte": "A coupon to stamp?",
     "ramenChef": "Feeling peckish?",
-    "dojoMaster": "Up for some training?"
+    "dojoMaster": "Up for some training?",
+    "gardener": "Fancy helping in the garden?"
   },
   "Bus": {
     "title": "Bus map",
@@ -597,6 +599,18 @@
       "dojoArchery": {
         "name": "Archery at Kaito’s",
         "where": "At the dojo, downtown"
+      },
+      "gardenCleanup": {
+        "name": "Cleaning up with Pépin",
+        "where": "At Linden Park"
+      },
+      "gardenWatering": {
+        "name": "Watering with Pépin",
+        "where": "At Linden Park"
+      },
+      "grandpaStones": {
+        "name": "Papy’s skipping stones",
+        "where": "At Linden Park’s lake"
       }
     },
     "status": {
@@ -883,7 +897,8 @@
       "newsSheet": "This very sheet! It tells you what changed in the game whenever you come by, and you can read it again from the settings.",
       "ramenShop": "Ramen Yuzu opens downtown, between the towers! Yuzu the red panda hires you for three little jobs paid in coins: washing up, the kitchen and waiting tables.",
       "anySixQuests": "The daily bonus now takes any 6 quests of your choice: no need to do them all.",
-      "dojo": "The dojo opens downtown, next to Ramen Yuzu! Master Kaito, an old badger, trains you in vegetable slicing and archery: two new daily quests paid in coins. At the dojo as at Yuzu’s, replay as often as you like: each new star of the day pays you the difference in coins, up to 300 coins for three stars."
+      "dojo": "The dojo opens downtown, next to Ramen Yuzu! Master Kaito, an old badger, trains you in vegetable slicing and archery: two new daily quests paid in coins. At the dojo as at Yuzu’s, replay as often as you like: each new star of the day pays you the difference in coins, up to 300 coins for three stars.",
+      "parkQuests": "At Linden Park, Pépin the squirrel gardener has you clean up the lawn and water his flowers, and Papy Caillou teaches you to skip stones: three new daily quests. The clean-up and the stones can be replayed for every star, and the gentle watering is done once a day."
     }
   },
   "Shift": {
@@ -892,9 +907,12 @@
       "kitchen": "In the kitchen",
       "service": "Waiting tables",
       "slicing": "Slicing",
-      "archery": "Archery"
+      "archery": "Archery",
+      "cleanup": "The big clean-up",
+      "stones": "Skipping stones"
     },
     "start": "Let’s go!",
+    "notNow": "Not now",
     "timeLeft": "{seconds} s",
     "mistakes": "Mistakes",
     "giveUp": "Stop",
@@ -915,6 +933,16 @@
         "checking": "Kaito is counting…",
         "over": "Lesson over!",
         "back": "Go back to Kaito"
+      },
+      "gardener": {
+        "checking": "Pépin is counting…",
+        "over": "All done!",
+        "back": "Go back to Pépin"
+      },
+      "grandpa": {
+        "checking": "Papy is counting the skips…",
+        "over": "No pebbles left!",
+        "back": "Go back to Papy"
       }
     }
   },
@@ -1094,6 +1122,108 @@
         "miss": "The target is in front of you, not beside it.",
         "streak": "Twice in the centre! I am proud.",
         "wind": "The wind is strong: aim against it."
+      }
+    }
+  },
+  "Garden": {
+    "name": "Pépin",
+    "title": "the park’s gardener",
+    "leave": "See you later!",
+    "jobs": {
+      "cleanup": "Clean up the path",
+      "watering": "Water the flowers"
+    },
+    "lines": {
+      "greeting": "Hi, {name}! The wind scatters litter everywhere and my flowers are always thirsty. Will you lend me a hand? I pay in coins, and the more stars you earn, the more I pay.",
+      "rewarded": "Thanks for the help! Here are {coins} coins. One more star, and I’ll pay you the difference.",
+      "rewardedAll": "Three stars, the park has never looked so good! Here are {coins} coins. You have earned every reward of this job for today.",
+      "alreadyPaid": "Thanks! I already paid you for a score like that today: earn one more star to get more.",
+      "allEarned": "You have already earned every reward of this job today. Stay and garden for the fun of it, or come back tomorrow!",
+      "failed": "Not easy, is it? No coins this time, but we can go again whenever you like.",
+      "unavailable": "Oops, my wheelbarrow is stuck. Come back in a moment!"
+    },
+    "cleanup": {
+      "howTo": "You stroll along the path pulling Pépin’s cart with its three bins. When a piece of litter comes within reach, in the circle in front of you, choose its bin: 1 Paper, 2 Packaging, 3 Glass, or click it. The wrong bin or a piece left behind is a mistake. Five good sorts in a row earn a bonus!",
+      "path": "The park’s path",
+      "reaching": "Within reach: {look}",
+      "bins": {
+        "paper": "Paper",
+        "packaging": "Packaging",
+        "glass": "Glass"
+      },
+      "looks": {
+        "newspaper": "a newspaper",
+        "crumpledPaper": "a crumpled sheet",
+        "can": "a can",
+        "plasticBottle": "a plastic bottle",
+        "jar": "a jar",
+        "glassBottle": "a glass bottle"
+      },
+      "moments": {
+        "sorted": "+1",
+        "streak": "Streak! +2",
+        "wrongBin": "Wrong bin!",
+        "missed": "Left behind!"
+      },
+      "pepin": {
+        "start": "The wind is rising, keep your eyes open!",
+        "sorted": "Well sorted!",
+        "streak": "What a streak, well done!",
+        "wrongBin": "Oh, not in that bin…",
+        "missed": "Bother, you left one behind.",
+        "calm": "The park thanks you!"
+      }
+    },
+    "watering": {
+      "title": "Watering",
+      "howTo": "Pépin’s five flower beds are thirsty. Water each one three times, with a click or the keys 1 to 5, and watch them bloom. Once a day, {coins} coins.",
+      "bed": "Bed {number}: {state, select, thirsty {thirsty} other {in flower}}",
+      "start": "They’re thirsty, over to you. Take your time!",
+      "going": "That’s it, gently… they love it.",
+      "thanks": "Thank you, my flowers are delighted! Here are {coins} coins.",
+      "notPaid": "Thank you! I couldn’t count it, but my flowers are delighted.",
+      "alreadyDone": "My flowers have already had a drink today, {name}, thank you! No need to see to them, come back tomorrow.",
+      "error": "Oops, the fountain is off. Come back in a moment!",
+      "close": "Close",
+      "stop": "Stop"
+    }
+  },
+  "Stones": {
+    "name": "Papy Caillou",
+    "title": "the stone-skipping champion",
+    "leave": "See you later, Papy!",
+    "jobs": {
+      "stones": "Skip stones"
+    },
+    "lines": {
+      "greeting": "Ah, {name}, did you know I was a stone-skipping champion? The secret is the angle and the strength. Show me what you can do: more skips, more coins!",
+      "rewarded": "Nice throw! Here are {coins} coins. One more star, and I’ll pay you the difference.",
+      "rewardedAll": "Three stars! Even I, at your age… Here are {coins} coins: you’ve earned everything for today.",
+      "alreadyPaid": "Well thrown! I already paid you for a score like that today: do better for one more star.",
+      "allEarned": "You have already earned every reward for skipping stones today. Throw for the fun of it, or come back tomorrow!",
+      "failed": "Splash! It happens to the best of us. Again?",
+      "unavailable": "Hmm, the lake is too choppy. Come back in a moment."
+    },
+    "stones": {
+      "howTo": "Five pebbles to skip. A needle sweeps the angle: press Space, the button or touch the lake to hold it. A gauge then sweeps the strength: press again to throw. The right angle is in the middle, moved by the wind that bends the reeds, and the right strength at the top of the green zone. Ten skips or more: a champion’s bonus!",
+      "angle": "Hold the angle",
+      "strength": "Hold the strength and throw",
+      "wait": "Next pebble…",
+      "pebbles": "{count, plural, =0 {No pebbles left} one {# pebble} other {# pebbles}}",
+      "wind": "Wind: {strength, select, calm {calm} light {light} other {strong}}{direction, select, left {, to the left} right {, to the right} other {}}",
+      "lake": "The lake: {count, plural, =0 {no throw yet} one {# throw} other {# throws}}",
+      "moments": {
+        "skipped": "{skips, plural, one {# skip} other {# skips}}",
+        "sank": "Splash!",
+        "champion": "Champion! +3"
+      },
+      "papy": {
+        "start": "Watch the reeds: they tell you where the wind comes from.",
+        "skipped": "Not bad at all!",
+        "sank": "Splash… Flatter, and harder!",
+        "champion": "Now that’s a champion’s throw!",
+        "calm": "Take your time.",
+        "wind": "The wind is strong: shift your angle."
       }
     }
   }

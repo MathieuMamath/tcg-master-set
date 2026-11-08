@@ -53,7 +53,8 @@
     "ramenChef": "Parler (Yuzu)",
     "enterDojo": "Entrer au dojo",
     "leaveDojo": "Sortir",
-    "dojoMaster": "Parler (Maître Kaito)"
+    "dojoMaster": "Parler (Maître Kaito)",
+    "gardener": "Parler (Pépin)"
   },
   "Shopkeeper": {
     "names": {
@@ -242,7 +243,7 @@
         "greeting": "Hé hé, une petite partie de memory, {name} ? Retrouve les 8 paires en 20 coups maximum… et je te donne 150 pièces. Mais je te préviens, je ne perds jamais !",
         "rewarded": "Ça alors, tu m’as battu ! Tu as une sacrée mémoire. Voici tes 150 pièces, bien méritées.",
         "failed": "Ha ha ! Plus de coups ! Ne t’en fais pas, j’ai eu cent ans pour m’entraîner. On en refait une ?",
-        "alreadyDone": "Une défaite par jour, c’est bien assez pour mon orgueil ! Reviens demain.",
+        "alreadyDone": "Une défaite au memory par jour, c’est bien assez pour mon orgueil ! Mais si tu veux faire quelques ricochets, je suis ton homme.",
         "unavailable": "Hum, j’ai égaré mes cartes… Réessaie dans un instant."
       },
       "accept": "Jouons !",
@@ -525,7 +526,8 @@
     "brutus": "Halte !",
     "trotte": "Un coupon à tamponner ?",
     "ramenChef": "Une petite faim ?",
-    "dojoMaster": "Un peu d’entraînement ?"
+    "dojoMaster": "Un peu d’entraînement ?",
+    "gardener": "Un coup de main au jardin ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -597,6 +599,18 @@
       "dojoArchery": {
         "name": "Le tir à l’arc chez Kaito",
         "where": "Au dojo, en ville"
+      },
+      "gardenCleanup": {
+        "name": "Le nettoyage avec Pépin",
+        "where": "Au parc des Tilleuls"
+      },
+      "gardenWatering": {
+        "name": "L’arrosage avec Pépin",
+        "where": "Au parc des Tilleuls"
+      },
+      "grandpaStones": {
+        "name": "Les ricochets de Papy",
+        "where": "Au lac du parc des Tilleuls"
       }
     },
     "status": {
@@ -883,7 +897,8 @@
       "newsSheet": "Cette feuille ! Elle te raconte ce qui change dans le jeu à chaque visite, et tu peux la relire depuis les réglages.",
       "ramenShop": "Ramen Yuzu ouvre en ville, entre les tours ! Yuzu la panda roux t’embauche pour trois petits boulots payés en pièces : la plonge, la cuisine et le service en salle.",
       "anySixQuests": "Le bonus du jour se gagne maintenant avec 6 quêtes au choix : plus besoin de toutes les faire.",
-      "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Au dojo comme chez Yuzu, rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces, jusqu’à 300 pièces pour trois étoiles."
+      "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Au dojo comme chez Yuzu, rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces, jusqu’à 300 pièces pour trois étoiles.",
+      "parkQuests": "Au parc des Tilleuls, Pépin l’écureuil jardinier te confie la pelouse à nettoyer et ses fleurs à arroser, et Papy Caillou t’apprend les ricochets : trois nouvelles quêtes du jour. Le nettoyage et les ricochets se rejouent pour chaque étoile, et l’arrosage, tout doux, se fait une fois par jour."
     }
   },
   "Shift": {
@@ -892,9 +907,12 @@
       "kitchen": "En cuisine",
       "service": "Le service",
       "slicing": "La découpe",
-      "archery": "Le tir à l’arc"
+      "archery": "Le tir à l’arc",
+      "cleanup": "Le grand nettoyage",
+      "stones": "Les ricochets"
     },
     "start": "C’est parti !",
+    "notNow": "Pas maintenant",
     "timeLeft": "{seconds} s",
     "mistakes": "Erreurs",
     "giveUp": "Arrêter",
@@ -915,6 +933,16 @@
         "checking": "Kaito compte les points…",
         "over": "Fin de la leçon !",
         "back": "Retourner voir Kaito"
+      },
+      "gardener": {
+        "checking": "Pépin compte les points…",
+        "over": "C’est fini !",
+        "back": "Retourner voir Pépin"
+      },
+      "grandpa": {
+        "checking": "Papy compte les rebonds…",
+        "over": "Plus de galets !",
+        "back": "Retourner voir Papy"
       }
     }
   },
@@ -1094,6 +1122,108 @@
         "miss": "La cible est devant toi, pas à côté.",
         "streak": "Deux fois au centre ! Je suis fier.",
         "wind": "Le vent est fort : vise contre lui."
+      }
+    }
+  },
+  "Garden": {
+    "name": "Pépin",
+    "title": "le jardinier du parc",
+    "leave": "À plus tard !",
+    "jobs": {
+      "cleanup": "Nettoyer l’allée",
+      "watering": "Arroser les fleurs"
+    },
+    "lines": {
+      "greeting": "Salut, {name} ! Le vent sème des déchets partout et mes fleurs ont toujours soif. Tu me donnes un coup de main ? Je paie en pièces, et plus tu fais d’étoiles, plus je paie.",
+      "rewarded": "Merci du coup de main ! Voilà {coins} pièces. Une étoile de plus, et je te paie la différence.",
+      "rewardedAll": "Trois étoiles, le parc n’a jamais été aussi beau ! Voilà {coins} pièces. Tu as gagné toutes les récompenses de ce travail pour aujourd’hui.",
+      "alreadyPaid": "Merci ! Ce score-là, je te l’ai déjà payé aujourd’hui : décroche une étoile de plus pour gagner davantage.",
+      "allEarned": "Tu as déjà gagné toutes les récompenses de ce travail aujourd’hui. Reste jardiner pour le plaisir, ou reviens demain !",
+      "failed": "Pas facile, hein ? Pas de pièces cette fois, mais on recommence quand tu veux.",
+      "unavailable": "Oups, ma brouette est coincée. Repasse dans un instant !"
+    },
+    "cleanup": {
+      "howTo": "Tu te promènes dans l’allée en tirant le chariot de Pépin, avec ses trois poubelles. Quand un déchet arrive à ta portée, dans le cercle devant toi, choisis sa poubelle : 1 Papier, 2 Emballages, 3 Verre, ou clique dessus. Une mauvaise poubelle ou un déchet oublié, c’est une erreur. Cinq bons tris d’affilée, c’est un bonus !",
+      "path": "L’allée du parc",
+      "reaching": "À ta portée : {look}",
+      "bins": {
+        "paper": "Papier",
+        "packaging": "Emballages",
+        "glass": "Verre"
+      },
+      "looks": {
+        "newspaper": "un journal",
+        "crumpledPaper": "une feuille froissée",
+        "can": "une canette",
+        "plasticBottle": "une bouteille en plastique",
+        "jar": "un bocal",
+        "glassBottle": "une bouteille en verre"
+      },
+      "moments": {
+        "sorted": "+1",
+        "streak": "Série ! +2",
+        "wrongBin": "Mauvaise poubelle !",
+        "missed": "Oublié !"
+      },
+      "pepin": {
+        "start": "Le vent se lève, ouvre l’œil !",
+        "sorted": "Bien trié !",
+        "streak": "Quelle série, bravo !",
+        "wrongBin": "Oh, pas dans cette poubelle-là…",
+        "missed": "Zut, tu en as laissé un derrière toi.",
+        "calm": "Le parc te dit merci !"
+      }
+    },
+    "watering": {
+      "title": "L’arrosage",
+      "howTo": "Les cinq massifs de Pépin ont soif. Arrose chacun trois fois, d’un clic ou avec les touches 1 à 5, et regarde-les fleurir. Une fois par jour, {coins} pièces.",
+      "bed": "Massif {number} : {state, select, thirsty {a soif} other {en fleurs}}",
+      "start": "Elles ont soif, à toi de jouer. Prends ton temps !",
+      "going": "C’est ça, doucement… elles adorent.",
+      "thanks": "Merci, mes fleurs sont ravies ! Voilà {coins} pièces.",
+      "notPaid": "Merci ! Je n’ai pas pu compter, mais mes fleurs sont ravies.",
+      "alreadyDone": "Mes fleurs ont déjà bu aujourd’hui, {name}, merci ! Plus besoin de t’en occuper, reviens demain.",
+      "error": "Oups, la fontaine est coupée. Repasse dans un instant !",
+      "close": "Fermer",
+      "stop": "Arrêter"
+    }
+  },
+  "Stones": {
+    "name": "Papy Caillou",
+    "title": "le champion de ricochets",
+    "leave": "À plus tard, Papy !",
+    "jobs": {
+      "stones": "Faire des ricochets"
+    },
+    "lines": {
+      "greeting": "Ah, {name}, tu sais que j’étais champion de ricochets ? Le secret, c’est l’angle et la force. Montre-moi ce que tu sais faire : plus de rebonds, plus de pièces !",
+      "rewarded": "Joli lancer ! Voilà {coins} pièces. Une étoile de plus, et je te paie la différence.",
+      "rewardedAll": "Trois étoiles ! Même moi, à ton âge… Voilà {coins} pièces : tu as tout gagné pour aujourd’hui.",
+      "alreadyPaid": "Bien lancé ! Ce score-là, je te l’ai déjà payé aujourd’hui : fais mieux pour une étoile de plus.",
+      "allEarned": "Tu as déjà gagné toutes les récompenses des ricochets aujourd’hui. Lance pour le plaisir, ou reviens demain !",
+      "failed": "Plouf ! Ça arrive aux meilleurs. On recommence ?",
+      "unavailable": "Hmm, le lac est trop agité. Repasse dans un instant."
+    },
+    "stones": {
+      "howTo": "Cinq galets à faire ricocher. Une aiguille balaie l’angle : appuie sur Espace, sur le bouton ou touche le lac pour la fixer. Une jauge balaie alors la force : appuie de nouveau pour lancer. Le bon angle est au milieu, déplacé par le vent qui fait pencher les roseaux, et la bonne force tout en haut de la zone verte. Dix rebonds ou plus : bonus de champion !",
+      "angle": "Fixer l’angle",
+      "strength": "Fixer la force et lancer",
+      "wait": "Galet suivant…",
+      "pebbles": "{count, plural, =0 {Plus de galets} one {# galet} other {# galets}}",
+      "wind": "Vent : {strength, select, calm {calme} light {léger} other {fort}}{direction, select, left { vers la gauche} right { vers la droite} other {}}",
+      "lake": "Le lac : {count, plural, =0 {pas encore de lancer} one {# lancer} other {# lancers}}",
+      "moments": {
+        "skipped": "{skips, plural, one {# rebond} other {# rebonds}}",
+        "sank": "Plouf !",
+        "champion": "Champion ! +3"
+      },
+      "papy": {
+        "start": "Regarde les roseaux : ils te disent d’où vient le vent.",
+        "skipped": "Pas mal du tout !",
+        "sank": "Plouf… Plus à plat, plus fort !",
+        "champion": "Ça, c’est un lancer de champion !",
+        "calm": "Prends ton temps.",
+        "wind": "Le vent souffle fort : décale ton angle."
       }
     }
   }

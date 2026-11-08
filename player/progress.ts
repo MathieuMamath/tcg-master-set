@@ -56,11 +56,13 @@ import {
   MEMORY_REWARD,
   type MemoryStatus,
 } from '@/game/memory-game';
+import { canFinishWatering, WATERING_QUEST, WATERING_REWARD } from '@/game/park-watering';
 import {
   canFinishQuest,
   canStartQuest,
   GRANDMA_QUEST,
   QUEST_REWARD,
+  type QuestAttempt,
   questDay,
 } from '@/game/quests';
 import { drawRaffle, RAFFLE_COINS, RAFFLE_QUEST, type RaffleOutcome } from '@/game/raffle';
@@ -98,8 +100,6 @@ export type PlayerProgress = {
   basketballHighScore: number;
   // The day of the last reward, so that the machine can say when it's already been paid.
   basketballRewardedOn: string | null;
-  // The day Papy Caillou was last beaten at memory, after which he only shares sayings.
-  memoryWonOn: string | null;
   // The day Léa's walls were last dusted, after which she can breathe again.
   cleanedOn: string | null;
   // The day of the last turn of Bérénice's drum, after which she says to come back tomorrow.
@@ -277,7 +277,6 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     spot: await allowedSpot(userId, parseSpot(spots[0])),
     basketballHighScore: await loadBasketballHighScore(getDb(), userId),
     basketballRewardedOn: await loadRewardDay(getDb(), userId, BASKETBALL_QUEST),
-    memoryWonOn: await loadRewardDay(getDb(), userId, GRANDPA_QUEST),
     cleanedOn: await loadRewardDay(getDb(), userId, GRANDMA_QUEST),
     raffleDrawnOn: await loadRewardDay(getDb(), userId, RAFFLE_QUEST),
     activity: await loadDailyActivity(getDb(), userId),
@@ -355,42 +354,69 @@ export function startFishingQuest(userId: string): Promise<{ hasStarted: boolean
   return startQuestAttempt(userId, FISHING_QUEST);
 }
 
-// The attempt's row is locked and used up with the reward, so that it can only pay once.
-export async function finishGrandmaQuest(
+// The attempt's row is locked and used up with the reward, so that it can only pay once. For the
+// quests played in the browser with a fixed reward, whose only check is the time it took.
+async function finishTimedQuest(
   userId: string,
+  questId: string,
+  coins: number,
+  canFinish: (attempt: QuestAttempt, now: Date) => boolean,
 ): Promise<{ isRewarded: boolean; wallet: Wallet }> {
   return getDb().transaction(async (transaction) => {
     const now = new Date();
     await loadWallet(transaction, userId);
+    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId));
     const [attempt] = await transaction
       .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
       .from(playerQuests)
-      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, GRANDMA_QUEST)))
+      .where(quest)
       .for('update');
-    if (!attempt || !canFinishQuest(attempt, now)) {
+    if (!attempt || !canFinish(attempt, now)) {
       if (attempt?.startedAt) {
-        await recordEvent(transaction, userId, 'quest.rejected', { questId: GRANDMA_QUEST });
+        await recordEvent(transaction, userId, 'quest.rejected', { questId });
       }
       return { isRewarded: false, wallet: await loadWallet(transaction, userId) };
     }
 
     await transaction
       .update(playerQuests)
-      .set({ startedAt: null, completedOn: questDay(now) })
-      .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, GRANDMA_QUEST)));
+      .set({ startedAt: null, completedOn: questDay(now), paidCoins: coins })
+      .where(quest);
     await transaction
       .update(playerWallets)
-      .set({ coins: sql`${playerWallets.coins} + ${QUEST_REWARD}`, updatedAt: new Date() })
+      .set({ coins: sql`${playerWallets.coins} + ${coins}`, updatedAt: new Date() })
       .where(eq(playerWallets.userId, userId));
     await recordEvent(transaction, userId, 'quest.finished', {
       coinsAfter: await coinsNow(transaction, userId),
-      questId: GRANDMA_QUEST,
+      questId,
       outcome: 'rewarded',
-      coins: QUEST_REWARD,
+      coins,
       boosterSetId: null,
     });
     return { isRewarded: true, wallet: await loadWallet(transaction, userId) };
   });
+}
+
+export function finishGrandmaQuest(
+  userId: string,
+): Promise<{ isRewarded: boolean; wallet: Wallet }> {
+  return finishTimedQuest(userId, GRANDMA_QUEST, QUEST_REWARD, canFinishQuest);
+}
+
+export function startWateringQuest(userId: string): Promise<{ hasStarted: boolean }> {
+  return startQuestAttempt(userId, WATERING_QUEST);
+}
+
+// Pépin's flower beds, watered in the browser: paid once a day if the time adds up.
+export function finishWateringQuest(
+  userId: string,
+): Promise<{ isRewarded: boolean; wallet: Wallet }> {
+  return finishTimedQuest(
+    userId,
+    WATERING_QUEST,
+    WATERING_REWARD,
+    (attempt, now) => canStartQuest(attempt, now) && canFinishWatering(attempt.startedAt, now),
+  );
 }
 
 // The board stays here: the browser only learns a card's face when it flips that card. Starting
