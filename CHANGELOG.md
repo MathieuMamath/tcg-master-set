@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.95](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.94...v0.1.95) (2026-11-08)
+
+### Features
+
+* **quests:** add Pinceau's puzzle, Mme Ronron's lost kitten and Flash's photos ([#97](https://github.com/MathieuMamath/tcg-master-set/issues/97)) ([c96a012](https://github.com/MathieuMamath/tcg-master-set/commit/c96a0129a1782a84b29e67561a5a72e99343f1e8))
+
 ## [0.1.94](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.93...v0.1.94) (2026-11-08)
 
 ### Features
