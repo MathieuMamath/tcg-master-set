@@ -45,10 +45,8 @@ export type ShiftPay = { coins: number; score: number };
 export type ShiftRules = {
   seconds: number;
   choices: number;
-  // From the lowest score that pays, each step with its coins: one step a star.
-  pay: readonly ShiftPay[];
-  // Whether a better shift the same day pays the difference, rather than only the first that pays.
-  topsUp?: boolean;
+  // From the lowest score that pays, each step with its coins: one step a star, three in all.
+  pay: readonly [ShiftPay, ShiftPay, ShiftPay];
 };
 
 export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
@@ -59,6 +57,8 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
     pay: [
       { score: 16, coins: 120 },
       { score: 28, coins: 200 },
+      // A careful washer stays near 32: three stars ask for a taller, riskier pile.
+      { score: 35, coins: 300 },
     ],
   },
   kitchen: {
@@ -68,6 +68,7 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
     pay: [
       { score: 20, coins: 120 },
       { score: 36, coins: 200 },
+      { score: 50, coins: 300 },
     ],
   },
   service: {
@@ -77,6 +78,7 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
     pay: [
       { score: 30, coins: 120 },
       { score: 55, coins: 200 },
+      { score: 77, coins: 300 },
     ],
   },
   slicing: {
@@ -88,7 +90,6 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
       { score: 55, coins: 200 },
       { score: 77, coins: 300 },
     ],
-    topsUp: true,
   },
   archery: {
     seconds: 60,
@@ -99,19 +100,13 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
       { score: 75, coins: 200 },
       { score: 105, coins: 300 },
     ],
-    topsUp: true,
   },
 };
 
-// The stars a shift earns: one for each step of pay, and, for a job paid in two steps, a third for a
-// shift well beyond.
+// The stars a shift earns: one for each step of pay.
 export function shiftStars(job: ShiftJob, score: number): 0 | 1 | 2 | 3 {
-  const { pay } = SHIFT_RULES[job];
-  const third = pay[2]?.score ?? Math.round(pay[1].score * 1.4);
-  if (score >= third) {
-    return 3;
-  }
-  return score >= pay[1].score ? 2 : score >= pay[0].score ? 1 : 0;
+  const [first, second, third] = SHIFT_RULES[job].pay;
+  return score >= third.score ? 3 : score >= second.score ? 2 : score >= first.score ? 1 : 0;
 }
 
 export function shiftCoins(job: ShiftJob, score: number): number {
@@ -132,28 +127,19 @@ export type ShiftPayout = {
   hasEarnedAll: boolean;
 };
 
-// What a shift pays, given what the job paid already today, null if nothing yet. Most jobs pay once
-// a day, the first time a shift earns something; a job that tops up pays a better shift the
-// difference, star after star, up to its last step.
+// What a shift pays, given what the job paid already today, null if nothing yet. Shifts can be
+// replayed all day for a better score: each new star pays the difference, up to the last step.
 export function shiftPayout(job: ShiftJob, score: number, paidToday: number | null): ShiftPayout {
-  const rules = SHIFT_RULES[job];
+  const { pay } = SHIFT_RULES[job];
   const earned = shiftCoins(job, score);
-  const most = rules.pay[rules.pay.length - 1].coins;
-  if (paidToday === null) {
-    return {
-      coins: earned,
-      paidToday: earned,
-      wasAlreadyPaid: false,
-      hasEarnedAll: rules.topsUp ? earned >= most : earned > 0,
-    };
-  }
-  const coins = rules.topsUp ? Math.max(0, earned - paidToday) : 0;
-  const paid = paidToday + coins;
+  const already = paidToday ?? 0;
+  const coins = Math.max(0, earned - already);
+  const paid = already + coins;
   return {
     coins,
     paidToday: paid,
     wasAlreadyPaid: earned > 0 && coins === 0,
-    hasEarnedAll: rules.topsUp ? paid >= most : true,
+    hasEarnedAll: paid >= pay[pay.length - 1].coins,
   };
 }
 

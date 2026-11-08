@@ -883,7 +883,7 @@
       "newsSheet": "This very sheet! It tells you what changed in the game whenever you come by, and you can read it again from the settings.",
       "ramenShop": "Ramen Yuzu opens downtown, between the towers! Yuzu the red panda hires you for three little jobs paid in coins: washing up, the kitchen and waiting tables.",
       "anySixQuests": "The daily bonus now takes any 6 quests of your choice: no need to do them all.",
-      "dojo": "The dojo opens downtown, next to Ramen Yuzu! Master Kaito, an old badger, trains you in vegetable slicing and archery: two new daily quests paid in coins. Replay as often as you like: each new star of the day pays you the difference in coins."
+      "dojo": "The dojo opens downtown, next to Ramen Yuzu! Master Kaito, an old badger, trains you in vegetable slicing and archery: two new daily quests paid in coins. At the dojo as at Yuzu’s, replay as often as you like: each new star of the day pays you the difference in coins, up to 300 coins for three stars."
     }
   },
   "Shift": {
@@ -929,10 +929,10 @@
     },
     "lines": {
       "greeting": "Welcome to Ramen Yuzu, {name}! Everything’s vegetarian and homemade. I’m always a pair of paws short: will you lend me a hand? I pay in coins.",
-      "rewarded": "What a shift! Here are {coins} coins, well earned. Come back any time.",
-      "rewardedAll": "What a shift! Here are {coins} coins, well earned. Come back any time.",
-      "alreadyPaid": "Thanks for the help! I already paid you for that job today, but it’s lovely to see you.",
-      "allEarned": "Thanks for the help! I already paid you for that job today, but it’s lovely to see you.",
+      "rewarded": "What a shift! Here are {coins} coins, well earned. One more star, and I’ll pay you the difference.",
+      "rewardedAll": "Three stars, what a shift! Here are {coins} coins. You have earned every reward of this job for today.",
+      "alreadyPaid": "Thanks for the help! I already paid you for a score like that today: earn one more star to get more.",
+      "allEarned": "You have already earned every reward of this job today. Stay and help for the fun of it, or come back tomorrow!",
       "failed": "Oops, that was a busy shift… No pay this time, but we can go again whenever you like!",
       "unavailable": "Oh dear, the gas went out. Come back in a moment!"
     },

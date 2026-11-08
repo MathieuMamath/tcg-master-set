@@ -62,16 +62,16 @@ describe('the jobs', () => {
 });
 
 describe('shiftPayout', () => {
-  test('pays the first shift of the day that earns something', () => {
+  test('pays nothing below the first step', () => {
     expect(shiftPayout('kitchen', 0, null)).toMatchObject({ coins: 0, wasAlreadyPaid: false });
-    expect(shiftPayout('kitchen', 40, null)).toMatchObject({ coins: 200, hasEarnedAll: true });
   });
 
-  test('pays a job without top-ups only once a day, whatever the score', () => {
-    expect(shiftPayout('kitchen', 99, 120)).toEqual({
-      coins: 0,
-      paidToday: 120,
-      wasAlreadyPaid: true,
+  test("pays Yuzu's jobs the difference too", () => {
+    const [one, , three] = SHIFT_RULES.kitchen.pay;
+    expect(shiftPayout('kitchen', three.score, one.coins)).toEqual({
+      coins: three.coins - one.coins,
+      paidToday: three.coins,
+      wasAlreadyPaid: false,
       hasEarnedAll: true,
     });
   });
@@ -104,7 +104,7 @@ describe('shiftPayout', () => {
 });
 
 describe('playShift', () => {
-  test('a perfect shift pays the most, in every job', () => {
+  test('a perfect shift earns two stars at least, in every job', () => {
     const perfect = {
       dishes: perfectDishes(SEED),
       kitchen: perfectKitchen(SEED),
@@ -115,7 +115,7 @@ describe('playShift', () => {
     for (const job of SHIFT_JOBS) {
       const result = playShift(job, SEED, perfect[job]);
       expect(result?.mistakes, job).toBe(0);
-      expect(shiftCoins(job, result?.score ?? 0), job).toBe(SHIFT_RULES[job].pay.at(-1)?.coins);
+      expect(shiftStars(job, result?.score ?? 0), job).toBeGreaterThanOrEqual(2);
     }
   });
 

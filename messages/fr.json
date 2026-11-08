@@ -883,7 +883,7 @@
       "newsSheet": "Cette feuille ! Elle te raconte ce qui change dans le jeu à chaque visite, et tu peux la relire depuis les réglages.",
       "ramenShop": "Ramen Yuzu ouvre en ville, entre les tours ! Yuzu la panda roux t’embauche pour trois petits boulots payés en pièces : la plonge, la cuisine et le service en salle.",
       "anySixQuests": "Le bonus du jour se gagne maintenant avec 6 quêtes au choix : plus besoin de toutes les faire.",
-      "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces."
+      "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Au dojo comme chez Yuzu, rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces, jusqu’à 300 pièces pour trois étoiles."
     }
   },
   "Shift": {
@@ -929,10 +929,10 @@
     },
     "lines": {
       "greeting": "Bienvenue chez Ramen Yuzu, {name} ! Tout est végétarien et fait maison. Il me manque toujours une paire de pattes : tu me donnes un coup de main ? Je paie en pièces.",
-      "rewarded": "Quel travail ! Voilà {coins} pièces, bien méritées. Reviens quand tu veux.",
-      "rewardedAll": "Quel travail ! Voilà {coins} pièces, bien méritées. Reviens quand tu veux.",
-      "alreadyPaid": "Merci pour l’aide ! Je t’ai déjà payé ce poste aujourd’hui, mais ça me fait plaisir de te voir.",
-      "allEarned": "Merci pour l’aide ! Je t’ai déjà payé ce poste aujourd’hui, mais ça me fait plaisir de te voir.",
+      "rewarded": "Quel travail ! Voilà {coins} pièces, bien méritées. Une étoile de plus, et je te paie la différence.",
+      "rewardedAll": "Trois étoiles, quel service ! Voilà {coins} pièces. Tu as gagné toutes les récompenses de ce poste pour aujourd’hui.",
+      "alreadyPaid": "Merci pour l’aide ! Ce score-là, je te l’ai déjà payé aujourd’hui : décroche une étoile de plus pour gagner davantage.",
+      "allEarned": "Tu as déjà gagné toutes les récompenses de ce poste aujourd’hui. Reste donner un coup de main pour le plaisir, ou reviens demain !",
       "failed": "Oups, c’était un service un peu agité… Pas de paie cette fois, mais on recommence quand tu veux !",
       "unavailable": "Aïe, le gaz a coupé. Repasse dans un instant !"
     },
