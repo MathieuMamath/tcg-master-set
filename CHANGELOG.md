@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.93](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.92...v0.1.93) (2026-11-08)
+
+### Features
+
+* **quests:** open Pépin's garden and Papy's stones at Linden Park ([#95](https://github.com/MathieuMamath/tcg-master-set/issues/95)) ([9bbada8](https://github.com/MathieuMamath/tcg-master-set/commit/9bbada8416ce184612800ce9ef00ce0cd81a729b))
+
 ## [0.1.92](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.91...v0.1.92) (2026-11-08)
 
 ### Features
