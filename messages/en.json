@@ -773,7 +773,9 @@
       "dailyBonuses": "Daily rewards claimed",
       "byQuest": "By quest",
       "counts": "{started} started · {finished} finished · {rejected} refused",
-      "stars": "{stars, plural, =0 {No star} one {# star} other {# stars}}"
+      "stars": "{stars, plural, =0 {No star} one {# star} other {# stars}}",
+      "averageScore": "Average score: {score}",
+      "averageSearches": "Hiding places searched on average: {score}"
     },
     "outcomes": {
       "rewarded": "Paid",
@@ -821,7 +823,9 @@
       "park": "The park",
       "downtown": "The Big City",
       "bureau": "The administrative office",
-      "coupons": "The coupon floor"
+      "coupons": "The coupon floor",
+      "ramen": "Ramen Yuzu",
+      "dojo": "The dojo"
     },
     "log": {
       "title": "Log coverage",

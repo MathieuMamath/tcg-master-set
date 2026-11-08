@@ -43,6 +43,8 @@ export type GameEventDetails = {
   };
   // The server refused to finish an attempt: out of time, or with moves that can't have happened.
   'quest.rejected': { questId: string };
+  // A hiding place searched for Mme Ronron's kitten, by its id, and whether he was there.
+  'kitten.searched': { spot: string; isFound: boolean };
   'daily_bonus.claimed': { coins: number; coinsAfter?: number };
   // The player arrived in a place, through a door or by bus, and where from: null on a first visit.
   // Reported by the browser when it saves where the character stands, and not checked, since a
@@ -97,6 +99,7 @@ export const GAME_EVENT_TYPES = [
   'quest.started',
   'quest.finished',
   'quest.rejected',
+  'kitten.searched',
   'daily_bonus.claimed',
   'place.entered',
   'game.opened',

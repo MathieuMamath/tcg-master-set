@@ -11,6 +11,7 @@ test('lists every type of the catalogue once', () => {
     'quest.started': true,
     'quest.finished': true,
     'quest.rejected': true,
+    'kitten.searched': true,
     'daily_bonus.claimed': true,
     'place.entered': true,
     'game.opened': true,

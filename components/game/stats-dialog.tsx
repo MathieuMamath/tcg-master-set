@@ -4,6 +4,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { DAILY_QUESTS } from '@/game/activity';
 import type { PlayableSet } from '@/game/card-sets';
+import { KITTEN_QUEST } from '@/game/lost-kitten';
 import { STATS_PERIODS, type StatsPeriod } from '@/game/stats';
 import type { GameStats, SeriesPoint } from '@/stats/game-stats';
 import { moveThroughChoices } from './menu-focus';
@@ -29,6 +30,15 @@ const KNOWN_OUTCOMES = new Set([
   'jackpot',
   'prize',
 ]);
+// The hosts of shifts, by their speaker's id, and the namespace that names them.
+const SHIFT_HOST_NAMES: Record<string, 'Ramen' | 'Dojo' | 'Garden' | 'Post' | 'Photos'> = {
+  ramenChef: 'Ramen',
+  dojoMaster: 'Dojo',
+  gardener: 'Garden',
+  postman: 'Post',
+  photographer: 'Photos',
+};
+
 const KNOWN_PLACES = new Set([
   'bedroom',
   'town',
@@ -40,6 +50,8 @@ const KNOWN_PLACES = new Set([
   'downtown',
   'bureau',
   'coupons',
+  'ramen',
+  'dojo',
 ]);
 
 // The reports show on Mme Hulotte's computer, a dark dashboard on its screen, unlike the game's
@@ -111,6 +123,7 @@ export function StatsDialog({ sets, onClose }: Props) {
   const tQuest = useTranslations('Quest');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tSpeakers = useTranslations('Speakers');
+  const tRoot = useTranslations();
   const format = useFormatter();
   const dialog = useRef<HTMLDialogElement>(null);
   const firstButton = useRef<HTMLButtonElement>(null);
@@ -162,8 +175,19 @@ export function StatsDialog({ sets, onClose }: Props) {
     if (speaker === 'binderSeller') {
       return tShopkeeper('names.binderSeller');
     }
-    if (speaker === 'brutus' || speaker === 'hulotte') {
+    if (
+      speaker === 'brutus' ||
+      speaker === 'hulotte' ||
+      speaker === 'trotte' ||
+      speaker === 'painter' ||
+      speaker === 'ronron'
+    ) {
       return tSpeakers(`${speaker}.name`);
+    }
+    // The hosts of shifts keep their names with their jobs' texts.
+    const host = SHIFT_HOST_NAMES[speaker];
+    if (host) {
+      return tRoot(`${host}.name`);
     }
     if (DAILY_QUESTS.some(({ giver }) => giver === speaker)) {
       return tQuest(`${speaker}.name` as 'grandma.name');
@@ -485,6 +509,20 @@ export function StatsDialog({ sets, onClose }: Props) {
                                     {outcomeName(outcome)} · {format.number(count)}
                                   </span>
                                 ))}
+                              </p>
+                            )}
+                            {quest.averageScore !== null && (
+                              <p className="mt-1 text-sm text-[#c5cfdc]">
+                                {t(
+                                  quest.questId === KITTEN_QUEST
+                                    ? 'quests.averageSearches'
+                                    : 'quests.averageScore',
+                                  {
+                                    score: format.number(quest.averageScore, {
+                                      maximumFractionDigits: 1,
+                                    }),
+                                  },
+                                )}
                               </p>
                             )}
                             {quest.stars.length > 0 && (
