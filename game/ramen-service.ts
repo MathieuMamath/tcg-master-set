@@ -8,8 +8,8 @@
 // Everything follows from the seed and the presses, so that the browser draws the same shift the
 // server plays again: `simulateService` is both.
 
-import type { ShiftAction } from './ramen';
 import { seededRandom } from './seeded-random';
+import type { ShiftAction } from './shifts';
 
 export const SERVICE_TABLES = 4;
 export const SERVICE_DISHES = ['shoyu', 'miso', 'curry', 'veggie'] as const;

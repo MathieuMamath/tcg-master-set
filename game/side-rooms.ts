@@ -12,7 +12,8 @@ export type SidePlaceId =
   | 'downtown'
   | 'bureau'
   | 'coupons'
-  | 'ramen';
+  | 'ramen'
+  | 'dojo';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -27,6 +28,8 @@ export const DOOR_INTERACTIONS = [
   'leaveArcade',
   'enterRamen',
   'leaveRamen',
+  'enterDojo',
+  'leaveDojo',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -171,7 +174,7 @@ export const PARK_SPOTS = {
 
 // Downtown, behind the village, reached by bus: a wide modern pavement under towers so tall that
 // they rise out of sight, with smaller houses between them. The bus stop is on the far left.
-export const DOWNTOWN_ENDS = { left: -12, right: 30 };
+export const DOWNTOWN_ENDS = { left: -12, right: 40 };
 export const DOWNTOWN_SPOTS = {
   busStop: { x: -9.4, width: 3.6, signX: -10.9 },
   // The administrative office's tower, its door in the middle, and Brutus guarding it on its right: the
@@ -179,6 +182,8 @@ export const DOWNTOWN_SPOTS = {
   bureau: { x: 0.8, width: 4.8, height: 17, doorX: 0.8, brutusX: 2.5 },
   // The ramen shop, a low wooden house between two towers, its door under the curtain.
   ramen: { x: 22.4, width: 5.4, height: 5, doorX: 22.4 },
+  // The dojo, white plaster and dark timber under a sweeping roof, its sliding doors in the middle.
+  dojo: { x: 34, width: 6, height: 5.2, doorX: 34 },
 } as const;
 // The towers along the pavement, and a farther row behind them, from left to right.
 export const DOWNTOWN_TOWERS = [
@@ -187,6 +192,7 @@ export const DOWNTOWN_TOWERS = [
   { x: 11.8, width: 5, height: 15, look: 'ribbon' },
   { x: 16.6, width: 3.8, height: 13.5, look: 'diagrid' },
   { x: 28.2, width: 4.4, height: 14, look: 'setback' },
+  { x: 39.6, width: 4, height: 13, look: 'ribbon' },
 ] as const;
 export const DOWNTOWN_BACK_TOWERS = [
   { x: -8, width: 4, height: 10, look: 'ribbon' },
@@ -196,6 +202,8 @@ export const DOWNTOWN_BACK_TOWERS = [
   { x: 14.4, width: 4.4, height: 13, look: 'curtain' },
   { x: 20.4, width: 4, height: 11.5, look: 'ribbon' },
   { x: 25.8, width: 4.2, height: 12.5, look: 'cylinder' },
+  { x: 31.6, width: 3.8, height: 11, look: 'curtain' },
+  { x: 37.2, width: 4.2, height: 13.5, look: 'diagrid' },
 ] as const;
 
 // The administrative office, high in its tower: a window onto the big city, a wall screen of
@@ -243,6 +251,24 @@ export const RAMEN_CHEF_X = RAMEN_FURNITURE.counter.x;
 const RAMEN_BOUNDS = {
   minX: RAMEN_WALLS.left + CHARACTER_HALF_WIDTH,
   maxX: RAMEN_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+
+// The dojo, inside: a rack of wooden swords and a bow by the door in the left wall, a hanging
+// scroll, Maître Kaito on the mats in the middle, a basket of vegetables and a chopping block, and
+// the back screens open onto the garden, where the archery target stands.
+export const DOJO_WALLS = { left: -7, right: 7 };
+export const DOJO_FURNITURE = {
+  rack: { x: -4.4, width: 2 },
+  scroll: { x: -1.6, width: 1.1 },
+  basket: { x: 3, width: 1.4 },
+  // The back screens, slid open onto the garden and its archery target.
+  garden: { x: 5.2, width: 2.6 },
+} as const;
+export const DOJO_MASTER_X = 0.8;
+
+const DOJO_BOUNDS = {
+  minX: DOJO_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: DOJO_WALLS.right - CHARACTER_HALF_WIDTH,
 };
 
 // The places only admins may be in, whose spot is neither saved nor restored for anyone else.
@@ -512,6 +538,13 @@ export const DOWNTOWN: SideRoom = {
       to: 'ramen',
       arrival: { x: RAMEN_BOUNDS.maxX, facing: -1 },
     },
+    {
+      interaction: 'enterDojo',
+      minX: DOWNTOWN_SPOTS.dojo.doorX - DOOR_REACH,
+      maxX: DOWNTOWN_SPOTS.dojo.doorX + DOOR_REACH,
+      to: 'dojo',
+      arrival: { x: DOJO_BOUNDS.minX, facing: 1 },
+    },
   ],
 };
 
@@ -534,6 +567,29 @@ export const RAMEN: SideRoom = {
       maxX: RAMEN_BOUNDS.maxX,
       to: 'downtown',
       arrival: { x: DOWNTOWN_SPOTS.ramen.doorX, facing: 1 },
+    },
+  ],
+};
+
+export const DOJO: SideRoom = {
+  id: 'dojo',
+  bounds: DOJO_BOUNDS,
+  start: DOJO_BOUNDS.minX,
+  interactions: [
+    {
+      interaction: 'dojoMaster',
+      minX: DOJO_MASTER_X - 1.6,
+      maxX: DOJO_MASTER_X + 1.6,
+      speaker: { x: DOJO_MASTER_X },
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveDojo',
+      minX: DOJO_BOUNDS.minX,
+      maxX: DOJO_BOUNDS.minX + DOOR_REACH,
+      to: 'downtown',
+      arrival: { x: DOWNTOWN_SPOTS.dojo.doorX, facing: -1 },
     },
   ],
 };
@@ -598,6 +654,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bureau: BUREAU,
   coupons: COUPONS,
   ramen: RAMEN,
+  dojo: DOJO,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

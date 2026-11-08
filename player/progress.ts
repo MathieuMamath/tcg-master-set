@@ -64,16 +64,16 @@ import {
   questDay,
 } from '@/game/quests';
 import { drawRaffle, RAFFLE_COINS, RAFFLE_QUEST, type RaffleOutcome } from '@/game/raffle';
+import type { Report } from '@/game/reports';
 import {
   canFinishShift,
   playShift,
-  RAMEN_QUESTS,
-  type RamenJob,
-  shiftCoins,
+  SHIFT_QUESTS,
+  type ShiftJob,
+  shiftPayout,
   shiftSeed,
   shiftStars,
-} from '@/game/ramen';
-import type { Report } from '@/game/reports';
+} from '@/game/shifts';
 import {
   BINDER_PRICE,
   BOOSTER_PRICE,
@@ -595,10 +595,10 @@ export async function finishBasketball(
   });
 }
 
-// A shift at the ramen shop begins: its moment is the seed of its orders, sent to the browser to
+// A shift at the ramen shop or the dojo begins: its moment is the seed of its orders, sent to the browser to
 // show them. Starting again replaces a shift that was left halfway.
-export async function startRamenShift(userId: string, job: RamenJob): Promise<{ seed: number }> {
-  const questId = RAMEN_QUESTS[job];
+export async function startShift(userId: string, job: ShiftJob): Promise<{ seed: number }> {
+  const questId = SHIFT_QUESTS[job];
   return getDb().transaction(async (transaction) => {
     const startedAt = new Date();
     await transaction
@@ -613,30 +613,37 @@ export async function startRamenShift(userId: string, job: RamenJob): Promise<{ 
   });
 }
 
-export type RamenShiftResult = {
+export type ShiftOutcome = {
   score: number;
   mistakes: number;
   coins: number;
   // The shift earned coins, but the day's pay was already given.
   wasAlreadyPaid: boolean;
+  // Nothing more can be earned today from this job.
+  hasEarnedAll: boolean;
   wallet: Wallet;
 };
 
 // Null when no shift is under way, or when its presses can't have happened. The row is locked and
-// the shift used up with its pay, so that it can only pay once a day. A shift that earns nothing
+// the shift used up with its pay, so that it pays only what `shiftPayout` allows: once a day, or,
+// for the jobs that top up, the difference a better shift earns. A shift that earns nothing
 // leaves the day's pay to be won.
-export async function finishRamenShift(
+export async function finishShift(
   userId: string,
-  job: RamenJob,
+  job: ShiftJob,
   actions: unknown,
-): Promise<RamenShiftResult | null> {
-  const questId = RAMEN_QUESTS[job];
+): Promise<ShiftOutcome | null> {
+  const questId = SHIFT_QUESTS[job];
   return getDb().transaction(async (transaction) => {
     const now = new Date();
     await loadWallet(transaction, userId);
     const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId));
     const [attempt] = await transaction
-      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .select({
+        startedAt: playerQuests.startedAt,
+        completedOn: playerQuests.completedOn,
+        paidCoins: playerQuests.paidCoins,
+      })
       .from(playerQuests)
       .where(quest)
       .for('update');
@@ -654,12 +661,18 @@ export async function finishRamenShift(
       return null;
     }
 
-    const earned = shiftCoins(job, result.score);
-    const wasAlreadyPaid = earned > 0 && !canStartQuest(attempt, now);
-    const coins = wasAlreadyPaid ? 0 : earned;
+    const payout = shiftPayout(
+      job,
+      result.score,
+      canStartQuest(attempt, now) ? null : attempt.paidCoins,
+    );
+    const { coins, wasAlreadyPaid } = payout;
     await transaction
       .update(playerQuests)
-      .set({ startedAt: null, ...(coins > 0 ? { completedOn: questDay(now) } : {}) })
+      .set({
+        startedAt: null,
+        ...(coins > 0 ? { completedOn: questDay(now), paidCoins: payout.paidToday } : {}),
+      })
       .where(quest);
     if (coins > 0) {
       await transaction
@@ -681,6 +694,7 @@ export async function finishRamenShift(
       mistakes: result.mistakes,
       coins,
       wasAlreadyPaid,
+      hasEarnedAll: payout.hasEarnedAll,
       wallet: await loadWallet(transaction, userId),
     };
   });

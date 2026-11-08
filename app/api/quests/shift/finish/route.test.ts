@@ -1,14 +1,14 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { finishRamenShift } from '@/player/progress';
+import { finishShift } from '@/player/progress';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ finishRamenShift: vi.fn() }));
+vi.mock('@/player/progress', () => ({ finishShift: vi.fn() }));
 
 function finish(job: string, body: string) {
   return POST(
-    new Request(`http://localhost/api/quests/ramen/finish?job=${job}`, { method: 'POST', body }),
+    new Request(`http://localhost/api/quests/shift/finish?job=${job}`, { method: 'POST', body }),
   );
 }
 
@@ -23,28 +23,29 @@ test('finishes the shift of the signed-in player with their presses', async () =
     mistakes: 1,
     coins: 120,
     wasAlreadyPaid: false,
+    hasEarnedAll: false,
     wallet: { coins: 1120, boosters: {} },
   };
-  vi.mocked(finishRamenShift).mockResolvedValue(result);
+  vi.mocked(finishShift).mockResolvedValue(result);
 
   const response = await finish('kitchen', '{"actions":[[0,0],[400,3]]}');
 
   expect(await response.json()).toEqual(result);
-  expect(finishRamenShift).toHaveBeenCalledWith('player-1', 'kitchen', [
+  expect(finishShift).toHaveBeenCalledWith('player-1', 'kitchen', [
     [0, 0],
     [400, 3],
   ]);
 });
 
 test('reports a shift that cannot be finished', async () => {
-  vi.mocked(finishRamenShift).mockResolvedValue(null);
+  vi.mocked(finishShift).mockResolvedValue(null);
 
   expect((await finish('dishes', '{"actions":[]}')).status).toBe(409);
 });
 
 test('rejects a job the shop does not have', async () => {
   expect((await finish('cleaning', '{}')).status).toBe(400);
-  expect(finishRamenShift).not.toHaveBeenCalled();
+  expect(finishShift).not.toHaveBeenCalled();
 });
 
 test('refuses a visitor who is not signed in', async () => {
@@ -54,7 +55,7 @@ test('refuses a visitor who is not signed in', async () => {
 });
 
 test('hides database errors from the player', async () => {
-  vi.mocked(finishRamenShift).mockRejectedValue(new Error('connection to secret-host refused'));
+  vi.mocked(finishShift).mockRejectedValue(new Error('connection to secret-host refused'));
 
   const response = await finish('service', '{"actions":[]}');
 

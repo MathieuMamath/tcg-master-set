@@ -50,7 +50,10 @@
     "elevator": "Prendre l’ascenseur",
     "enterRamen": "Entrer chez Ramen Yuzu",
     "leaveRamen": "Sortir",
-    "ramenChef": "Parler (Yuzu)"
+    "ramenChef": "Parler (Yuzu)",
+    "enterDojo": "Entrer au dojo",
+    "leaveDojo": "Sortir",
+    "dojoMaster": "Parler (Maître Kaito)"
   },
   "Shopkeeper": {
     "names": {
@@ -505,7 +508,8 @@
     "dalgona": "Dalgona",
     "raffle": "Tombola",
     "bureau": "Bureau administratif",
-    "ramen": "Ramen Yuzu"
+    "ramen": "Ramen Yuzu",
+    "dojo": "Dojo Kaito"
   },
   "Hails": {
     "latest": "Méga bienvenue !",
@@ -520,7 +524,8 @@
     "hulotte": "Ah, un visiteur !",
     "brutus": "Halte !",
     "trotte": "Un coupon à tamponner ?",
-    "ramenChef": "Une petite faim ?"
+    "ramenChef": "Une petite faim ?",
+    "dojoMaster": "Un peu d’entraînement ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -584,6 +589,14 @@
       "ramenService": {
         "name": "Le service chez Yuzu",
         "where": "Chez Ramen Yuzu, en ville"
+      },
+      "dojoSlicing": {
+        "name": "La découpe chez Kaito",
+        "where": "Au dojo, en ville"
+      },
+      "dojoArchery": {
+        "name": "Le tir à l’arc chez Kaito",
+        "where": "Au dojo, en ville"
       }
     },
     "status": {
@@ -869,7 +882,40 @@
       "everySetOnSale": "Toutes les séries sont en vente ! Mamie Noisette a tous les classeurs, et les triplées de la Tanière se partagent les boosters : les 30 ans et les Méga-Évolutions chez Filou, les séries d’antan chez Frimousse, les plus récentes chez Fripouille.",
       "newsSheet": "Cette feuille ! Elle te raconte ce qui change dans le jeu à chaque visite, et tu peux la relire depuis les réglages.",
       "ramenShop": "Ramen Yuzu ouvre en ville, entre les tours ! Yuzu la panda roux t’embauche pour trois petits boulots payés en pièces : la plonge, la cuisine et le service en salle.",
-      "anySixQuests": "Le bonus du jour se gagne maintenant avec 6 quêtes au choix : plus besoin de toutes les faire."
+      "anySixQuests": "Le bonus du jour se gagne maintenant avec 6 quêtes au choix : plus besoin de toutes les faire.",
+      "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces."
+    }
+  },
+  "Shift": {
+    "titles": {
+      "dishes": "La plonge",
+      "kitchen": "En cuisine",
+      "service": "Le service",
+      "slicing": "La découpe",
+      "archery": "Le tir à l’arc"
+    },
+    "start": "C’est parti !",
+    "timeLeft": "{seconds} s",
+    "mistakes": "Erreurs",
+    "giveUp": "Arrêter",
+    "error": "Le service n’a pas pu être compté. Réessaie dans un instant.",
+    "pay": "{score} points pour {coins} pièces",
+    "points": "Points",
+    "result": "{points, plural, one {# point} other {# points}}",
+    "earned": "+{coins} pièces",
+    "allEarned": "Toutes les récompenses du jour sont gagnées !",
+    "stars": "{count, plural, =0 {Aucune étoile} one {# étoile} other {# étoiles}}",
+    "hosts": {
+      "ramenChef": {
+        "checking": "Yuzu fait les comptes…",
+        "over": "Fin du service !",
+        "back": "Retourner voir Yuzu"
+      },
+      "dojoMaster": {
+        "checking": "Kaito compte les points…",
+        "over": "Fin de la leçon !",
+        "back": "Retourner voir Kaito"
+      }
     }
   },
   "Ramen": {
@@ -884,24 +930,13 @@
     "lines": {
       "greeting": "Bienvenue chez Ramen Yuzu, {name} ! Tout est végétarien et fait maison. Il me manque toujours une paire de pattes : tu me donnes un coup de main ? Je paie en pièces.",
       "rewarded": "Quel travail ! Voilà {coins} pièces, bien méritées. Reviens quand tu veux.",
+      "rewardedAll": "Quel travail ! Voilà {coins} pièces, bien méritées. Reviens quand tu veux.",
       "alreadyPaid": "Merci pour l’aide ! Je t’ai déjà payé ce poste aujourd’hui, mais ça me fait plaisir de te voir.",
+      "allEarned": "Merci pour l’aide ! Je t’ai déjà payé ce poste aujourd’hui, mais ça me fait plaisir de te voir.",
       "failed": "Oups, c’était un service un peu agité… Pas de paie cette fois, mais on recommence quand tu veux !",
       "unavailable": "Aïe, le gaz a coupé. Repasse dans un instant !"
     },
     "shift": {
-      "titles": {
-        "dishes": "La plonge",
-        "kitchen": "En cuisine",
-        "service": "Le service"
-      },
-      "start": "C’est parti !",
-      "timeLeft": "{seconds} s",
-      "mistakes": "Erreurs",
-      "checking": "Yuzu fait les comptes…",
-      "over": "Fin du service !",
-      "back": "Retourner voir Yuzu",
-      "giveUp": "Arrêter",
-      "error": "Le service n’a pas pu être compté. Réessaie dans un instant.",
       "ingredients": {
         "noodles": "Nouilles",
         "miso": "Miso",
@@ -920,12 +955,8 @@
     },
     "service": {
       "howTo": "Les habitants du village s’installent et commandent. Le bol en main va à une table qui l’a commandé : touche la table, ou appuie sur son numéro. Sers vite pour un pourboire, et ne laisse personne attendre trop longtemps !",
-      "pay": "{score} points pour {coins} pièces",
-      "points": "Points",
       "inHand": "En main",
       "cooking": "En cuisine…",
-      "result": "{points, plural, one {# point} other {# points}}",
-      "stars": "{count, plural, =0 {Aucune étoile} one {# étoile} other {# étoiles}}",
       "tableWithOrder": "Table {number}, commande : {dish}",
       "moments": {
         "served": "+1",
@@ -1001,6 +1032,68 @@
         "combo": "Combo ×{count} !",
         "spoiled": "Ce n’était pas sur le ticket !",
         "dropped": "Il est tombé du tapis…"
+      }
+    }
+  },
+  "Dojo": {
+    "name": "Maître Kaito",
+    "title": "le maître du dojo",
+    "leave": "Au revoir, maître !",
+    "jobs": {
+      "slicing": "Découper des légumes",
+      "archery": "Tirer à l’arc"
+    },
+    "lines": {
+      "greeting": "Bienvenue au dojo, {name}. Ici, on affûte le geste et l’esprit. Une leçon de découpe, ou une leçon d’arc ? Chaque leçon bien menée rapporte quelques pièces.",
+      "rewarded": "Belle maîtrise. Voilà {coins} pièces : tu les as gagnées. Une étoile de plus, et je te paie la différence.",
+      "rewardedAll": "Trois étoiles ! Voilà {coins} pièces. Tu as gagné toutes les récompenses de cette leçon pour aujourd’hui.",
+      "alreadyPaid": "Bien. Ce score-là, je te l’ai déjà payé aujourd’hui : décroche une étoile de plus pour gagner davantage.",
+      "allEarned": "Tu as déjà gagné toutes les récompenses de cette leçon aujourd’hui. Entraîne-toi pour le plaisir, ou reviens demain !",
+      "failed": "Le bambou plie mais ne rompt pas. Pas de pièces cette fois : recommence quand tu veux.",
+      "unavailable": "Hmm, le dojo se recueille. Reviens dans un instant."
+    },
+    "slicing": {
+      "howTo": "Des légumes sont lancés en l’air. Tranche-les avant qu’ils retombent : passe la lame à travers eux d’un geste de la souris ou du doigt, ou appuie sur 1 à 4 pour trancher tout un couloir. Au sommet de leur vol, la coupe est nette. Plusieurs d’un coup, c’est un combo. Mais ne touche pas aux pots en terre !",
+      "lane": "Couloir {number}",
+      "board": "Zone de découpe : passe la lame à travers les légumes",
+      "moments": {
+        "cut": "+1",
+        "clean": "Net !",
+        "combo": "Combo ×{count} !",
+        "pot": "Crac !",
+        "dropped": "Raté !"
+      },
+      "kaito": {
+        "start": "Respire. Le premier légume arrive.",
+        "cut": "Bien.",
+        "clean": "Une coupe parfaite !",
+        "combo": "Plusieurs d’un geste, superbe !",
+        "pot": "Pas le pot ! Il était à ma grand-mère…",
+        "dropped": "Un légume au sol… ne les laisse pas filer.",
+        "calm": "Ta lame devient sûre."
+      }
+    },
+    "archery": {
+      "howTo": "Au jardin du dojo, dix flèches sur la cible. Une ligne balaie la cible de gauche à droite : appuie sur Espace, sur le bouton ou touche le terrain pour la fixer. Une seconde ligne balaie alors de haut en bas : appuie de nouveau pour la fixer et tirer, là où les deux lignes se croisent. Le vent pousse la flèche de côté : fixe la première ligne un peu contre le vent !",
+      "aimX": "Fixer la ligne gauche-droite",
+      "aimY": "Fixer la ligne haut-bas et tirer",
+      "wait": "Flèche suivante…",
+      "arrows": "{count, plural, =0 {Plus de flèches} one {# flèche} other {# flèches}}",
+      "wind": "Vent : {strength, select, calm {calme} light {léger} other {fort}}{direction, select, left { vers la gauche} right { vers la droite} other {}}",
+      "target": "Cible : {count, plural, =0 {aucune flèche plantée} one {# flèche plantée} other {# flèches plantées}}",
+      "moments": {
+        "bullseye": "Dans le mille !",
+        "hit": "+{points}",
+        "miss": "Raté…",
+        "streak": "Série ! +{points}"
+      },
+      "kaito": {
+        "start": "Le vent parle. Écoute-le.",
+        "bullseye": "Dans le mille. Magnifique.",
+        "hit": "Pas mal. Encore.",
+        "miss": "La cible est devant toi, pas à côté.",
+        "streak": "Deux fois au centre ! Je suis fier.",
+        "wind": "Le vent est fort : vise contre lui."
       }
     }
   }

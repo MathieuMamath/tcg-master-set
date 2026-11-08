@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { ShiftAction } from '@/game/ramen';
 import {
   canTouchTable,
   dishInHand,
@@ -16,9 +15,10 @@ import {
   servicePoints,
   simulateService,
 } from '@/game/ramen-service';
+import type { ShiftAction } from '@/game/shifts';
 import { drawServiceDish, drawServiceTable } from './paper-art';
-import { digitKeys, ScoreLine, type ShiftEnd, ShiftFrame, useShift, YuzuSays } from './ramen-shift';
 import { SellerPortrait } from './seller-portrait';
+import { digitKeys, HostSays, ScoreLine, type ShiftEnd, ShiftFrame, useShift } from './shift';
 
 // How long a moment, such as a tip, stays on screen.
 const MOMENT_MS = 900;
@@ -77,6 +77,7 @@ export function ServiceShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
 
   return (
     <ShiftFrame
+      host="ramenChef"
       job="service"
       phase={phase}
       secondsLeft={secondsLeft}
@@ -325,5 +326,5 @@ function YuzuRemark({ state, guests }: { state: ServiceState; guests: Guest[] })
           : state.served === 0 && state.mistakes === 0
             ? tService('yuzu.start')
             : tService('yuzu.calm');
-  return <YuzuSays text={remark} />;
+  return <HostSays host="ramenChef" text={remark} />;
 }

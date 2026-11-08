@@ -1,5 +1,5 @@
-import type { ShiftAction } from './ramen';
 import { dishInHand, serviceGuests, simulateService } from './ramen-service';
+import type { ShiftAction } from './shifts';
 
 // A perfect waiter's presses: every fifth of a second, a table left dirty is cleared, or else the
 // bowl in hand goes to the most impatient guest who ordered it.

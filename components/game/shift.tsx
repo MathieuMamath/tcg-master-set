@@ -13,26 +13,29 @@ import {
 } from 'react';
 import {
   QUICKEST_PRESS_MS,
-  type RamenJob,
   SHIFT_RULES,
   type ShiftAction,
+  type ShiftJob,
   shiftStars,
-} from '@/game/ramen';
-import type { RamenShiftResult } from '@/player/progress';
+} from '@/game/shifts';
+import type { ShiftOutcome } from '@/player/progress';
 import { focusFirstChoice, moveThroughChoices } from './menu-focus';
 import { SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
-// How a shift ends for Yuzu's conversation: what the server counted, nothing it could count, or
+// Who a shift is played for: Yuzu at the ramen shop, or Maître Kaito at the dojo.
+export type ShiftHost = 'ramenChef' | 'dojoMaster';
+
+// How a shift ends for its host's conversation: what the server counted, nothing it could count, or
 // the player stopping.
-export type ShiftEnd = RamenShiftResult | null | 'gaveUp';
+export type ShiftEnd = ShiftOutcome | null | 'gaveUp';
 
 export type ShiftPhase =
   | { step: 'ready' }
   | { step: 'starting' }
   | { step: 'playing'; seed: number; startedAt: number }
   | { step: 'checking'; points: number }
-  | { step: 'result'; result: RamenShiftResult }
+  | { step: 'result'; result: ShiftOutcome }
   | { step: 'error' };
 
 type Simulated = { endedAt: number | null };
@@ -40,7 +43,7 @@ type Simulated = { endedAt: number | null };
 // A shift's life: started on the server, which sends its seed, then played frame by frame from the
 // seed and the presses, by the same simulation as the server's, then sent to be counted.
 export function useShift<State extends Simulated>(
-  job: RamenJob,
+  job: ShiftJob,
   simulate: (seed: number, presses: readonly ShiftAction[], until: number) => State | null,
   points: (state: State) => number,
 ) {
@@ -69,7 +72,7 @@ export function useShift<State extends Simulated>(
       isOver.current = true;
       setPhase({ step: 'checking', points: score });
       try {
-        const response = await fetch(`/api/quests/ramen/finish?job=${job}`, {
+        const response = await fetch(`/api/quests/shift/finish?job=${job}`, {
           method: 'POST',
           body: JSON.stringify({ actions: actions.current }),
         });
@@ -106,7 +109,7 @@ export function useShift<State extends Simulated>(
   const start = async () => {
     setPhase({ step: 'starting' });
     try {
-      const response = await fetch(`/api/quests/ramen/start?job=${job}`, { method: 'POST' });
+      const response = await fetch(`/api/quests/shift/start?job=${job}`, { method: 'POST' });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -121,21 +124,23 @@ export function useShift<State extends Simulated>(
   };
 
   // A press, kept to be sent at the end, when it would do something now: the simulation tells.
-  const press = (choice: number, canPress: (now: State) => boolean) => {
+  // Whether it was kept, since a press too soon after the last one is not.
+  const press = (choice: number, canPress: (now: State) => boolean): boolean => {
     if (!isPlaying || isOver.current) {
-      return;
+      return false;
     }
     const ms = Math.round(performance.now() - startedAt);
     const previous = actions.current.at(-1)?.[0];
     if (ms > shiftMs || (previous !== undefined && ms - previous < QUICKEST_PRESS_MS)) {
-      return;
+      return false;
     }
     const now = simulate(seed, actions.current, ms);
     if (!now || now.endedAt !== null || !canPress(now)) {
-      return;
+      return false;
     }
     actions.current.push([ms, choice]);
     setPressCount((count) => count + 1);
+    return true;
   };
 
   return {
@@ -190,7 +195,7 @@ export function CanvasArt({
 }
 
 export function Stars({ count }: { count: number }) {
-  const t = useTranslations('Ramen.service');
+  const t = useTranslations('Shift');
   return (
     <p
       className="mt-2 flex justify-center gap-2 text-4xl"
@@ -212,7 +217,7 @@ export function Stars({ count }: { count: number }) {
 }
 
 export function Mistakes({ count, limit }: { count: number; limit: number }) {
-  const t = useTranslations('Ramen.shift');
+  const t = useTranslations('Shift');
   return (
     <span className="flex items-center gap-1.5">
       {t('mistakes')}
@@ -231,12 +236,12 @@ export function Mistakes({ count, limit }: { count: number; limit: number }) {
   );
 }
 
-// Yuzu, at the bottom of a shift, cheering on or wincing.
-export function YuzuSays({ text }: { text: string }) {
+// The host, at the bottom of a shift, cheering on or wincing.
+export function HostSays({ host, text }: { host: ShiftHost; text: string }) {
   return (
     <div className="mt-2 flex items-center gap-2">
       <span className="block size-11 shrink-0 overflow-hidden rounded-full border-2 border-[#fbf6ea] bg-[#e7d9bc] shadow-[1px_2px_0_var(--ui-shadow)]">
-        <SellerPortrait stock="ramenChef" />
+        <SellerPortrait stock={host} />
       </span>
       <p
         aria-live="polite"
@@ -252,27 +257,32 @@ export function YuzuSays({ text }: { text: string }) {
 // runs, and the stars once it is counted.
 export function ShiftFrame({
   job,
+  host,
   phase,
   secondsLeft,
   howTo,
   onStart,
   onDone,
   onKeyDown,
+  onKeyUp,
   box,
   children,
 }: {
-  job: RamenJob;
+  job: ShiftJob;
+  host: ShiftHost;
   phase: ShiftPhase;
   secondsLeft: number;
   howTo: string;
   onStart: () => void;
   onDone: (end: ShiftEnd) => void;
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+  // For a game played by holding a key, such as drawing a bow.
+  onKeyUp?: (event: KeyboardEvent<HTMLElement>) => void;
   box: RefObject<HTMLDivElement | null>;
   children: ReactNode;
 }) {
-  const t = useTranslations('Ramen.shift');
-  const tService = useTranslations('Ramen.service');
+  const t = useTranslations('Shift');
+  const tHost = useTranslations(`Shift.hosts.${host}`);
   const rules = SHIFT_RULES[job];
 
   useEffect(() => {
@@ -283,11 +293,22 @@ export function ShiftFrame({
   }, [phase.step, box]);
 
   return (
+    // A click on the board, or anywhere but a control, would take the focus off the board's buttons
+    // and leave the keys nowhere to go: playing with the mouse then the keyboard must just work.
     // biome-ignore lint/a11y/noStaticElementInteractions: the keys reach the board's buttons inside.
-    <div ref={box} onKeyDown={onKeyDown}>
+    <div
+      ref={box}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
+      onMouseDown={(event) => {
+        if (!(event.target as HTMLElement).closest('button, a, input, select, textarea')) {
+          event.preventDefault();
+        }
+      }}
+    >
       <TornPaper className="px-3 pt-4 pb-4 sm:px-5">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 id="ramen-shift-title" className="font-display text-xl">
+          <h2 id="shift-title" className="font-display text-xl">
             {t(`titles.${job}`)}
           </h2>
           {phase.step === 'playing' && (
@@ -302,7 +323,7 @@ export function ShiftFrame({
             <p className="mt-2 text-lg leading-snug">{howTo}</p>
             <ul className="mt-2 text-ui-ink/70">
               {rules.pay.map(({ score, coins }) => (
-                <li key={score}>{tService('pay', { score, coins })}</li>
+                <li key={score}>{t('pay', { score, coins })}</li>
               ))}
             </ul>
             <div className="mt-4 flex flex-wrap gap-2.5">
@@ -315,7 +336,7 @@ export function ShiftFrame({
                 {t('start')}
               </button>
               <button type="button" onClick={() => onDone('gaveUp')} className={CHOICE_CLASS}>
-                {t('back')}
+                {tHost('back')}
               </button>
             </div>
           </>
@@ -337,24 +358,30 @@ export function ShiftFrame({
         {phase.step === 'checking' && (
           <>
             <Stars count={shiftStars(job, phase.points)} />
-            <p className="mt-2 text-center text-lg">{t('checking')}</p>
+            <p className="mt-2 text-center text-lg">{tHost('checking')}</p>
           </>
         )}
 
         {phase.step === 'result' && (
           <>
-            <p className="mt-3 text-center font-display text-2xl">{t('over')}</p>
+            <p className="mt-3 text-center font-display text-2xl">{tHost('over')}</p>
             <Stars count={shiftStars(job, phase.result.score)} />
-            <p className="text-center text-lg">
-              {tService('result', { points: phase.result.score })}
-            </p>
+            <p className="text-center text-lg">{t('result', { points: phase.result.score })}</p>
+            {phase.result.coins > 0 && (
+              <p className="text-center font-display text-xl text-[#3f8a6a]">
+                {t('earned', { coins: phase.result.coins })}
+              </p>
+            )}
+            {phase.result.hasEarnedAll && (
+              <p className="mt-1 text-center text-ui-ink/70">{t('allEarned')}</p>
+            )}
             <div className="mt-4 flex justify-center">
               <button
                 type="button"
                 onClick={() => onDone(phase.result)}
                 className={`${CHOICE_CLASS} bg-ui-accent!`}
               >
-                {t('back')}
+                {tHost('back')}
               </button>
             </div>
           </>
@@ -364,7 +391,7 @@ export function ShiftFrame({
           <>
             <p className="mt-3 text-lg">{t('error')}</p>
             <button type="button" onClick={() => onDone(null)} className={`${CHOICE_CLASS} mt-4`}>
-              {t('back')}
+              {tHost('back')}
             </button>
           </>
         )}
@@ -383,11 +410,11 @@ export function ScoreLine({
   mistakes: number;
   limit: number;
 }) {
-  const tService = useTranslations('Ramen.service');
+  const t = useTranslations('Shift');
   return (
     <div className="mt-1 flex items-center justify-between gap-3 text-lg">
       <span>
-        {tService('points')} <span className="font-digits font-bold tabular-nums">{points}</span>
+        {t('points')} <span className="font-digits font-bold tabular-nums">{points}</span>
       </span>
       <Mistakes count={mistakes} limit={limit} />
     </div>

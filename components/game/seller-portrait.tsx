@@ -7,8 +7,11 @@ import {
   BERENICE_SIZE,
   BRUTUS_FACE,
   BRUTUS_SIZE,
+  DOJO_MASTER_FACE,
+  DOJO_MASTER_SIZE,
   drawBerenice,
   drawBrutus,
+  drawDojoMaster,
   drawGaspard,
   drawHedgehog,
   drawHulotte,
@@ -49,7 +52,8 @@ type Character =
   | 'brutus'
   | 'hulotte'
   | 'trotte'
-  | 'ramenChef';
+  | 'ramenChef'
+  | 'dojoMaster';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -76,6 +80,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'ramenChef') {
     return { draw: drawRamenChef, size: RAMEN_CHEF_SIZE, face: RAMEN_CHEF_FACE };
+  }
+  if (stock === 'dojoMaster') {
+    return { draw: drawDojoMaster, size: DOJO_MASTER_SIZE, face: DOJO_MASTER_FACE };
   }
   if (stock === 'gaspard') {
     return { draw: drawGaspard, size: GASPARD_SIZE, face: GASPARD_FACE };

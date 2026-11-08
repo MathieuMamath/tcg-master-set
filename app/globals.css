@@ -693,6 +693,56 @@ him, the bus rumbling, and dots that wait. */
   animation: ui-pour 300ms linear infinite;
 }
 
+/* The two halves of a sliced vegetable, flying apart and falling. */
+@keyframes ui-half-left {
+  to {
+    transform: translate(-1.6rem, 3rem) rotate(-50deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ui-half-right {
+  to {
+    transform: translate(1.6rem, 3rem) rotate(50deg);
+    opacity: 0;
+  }
+}
+
+.ui-half-left {
+  animation: ui-half-left 550ms ease-in forwards;
+}
+
+.ui-half-right {
+  animation: ui-half-right 550ms ease-in forwards;
+}
+
+/* Juice splashing out of a sliced vegetable, each drop flying its own way. */
+@keyframes ui-splash {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.ui-splash {
+  animation: ui-splash 500ms ease-out forwards;
+}
+
+/* A pennant fluttering in the wind. */
+@keyframes ui-flutter {
+  50% {
+    transform: scaleY(0.82) skewY(-4deg);
+  }
+}
+
+.ui-flutter {
+  animation: ui-flutter 500ms ease-in-out infinite;
+}
+
 .ui-wobble {
   animation: ui-wobble 900ms ease-in-out infinite;
   transform-origin: 50% 100%;
@@ -758,7 +808,9 @@ him, the bus rumbling, and dots that wait. */
   .ui-bubble,
   .ui-belt,
   .ui-scrub,
-  .ui-pour {
+  .ui-pour,
+  .ui-flutter,
+  .ui-splash {
     animation: none;
   }
 }

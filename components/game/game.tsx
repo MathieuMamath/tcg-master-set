@@ -64,10 +64,11 @@ import { PlayerNameContext } from './player-name';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
 import { RaffleDialog } from './raffle-dialog';
-import { RamenDialog } from './ramen-dialog';
 import { reportPlay } from './report';
 import { SaveNotice, useSaveNotice } from './save-notice';
 import { SettingsMenu } from './settings-menu';
+import type { ShiftHost } from './shift';
+import { ShiftDialog } from './shift-dialog';
 import { ShopDialog } from './shop-dialog';
 import { StatsDialog } from './stats-dialog';
 
@@ -81,7 +82,7 @@ const INTERACT_KEY = 'KeyE';
 // Where the browser keeps the id of the last "What's new?" note it showed.
 const NEWS_SEEN_KEY = 'tcg-master-set:news-seen';
 
-type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker | 'ramenChef';
+type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker | ShiftHost;
 
 // Talking to someone gets a speech bubble over their head, and everything else a prompt at the
 // bottom of the screen.
@@ -871,6 +872,7 @@ export function Game({ player, sets, progress }: Props) {
             thisYear: tShopkeeper('names.thisYear'),
             older: tShopkeeper('names.older'),
             ramen: tTown('ramen'),
+            dojo: tTown('dojo'),
           }}
           stains={quest?.stains ?? []}
           isLeaCalm={cleanedOn === questDay(new Date())}
@@ -1223,8 +1225,9 @@ export function Game({ player, sets, progress }: Props) {
         {isCouponRegisterOpen && !isTalking && (
           <CouponRegister sets={sets} onClose={() => setIsCouponRegisterOpen(false)} />
         )}
-        {talkingTo === 'ramenChef' && (
-          <RamenDialog
+        {(talkingTo === 'ramenChef' || talkingTo === 'dojoMaster') && (
+          <ShiftDialog
+            host={talkingTo}
             onShiftEnd={(updated, hasPaid) => {
               setWallet(updated);
               if (hasPaid) {
@@ -1246,7 +1249,8 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'brutus' &&
           talkingTo !== 'hulotte' &&
           talkingTo !== 'trotte' &&
-          talkingTo !== 'ramenChef' && (
+          talkingTo !== 'ramenChef' &&
+          talkingTo !== 'dojoMaster' && (
             <ShopDialog
               stock={talkingTo}
               items={(talkingTo === 'binderSeller'

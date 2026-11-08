@@ -47,6 +47,9 @@ import {
   BUREAU_WALLS,
   COUPONS_FURNITURE,
   COUPONS_WALLS,
+  DOJO_FURNITURE,
+  DOJO_MASTER_X,
+  DOJO_WALLS,
   DOWNTOWN_BACK_TOWERS,
   DOWNTOWN_ENDS,
   DOWNTOWN_SPOTS,
@@ -90,6 +93,7 @@ import {
   BERENICE_SIZE,
   BRUTUS_SIZE,
   cutOut,
+  DOJO_MASTER_SIZE,
   drawArcade,
   drawArcadeCabinet,
   drawArcadeCarpet,
@@ -120,6 +124,12 @@ import {
   drawDalgonaCart,
   drawDashboard,
   drawDesk,
+  drawDojo,
+  drawDojoFloor,
+  drawDojoMaster,
+  drawDojoRack,
+  drawDojoScroll,
+  drawDojoWall,
   drawDoor,
   drawDust,
   drawEdgeShadow,
@@ -127,6 +137,7 @@ import {
   drawFilingCabinet,
   drawFlats,
   drawFrame,
+  drawGardenView,
   drawGaspard,
   drawHedgehog,
   drawHills,
@@ -145,6 +156,7 @@ import {
   drawPanoramaCity,
   drawPanoramaFrame,
   drawPanoramaLights,
+  drawPaperLantern,
   drawPaperStack,
   drawPapy,
   drawParkGround,
@@ -176,6 +188,7 @@ import {
   drawStreetLamp,
   drawSweatDrop,
   drawTallPlant,
+  drawThrown,
   drawTower,
   drawTree,
   drawTrotte,
@@ -249,8 +262,9 @@ export type SceneSigns = {
   latest: string;
   thisYear: string;
   older: string;
-  // On the board over Ramen Yuzu's door, downtown.
+  // On the boards over Ramen Yuzu's and the dojo's doors, downtown.
   ramen: string;
+  dojo: string;
 };
 
 const PIP_Z = 1.25;
@@ -1492,7 +1506,7 @@ const LAMP_Z = -0.25;
 const LAMP_HEIGHTS: Record<LampStyle, number> = { classic: 3.3, modern: 4.2 };
 const TOWN_LAMPS = [-17.6, -9.4, 2.05, 9.4, 25.8];
 const PARK_LAMPS = [-5.1, 2.7, 9.8];
-const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8];
+const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8, 30.4, 38];
 
 function Lamps({ style, xs }: { style: LampStyle; xs: readonly number[] }) {
   const textures = useLampTextures(style);
@@ -2104,6 +2118,21 @@ function Downtown({
       ),
     [fontsReady, signs.ramen, ramen.width, ramen.height],
   );
+  const { dojo } = DOWNTOWN_SPOTS;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const dojoFront = useMemo(
+    () =>
+      texture(
+        cutOut(
+          Math.round(dojo.width * PIXELS_PER_UNIT),
+          Math.round(dojo.height * PIXELS_PER_UNIT),
+          drawDojo(signs.dojo),
+          9,
+          164,
+        ),
+      ),
+    [fontsReady, signs.dojo, dojo.width, dojo.height],
+  );
   const width = DOWNTOWN_ENDS.right - DOWNTOWN_ENDS.left + 20;
   const center = (DOWNTOWN_ENDS.left + DOWNTOWN_ENDS.right) / 2;
   return (
@@ -2166,6 +2195,14 @@ function Downtown({
         x={ramen.x}
         z={DOWNTOWN_TOWERS_Z + 0.2}
         height={ramen.height}
+        shadow={textures.shadow}
+      />
+      {/* The dojo, past the last tower. */}
+      <Furniture
+        map={dojoFront}
+        x={dojo.x}
+        z={DOWNTOWN_TOWERS_Z + 0.2}
+        height={dojo.height}
         shadow={textures.shadow}
       />
       {/* Brutus, by the bureau's door. His dark glasses hide his eyes, so he never blinks. */}
@@ -2526,6 +2563,121 @@ function Ramen({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
   );
 }
 
+const DOJO_MASTER_HEIGHT = 2.5;
+const DOJO_MASTER_Z = -1;
+const VEGETABLE_LOOKS = ['carrot', 'radish', 'pepper', 'eggplant', 'cabbage'] as const;
+
+// A basket of vegetables beside the chopping block, for the slicing lessons.
+function drawVegetableBasket(drawing: CanvasRenderingContext2D, width: number, height: number) {
+  // The chopping block, a thick round of wood.
+  drawing.fillStyle = '#8a5a34';
+  drawing.fillRect(width * 0.56, height * 0.5, width * 0.4, height * 0.5);
+  drawing.fillStyle = '#c99a5b';
+  drawing.beginPath();
+  drawing.ellipse(width * 0.76, height * 0.5, width * 0.2, height * 0.08, 0, 0, Math.PI * 2);
+  drawing.fill();
+  // The basket, heaped with vegetables.
+  VEGETABLE_LOOKS.forEach((look, index) => {
+    drawing.save();
+    drawing.translate(width * (0.02 + index * 0.09), height * (0.28 + (index % 2) * 0.06));
+    drawThrown(look)(drawing, width * 0.22, width * 0.22);
+    drawing.restore();
+  });
+  drawing.fillStyle = '#b8894a';
+  drawing.beginPath();
+  drawing.moveTo(0, height * 0.52);
+  drawing.lineTo(width * 0.54, height * 0.52);
+  drawing.lineTo(width * 0.48, height);
+  drawing.lineTo(width * 0.06, height);
+  drawing.closePath();
+  drawing.fill();
+  drawing.strokeStyle = 'rgb(90 60 30 / 45%)';
+  drawing.lineWidth = 4;
+  for (let row = 0.62; row < 1; row += 0.12) {
+    drawing.beginPath();
+    drawing.moveTo(width * 0.02, height * row);
+    drawing.lineTo(width * 0.52, height * row);
+    drawing.stroke();
+  }
+}
+
+// Inside the dojo: paper screens in a wooden grid, tatami on the floor, the rack of swords by the
+// door, a hanging scroll, Maître Kaito on the mats, the vegetables for slicing, and the back screens
+// open onto the garden, where the archery target stands.
+function Dojo({ speakerTops }: { speakerTops: RefObject<SpeakerTops> }) {
+  const { rack, scroll, basket, garden } = DOJO_FURNITURE;
+  const textures = useMemo(
+    () => ({
+      room: {
+        wall: texture(drawDojoWall()),
+        floor: texture(drawDojoFloor()),
+        door: texture(
+          paint(
+            Math.round(DOOR_WIDTH * PIXELS_PER_UNIT),
+            Math.round(DOOR_HEIGHT * PIXELS_PER_UNIT),
+            drawDoor,
+            213,
+          ),
+        ),
+      },
+      shadow: texture(drawShadowBlob()),
+      rack: texture(cutOut(Math.round(rack.width * PIXELS_PER_UNIT), 260, drawDojoRack, 8, 214)),
+      scroll: texture(cutOut(110, 220, drawDojoScroll, 6, 215)),
+      basket: texture(
+        cutOut(Math.round(basket.width * PIXELS_PER_UNIT), 150, drawVegetableBasket, 8, 216),
+      ),
+      garden: texture(cutOut(260, 230, drawGardenView, 6, 217)),
+      lantern: texture(cutOut(50, 80, drawPaperLantern, 6, 218)),
+      master: blinker(DOJO_MASTER_SIZE.width, DOJO_MASTER_SIZE.height, drawDojoMaster, 9, 219),
+    }),
+    [],
+  );
+  return (
+    <>
+      <RoomShell walls={DOJO_WALLS} doorSide="left" textures={textures.room} />
+      <SpeakerTopsOf
+        speakerTops={speakerTops}
+        speakers={[
+          {
+            interaction: 'dojoMaster',
+            map: textures.master.open,
+            height: DOJO_MASTER_HEIGHT,
+            z: DOJO_MASTER_Z,
+          },
+        ]}
+      />
+      <group position={[scroll.x, 2.4, WALL_Z + 0.02]}>
+        <CutOut map={textures.scroll} height={1.7} />
+      </group>
+      {[-3, 4].map((lanternX) => (
+        <group key={lanternX} position={[lanternX, 3.2, WALL_Z + 0.3]}>
+          <CutOut map={textures.lantern} height={0.8} />
+        </group>
+      ))}
+      <Furniture map={textures.rack} x={rack.x} z={-1.3} height={2.2} shadow={textures.shadow} />
+      <Character
+        map={textures.master.open}
+        blinks={textures.master}
+        x={DOJO_MASTER_X}
+        z={DOJO_MASTER_Z}
+        height={DOJO_MASTER_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={textures.basket}
+        x={basket.x}
+        z={-0.8}
+        height={1.1}
+        shadow={textures.shadow}
+      />
+      {/* The back screens slid open onto the garden, where archery is practised. */}
+      <group position={[garden.x, 1.9, WALL_Z + 0.02]}>
+        <CutOut map={textures.garden} height={2.3} />
+      </group>
+    </>
+  );
+}
+
 // The drawings with text wait for the game's fonts, or they would be drawn in a fallback font.
 function useFontsReady(): boolean {
   const [isReady, setIsReady] = useState(false);
@@ -2803,6 +2955,7 @@ export function PaperScene({
     bureau: signs.bureau,
     coupons: tTravel('places.coupons'),
     ramen: signs.ramen,
+    dojo: signs.dojo,
   };
   const [visit, setVisit] = useState<{
     number: number;
@@ -2931,6 +3084,7 @@ export function PaperScene({
             {visit.place === 'bureau' && <Bureau speakerTops={speakerTops} />}
             {visit.place === 'coupons' && <Coupons speakerTops={speakerTops} />}
             {visit.place === 'ramen' && <Ramen speakerTops={speakerTops} />}
+            {visit.place === 'dojo' && <Dojo speakerTops={speakerTops} />}
             <Pip
               input={input}
               room={SIDE_PLACES[visit.place]}

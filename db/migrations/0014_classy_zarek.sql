@@ -1,0 +1,1 @@
+ALTER TABLE "player_quests" ADD COLUMN "paid_coins" integer DEFAULT 0 NOT NULL;
