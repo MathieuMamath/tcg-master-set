@@ -27,6 +27,8 @@ import {
   type Wallet,
 } from '@/game/shop-dialogue';
 import {
+  type HidingSpotId,
+  hidingSpotAlong,
   isDoorInteraction,
   OFFICE_FLOORS,
   type OfficeFloor,
@@ -39,6 +41,7 @@ import type {
   DailyBonusClaim,
   DalgonaResult,
   FishingCatch,
+  KittenSearch,
   PlayerProgress,
   RaffleDraw,
 } from '@/player/progress';
@@ -61,6 +64,7 @@ import { NewsSheet } from './news-sheet';
 import { NpcDialog, type Speaker } from './npc-dialog';
 import type { MovementInput } from './paper-scene';
 import { PlayerNameContext } from './player-name';
+import { PuzzleDialog } from './puzzle-dialog';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
 import { QuizDialog } from './quiz-dialog';
@@ -90,7 +94,8 @@ type Talk =
   | ShopkeeperStock
   | 'binderSeller'
   | QuestGiver
-  | Speaker
+  // Mme Ronron's kitten only speaks once found, never from the street.
+  | Exclude<Speaker, 'kitten'>
   | ShiftHost
   | 'grandpaStones'
   | 'bereniceBalloons';
@@ -105,7 +110,8 @@ function isTalk(interaction: Interaction): interaction is Extract<Talk, Interact
     interaction !== 'scrub' &&
     interaction !== 'busStop' &&
     interaction !== 'elevator' &&
-    interaction !== 'bed'
+    interaction !== 'bed' &&
+    interaction !== 'search'
   );
 }
 const DASH_KEY = 'Space';
@@ -142,7 +148,9 @@ export function Game({ player, sets, progress }: Props) {
     travelTo: null,
     wantsDoor: false,
   });
-  const [interaction, setInteraction] = useState<Interaction | null>(null);
+  // What the scene says the character can do where it stands, before the game's own state hides
+  // what can't be done now, such as a hiding place with no kitten to look for.
+  const [reached, setInteraction] = useState<Interaction | null>(null);
   const [talkingTo, setTalkingTo] = useState<Talk | null>(null);
   const [quest, setQuest] = useState<{ startedAt: number; stains: readonly Stain[] } | null>(null);
   const [questLine, setQuestLine] = useState<QuestLine>('greeting');
@@ -156,6 +164,12 @@ export function Game({ player, sets, progress }: Props) {
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
   const [isWatering, setIsWatering] = useState(false);
   const [isQuizzing, setIsQuizzing] = useState(false);
+  const [isPuzzling, setIsPuzzling] = useState(false);
+  // Where Mme Ronron's kitten hides today, once she gave her hint, and what the last search found.
+  const [kittenSpot, setKittenSpot] = useState<HidingSpotId | null>(null);
+  const [isKittenHintGiven, setIsKittenHintGiven] = useState(progress.isKittenHunted);
+  const [searchNote, setSearchNote] = useState<'nothing' | 'unavailable' | null>(null);
+  const [isKittenFound, setIsKittenFound] = useState(false);
   // The shape Gaspard handed over, while the player carves it.
   const [dalgonaShape, setDalgonaShape] = useState<DalgonaShape | null>(null);
   const [gaspardLine, setGaspardLine] = useState<QuestLine>('greeting');
@@ -215,6 +229,9 @@ export function Game({ player, sets, progress }: Props) {
   // Papy's memory game, won for the day, as the day's activity says: read again from the server
   // whenever a dialog closes, so that it never drifts from the database.
   const isMemoryWon = activity.done.includes('grandpa');
+  // The hiding places are only searched while the kitten is lost and Mme Ronron gave her hint.
+  const isKittenHunted = isKittenHintGiven && !activity.done.includes('ronronKitten');
+  const interaction = reached === 'search' && !isKittenHunted ? null : reached;
   const isPapySaying = interaction === 'grandpa' && isMemoryWon;
   const isDialogOpen =
     isTalking ||
@@ -231,6 +248,8 @@ export function Game({ player, sets, progress }: Props) {
     isPlayingBasketball ||
     isWatering ||
     isQuizzing ||
+    isPuzzling ||
+    isKittenFound ||
     dalgonaShape !== null ||
     isRaffling ||
     isBusMapOpen ||
@@ -243,8 +262,13 @@ export function Game({ player, sets, progress }: Props) {
   const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
   const isCutting = useRef(false);
-  const controls = useRef({ interaction, isDialogOpen, goToBed: () => {} });
-  controls.current = { interaction, isDialogOpen, goToBed: () => goToBed() };
+  const controls = useRef({ interaction, isDialogOpen, goToBed: () => {}, search: () => {} });
+  controls.current = {
+    interaction,
+    isDialogOpen,
+    goToBed: () => goToBed(),
+    search: () => searchHere(),
+  };
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -289,6 +313,8 @@ export function Game({ player, sets, progress }: Props) {
           setIsElevatorOpen(true);
         } else if (controls.current.interaction === 'bed') {
           controls.current.goToBed();
+        } else if (controls.current.interaction === 'search') {
+          controls.current.search();
         } else {
           setTalkingTo(controls.current.interaction);
         }
@@ -346,6 +372,66 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
+  // A hiding place searched: the server alone knows where the kitten is, and pays when found.
+  const searchHere = async () => {
+    const hidingSpot = spot.current && hidingSpotAlong(spot.current.place, spot.current.x);
+    if (!hidingSpot) {
+      return;
+    }
+    stopWalking();
+    try {
+      const response = await fetch('/api/quests/kitten/search', {
+        method: 'POST',
+        body: JSON.stringify({ spot: hidingSpot }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const found: KittenSearch = await response.json();
+      if (!found.isFound) {
+        setSearchNote('nothing');
+        return;
+      }
+      setWallet(found.wallet);
+      showSaveNotice();
+      setActivity((current) =>
+        current.done.includes('ronronKitten')
+          ? current
+          : { ...current, done: [...current.done, 'ronronKitten'] },
+      );
+      setIsKittenFound(true);
+    } catch {
+      setSearchNote('unavailable');
+    }
+  };
+
+  // A search's note fades after a moment, or as soon as the character walks off.
+  useEffect(() => {
+    if (searchNote === null) {
+      return;
+    }
+    const timer = setTimeout(() => setSearchNote(null), 2500);
+    return () => clearTimeout(timer);
+  }, [searchNote]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new place to stand clears the note.
+  useEffect(() => setSearchNote(null), [reached]);
+
+  // Talking to Mme Ronron while her kitten is lost gives her hint: the day's hiding place.
+  useEffect(() => {
+    if (talkingTo !== 'ronron' || kittenSpot !== null || activity.done.includes('ronronKitten')) {
+      return;
+    }
+    fetch('/api/quests/kitten/start', { method: 'POST' })
+      .then((response) => (response.ok ? response.json() : Promise.reject()))
+      .then((answer: { hasStarted: boolean; spot?: HidingSpotId }) => {
+        if (answer.hasStarted && answer.spot) {
+          setKittenSpot(answer.spot);
+          setIsKittenHintGiven(true);
+        }
+      })
+      .catch(() => {});
+  }, [talkingTo, kittenSpot, activity.done]);
+
   const stopWalking = () => {
     input.current.keyboard = STILL;
     input.current.joystick = STILL;
@@ -367,6 +453,8 @@ export function Game({ player, sets, progress }: Props) {
       setIsElevatorOpen(true);
     } else if (interaction === 'bed') {
       goToBed();
+    } else if (interaction === 'search') {
+      searchHere();
     } else if (interaction) {
       setTalkingTo(interaction);
     }
@@ -1048,7 +1136,11 @@ export function Game({ player, sets, progress }: Props) {
             <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
               E
             </kbd>
-            {interaction === 'bed' && !clock?.canSleep ? t('notSleepy') : t(interaction)}
+            {interaction === 'bed' && !clock?.canSleep
+              ? t('notSleepy')
+              : interaction === 'search' && searchNote
+                ? t(`searched.${searchNote}`)
+                : t(interaction)}
           </button>
         )}
         {!isTalking &&
@@ -1163,6 +1255,15 @@ export function Game({ player, sets, progress }: Props) {
             onGiveUp={() => setMemoryCards(null)}
           />
         )}
+        {isPuzzling && (
+          <PuzzleDialog
+            onFinished={(updated) => {
+              setWallet(updated);
+              showSaveNotice();
+            }}
+            onClose={() => setIsPuzzling(false)}
+          />
+        )}
         {isQuizzing && (
           <QuizDialog
             onFinished={(updated) => {
@@ -1262,6 +1363,35 @@ export function Game({ player, sets, progress }: Props) {
             onClose={() => setTalkingTo(null)}
           />
         )}
+        {talkingTo === 'painter' && (
+          // Pinceau's puzzle, once a day: done, he only says thank you.
+          <NpcDialog
+            speaker="painter"
+            line={activity.done.includes('painterPuzzle') ? 'done' : 'greeting'}
+            action={
+              activity.done.includes('painterPuzzle')
+                ? undefined
+                : { label: tSpeakers('painter.puzzle'), onPress: () => setIsPuzzling(true) }
+            }
+            onClose={() => setTalkingTo(null)}
+          />
+        )}
+        {talkingTo === 'ronron' && (
+          <NpcDialog
+            speaker="ronron"
+            line={
+              activity.done.includes('ronronKitten')
+                ? 'thanks'
+                : kittenSpot
+                  ? `hints.${kittenSpot}`
+                  : 'worried'
+            }
+            onClose={() => setTalkingTo(null)}
+          />
+        )}
+        {isKittenFound && (
+          <NpcDialog speaker="kitten" line="found" onClose={() => setIsKittenFound(false)} />
+        )}
         {talkingTo === 'hulotte' && (
           <NpcDialog
             speaker="hulotte"
@@ -1291,6 +1421,7 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo === 'dojoMaster' ||
           talkingTo === 'gardener' ||
           talkingTo === 'postman' ||
+          talkingTo === 'photographer' ||
           talkingTo === 'grandpaStones' ||
           talkingTo === 'bereniceBalloons') && (
           <ShiftDialog
@@ -1344,10 +1475,13 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'brutus' &&
           talkingTo !== 'hulotte' &&
           talkingTo !== 'trotte' &&
+          talkingTo !== 'painter' &&
+          talkingTo !== 'ronron' &&
           talkingTo !== 'ramenChef' &&
           talkingTo !== 'dojoMaster' &&
           talkingTo !== 'gardener' &&
           talkingTo !== 'postman' &&
+          talkingTo !== 'photographer' &&
           talkingTo !== 'grandpaStones' &&
           talkingTo !== 'bereniceBalloons' && (
             <ShopDialog

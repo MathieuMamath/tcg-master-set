@@ -44,4 +44,12 @@ export type Interaction =
   // Pépin, the squirrel who tends Linden Park's garden, and has its lawn cleaned and beds watered.
   | 'gardener'
   // Gustave, the heron who keeps the village's post stand and has the mail sorted.
-  | 'postman';
+  | 'postman'
+  // Pinceau, the sheep who paints by the park's lake and has his painting put back together.
+  | 'painter'
+  // Mme Ronron, the old cat by Léa's block whose kitten hides somewhere every day, and a hiding
+  // place being searched for him.
+  | 'ronron'
+  | 'search'
+  // Flash, the chameleon who photographs the big city's sky.
+  | 'photographer';

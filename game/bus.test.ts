@@ -31,11 +31,15 @@ test('the sign of the stop can be read from the street, past the arcade', () => 
   expect(bus.x + bus.width / 2).toBeLessThan(TOWN_ENDS.right);
 });
 
-test('in the park, Pépin, Papy Caillou and Lucas can be talked to', () => {
+test('in the park, Pépin, Papy Caillou, Pinceau and Lucas can be talked to', () => {
   expect(PARK.interactions.map(({ interaction }) => interaction)).toEqual([
     'busStop',
     'gardener',
     'grandpa',
+    'painter',
     'boy',
+    // The places where Mme Ronron's kitten can hide.
+    'search',
+    'search',
   ]);
 });

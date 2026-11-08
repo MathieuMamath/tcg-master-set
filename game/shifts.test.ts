@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { perfectPhotos } from './city-photos.test-helpers';
 import { ARCHERY_ACTIONS } from './dojo-archery';
 import { perfectArchery, perfectSlicing } from './dojo-games.test-helpers';
 import { SLICING_STROKES } from './dojo-slicing';
@@ -117,6 +118,7 @@ describe('playShift', () => {
       stones: perfectStones(SEED),
       balloons: perfectBalloons(SEED),
       mail: perfectMail(SEED),
+      photos: perfectPhotos(SEED),
     };
     for (const job of SHIFT_JOBS) {
       const result = playShift(job, SEED, perfect[job]);

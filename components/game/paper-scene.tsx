@@ -58,6 +58,7 @@ import {
   FLAT_FURNITURE,
   FLAT_WALLS,
   FLAT_WINDOW_X,
+  HIDING_SPOTS,
   HULOTTE_X,
   interactionAlong,
   LEA_X,
@@ -132,6 +133,7 @@ import {
   drawDojoWall,
   drawDoor,
   drawDust,
+  drawEasel,
   drawEdgeShadow,
   drawElevator,
   drawFilingCabinet,
@@ -143,6 +145,7 @@ import {
   drawGardenView,
   drawGaspard,
   drawHedgehog,
+  drawHidingProp,
   drawHills,
   drawHouse,
   drawHulotte,
@@ -156,6 +159,7 @@ import {
   drawModernSofa,
   drawOfficeFloor,
   drawOfficeWall,
+  drawPainter,
   drawPanoramaCity,
   drawPanoramaFrame,
   drawPanoramaLights,
@@ -164,6 +168,7 @@ import {
   drawPapy,
   drawParkGround,
   drawPavement,
+  drawPhotographer,
   drawPine,
   drawPip,
   drawPlanks,
@@ -183,6 +188,7 @@ import {
   drawRamenWall,
   drawRedLantern,
   drawReeds,
+  drawRonron,
   drawShadowBlob,
   drawShop,
   drawSign,
@@ -208,16 +214,20 @@ import {
   GARDENER_SIZE,
   GASPARD_SIZE,
   HEDGEHOG_SIZE,
+  HIDING_PROP_SIZE,
   HULOTTE_SIZE,
   LAMP_DRAWINGS,
   type LampStyle,
   LEA_SIZE,
   LUCAS_SIZE,
+  PAINTER_SIZE,
   PAPY_SIZE,
+  PHOTOGRAPHER_SIZE,
   POSTMAN_SIZE,
   paint,
   RACCOON_SIZE,
   RAMEN_CHEF_SIZE,
+  RONRON_SIZE,
   SELLERS,
   solidTop,
   TROTTE_SIZE,
@@ -1455,6 +1465,8 @@ const GASPARD_HEIGHT = 3.3;
 const DALGONA_Z = { awning: -1.1, gaspard: -0.85, cart: -0.45 };
 const POST_Z = { booth: -1.1, postman: -0.85, counter: -0.45 };
 const POSTMAN_HEIGHT = 3.1;
+const RONRON_HEIGHT = 2.5;
+const RONRON_Z = -0.6;
 
 // The street: a wide sky, rows of hills, our house, Gaspard's stand, the shop and the bookshop.
 // The village's greenery, as in the art direction's prototype: trees between and behind the
@@ -1518,8 +1530,8 @@ const WIND_SWAY = 0.025;
 const LAMP_Z = -0.25;
 const LAMP_HEIGHTS: Record<LampStyle, number> = { classic: 3.3, modern: 4.2 };
 // Clear of the stands and doors: the one by the post stand stands between it and the bookshop.
-const TOWN_LAMPS = [-17.6, -9.4, 2.05, 11.25, 25.8];
-const PARK_LAMPS = [-16.6, -5.1, 2.7, 9.8];
+const TOWN_LAMPS = [-18.9, -9.4, 2.05, 11.25, 25.8];
+const PARK_LAMPS = [-16.6, -6.2, 4.4, 9.1];
 const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8, 30.4, 38];
 
 function Lamps({ style, xs }: { style: LampStyle; xs: readonly number[] }) {
@@ -1613,6 +1625,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       awning: texture(cutOut(320, 380, drawDalgonaAwning, 8, 121)),
       gaspard: blinker(GASPARD_SIZE.width, GASPARD_SIZE.height, drawGaspard, 9, 122),
       postman: blinker(POSTMAN_SIZE.width, POSTMAN_SIZE.height, drawPostman, 9, 240),
+      ronron: blinker(RONRON_SIZE.width, RONRON_SIZE.height, drawRonron, 9, 242),
       postBooth: texture(cutOut(340, 420, drawPostBooth, 8, 241)),
       berenice: blinker(BERENICE_SIZE.width, BERENICE_SIZE.height, drawBerenice, 9, 124),
       raffleCounter: texture(cutOut(340, 200, drawRaffleCounter, 8, 126)),
@@ -1782,6 +1795,12 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         speakerTops={speakerTops}
         speakers={[
           {
+            interaction: 'ronron',
+            map: textures.ronron.open,
+            height: RONRON_HEIGHT,
+            z: RONRON_Z,
+          },
+          {
             interaction: 'gaspard',
             map: textures.gaspard.open,
             height: GASPARD_HEIGHT,
@@ -1900,6 +1919,16 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         height={4.06}
         shadow={textures.shadow}
       />
+      {/* Mme Ronron, on the pavement by her block, waiting for news of her kitten. */}
+      <Character
+        map={textures.ronron.open}
+        blinks={textures.ronron}
+        x={TOWN_BUILDINGS.ronron.x}
+        z={RONRON_Z}
+        height={RONRON_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <HidingProps place="town" shadow={textures.shadow} />
     </>
   );
 }
@@ -1957,16 +1986,59 @@ const PARK_TUFTS = [
   { x: 9.1, z: 2.68, height: 0.85 },
   { x: 11.8, z: 2.6, height: 0.72 },
 ];
+// The places where Mme Ronron's kitten can hide, along a place: drawn there every day, whether or
+// not he hides behind one.
+function HidingProps({ place, shadow }: { place: SidePlaceId; shadow: Texture }) {
+  const textures = useMemo(
+    () =>
+      Object.fromEntries(
+        (['crates', 'bush', 'flowers', 'log'] as const).map((look, index) => [
+          look,
+          texture(
+            cutOut(
+              HIDING_PROP_SIZE.width,
+              HIDING_PROP_SIZE.height,
+              drawHidingProp(look),
+              7,
+              250 + index,
+            ),
+          ),
+        ]),
+      ) as Record<(typeof HIDING_SPOTS)[number]['look'], Texture>,
+    [],
+  );
+  return (
+    <>
+      {HIDING_SPOTS.filter((spot) => spot.place === place).map(({ id, x, look }) => (
+        <Furniture key={id} map={textures[look]} x={x} z={-0.35} height={1.05} shadow={shadow} />
+      ))}
+    </>
+  );
+}
+
 const PAPY_HEIGHT = 2.9;
 const LUCAS_HEIGHT = 2.6;
 const PARK_PEOPLE_Z = -0.5;
 const GARDENER_HEIGHT = 2.5;
+const PAINTER_HEIGHT = 2.6;
 
 // The Linden Park: lawns and trees under the sky, Pépin's garden on the far left, the bus stop,
-// Papy Caillou by his bench, and Lucas fishing at the edge of the lake.
+// Papy Caillou by his bench, Pinceau at his easel, and Lucas fishing at the edge of the lake.
 function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObject<SpeakerTops> }) {
   const fontsReady = useFontsReady();
-  const { busStop, bench, papy, lake, lucas, fountain, flowerBeds, gardener, bins } = PARK_SPOTS;
+  const {
+    busStop,
+    bench,
+    papy,
+    lake,
+    lucas,
+    fountain,
+    flowerBeds,
+    gardener,
+    bins,
+    painter,
+    easel,
+  } = PARK_SPOTS;
   const staticTextures = useMemo(
     () => ({
       ground: texture(drawParkGround()),
@@ -1992,6 +2064,8 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       flowerBeds: texture(cutOut(380, 150, drawFlowerBeds, 7, 231)),
       fountain: texture(cutOut(160, 220, drawFountain, 7, 232)),
       bins: texture(cutOut(150, 110, drawSortingBins, 7, 233)),
+      painter: blinker(PAINTER_SIZE.width, PAINTER_SIZE.height, drawPainter, 9, 234),
+      easel: texture(cutOut(240, 360, drawEasel, 8, 235)),
     }),
     [],
   );
@@ -2017,6 +2091,12 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
             z: PARK_PEOPLE_Z,
           },
           { interaction: 'grandpa', map: textures.papy, height: PAPY_HEIGHT, z: PARK_PEOPLE_Z },
+          {
+            interaction: 'painter',
+            map: textures.painter.open,
+            height: PAINTER_HEIGHT,
+            z: PARK_PEOPLE_Z,
+          },
           { interaction: 'boy', map: textures.lucas.open, height: LUCAS_HEIGHT, z: PARK_PEOPLE_Z },
         ]}
       />
@@ -2110,6 +2190,16 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         height={PAPY_HEIGHT}
         shadow={textures.shadow}
       />
+      {/* Pinceau, painting the lake at his easel. */}
+      <Character
+        map={textures.painter.open}
+        blinks={textures.painter}
+        x={painter.x}
+        z={PARK_PEOPLE_Z}
+        height={PAINTER_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture map={textures.easel} x={easel.x} z={-0.7} height={2.2} shadow={textures.shadow} />
       <Swaying x={lake.left + 0.6} z={-0.3} phase={0.4}>
         <CutOut map={textures.reeds} height={1.1} />
       </Swaying>
@@ -2125,6 +2215,7 @@ function Park({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         height={LUCAS_HEIGHT}
         shadow={textures.shadow}
       />
+      <HidingProps place="park" shadow={textures.shadow} />
     </>
   );
 }
@@ -2197,6 +2288,10 @@ function Downtown({
   );
   const brutus = useMemo(
     () => texture(cutOut(BRUTUS_SIZE.width, BRUTUS_SIZE.height, drawBrutus, 9, 162)),
+    [],
+  );
+  const photographer = useMemo(
+    () => blinker(PHOTOGRAPHER_SIZE.width, PHOTOGRAPHER_SIZE.height, drawPhotographer, 9, 163),
     [],
   );
   const { ramen } = DOWNTOWN_SPOTS;
@@ -2276,7 +2371,15 @@ function Downtown({
       <Furniture map={shelter} x={busStop.x} z={-0.7} height={3} shadow={textures.shadow} />
       <SpeakerTopsOf
         speakerTops={speakerTops}
-        speakers={[{ interaction: 'brutus', map: brutus, height: BRUTUS_HEIGHT, z: -0.6 }]}
+        speakers={[
+          { interaction: 'brutus', map: brutus, height: BRUTUS_HEIGHT, z: -0.6 },
+          {
+            interaction: 'photographer',
+            map: photographer.open,
+            height: PHOTOGRAPHER_HEIGHT,
+            z: -0.6,
+          },
+        ]}
       />
       <Furniture
         map={bureauTower}
@@ -2309,11 +2412,22 @@ function Downtown({
         height={BRUTUS_HEIGHT}
         shadow={textures.shadow}
       />
+      {/* Flash, photographing the sky. */}
+      <Character
+        map={photographer.open}
+        blinks={photographer}
+        x={DOWNTOWN_SPOTS.photographer.x}
+        z={-0.6}
+        height={PHOTOGRAPHER_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <HidingProps place="downtown" shadow={textures.shadow} />
     </>
   );
 }
 
 const BRUTUS_HEIGHT = 2.9;
+const PHOTOGRAPHER_HEIGHT = 2.7;
 const HULOTTE_HEIGHT = 2.8;
 const HULOTTE_Z = -0.9;
 

@@ -10,9 +10,10 @@ import {
   type DailyActivity,
   type DailyQuestGiver,
 } from '@/game/activity';
+import type { QuestGiver } from '@/game/world';
 import { CoinIcon } from './hud-icons';
 import { moveThroughChoices } from './menu-focus';
-import { SellerPortrait } from './seller-portrait';
+import { type Character, SellerPortrait } from './seller-portrait';
 import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 
 // A clipboard with its list ticked off, for the tracker's button.
@@ -58,33 +59,39 @@ function QuestPortrait({ giver }: { giver: DailyQuestGiver }) {
   if (giver === 'basketball') {
     return <BallPortrait />;
   }
-  // The ramen shop's three jobs are all Yuzu's, the dojo's two trainings Maître Kaito's, and the
-  // park's chores Pépin's, but for Papy Caillou's skipping stones.
-  const isRamen = giver === 'ramenDishes' || giver === 'ramenKitchen' || giver === 'ramenService';
-  const isDojo = giver === 'dojoSlicing' || giver === 'dojoArchery';
-  const isGarden = giver === 'gardenCleanup' || giver === 'gardenWatering';
-  return (
-    <SellerPortrait
-      stock={
-        isRamen
-          ? 'ramenChef'
-          : isDojo
-            ? 'dojoMaster'
-            : isGarden
-              ? 'gardener'
-              : giver === 'grandpaStones'
-                ? 'grandpa'
-                : giver === 'bookshopQuiz'
-                  ? 'binderSeller'
-                  : giver === 'bereniceBalloons'
-                    ? 'berenice'
-                    : giver === 'postMail'
-                      ? 'postman'
-                      : giver
-      }
-    />
-  );
+  return <SellerPortrait stock={isQuestGiver(giver) ? giver : GIVER_FACES[giver]} />;
 }
+
+// Whose face shows by a quest that its giver's id doesn't name: the ramen shop's three jobs are all
+// Yuzu's, the dojo's two trainings Maître Kaito's, the park's chores Pépin's, and so on.
+const QUEST_GIVERS: readonly string[] = [
+  'grandma',
+  'grandpa',
+  'boy',
+  'gaspard',
+  'berenice',
+] satisfies QuestGiver[];
+
+function isQuestGiver(giver: DailyQuestGiver): giver is Extract<DailyQuestGiver, QuestGiver> {
+  return QUEST_GIVERS.includes(giver);
+}
+
+const GIVER_FACES: Record<Exclude<DailyQuestGiver, QuestGiver | 'basketball'>, Character> = {
+  ramenDishes: 'ramenChef',
+  ramenKitchen: 'ramenChef',
+  ramenService: 'ramenChef',
+  dojoSlicing: 'dojoMaster',
+  dojoArchery: 'dojoMaster',
+  gardenCleanup: 'gardener',
+  gardenWatering: 'gardener',
+  grandpaStones: 'grandpa',
+  bookshopQuiz: 'binderSeller',
+  bereniceBalloons: 'berenice',
+  postMail: 'postman',
+  painterPuzzle: 'painter',
+  ronronKitten: 'ronron',
+  cityPhotos: 'photographer',
+};
 
 type Props = {
   activity: DailyActivity;

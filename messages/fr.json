@@ -55,7 +55,15 @@
     "leaveDojo": "Sortir",
     "dojoMaster": "Parler (Maître Kaito)",
     "gardener": "Parler (Pépin)",
-    "postman": "Parler (Gustave)"
+    "postman": "Parler (Gustave)",
+    "painter": "Parler (Pinceau)",
+    "ronron": "Parler (Mme Ronron)",
+    "photographer": "Parler (Flash)",
+    "search": "Fouiller",
+    "searched": {
+      "nothing": "Rien ici… Mistigri est ailleurs.",
+      "unavailable": "Impossible de fouiller pour l’instant."
+    }
   },
   "Shopkeeper": {
     "names": {
@@ -530,7 +538,10 @@
     "ramenChef": "Une petite faim ?",
     "dojoMaster": "Un peu d’entraînement ?",
     "gardener": "Un coup de main au jardin ?",
-    "postman": "Du courrier à trier ?"
+    "postman": "Du courrier à trier ?",
+    "painter": "Tu as l’œil, toi ?",
+    "ronron": "Tu n’as pas vu mon petit ?",
+    "photographer": "Une photo du ciel ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -626,6 +637,18 @@
       "postMail": {
         "name": "Le courrier de Gustave",
         "where": "À la poste du village"
+      },
+      "painterPuzzle": {
+        "name": "Le taquin de Pinceau",
+        "where": "Au parc des Tilleuls"
+      },
+      "ronronKitten": {
+        "name": "Le chaton de Mme Ronron",
+        "where": "Devant l’immeuble de Léa"
+      },
+      "cityPhotos": {
+        "name": "Les photos de Flash",
+        "where": "Dans la grande ville"
       }
     },
     "status": {
@@ -661,6 +684,39 @@
         "greeting": "Bonjour ! Ici, on fabrique les coupons, et je les tamponne un par un. Tu veux ouvrir le registre ?"
       },
       "register": "Ouvrir le registre"
+    },
+    "painter": {
+      "name": "Pinceau",
+      "title": "le peintre du parc",
+      "puzzle": "Remettre le tableau en ordre",
+      "lines": {
+        "greeting": "Bonjour ! Le vent a fait tomber mon tableau du lac, et il s’est tout mélangé. Tu m’aides à remettre les morceaux en place ?",
+        "done": "Mon tableau est comme neuf, grâce à toi ! Reviens demain, j’en aurai peut-être un autre à remettre en ordre."
+      }
+    },
+    "ronron": {
+      "name": "Mme Ronron",
+      "title": "la voisine de l’immeuble de Léa",
+      "lines": {
+        "worried": "Oh, bonjour… Mon petit Mistigri s’est encore caché, et je ne le trouve nulle part. Laisse-moi réfléchir à où il a pu aller…",
+        "thanks": "Mistigri est rentré, grâce à toi ! Il fait la sieste, maintenant. Merci, mon petit cœur.",
+        "hints": {
+          "houseCrates": "Mistigri s’est encore caché ! Il m’a dit hier qu’il rêvait d’habiter chez toi… Il traîne peut-être près de ta maison, derrière quelque chose en bois. Fouille bien, et ramène-le-moi !",
+          "arcadeBush": "Mistigri s’est encore caché ! Il adore les bips des machines de jeux. Je parie qu’il s’est caché tout près, dans quelque chose de vert. Fouille bien, et ramène-le-moi !",
+          "busFlowers": "Mistigri s’est encore caché ! Il voulait prendre le bus tout seul ! Va voir près de l’arrêt, du côté des fleurs. Fouille bien, et ramène-le-moi !",
+          "benchBush": "Mistigri s’est encore caché ! Il aime écouter Papy Caillou raconter ses histoires sur son banc, au parc. Un buisson par là, peut-être ? Fouille bien, et ramène-le-moi !",
+          "lakeLog": "Mistigri s’est encore caché ! Il voulait voir les poissons de Lucas, au bord du lac du parc. Il adore se glisser dans les trous… Fouille bien, et ramène-le-moi !",
+          "ramenCrates": "Mistigri s’est encore caché ! Ses moustaches sentaient le bouillon de ramen, ce matin. Il est sûrement en ville, derrière des caisses. Fouille bien, et ramène-le-moi !",
+          "dojoFlowers": "Mistigri s’est encore caché ! Il veut devenir un grand maître du sabre ! Il est parti en ville, du côté du dojo, au milieu des fleurs. Fouille bien, et ramène-le-moi !"
+        }
+      }
+    },
+    "kitten": {
+      "name": "Mistigri",
+      "title": "le chaton de Mme Ronron",
+      "lines": {
+        "found": "Ah, tu m’as trouvé ! Bon, d’accord, je rentre voir Mamie Ronron. Elle a dit qu’elle te donnerait 200 pièces pour la peine !"
+      }
     }
   },
   "Stats": {
@@ -914,7 +970,8 @@
       "anySixQuests": "Le bonus du jour se gagne maintenant avec 6 quêtes au choix : plus besoin de toutes les faire.",
       "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Au dojo comme chez Yuzu, rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces, jusqu’à 300 pièces pour trois étoiles.",
       "parkQuests": "Au parc des Tilleuls, Pépin l’écureuil jardinier te confie la pelouse à nettoyer et ses fleurs à arroser, et Papy Caillou t’apprend les ricochets : trois nouvelles quêtes du jour. Le nettoyage et les ricochets se rejouent pour chaque étoile, et l’arrosage, tout doux, se fait une fois par jour.",
-      "villageQuests": "Du nouveau au village ! Mamie Noisette pose son quiz du jour, Bérénice lance le Pop’Ballons à son stand, et Gustave le héron ouvre la poste du village, entre la boutique et la librairie : trois nouvelles quêtes du jour."
+      "villageQuests": "Du nouveau au village ! Mamie Noisette pose son quiz du jour, Bérénice lance le Pop’Ballons à son stand, et Gustave le héron ouvre la poste du village, entre la boutique et la librairie : trois nouvelles quêtes du jour.",
+      "painterKittenPhotos": "Trois nouvelles quêtes du jour ! Pinceau le mouton peint au bord du lac du parc et a besoin d’aide pour son taquin, Mme Ronron cherche son chaton caché quelque part, et Flash le caméléon photographie le ciel de la grande ville."
     }
   },
   "Shift": {
@@ -927,7 +984,8 @@
       "cleanup": "Le grand nettoyage",
       "stones": "Les ricochets",
       "balloons": "Pop’Ballons",
-      "mail": "Le tri du courrier"
+      "mail": "Le tri du courrier",
+      "photos": "Photos du ciel"
     },
     "start": "C’est parti !",
     "notNow": "Pas maintenant",
@@ -971,6 +1029,11 @@
         "checking": "Gustave compte les lettres…",
         "over": "Fin de la tournée !",
         "back": "Retourner voir Gustave"
+      },
+      "photographer": {
+        "checking": "Flash développe les photos…",
+        "over": "La pellicule est finie !",
+        "back": "Retourner voir Flash"
       }
     }
   },
@@ -1432,5 +1495,57 @@
         "answers": ["Un héron", "Une cigogne", "Un pélican"]
       }
     }
+  },
+  "Photos": {
+    "name": "Flash",
+    "title": "le photographe de la ville",
+    "leave": "Au revoir !",
+    "jobs": {
+      "photos": "Photographier le ciel"
+    },
+    "lines": {
+      "greeting": "Salut, {name} ! Des montgolfières et des cerfs-volants passent au-dessus des tours. Tu me fais quelques photos ? Je paie en pièces, et plus elles sont nettes, plus je paie.",
+      "rewarded": "Super clichés ! Voilà {coins} pièces. Une étoile de plus, et je te paie la différence.",
+      "rewardedAll": "Trois étoiles, ces photos iront dans ma galerie ! Voilà {coins} pièces : tu as tout gagné pour aujourd’hui.",
+      "alreadyPaid": "Belles photos ! Ce score-là, je te l’ai déjà payé aujourd’hui : décroche une étoile de plus pour gagner davantage.",
+      "allEarned": "Tu as déjà gagné toutes les récompenses des photos aujourd’hui. Photographie pour le plaisir, ou reviens demain !",
+      "failed": "Hum, tout est flou… On recommence ?",
+      "unavailable": "Oups, ma pellicule s’est coincée. Repasse dans un instant !"
+    },
+    "photos": {
+      "howTo": "Des montgolfières et des cerfs-volants traversent le viseur. Déclenche avec Espace, Entrée, le bouton ou un clic dans le viseur quand l’un d’eux passe au centre, dans le cercle doré. Plus il est centré, plus la photo est nette, et un cerf-volant vaut plus. Tu as 8 photos, le flash se recharge entre deux, et une photo du ciel vide est une erreur.",
+      "film": "{count, plural, =0 {Plus de photos} one {# photo restante} other {# photos restantes}}",
+      "shoot": "Déclencher",
+      "charging": "Le flash se recharge…",
+      "viewfinder": "Le viseur : {count, plural, =0 {le ciel est vide} one {# sujet dans le cadre} other {# sujets dans le cadre}}",
+      "qualities": {
+        "sharp": "Nette !",
+        "good": "Bien !",
+        "fair": "Floue…",
+        "missed": "Raté !"
+      },
+      "flash": {
+        "start": "Attends qu’un sujet passe au centre…",
+        "sharp": "Wouah, quelle netteté !",
+        "good": "Jolie photo !",
+        "fair": "Un peu flou, mais ça ira.",
+        "missed": "Il n’y avait rien dans le cadre !",
+        "calm": "Patience, le bon moment va venir."
+      },
+      "ready": "Prêt !"
+    }
+  },
+  "Puzzle": {
+    "title": "Le taquin de Pinceau",
+    "howTo": "Fais glisser les morceaux dans la case vide pour remettre le tableau en ordre : clique sur un morceau voisin, ou utilise les flèches. Pas de chrono ! Le tableau rapporte {coins} pièces, et {quickCoins} en {moves} coups ou moins, une fois par jour.",
+    "moves": "{count, plural, =0 {Aucun coup} one {# coup} other {# coups}}",
+    "board": "Le tableau de Pinceau, en morceaux",
+    "piece": "Morceau {number}",
+    "whole": "Le tableau de Pinceau, remis en ordre : le lac, son bateau rouge et le soleil couchant",
+    "thanks": "Mon tableau est comme neuf, {name} ! En {moves} coups, chapeau. Voilà {coins} pièces.",
+    "alreadyDone": "Tu as déjà remis mon tableau en ordre aujourd’hui, {name}. Reviens demain !",
+    "error": "Oh, un coup de vent a emporté mes morceaux… Repasse dans un instant.",
+    "close": "Fermer",
+    "stop": "Arrêter"
   }
 }

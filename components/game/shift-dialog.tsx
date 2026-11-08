@@ -6,12 +6,14 @@ import {
   BALLOONS_JOBS,
   DOJO_JOBS,
   GARDEN_JOBS,
+  PHOTO_JOBS,
   POST_JOBS,
   RAMEN_JOBS,
   type ShiftJob,
   STONES_JOBS,
 } from '@/game/shifts';
 import type { Wallet } from '@/game/shop-dialogue';
+import { PhotosShift } from './city-photos-scene';
 import { ArcheryShift } from './dojo-archery-scene';
 import { SlicingShift } from './dojo-slicing-scene';
 import { focusFirstChoice, moveThroughChoices, openDialog } from './menu-focus';
@@ -48,6 +50,7 @@ const HOSTS = {
   grandpa: { namespace: 'Stones', jobs: STONES_JOBS },
   berenice: { namespace: 'Balloons', jobs: BALLOONS_JOBS },
   postman: { namespace: 'Post', jobs: POST_JOBS },
+  photographer: { namespace: 'Photos', jobs: PHOTO_JOBS },
 } as const satisfies Record<ShiftHost, { namespace: string; jobs: readonly ShiftJob[] }>;
 
 // Each shift's game.
@@ -61,6 +64,7 @@ const SHIFTS: Record<ShiftJob, (props: { onDone: (end: ShiftEnd) => void }) => R
   stones: StonesShift,
   balloons: BalloonsShift,
   mail: MailShift,
+  photos: PhotosShift,
 };
 
 type Props = {

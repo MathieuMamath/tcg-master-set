@@ -30,14 +30,16 @@ import { CHOICE_CLASS, TornPaper } from './shop-dialog';
 export const ShiftOpenedDirectly = createContext(false);
 
 // Who a shift is played for: Yuzu at the ramen shop, Maître Kaito at the dojo, Pépin in the park's
-// garden, Papy Caillou at the lake, Bérénice at her raffle stand, or Gustave at the village post.
+// garden, Papy Caillou at the lake, Bérénice at her raffle stand, Gustave at the village post, or
+// Flash on the big city's pavement.
 export type ShiftHost =
   | 'ramenChef'
   | 'dojoMaster'
   | 'gardener'
   | 'grandpa'
   | 'berenice'
-  | 'postman';
+  | 'postman'
+  | 'photographer';
 
 // How a shift ends for its host's conversation: what the server counted, nothing it could count, or
 // the player stopping.
