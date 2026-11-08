@@ -773,7 +773,9 @@
       "dailyBonuses": "Récompenses du jour réclamées",
       "byQuest": "Par quête",
       "counts": "{started} commencées · {finished} terminées · {rejected} refusées",
-      "stars": "{stars, plural, =0 {Aucune étoile} one {# étoile} other {# étoiles}}"
+      "stars": "{stars, plural, =0 {Aucune étoile} one {# étoile} other {# étoiles}}",
+      "averageScore": "Score moyen : {score}",
+      "averageSearches": "Cachettes fouillées en moyenne : {score}"
     },
     "outcomes": {
       "rewarded": "Payée",
@@ -821,7 +823,9 @@
       "park": "Le parc",
       "downtown": "La Grande Ville",
       "bureau": "Le bureau administratif",
-      "coupons": "L’étage des coupons"
+      "coupons": "L’étage des coupons",
+      "ramen": "Ramen Yuzu",
+      "dojo": "Le dojo"
     },
     "log": {
       "title": "Couverture du journal",

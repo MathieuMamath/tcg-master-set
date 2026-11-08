@@ -46,6 +46,9 @@ export type GameStats = {
     outcomes: { outcome: string; count: number }[];
     // Finished attempts by the stars they earned, for the quests that give stars.
     stars: { stars: number; count: number }[];
+    // The average of the quest's own measure, for the quests that record one, such as the quiz's
+    // right answers, the puzzle's moves or the hiding places searched for the kitten.
+    averageScore: number | null;
   }[];
   dailyBonuses: number;
   players: {
@@ -93,6 +96,7 @@ type DetailField =
   | 'duplicateCoins'
   | 'outcome'
   | 'stars'
+  | 'score'
   | 'place'
   | 'device'
   | 'referrer'
@@ -194,6 +198,14 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
     .from(gameEvents)
     .where(inPeriod(ofType('quest.finished'), sql`${gameEvents.details} ? 'stars'`))
     .groupBy(detail('questId'), detail('stars'));
+  const scoreRows = await database
+    .select({
+      questId: detail('questId'),
+      average: sql<number>`avg((${detail('score')})::numeric)`,
+    })
+    .from(gameEvents)
+    .where(inPeriod(ofType('quest.finished'), sql`${gameEvents.details} ? 'score'`))
+    .groupBy(detail('questId'));
   const questIds = [...new Set(questRows.map(({ questId }) => String(questId)))].sort();
   const questTotal = (type: GameEventType, questId: string) =>
     Number(
@@ -212,6 +224,10 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
       .filter((row) => String(row.questId) === questId)
       .map(({ stars, total }) => ({ stars: Number(stars), count: Number(total) }))
       .sort((first, second) => first.stars - second.stars),
+    averageScore: (() => {
+      const row = scoreRows.find((score) => String(score.questId) === questId);
+      return row ? Number(row.average) : null;
+    })(),
   }));
 
   // Players: who joined, came back, played, and where they went. Counted, never named.

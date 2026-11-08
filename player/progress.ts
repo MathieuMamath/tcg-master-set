@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, gte, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gt, gte, sql } from 'drizzle-orm';
 import { isAdmin } from '@/auth/roles';
 import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
 import { loadNewestSetId } from '@/cards/playable-sets';
@@ -605,9 +605,22 @@ export async function searchForKitten(userId: string, spot: unknown): Promise<Ki
     if (!attempt || !canStartQuest(attempt, now) || !canSearchKitten(attempt.startedAt, now)) {
       return null;
     }
-    if (spot !== kittenSpotFor(userId, questDay(now))) {
+    const isFound = spot === kittenSpotFor(userId, questDay(now));
+    await recordEvent(transaction, userId, 'kitten.searched', { spot, isFound });
+    if (!isFound) {
       return { isFound: false };
     }
+    // How many hiding places were searched today to find him, this one included.
+    const [searches] = await transaction
+      .select({ total: count() })
+      .from(gameEvents)
+      .where(
+        and(
+          eq(gameEvents.userId, userId),
+          eq(gameEvents.type, 'kitten.searched'),
+          gte(gameEvents.occurredAt, new Date(`${questDay(now)}T00:00:00Z`)),
+        ),
+      );
     await transaction
       .update(playerQuests)
       .set({ startedAt: null, completedOn: questDay(now), paidCoins: KITTEN_REWARD })
@@ -622,6 +635,7 @@ export async function searchForKitten(userId: string, spot: unknown): Promise<Ki
       outcome: 'rewarded',
       coins: KITTEN_REWARD,
       boosterSetId: null,
+      score: Number(searches?.total ?? 1),
     });
     return { isFound: true, coins: KITTEN_REWARD, wallet: await loadWallet(transaction, userId) };
   });
