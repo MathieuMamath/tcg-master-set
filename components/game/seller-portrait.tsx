@@ -19,6 +19,7 @@ import {
   drawLea,
   drawLucas,
   drawPapy,
+  drawPostman,
   drawRaccoon,
   drawRamenChef,
   drawTrotte,
@@ -36,6 +37,8 @@ import {
   LUCAS_SIZE,
   PAPY_FACE,
   PAPY_SIZE,
+  POSTMAN_FACE,
+  POSTMAN_SIZE,
   RACCOON_FACE,
   RACCOON_SIZE,
   RAMEN_CHEF_FACE,
@@ -57,7 +60,8 @@ type Character =
   | 'trotte'
   | 'ramenChef'
   | 'dojoMaster'
-  | 'gardener';
+  | 'gardener'
+  | 'postman';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -84,6 +88,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'ramenChef') {
     return { draw: drawRamenChef, size: RAMEN_CHEF_SIZE, face: RAMEN_CHEF_FACE };
+  }
+  if (stock === 'postman') {
+    return { draw: drawPostman, size: POSTMAN_SIZE, face: POSTMAN_FACE };
   }
   if (stock === 'gardener') {
     return { draw: drawGardener, size: GARDENER_SIZE, face: GARDENER_FACE };

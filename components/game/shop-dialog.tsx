@@ -109,12 +109,15 @@ type Props = {
   items: readonly ShopItem[];
   coins: number;
   onBuy: (setId: SetId, quantity: number) => Promise<ShopkeeperLine>;
+  // Another thing the seller offers, such as Mamie Noisette's quiz, and what she says instead when
+  // it is done for the day, which leaves nothing to open.
+  extra?: { label: string; onPress: () => void; doneLine: string | null };
   onClose: () => void;
 };
 
 // Mounted only while talking, so every conversation starts with a greeting. The seller offers to
 // show what she sells, which opens her shop window in the same dialog.
-export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
+export function ShopDialog({ stock, items, coins, onBuy, extra, onClose }: Props) {
   const t = useTranslations('Shopkeeper');
   const dialog = useRef<HTMLDialogElement>(null);
   const [speech, setSpeech] = useState<{ line: ShopkeeperLine; turn: number }>({
@@ -122,6 +125,8 @@ export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
     turn: 0,
   });
   const [isBrowsing, setIsBrowsing] = useState(false);
+  // What the seller said about the extra once it is done for the day, in place of her line.
+  const [extraSaid, setExtraSaid] = useState<string | null>(null);
   const hasBought = useRef(false);
   const kind = stock === 'binderSeller' ? 'binder' : 'booster';
   const name = stock === 'binderSeller' ? t('names.binderSeller') : t(`sellers.${stock}`);
@@ -182,11 +187,12 @@ export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
           portrait={<SellerPortrait stock={stock} />}
         >
           <TypedLine
-            key={speech.turn}
+            key={extraSaid ? `extra-${speech.turn}` : speech.turn}
             text={
-              speech.line === 'greeting' || speech.line === 'thanks'
+              extraSaid ??
+              (speech.line === 'greeting' || speech.line === 'thanks'
                 ? t(`${speech.line === 'greeting' ? 'greetings' : 'thanks'}.${stock}`)
-                : t(speech.line)
+                : t(speech.line))
             }
           />
           <form method="dialog" className="mt-2.5 flex flex-wrap gap-2.5">
@@ -200,6 +206,23 @@ export function ShopDialog({ stock, items, coins, onBuy, onClose }: Props) {
             >
               {t(`browse.${stock}`)}
             </button>
+            {extra && extraSaid === null && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (extra.doneLine === null) {
+                    extra.onPress();
+                    return;
+                  }
+                  setExtraSaid(extra.doneLine);
+                  // The button goes, and the focus with it.
+                  requestAnimationFrame(() => dialog.current && focusFirstChoice(dialog.current));
+                }}
+                className={`${CHOICE_CLASS} bg-ui-stamp text-ui-paper`}
+              >
+                {extra.label}
+              </button>
+            )}
             <button type="submit" className={CHOICE_CLASS}>
               {t(`nothing.${stock}`)}
             </button>

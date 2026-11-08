@@ -2,7 +2,15 @@
 
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { DOJO_JOBS, GARDEN_JOBS, RAMEN_JOBS, type ShiftJob, STONES_JOBS } from '@/game/shifts';
+import {
+  BALLOONS_JOBS,
+  DOJO_JOBS,
+  GARDEN_JOBS,
+  POST_JOBS,
+  RAMEN_JOBS,
+  type ShiftJob,
+  STONES_JOBS,
+} from '@/game/shifts';
 import type { Wallet } from '@/game/shop-dialogue';
 import { ArcheryShift } from './dojo-archery-scene';
 import { SlicingShift } from './dojo-slicing-scene';
@@ -10,6 +18,8 @@ import { focusFirstChoice, moveThroughChoices, openDialog } from './menu-focus';
 import { CleanupShift } from './park-cleanup-scene';
 import { StonesShift } from './park-stones-scene';
 import { usePlayerName } from './player-name';
+import { MailShift } from './post-mail-scene';
+import { BalloonsShift } from './raffle-balloons-scene';
 import { DishesShift } from './ramen-dishes-scene';
 import { KitchenShift } from './ramen-kitchen-scene';
 import { ServiceShift } from './ramen-service-scene';
@@ -36,6 +46,8 @@ const HOSTS = {
   dojoMaster: { namespace: 'Dojo', jobs: DOJO_JOBS },
   gardener: { namespace: 'Garden', jobs: GARDEN_JOBS },
   grandpa: { namespace: 'Stones', jobs: STONES_JOBS },
+  berenice: { namespace: 'Balloons', jobs: BALLOONS_JOBS },
+  postman: { namespace: 'Post', jobs: POST_JOBS },
 } as const satisfies Record<ShiftHost, { namespace: string; jobs: readonly ShiftJob[] }>;
 
 // Each shift's game.
@@ -47,6 +59,8 @@ const SHIFTS: Record<ShiftJob, (props: { onDone: (end: ShiftEnd) => void }) => R
   archery: ArcheryShift,
   cleanup: CleanupShift,
   stones: StonesShift,
+  balloons: BalloonsShift,
+  mail: MailShift,
 };
 
 type Props = {

@@ -167,6 +167,9 @@ import {
   drawPine,
   drawPip,
   drawPlanks,
+  drawPostBooth,
+  drawPostCounter,
+  drawPostman,
   drawRaccoon,
   drawRaffleBooth,
   drawRaffleCounter,
@@ -211,6 +214,7 @@ import {
   LEA_SIZE,
   LUCAS_SIZE,
   PAPY_SIZE,
+  POSTMAN_SIZE,
   paint,
   RACCOON_SIZE,
   RAMEN_CHEF_SIZE,
@@ -262,6 +266,8 @@ export type SceneSigns = {
   bureau: string;
   // Painted on Gaspard's cart.
   dalgona: string;
+  // On the board of Gustave's post counter.
+  post: string;
   // On the board over Bérénice's stand.
   raffle: string;
   latest: string;
@@ -1447,6 +1453,8 @@ function Balloons({ x, z }: { x: number; z: number }) {
 const GASPARD_HEIGHT = 3.3;
 // The awning stands behind Gaspard, and his cart in front, hiding his legs.
 const DALGONA_Z = { awning: -1.1, gaspard: -0.85, cart: -0.45 };
+const POST_Z = { booth: -1.1, postman: -0.85, counter: -0.45 };
+const POSTMAN_HEIGHT = 3.1;
 
 // The street: a wide sky, rows of hills, our house, Gaspard's stand, the shop and the bookshop.
 // The village's greenery, as in the art direction's prototype: trees between and behind the
@@ -1509,7 +1517,8 @@ const WIND_SWAY = 0.025;
 // walks in front of them: cast-iron lanterns in the village and the park, slim poles in the city.
 const LAMP_Z = -0.25;
 const LAMP_HEIGHTS: Record<LampStyle, number> = { classic: 3.3, modern: 4.2 };
-const TOWN_LAMPS = [-17.6, -9.4, 2.05, 9.4, 25.8];
+// Clear of the stands and doors: the one by the post stand stands between it and the bookshop.
+const TOWN_LAMPS = [-17.6, -9.4, 2.05, 11.25, 25.8];
 const PARK_LAMPS = [-16.6, -5.1, 2.7, 9.8];
 const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8, 30.4, 38];
 
@@ -1603,6 +1612,8 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
       ),
       awning: texture(cutOut(320, 380, drawDalgonaAwning, 8, 121)),
       gaspard: blinker(GASPARD_SIZE.width, GASPARD_SIZE.height, drawGaspard, 9, 122),
+      postman: blinker(POSTMAN_SIZE.width, POSTMAN_SIZE.height, drawPostman, 9, 240),
+      postBooth: texture(cutOut(340, 420, drawPostBooth, 8, 241)),
       berenice: blinker(BERENICE_SIZE.width, BERENICE_SIZE.height, drawBerenice, 9, 124),
       raffleCounter: texture(cutOut(340, 200, drawRaffleCounter, 8, 126)),
       trees: TOWN_TREES.map(({ kind, seed }) =>
@@ -1633,6 +1644,11 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
   const cart = useMemo(
     () => texture(cutOut(320, 190, drawDalgonaCart(signs.dalgona), 8, 123)),
     [fontsReady, signs.dalgona],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const postCounter = useMemo(
+    () => texture(cutOut(340, 190, drawPostCounter(signs.post), 8, 242)),
+    [fontsReady, signs.post],
   );
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const raffleBooth = useMemo(
@@ -1682,6 +1698,7 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
     busStop,
     bus,
     dalgona,
+    post,
     raffle,
   } = TOWN_BUILDINGS;
   const streetWidth = TOWN_ENDS.right - TOWN_ENDS.left + 20;
@@ -1771,6 +1788,12 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
             z: DALGONA_Z.gaspard,
           },
           {
+            interaction: 'postman',
+            map: textures.postman.open,
+            height: POSTMAN_HEIGHT,
+            z: POST_Z.postman,
+          },
+          {
             interaction: 'berenice',
             map: textures.berenice.open,
             height: BERENICE_HEIGHT,
@@ -1820,6 +1843,29 @@ function Town({ signs, speakerTops }: { signs: SceneSigns; speakerTops: RefObjec
         map={cart}
         x={dalgona.x}
         z={DALGONA_Z.cart}
+        height={1.6}
+        shadow={textures.shadow}
+      />
+      {/* Gustave's post stand: its awning and pigeonholes, Gustave, and the counter before him. */}
+      <Furniture
+        map={textures.postBooth}
+        x={post.x}
+        z={POST_Z.booth}
+        height={3.9}
+        shadow={textures.shadow}
+      />
+      <Character
+        map={textures.postman.open}
+        blinks={textures.postman}
+        x={post.postmanX}
+        z={POST_Z.postman}
+        height={POSTMAN_HEIGHT}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={postCounter}
+        x={post.x}
+        z={POST_Z.counter}
         height={1.6}
         shadow={textures.shadow}
       />

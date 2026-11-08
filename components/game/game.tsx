@@ -63,6 +63,7 @@ import type { MovementInput } from './paper-scene';
 import { PlayerNameContext } from './player-name';
 import { QuestBanner } from './quest-banner';
 import { QuestDialog, type QuestLine } from './quest-dialog';
+import { QuizDialog } from './quiz-dialog';
 import { RaffleDialog } from './raffle-dialog';
 import { reportPlay } from './report';
 import { SaveNotice, useSaveNotice } from './save-notice';
@@ -83,8 +84,16 @@ const INTERACT_KEY = 'KeyE';
 // Where the browser keeps the id of the last "What's new?" note it showed.
 const NEWS_SEEN_KEY = 'tcg-master-set:news-seen';
 
-// Papy Caillou is both a quest giver and the host of the skipping stones, a conversation of its own.
-type Talk = ShopkeeperStock | 'binderSeller' | QuestGiver | Speaker | ShiftHost | 'grandpaStones';
+// Papy Caillou and Bérénice are both quest givers and the hosts of a shift, a conversation of its
+// own that opens straight onto the game.
+type Talk =
+  | ShopkeeperStock
+  | 'binderSeller'
+  | QuestGiver
+  | Speaker
+  | ShiftHost
+  | 'grandpaStones'
+  | 'bereniceBalloons';
 
 // Talking to someone gets a speech bubble over their head, and everything else a prompt at the
 // bottom of the screen.
@@ -146,6 +155,7 @@ export function Game({ player, sets, progress }: Props) {
   const [boyLine, setBoyLine] = useState<QuestLine>('greeting');
   const [isPlayingBasketball, setIsPlayingBasketball] = useState(false);
   const [isWatering, setIsWatering] = useState(false);
+  const [isQuizzing, setIsQuizzing] = useState(false);
   // The shape Gaspard handed over, while the player carves it.
   const [dalgonaShape, setDalgonaShape] = useState<DalgonaShape | null>(null);
   const [gaspardLine, setGaspardLine] = useState<QuestLine>('greeting');
@@ -194,6 +204,8 @@ export function Game({ player, sets, progress }: Props) {
   const tSpeakers = useTranslations('Speakers');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tStones = useTranslations('Stones');
+  const tBalloons = useTranslations('Balloons');
+  const tQuiz = useTranslations('Quiz');
   const tGarden = useTranslations('Garden');
   const tTown = useTranslations('Town');
   const tHails = useTranslations('Hails');
@@ -218,6 +230,7 @@ export function Game({ player, sets, progress }: Props) {
     isFishing ||
     isPlayingBasketball ||
     isWatering ||
+    isQuizzing ||
     dalgonaShape !== null ||
     isRaffling ||
     isBusMapOpen ||
@@ -500,7 +513,7 @@ export function Game({ player, sets, progress }: Props) {
 
   // Each conversation that starts, for the statistics. Papy's skipping stones carry on his.
   useEffect(() => {
-    if (talkingTo !== null && talkingTo !== 'grandpaStones') {
+    if (talkingTo !== null && talkingTo !== 'grandpaStones' && talkingTo !== 'bereniceBalloons') {
       reportPlay({ type: 'npc.talked', speaker: talkingTo });
     }
   }, [talkingTo]);
@@ -874,6 +887,7 @@ export function Game({ player, sets, progress }: Props) {
             parkStop: tBus('stops.park'),
             downtownStop: tBus('stops.downtown'),
             dalgona: tTown('dalgona'),
+            post: tTown('post'),
             raffle: tTown('raffle'),
             bureau: tTown('bureau'),
             latest: tShopkeeper('names.latest'),
@@ -1149,6 +1163,15 @@ export function Game({ player, sets, progress }: Props) {
             onGiveUp={() => setMemoryCards(null)}
           />
         )}
+        {isQuizzing && (
+          <QuizDialog
+            onFinished={(updated) => {
+              setWallet(updated);
+              showSaveNotice();
+            }}
+            onClose={() => setIsQuizzing(false)}
+          />
+        )}
         {isWatering && (
           <WateringDialog
             onWatered={(updated) => {
@@ -1203,6 +1226,12 @@ export function Game({ player, sets, progress }: Props) {
             giver="berenice"
             line={bereniceLine}
             onAccept={startRaffle}
+            extra={{
+              label: tBalloons('jobs.balloons'),
+              // Her Pop'Balloons is a shift of its own, with her as its host, opened straight onto
+              // the game.
+              onPress: () => setTalkingTo('bereniceBalloons'),
+            }}
             onClose={() => {
               setTalkingTo(null);
               setBereniceLine((line) =>
@@ -1261,10 +1290,24 @@ export function Game({ player, sets, progress }: Props) {
         {(talkingTo === 'ramenChef' ||
           talkingTo === 'dojoMaster' ||
           talkingTo === 'gardener' ||
-          talkingTo === 'grandpaStones') && (
+          talkingTo === 'postman' ||
+          talkingTo === 'grandpaStones' ||
+          talkingTo === 'bereniceBalloons') && (
           <ShiftDialog
-            host={talkingTo === 'grandpaStones' ? 'grandpa' : talkingTo}
-            startJob={talkingTo === 'grandpaStones' ? 'stones' : undefined}
+            host={
+              talkingTo === 'grandpaStones'
+                ? 'grandpa'
+                : talkingTo === 'bereniceBalloons'
+                  ? 'berenice'
+                  : talkingTo
+            }
+            startJob={
+              talkingTo === 'grandpaStones'
+                ? 'stones'
+                : talkingTo === 'bereniceBalloons'
+                  ? 'balloons'
+                  : undefined
+            }
             extra={
               talkingTo === 'gardener'
                 ? {
@@ -1304,7 +1347,9 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'ramenChef' &&
           talkingTo !== 'dojoMaster' &&
           talkingTo !== 'gardener' &&
-          talkingTo !== 'grandpaStones' && (
+          talkingTo !== 'postman' &&
+          talkingTo !== 'grandpaStones' &&
+          talkingTo !== 'bereniceBalloons' && (
             <ShopDialog
               stock={talkingTo}
               items={(talkingTo === 'binderSeller'
@@ -1327,6 +1372,21 @@ export function Game({ player, sets, progress }: Props) {
               })}
               coins={wallet.coins}
               onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
+              extra={
+                talkingTo === 'binderSeller'
+                  ? {
+                      label: tQuiz('start'),
+                      // Mamie Noisette's quiz, once a day: done, she says so instead.
+                      doneLine: activity.done.includes('bookshopQuiz')
+                        ? tQuiz('alreadyDone', { name: player.username })
+                        : null,
+                      onPress: () => {
+                        setTalkingTo(null);
+                        setIsQuizzing(true);
+                      },
+                    }
+                  : undefined
+              }
               onClose={() => setTalkingTo(null)}
             />
           )}

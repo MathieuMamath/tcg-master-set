@@ -91,6 +91,8 @@ export const TOWN_BUILDINGS = {
   // Gaspard stands behind his cart, under its awning.
   dalgona: { x: -0.1, width: 3.2, gaspardX: 0 },
   shop: { x: 5, width: 4.8, doorX: 5.9 },
+  // Gustave stands behind his post counter, under its awning, between the shop and the bookshop.
+  post: { x: 9.3, width: 3.2, postmanX: 9.2 },
   bookshop: { x: 13.5, width: 4.8, doorX: 14.4 },
   // Bérénice stands behind her counter, its raffle drum on top.
   raffle: { x: 17.7, width: 3.2, bereniceX: 17.2 },
@@ -346,6 +348,12 @@ export const TOWN: SideRoom = {
       minX: TOWN_BUILDINGS.dalgona.gaspardX - 1.3,
       maxX: TOWN_BUILDINGS.dalgona.gaspardX + 1.3,
       speaker: { x: TOWN_BUILDINGS.dalgona.gaspardX },
+    },
+    {
+      interaction: 'postman',
+      minX: TOWN_BUILDINGS.post.postmanX - 1.2,
+      maxX: TOWN_BUILDINGS.post.postmanX + 1.2,
+      speaker: { x: TOWN_BUILDINGS.post.postmanX },
     },
     {
       interaction: 'berenice',

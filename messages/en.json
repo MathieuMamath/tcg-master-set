@@ -54,7 +54,8 @@
     "enterDojo": "Go into the dojo",
     "leaveDojo": "Leave",
     "dojoMaster": "Talk (Master Kaito)",
-    "gardener": "Talk (Pépin)"
+    "gardener": "Talk (Pépin)",
+    "postman": "Talk (Gustave)"
   },
   "Shopkeeper": {
     "names": {
@@ -510,7 +511,8 @@
     "raffle": "Raffle",
     "bureau": "Administrative Office",
     "ramen": "Ramen Yuzu",
-    "dojo": "Dojo Kaito"
+    "dojo": "Dojo Kaito",
+    "post": "Village Post"
   },
   "Hails": {
     "latest": "A mega welcome!",
@@ -527,7 +529,8 @@
     "trotte": "A coupon to stamp?",
     "ramenChef": "Feeling peckish?",
     "dojoMaster": "Up for some training?",
-    "gardener": "Fancy helping in the garden?"
+    "gardener": "Fancy helping in the garden?",
+    "postman": "Got mail to sort?"
   },
   "Bus": {
     "title": "Bus map",
@@ -611,6 +614,18 @@
       "grandpaStones": {
         "name": "Papy’s skipping stones",
         "where": "At Linden Park’s lake"
+      },
+      "bookshopQuiz": {
+        "name": "Mamie Noisette’s quiz",
+        "where": "At the bookshop"
+      },
+      "bereniceBalloons": {
+        "name": "Bérénice’s Pop’Balloons",
+        "where": "At the raffle stand"
+      },
+      "postMail": {
+        "name": "Gustave’s mail",
+        "where": "At the village post"
       }
     },
     "status": {
@@ -898,7 +913,8 @@
       "ramenShop": "Ramen Yuzu opens downtown, between the towers! Yuzu the red panda hires you for three little jobs paid in coins: washing up, the kitchen and waiting tables.",
       "anySixQuests": "The daily bonus now takes any 6 quests of your choice: no need to do them all.",
       "dojo": "The dojo opens downtown, next to Ramen Yuzu! Master Kaito, an old badger, trains you in vegetable slicing and archery: two new daily quests paid in coins. At the dojo as at Yuzu’s, replay as often as you like: each new star of the day pays you the difference in coins, up to 300 coins for three stars.",
-      "parkQuests": "At Linden Park, Pépin the squirrel gardener has you clean up the lawn and water his flowers, and Papy Caillou teaches you to skip stones: three new daily quests. The clean-up and the stones can be replayed for every star, and the gentle watering is done once a day."
+      "parkQuests": "At Linden Park, Pépin the squirrel gardener has you clean up the lawn and water his flowers, and Papy Caillou teaches you to skip stones: three new daily quests. The clean-up and the stones can be replayed for every star, and the gentle watering is done once a day.",
+      "villageQuests": "News in the village! Mamie Noisette asks her daily quiz, Bérénice runs Pop’Balloons at her stand, and Gustave the heron opens the village post, between the shop and the bookshop: three new daily quests."
     }
   },
   "Shift": {
@@ -909,7 +925,9 @@
       "slicing": "Slicing",
       "archery": "Archery",
       "cleanup": "The big clean-up",
-      "stones": "Skipping stones"
+      "stones": "Skipping stones",
+      "balloons": "Pop’Balloons",
+      "mail": "Sorting the mail"
     },
     "start": "Let’s go!",
     "notNow": "Not now",
@@ -943,6 +961,16 @@
         "checking": "Papy is counting the skips…",
         "over": "No pebbles left!",
         "back": "Go back to Papy"
+      },
+      "berenice": {
+        "checking": "Bérénice is counting…",
+        "over": "No balloons left!",
+        "back": "Go back to Bérénice"
+      },
+      "postman": {
+        "checking": "Gustave is counting…",
+        "over": "Round over!",
+        "back": "Go back to Gustave"
       }
     }
   },
@@ -1224,6 +1252,180 @@
         "champion": "Now that’s a champion’s throw!",
         "calm": "Take your time.",
         "wind": "The wind is strong: shift your angle."
+      }
+    }
+  },
+  "Balloons": {
+    "name": "Bérénice",
+    "title": "the raffle goat",
+    "leave": "See you later!",
+    "jobs": {
+      "balloons": "Play Pop’Balloons"
+    },
+    "lines": {
+      "greeting": "Fancy popping a few balloons, {name}?",
+      "rewarded": "Well done! Here are {coins} coins. One more star, and I’ll pay you the difference.",
+      "rewardedAll": "Three stars, Pop’Balloons champion! Here are {coins} coins: you’ve earned everything for today.",
+      "alreadyPaid": "Nice! I already paid you for a score like that today: earn one more star to get more.",
+      "allEarned": "You have already earned every Pop’Balloons reward today. Play for fun, or come back tomorrow!",
+      "failed": "Oops, too many wrong balloons! Again?",
+      "unavailable": "Bother, my balloon pump is playing up. Come back in a moment!"
+    },
+    "balloons": {
+      "howTo": "Balloons of four colours rise in four lanes, and I call a colour, which often changes. Click or tap a balloon to pop it, or press 1 to 4 to pop the highest of a lane before it floats away. The called colour scores a point, any other is a mistake. Five good ones in a row earn a bonus!",
+      "lane": "Lane {number}",
+      "board": "The balloons: pop the {color} ones",
+      "colors": {
+        "red": "red",
+        "blue": "blue",
+        "yellow": "yellow",
+        "green": "green"
+      },
+      "call": "The {color} ones!",
+      "moments": {
+        "popped": "+1",
+        "streak": "Streak! +2",
+        "wrong": "Missed!"
+      },
+      "berenice": {
+        "start": "Ready? Listen for the colour!",
+        "popped": "Pop! Well done!",
+        "streak": "What a streak!",
+        "wrong": "Oh, not that colour!",
+        "calm": "Go for the {color} ones!"
+      }
+    }
+  },
+  "Post": {
+    "name": "Gustave",
+    "title": "the village postman",
+    "leave": "Goodbye!",
+    "jobs": {
+      "mail": "Sort the mail"
+    },
+    "lines": {
+      "greeting": "Hello, {name}! The mail is piling up, will you help me sort it? I pay in coins, and the more stars you earn, the more I pay.",
+      "rewarded": "Thank you! Here are {coins} coins. One more star, and I’ll pay you the difference.",
+      "rewardedAll": "Three stars, a real sorting pro! Here are {coins} coins: you’ve earned everything for today.",
+      "alreadyPaid": "Thank you! I already paid you for a score like that today: earn one more star to get more.",
+      "allEarned": "You have already earned every sorting reward today. Sort for fun, or come back tomorrow!",
+      "failed": "Ouch, a few letters went astray… Again?",
+      "unavailable": "Hmm, my mailbag is stuck. Come back in a moment!"
+    },
+    "mail": {
+      "howTo": "Letters reach the counter one at a time. File each in the pigeonhole of its stamp, with the keys 1 to 4 or a click. Express letters, edged in red, count double if you’re quick. A parcel takes two presses. The wrong pigeonhole, or a letter that slips off the counter, is a mistake.",
+      "pigeonholes": {
+        "house": "Houses",
+        "bowl": "Restaurants",
+        "leaf": "Park",
+        "book": "Bookshop"
+      },
+      "kinds": {
+        "letter": "A letter",
+        "express": "An express letter",
+        "parcel": "A parcel"
+      },
+      "counter": "On the counter: {kind}, for {to}",
+      "empty": "The counter is empty",
+      "parcelHint": "Once more!",
+      "moments": {
+        "filed": "+1",
+        "express": "Express! +2",
+        "parcel": "Parcel! +2",
+        "half": "Again!",
+        "wrong": "Wrong pigeonhole!",
+        "slipped": "Slipped off!"
+      },
+      "gustave": {
+        "start": "Here comes the first one!",
+        "filed": "Perfect.",
+        "express": "Quick and right, well done!",
+        "parcel": "A parcel well filed!",
+        "half": "A parcel takes two pushes.",
+        "wrong": "Oh, not in that pigeonhole…",
+        "slipped": "A letter slipped off!",
+        "calm": "You have the knack."
+      }
+    }
+  },
+  "Quiz": {
+    "title": "Mamie Noisette’s quiz",
+    "start": "Today’s quiz",
+    "howTo": "Five questions about the village and its folk, three answers each. Take your time! Each right answer pays {coins} coins, once a day.",
+    "question": "Question {number} of {total}",
+    "result": "{right, plural, =0 {No right answers} one {# right answer} other {# right answers}} out of {total}",
+    "thanks": "Well done, {name}! Here are {coins} coins for knowing the village so well.",
+    "noCoins": "Hee hee, not easy! Come back tomorrow for other questions.",
+    "alreadyDone": "You have already done the quiz today, {name}. Come back tomorrow for new questions!",
+    "error": "Oh, I’ve lost my cards… Come back in a moment.",
+    "close": "Close",
+    "stop": "Stop",
+    "right": "Right answer",
+    "wrong": "Missed, it was: {answer}",
+    "questions": {
+      "gaspard": {
+        "text": "What animal is Gaspard, at the dalgona stand?",
+        "answers": ["A fox", "A badger", "A raccoon"]
+      },
+      "yuzu": {
+        "text": "What does Yuzu cook in her restaurant?",
+        "answers": ["Vegetarian ramen", "Pizzas", "Pancakes"]
+      },
+      "pepin": {
+        "text": "What does Pépin wear on his head?",
+        "answers": ["A straw hat", "A cap", "A headband"]
+      },
+      "kaito": {
+        "text": "What animal is Master Kaito?",
+        "answers": ["A badger", "A red panda", "A heron"]
+      },
+      "berenice": {
+        "text": "What does Bérénice run at her stand?",
+        "answers": ["A raffle", "Ice creams", "Binders"]
+      },
+      "lucas": {
+        "text": "What do you fish out of the lake for Lucas?",
+        "answers": ["The things he dropped in the water", "Goldfish", "Gold coins"]
+      },
+      "lea": {
+        "text": "What animal is Léa, next door?",
+        "answers": ["A rabbit", "A hedgehog", "A mouse"]
+      },
+      "mamie": {
+        "text": "What does Mamie Noisette sell in her bookshop?",
+        "answers": ["Binders", "Boosters", "Bowls of ramen"]
+      },
+      "triplets": {
+        "text": "Who runs the Card Den?",
+        "answers": ["Three raccoons", "Three squirrels", "Three otters"]
+      },
+      "hulotte": {
+        "text": "What animal is Mme Hulotte, at the office?",
+        "answers": ["An owl", "A magpie", "A tortoise"]
+      },
+      "brutus": {
+        "text": "Who guards the office door, downtown?",
+        "answers": ["A bulldog", "A fox", "A beaver"]
+      },
+      "bus": {
+        "text": "Where can you go by bus?",
+        "answers": ["To the park and downtown", "To the beach", "To the mountains"]
+      },
+      "dalgona": {
+        "text": "What do you do at Gaspard’s stand?",
+        "answers": ["Carve a shape out of a biscuit", "Throw darts", "Hook ducks"]
+      },
+      "papy": {
+        "text": "What animal is Papy Caillou?",
+        "answers": ["A tortoise", "A hedgehog", "A beaver"]
+      },
+      "clock": {
+        "text": "How long does a day last in the village?",
+        "answers": ["24 minutes", "24 hours", "An hour"]
+      },
+      "gustave": {
+        "text": "What animal is Gustave, the postman?",
+        "answers": ["A heron", "A stork", "A pelican"]
       }
     }
   }

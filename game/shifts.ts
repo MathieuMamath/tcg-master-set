@@ -2,6 +2,8 @@ import { ARCHERY_ACTIONS, archeryPoints, simulateArchery } from './dojo-archery'
 import { SLICING_STROKES, simulateSlicing, slicingPoints } from './dojo-slicing';
 import { BINS, cleanupPoints, simulateCleanup } from './park-cleanup';
 import { STONE_ACTIONS, simulateStones, stonesPoints } from './park-stones';
+import { mailPoints, PIGEONHOLES, simulateMail } from './post-mail';
+import { BALLOON_CHOICES, balloonsPoints, simulateBalloons } from './raffle-balloons';
 import { DISH_ACTIONS, dishesPoints, simulateDishes } from './ramen-dishes';
 import { KITCHEN_INGREDIENTS, kitchenPoints, simulateKitchen } from './ramen-kitchen';
 import { SERVICE_TABLES, servicePoints, simulateService } from './ramen-service';
@@ -9,7 +11,8 @@ import { SERVICE_TABLES, servicePoints, simulateService } from './ramen-service'
 // The shifts: short games played for someone in the big city, each its own daily quest. Yuzu hires
 // the player at the ramen shop to wash the bowls, help in the kitchen and wait on the tables, and
 // Maître Kaito trains them at the dojo in slicing and archery. At Linden Park, Pépin the gardener
-// has the path cleaned up, and Papy Caillou skips stones on the lake. A shift's orders come from a seed,
+// has the path cleaned up, and Papy Caillou skips stones on the lake. In the village, Bérénice runs
+// her Pop'Ballons, and Gustave the postman has the mail sorted. A shift's orders come from a seed,
 // the moment it began, so that the server can find them again. The browser only sends what was
 // pressed and when, and the server plays the shift again with the same rules to get the score. A
 // shift pays once a day, the first time it earns something, in coins.
@@ -18,7 +21,16 @@ export const RAMEN_JOBS = ['dishes', 'kitchen', 'service'] as const;
 export const DOJO_JOBS = ['slicing', 'archery'] as const;
 export const GARDEN_JOBS = ['cleanup'] as const;
 export const STONES_JOBS = ['stones'] as const;
-export const SHIFT_JOBS = [...RAMEN_JOBS, ...DOJO_JOBS, ...GARDEN_JOBS, ...STONES_JOBS] as const;
+export const BALLOONS_JOBS = ['balloons'] as const;
+export const POST_JOBS = ['mail'] as const;
+export const SHIFT_JOBS = [
+  ...RAMEN_JOBS,
+  ...DOJO_JOBS,
+  ...GARDEN_JOBS,
+  ...STONES_JOBS,
+  ...BALLOONS_JOBS,
+  ...POST_JOBS,
+] as const;
 export type RamenJob = (typeof RAMEN_JOBS)[number];
 export type DojoJob = (typeof DOJO_JOBS)[number];
 export type ShiftJob = (typeof SHIFT_JOBS)[number];
@@ -32,6 +44,8 @@ export const SHIFT_QUESTS = {
   archery: 'dojo-archery',
   cleanup: 'park-cleanup',
   stones: 'park-stones',
+  balloons: 'raffle-balloons',
+  mail: 'post-mail',
 } as const satisfies Record<ShiftJob, string>;
 
 export function isShiftJob(value: unknown): value is ShiftJob {
@@ -126,6 +140,26 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
       { score: 20, coins: 120 },
       { score: 35, coins: 200 },
       { score: 55, coins: 300 },
+    ],
+  },
+  balloons: {
+    seconds: 45,
+    // One button per lane, then a touch on each balloon.
+    choices: BALLOON_CHOICES,
+    pay: [
+      { score: 18, coins: 120 },
+      { score: 35, coins: 200 },
+      { score: 50, coins: 300 },
+    ],
+  },
+  mail: {
+    seconds: 45,
+    // One button per pigeonhole.
+    choices: PIGEONHOLES.length,
+    pay: [
+      { score: 20, coins: 120 },
+      { score: 40, coins: 200 },
+      { score: 65, coins: 300 },
     ],
   },
 };
@@ -267,6 +301,16 @@ function playStones(seed: number, presses: ShiftAction[], shiftMs: number): Shif
   return resultOf(state, state ? stonesPoints(state) : 0, shiftMs);
 }
 
+function playBalloons(seed: number, presses: ShiftAction[], shiftMs: number): ShiftResult | null {
+  const state = simulateBalloons(seed, presses, shiftMs);
+  return resultOf(state, state ? balloonsPoints(state) : 0, shiftMs);
+}
+
+function playMail(seed: number, presses: ShiftAction[], shiftMs: number): ShiftResult | null {
+  const state = simulateMail(seed, presses, shiftMs);
+  return resultOf(state, state ? mailPoints(state) : 0, shiftMs);
+}
+
 const PLAYERS: Record<
   ShiftJob,
   (seed: number, presses: ShiftAction[], shiftMs: number) => ShiftResult | null
@@ -278,6 +322,8 @@ const PLAYERS: Record<
   archery: playArchery,
   cleanup: playCleanup,
   stones: playStones,
+  balloons: playBalloons,
+  mail: playMail,
 };
 
 // A shift lasts as long as its rules say, or until its last mistake: finishing earlier would mean

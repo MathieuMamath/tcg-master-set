@@ -65,6 +65,15 @@ import {
   type QuestAttempt,
   questDay,
 } from '@/game/quests';
+import {
+  canFinishQuiz,
+  checkAnswers,
+  QUIZ_QUEST,
+  type QuizQuestion,
+  quizCoins,
+  quizFor,
+  quizSeed,
+} from '@/game/quiz';
 import { drawRaffle, RAFFLE_COINS, RAFFLE_QUEST, type RaffleOutcome } from '@/game/raffle';
 import type { Report } from '@/game/reports';
 import {
@@ -405,6 +414,77 @@ export function finishGrandmaQuest(
 
 export function startWateringQuest(userId: string): Promise<{ hasStarted: boolean }> {
   return startQuestAttempt(userId, WATERING_QUEST);
+}
+
+// Mamie Noisette's quiz begins: its questions come from the moment it began, sent to the browser
+// without which answer is right. Starting again replaces a quiz that was left halfway.
+export async function startQuiz(
+  userId: string,
+): Promise<{ hasStarted: false } | { hasStarted: true; questions: QuizQuestion[] }> {
+  const started = await startQuestAttempt(userId, QUIZ_QUEST);
+  if (!started.hasStarted) {
+    return { hasStarted: false };
+  }
+  const [attempt] = await getDb()
+    .select({ startedAt: playerQuests.startedAt })
+    .from(playerQuests)
+    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, QUIZ_QUEST)));
+  return {
+    hasStarted: true,
+    questions: attempt?.startedAt ? quizFor(quizSeed(attempt.startedAt)) : [],
+  };
+}
+
+export type QuizResult = {
+  // Which answers were right, in the order of the questions.
+  checked: boolean[];
+  coins: number;
+  wallet: Wallet;
+};
+
+// The quiz is scored from the answers chosen, and paid once a day, by its right answers. Null when
+// no quiz is under way, or when the answers can't be its.
+export async function finishQuiz(userId: string, answers: unknown): Promise<QuizResult | null> {
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    await loadWallet(transaction, userId);
+    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, QUIZ_QUEST));
+    const [attempt] = await transaction
+      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(quest)
+      .for('update');
+    const checked =
+      attempt?.startedAt && canStartQuest(attempt, now) && canFinishQuiz(attempt.startedAt, now)
+        ? checkAnswers(quizFor(quizSeed(attempt.startedAt)), answers)
+        : null;
+    if (!attempt || !checked) {
+      if (attempt?.startedAt) {
+        await recordEvent(transaction, userId, 'quest.rejected', { questId: QUIZ_QUEST });
+      }
+      return null;
+    }
+    const coins = quizCoins(checked);
+    await transaction
+      .update(playerQuests)
+      .set({ startedAt: null, completedOn: questDay(now), paidCoins: coins })
+      .where(quest);
+    if (coins > 0) {
+      await transaction
+        .update(playerWallets)
+        .set({ coins: sql`${playerWallets.coins} + ${coins}`, updatedAt: new Date() })
+        .where(eq(playerWallets.userId, userId));
+    }
+    await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
+      questId: QUIZ_QUEST,
+      outcome: coins > 0 ? 'rewarded' : 'none',
+      coins,
+      boosterSetId: null,
+      score: checked.filter(Boolean).length,
+    });
+    return { checked, coins, wallet: await loadWallet(transaction, userId) };
+  });
 }
 
 // Pépin's flower beds, watered in the browser: paid once a day if the time adds up.

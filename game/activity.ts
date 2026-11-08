@@ -4,6 +4,7 @@ import { FISHING_QUEST } from './fishing';
 import { GRANDPA_QUEST } from './memory-game';
 import { WATERING_QUEST } from './park-watering';
 import { GRANDMA_QUEST, questDay } from './quests';
+import { QUIZ_QUEST } from './quiz';
 import { RAFFLE_QUEST } from './raffle';
 import { SHIFT_QUESTS } from './shifts';
 
@@ -27,6 +28,10 @@ export const DAILY_QUESTS = [
   { id: SHIFT_QUESTS.cleanup, giver: 'gardenCleanup' },
   { id: WATERING_QUEST, giver: 'gardenWatering' },
   { id: SHIFT_QUESTS.stones, giver: 'grandpaStones' },
+  // The village: Mamie Noisette's quiz, Bérénice's Pop'Ballons and Gustave's mail.
+  { id: QUIZ_QUEST, giver: 'bookshopQuiz' },
+  { id: SHIFT_QUESTS.balloons, giver: 'bereniceBalloons' },
+  { id: SHIFT_QUESTS.mail, giver: 'postMail' },
 ] as const;
 
 export type DailyQuest = (typeof DAILY_QUESTS)[number];
