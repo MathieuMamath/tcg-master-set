@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.96](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.95...v0.1.96) (2026-11-08)
+
+### Bug Fixes
+
+* **quests:** name every character in the stats and record kitten searches ([#98](https://github.com/MathieuMamath/tcg-master-set/issues/98)) ([ebc37b8](https://github.com/MathieuMamath/tcg-master-set/commit/ebc37b84aa35cde1e075a3d235efc799604f3314))
+
 ## [0.1.95](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.94...v0.1.95) (2026-11-08)
 
 ### Features
