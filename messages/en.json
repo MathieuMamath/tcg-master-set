@@ -63,7 +63,8 @@
     "searched": {
       "nothing": "Nothing here… Mistigri is somewhere else.",
       "unavailable": "You can’t search right now."
-    }
+    },
+    "archivist": "Talk (Bastien)"
   },
   "Shopkeeper": {
     "names": {
@@ -541,7 +542,8 @@
     "postman": "Got mail to sort?",
     "painter": "Got an eye for art?",
     "ronron": "Have you seen my little one?",
-    "photographer": "A photo of the sky?"
+    "photographer": "A photo of the sky?",
+    "archivist": "Need the archives?"
   },
   "Bus": {
     "title": "Bus map",
@@ -717,6 +719,14 @@
       "lines": {
         "found": "Oh, you found me! All right, I’ll go home to Granny Ronron. She said she’d give you 200 coins for your trouble!"
       }
+    },
+    "archivist": {
+      "name": "Bastien",
+      "title": "the office’s archivist",
+      "lines": {
+        "greeting": "Hello! I keep every booster’s archives here. I can print you the full card statistics: every version of every set, how many times it came out, and how many times it should have."
+      },
+      "export": "Export the card statistics"
     }
   },
   "Stats": {

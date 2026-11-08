@@ -270,6 +270,8 @@ export const BUREAU_FURNITURE = {
   cornerPlant: { x: 5.2, width: 0.9 },
 } as const;
 export const HULOTTE_X = BUREAU_FURNITURE.desk.x;
+// Bastien, the archivist, stands by the wall screen, his printed tables in his arms.
+export const ARCHIVIST_X = 0.3;
 
 // The coupon floor, above the administrative office: Mlle Trotte's desk, a cork board of coupons,
 // a filing cabinet, and the lift in the left wall to go back down. Admins only, like the office.
@@ -699,6 +701,12 @@ export const BUREAU: SideRoom = {
   // leading anywhere by itself.
   interactions: [
     { interaction: 'elevator', minX: BUREAU_BOUNDS.minX, maxX: BUREAU_BOUNDS.minX + DOOR_REACH },
+    {
+      interaction: 'archivist',
+      minX: ARCHIVIST_X - 1,
+      maxX: ARCHIVIST_X + 1,
+      speaker: { x: ARCHIVIST_X },
+    },
     {
       interaction: 'hulotte',
       minX: HULOTTE_X - 1.2,

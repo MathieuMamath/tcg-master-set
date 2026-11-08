@@ -3,12 +3,15 @@
 import { useEffect, useRef } from 'react';
 import type { QuestGiver } from '@/game/world';
 import {
+  ARCHIVIST_FACE,
+  ARCHIVIST_SIZE,
   BERENICE_FACE,
   BERENICE_SIZE,
   BRUTUS_FACE,
   BRUTUS_SIZE,
   DOJO_MASTER_FACE,
   DOJO_MASTER_SIZE,
+  drawArchivist,
   drawBerenice,
   drawBrutus,
   drawDojoMaster,
@@ -68,6 +71,7 @@ export type Character =
   | QuestGiver
   | 'brutus'
   | 'hulotte'
+  | 'archivist'
   | 'trotte'
   | 'ramenChef'
   | 'dojoMaster'
@@ -94,6 +98,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'hulotte') {
     return { draw: drawHulotte, size: HULOTTE_SIZE, face: HULOTTE_FACE };
+  }
+  if (stock === 'archivist') {
+    return { draw: drawArchivist, size: ARCHIVIST_SIZE, face: ARCHIVIST_FACE };
   }
   if (stock === 'trotte') {
     return { draw: drawTrotte, size: TROTTE_SIZE, face: TROTTE_FACE };

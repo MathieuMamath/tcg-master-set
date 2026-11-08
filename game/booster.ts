@@ -1,3 +1,4 @@
+import { slotKey } from './binder';
 import type { SetId } from './card-sets';
 import { cardTier } from './pull-tier';
 
@@ -371,6 +372,57 @@ export function openBooster(
 
   const cards = drawBooster(pool, recipe, random);
   return cards && { cards, isGodPack: false };
+}
+
+// How many times each version of a set's cards is expected to come out per booster, by its key
+// from `slotKey`, worked out from the recipe rather than drawn: each slot's outcomes, falling back
+// as a draw does when the set lacks one, a card picked evenly among those the outcome allows, and
+// god packs at their rate. It leaves out that a booster never holds the same card twice, which
+// only matters for the smallest pools, so that the draws in production can be checked against it.
+export function expectedPulls(
+  pool: readonly PoolCard[],
+  recipe: BoosterRecipe,
+): Map<string, number> {
+  const expected = new Map<string, number>();
+  const add = (card: PoolCard, variant: string, amount: number) => {
+    const key = slotKey(card.id, variant);
+    expected.set(key, (expected.get(key) ?? 0) + amount);
+  };
+  const addSlot = (slot: BoosterSlot, share: number) => {
+    const total = slot.reduce((sum, { weight }) => sum + weight, 0);
+    for (const rolled of slot) {
+      const outcome = [rolled, ...slot].find((candidate) =>
+        pool.some((card) => matches(card, candidate)),
+      );
+      if (!outcome || total === 0) {
+        continue;
+      }
+      const cards = pool.filter((card) => matches(card, outcome));
+      const each = (share * rolled.weight) / total / cards.length;
+      for (const card of cards) {
+        if (outcome.source === REVERSE) {
+          add(card, REVERSE, each);
+          continue;
+        }
+        const regular = card.variants.filter((variant) => variant !== REVERSE);
+        const variants = regular.length > 0 ? regular : [card.variants[0] ?? 'normal'];
+        for (const variant of variants) {
+          add(card, variant, each / variants.length);
+        }
+      }
+    }
+  };
+  const godPackSlot: BoosterSlot = [{ source: recipe.godPackRarities, weight: 1 }];
+  const godPackCards = pool.filter((card) => matches(card, godPackSlot[0]));
+  const godPackShare =
+    godPackCards.length >= boosterSize(recipe) ? GOD_PACK_CHANCE_PERCENT / 100 : 0;
+  for (const slot of recipe.slots) {
+    addSlot(slot, 1 - godPackShare);
+    if (godPackShare > 0) {
+      addSlot(godPackSlot, godPackShare);
+    }
+  }
+  return expected;
 }
 
 // The versions of cards that no booster of this recipe could ever give.

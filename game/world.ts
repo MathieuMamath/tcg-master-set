@@ -24,6 +24,8 @@ export type Interaction =
   // Brutus, the bulldog who guards the administrative office, and Mme Hulotte, the owl who keeps it.
   | 'brutus'
   | 'hulotte'
+  // Bastien, the beaver who keeps the office's archives and exports the card statistics.
+  | 'archivist'
   // Mlle Trotte, the mouse who keeps the coupon floor, and the administrative office's lift.
   | 'trotte'
   | 'elevator'

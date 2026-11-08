@@ -6,6 +6,7 @@ import {
   boosterSize,
   drawBooster,
   drawGodPack,
+  expectedPulls,
   genericRecipe,
   isTearComplete,
   openBooster,
@@ -337,5 +338,35 @@ describe('genericRecipe', () => {
     const pool = ERAS['an old set'];
 
     expect(boosterRecipe('base1', pool).revealOrder).toContain('Rare');
+  });
+});
+
+describe('expectedPulls', () => {
+  test.each([
+    ['Darkness Ablaze', POOL, RECIPE],
+    ['recent', RECENT_POOL, RECENT_RECIPE],
+  ])('matches what the %s boosters draw, rarity by rarity', (_, smallPool, recipe) => {
+    // As large as a real set, where never drawing the same card twice in a booster hardly matters.
+    const pool = Array.from({ length: 8 }, (_, copy) =>
+      smallPool.map((card) => ({ ...card, id: `${card.id}x${copy}` })),
+    ).flat();
+    const expected = expectedPulls(pool, recipe);
+    const total = [...expected.values()].reduce((sum, value) => sum + value, 0);
+    expect(total).toBeCloseTo(boosterSize(recipe), 6);
+    const boosters = manyBoosters(pool, recipe, 6000);
+    const drawn = new Map<string, number>();
+    const expectedByRarity = new Map<string, number>();
+    for (const booster of boosters) {
+      for (const { cardId } of booster ?? []) {
+        drawn.set(rarityOf(cardId), (drawn.get(rarityOf(cardId)) ?? 0) + 1 / boosters.length);
+      }
+    }
+    for (const [key, value] of expected) {
+      const rarity = rarityOf(key.slice(0, key.indexOf(':')));
+      expectedByRarity.set(rarity, (expectedByRarity.get(rarity) ?? 0) + value);
+    }
+    for (const [rarity, value] of expectedByRarity) {
+      expect(drawn.get(rarity) ?? 0).toBeCloseTo(value, 1);
+    }
   });
 });

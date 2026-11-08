@@ -432,6 +432,14 @@ export function Game({ player, sets, progress }: Props) {
       .catch(() => {});
   }, [talkingTo, kittenSpot, activity.done]);
 
+  // The full card statistics, downloaded as a CSV file in the player's language.
+  const downloadCardStats = () => {
+    const link = document.createElement('a');
+    link.href = `/api/stats/cards/export?locale=${locale}`;
+    link.download = '';
+    link.click();
+  };
+
   const stopWalking = () => {
     input.current.keyboard = STILL;
     input.current.joystick = STILL;
@@ -1392,6 +1400,15 @@ export function Game({ player, sets, progress }: Props) {
         {isKittenFound && (
           <NpcDialog speaker="kitten" line="found" onClose={() => setIsKittenFound(false)} />
         )}
+        {talkingTo === 'archivist' && (
+          // Bastien hands over the full card statistics as a file. The server checks the role again.
+          <NpcDialog
+            speaker="archivist"
+            line="greeting"
+            action={{ label: tSpeakers('archivist.export'), onPress: downloadCardStats }}
+            onClose={() => setTalkingTo(null)}
+          />
+        )}
         {talkingTo === 'hulotte' && (
           <NpcDialog
             speaker="hulotte"
@@ -1474,6 +1491,7 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'berenice' &&
           talkingTo !== 'brutus' &&
           talkingTo !== 'hulotte' &&
+          talkingTo !== 'archivist' &&
           talkingTo !== 'trotte' &&
           talkingTo !== 'painter' &&
           talkingTo !== 'ronron' &&
