@@ -12,6 +12,7 @@ import {
   drawBerenice,
   drawBrutus,
   drawDojoMaster,
+  drawGardener,
   drawGaspard,
   drawHedgehog,
   drawHulotte,
@@ -21,6 +22,8 @@ import {
   drawRaccoon,
   drawRamenChef,
   drawTrotte,
+  GARDENER_FACE,
+  GARDENER_SIZE,
   GASPARD_FACE,
   GASPARD_SIZE,
   HEDGEHOG_FACE,
@@ -53,7 +56,8 @@ type Character =
   | 'hulotte'
   | 'trotte'
   | 'ramenChef'
-  | 'dojoMaster';
+  | 'dojoMaster'
+  | 'gardener';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -80,6 +84,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'ramenChef') {
     return { draw: drawRamenChef, size: RAMEN_CHEF_SIZE, face: RAMEN_CHEF_FACE };
+  }
+  if (stock === 'gardener') {
+    return { draw: drawGardener, size: GARDENER_SIZE, face: GARDENER_FACE };
   }
   if (stock === 'dojoMaster') {
     return { draw: drawDojoMaster, size: DOJO_MASTER_SIZE, face: DOJO_MASTER_FACE };

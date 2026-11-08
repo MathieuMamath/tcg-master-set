@@ -1,19 +1,24 @@
 import { ARCHERY_ACTIONS, archeryPoints, simulateArchery } from './dojo-archery';
 import { SLICING_STROKES, simulateSlicing, slicingPoints } from './dojo-slicing';
+import { BINS, cleanupPoints, simulateCleanup } from './park-cleanup';
+import { STONE_ACTIONS, simulateStones, stonesPoints } from './park-stones';
 import { DISH_ACTIONS, dishesPoints, simulateDishes } from './ramen-dishes';
 import { KITCHEN_INGREDIENTS, kitchenPoints, simulateKitchen } from './ramen-kitchen';
 import { SERVICE_TABLES, servicePoints, simulateService } from './ramen-service';
 
 // The shifts: short games played for someone in the big city, each its own daily quest. Yuzu hires
 // the player at the ramen shop to wash the bowls, help in the kitchen and wait on the tables, and
-// Maître Kaito trains them at the dojo in slicing and archery. A shift's orders come from a seed,
+// Maître Kaito trains them at the dojo in slicing and archery. At Linden Park, Pépin the gardener
+// has the path cleaned up, and Papy Caillou skips stones on the lake. A shift's orders come from a seed,
 // the moment it began, so that the server can find them again. The browser only sends what was
 // pressed and when, and the server plays the shift again with the same rules to get the score. A
 // shift pays once a day, the first time it earns something, in coins.
 
 export const RAMEN_JOBS = ['dishes', 'kitchen', 'service'] as const;
 export const DOJO_JOBS = ['slicing', 'archery'] as const;
-export const SHIFT_JOBS = [...RAMEN_JOBS, ...DOJO_JOBS] as const;
+export const GARDEN_JOBS = ['cleanup'] as const;
+export const STONES_JOBS = ['stones'] as const;
+export const SHIFT_JOBS = [...RAMEN_JOBS, ...DOJO_JOBS, ...GARDEN_JOBS, ...STONES_JOBS] as const;
 export type RamenJob = (typeof RAMEN_JOBS)[number];
 export type DojoJob = (typeof DOJO_JOBS)[number];
 export type ShiftJob = (typeof SHIFT_JOBS)[number];
@@ -25,6 +30,8 @@ export const SHIFT_QUESTS = {
   service: 'ramen-service',
   slicing: 'dojo-slicing',
   archery: 'dojo-archery',
+  cleanup: 'park-cleanup',
+  stones: 'park-stones',
 } as const satisfies Record<ShiftJob, string>;
 
 export function isShiftJob(value: unknown): value is ShiftJob {
@@ -99,6 +106,26 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
       { score: 50, coins: 120 },
       { score: 75, coins: 200 },
       { score: 105, coins: 300 },
+    ],
+  },
+  cleanup: {
+    seconds: 45,
+    // The three bins.
+    choices: BINS.length,
+    pay: [
+      { score: 12, coins: 120 },
+      { score: 28, coins: 200 },
+      { score: 40, coins: 300 },
+    ],
+  },
+  stones: {
+    seconds: 40,
+    // Throwing: the first press holds the angle, the second throws.
+    choices: STONE_ACTIONS.length,
+    pay: [
+      { score: 20, coins: 120 },
+      { score: 35, coins: 200 },
+      { score: 55, coins: 300 },
     ],
   },
 };
@@ -195,8 +222,13 @@ function resultOf(
   points: number,
   shiftMs: number,
 ): ShiftResult | null {
+  // A last throw still in the air when the time is up ends with the shift.
   return state
-    ? { score: points, mistakes: state.mistakes, endedAtMs: state.endedAt ?? shiftMs }
+    ? {
+        score: points,
+        mistakes: state.mistakes,
+        endedAtMs: Math.min(state.endedAt ?? shiftMs, shiftMs),
+      }
     : null;
 }
 
@@ -225,6 +257,16 @@ function playArchery(seed: number, presses: ShiftAction[], shiftMs: number): Shi
   return resultOf(state, state ? archeryPoints(state) : 0, shiftMs);
 }
 
+function playCleanup(seed: number, presses: ShiftAction[], shiftMs: number): ShiftResult | null {
+  const state = simulateCleanup(seed, presses, shiftMs);
+  return resultOf(state, state ? cleanupPoints(state) : 0, shiftMs);
+}
+
+function playStones(seed: number, presses: ShiftAction[], shiftMs: number): ShiftResult | null {
+  const state = simulateStones(seed, presses, shiftMs);
+  return resultOf(state, state ? stonesPoints(state) : 0, shiftMs);
+}
+
 const PLAYERS: Record<
   ShiftJob,
   (seed: number, presses: ShiftAction[], shiftMs: number) => ShiftResult | null
@@ -234,6 +276,8 @@ const PLAYERS: Record<
   service: playService,
   slicing: playSlicing,
   archery: playArchery,
+  cleanup: playCleanup,
+  stones: playStones,
 };
 
 // A shift lasts as long as its rules say, or until its last mistake: finishing earlier would mean

@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { ARCHERY_ACTIONS } from './dojo-archery';
 import { perfectArchery, perfectSlicing } from './dojo-games.test-helpers';
 import { SLICING_STROKES } from './dojo-slicing';
+import { perfectCleanup, perfectStones } from './park-games.test-helpers';
 import { DISH_ACTIONS } from './ramen-dishes';
 import { perfectDishes, perfectKitchen } from './ramen-games.test-helpers';
 import { KITCHEN_INGREDIENTS } from './ramen-kitchen';
@@ -111,6 +112,8 @@ describe('playShift', () => {
       service: perfectService(SEED, 60_000),
       slicing: perfectSlicing(SEED),
       archery: perfectArchery(SEED),
+      cleanup: perfectCleanup(SEED),
+      stones: perfectStones(SEED),
     };
     for (const job of SHIFT_JOBS) {
       const result = playShift(job, SEED, perfect[job]);
@@ -162,4 +165,25 @@ describe('canFinishShift', () => {
   test('refuses a shift finished long after its time', () => {
     expect(canFinishShift(startedAt, at(90), 45_000, 'dishes')).toBe(false);
   });
+});
+
+test('a shift ends when its last pebble sinks, not when it is thrown', () => {
+  // A perfect throw skips for nearly two seconds: finishing as it leaves would be too early.
+  const presses = perfectStones(SEED);
+  const result = playShift('stones', SEED, presses);
+  const thrownAt = presses.at(-1)?.[0] ?? 0;
+  const endedAtMs = result?.endedAtMs ?? 0;
+  expect(endedAtMs - thrownAt).toBeGreaterThan(1000);
+  expect(canFinishShift(new Date(0), new Date(thrownAt), endedAtMs, 'stones')).toBe(false);
+  expect(canFinishShift(new Date(0), new Date(endedAtMs), endedAtMs, 'stones')).toBe(true);
+});
+
+test('a throw still in the air when the time is up ends with the shift', () => {
+  const shiftMs = SHIFT_RULES.stones.seconds * 1000;
+  // The first pebble, its angle held, thrown just before the time is up.
+  const result = playShift('stones', SEED, [
+    [1000, 0],
+    [shiftMs - 50, 0],
+  ]);
+  expect(result?.endedAtMs).toBeLessThanOrEqual(shiftMs);
 });

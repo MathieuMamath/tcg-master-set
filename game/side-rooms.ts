@@ -161,10 +161,15 @@ const ARCADE_BOUNDS = {
   maxX: ARCADE_WALLS.right - CHARACTER_HALF_WIDTH,
 };
 
-// The Linden Park, reached by bus: its stop on the left, Papy Caillou beside his bench with his
-// cards on it, and Lucas the little otter at the edge of the lake on the right.
-export const PARK_ENDS = { left: -10, right: 13 };
+// The Linden Park, reached by bus: Pépin's garden on the far left, with its fountain, flower beds
+// and sorting bins, then the stop, Papy Caillou beside his bench with his cards on it, and Lucas the
+// little otter at the edge of the lake on the right.
+export const PARK_ENDS = { left: -20, right: 13 };
 export const PARK_SPOTS = {
+  fountain: { x: -18.2, width: 1.8 },
+  flowerBeds: { x: -15.2, width: 3.8 },
+  gardener: { x: -12.4 },
+  bins: { x: -10.6, width: 1.5 },
   busStop: { x: -7.4, width: 3.6, signX: -8.9 },
   bench: { x: -2.6, width: 2.6 },
   papy: { x: -0.6 },
@@ -493,6 +498,12 @@ export const PARK: SideRoom = {
       interaction: 'busStop',
       minX: PARK_SPOTS.busStop.signX - DOOR_REACH,
       maxX: PARK_SPOTS.busStop.signX + DOOR_REACH,
+    },
+    {
+      interaction: 'gardener',
+      minX: PARK_SPOTS.gardener.x - 1.2,
+      maxX: PARK_SPOTS.gardener.x + 1.2,
+      speaker: { x: PARK_SPOTS.gardener.x },
     },
     {
       interaction: 'grandpa',
