@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.92](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.91...v0.1.92) (2026-11-08)
+
+### Features
+
+* **quests:** open Maître Kaito's dojo and pay every shift star by star ([#94](https://github.com/MathieuMamath/tcg-master-set/issues/94)) ([5723381](https://github.com/MathieuMamath/tcg-master-set/commit/572338151a06e5dfdfee4c1ab87253b6a8035126))
+
 ## [0.1.91](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.90...v0.1.91) (2026-11-07)
 
 ### Features
