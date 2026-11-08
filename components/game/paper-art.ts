@@ -8001,3 +8001,1086 @@ export function drawFairScenery(): HTMLCanvasElement {
   addGrain(canvas, 8, 432);
   return canvas;
 }
+
+// --- Pinceau's easel, at Linden Park. ------------------------------------------------------------
+
+const WOOL = '#f3ecdc';
+const WOOL_SHADE = '#ddd2bb';
+const SMOCK_BLUE = '#5a7fb0';
+const BERET_RED = '#c8453a';
+
+export const PAINTER_SIZE = { width: 300, height: 380 };
+export const PAINTER_FACE = { x: 168, y: 120, size: 170 };
+
+// Pinceau, the sheep who paints by the lake: a woolly head under a red beret, a blue smock spotted
+// with paint, a palette on one arm and a brush in the other hand.
+export function drawPainter(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eyes: Eyes = 'open',
+) {
+  const x = drawing;
+  const cx = width / 2;
+  const bottom = height - 6;
+  const bodyY = bottom - 110;
+  const headY = bodyY - 128;
+  x.lineCap = 'round';
+  x.lineJoin = 'round';
+  // Little dark legs and hooves.
+  x.fillStyle = '#3d3a42';
+  for (const side of [-1, 1]) {
+    roundedRect(x, cx + side * 30 - 10, bodyY + 60, 20, bottom - bodyY - 60, 8);
+    x.fill();
+  }
+  // The smock, wide at the hem, with spots of paint.
+  x.fillStyle = SMOCK_BLUE;
+  x.beginPath();
+  x.moveTo(cx - 52, bodyY - 70);
+  x.quadraticCurveTo(cx - 90, bodyY + 40, cx - 78, bodyY + 74);
+  x.lineTo(cx + 78, bodyY + 74);
+  x.quadraticCurveTo(cx + 90, bodyY + 40, cx + 52, bodyY - 70);
+  x.closePath();
+  x.fill();
+  for (const [spotX, spotY, color] of [
+    [-30, 10, '#f0c43a'],
+    [22, 36, BERET_RED],
+    [-8, 54, '#4f8a3c'],
+    [36, -14, '#fbf6ea'],
+  ] as const) {
+    x.fillStyle = color;
+    ellipse(x, cx + spotX, bodyY + spotY, 7, 6);
+  }
+  // A woolly collar.
+  x.fillStyle = WOOL;
+  for (let puff = 0; puff < 7; puff++) {
+    ellipse(x, cx - 54 + puff * 18, bodyY - 66, 16, 14);
+  }
+  // The palette, held on the left arm.
+  x.fillStyle = WOOL;
+  ellipse(x, cx - 70, bodyY + 4, 18, 16);
+  x.fillStyle = '#d9b27a';
+  x.beginPath();
+  x.ellipse(cx - 92, bodyY + 18, 44, 30, -0.3, 0, Math.PI * 2);
+  x.fill();
+  x.fillStyle = '#efe2c8';
+  ellipse(x, cx - 110, bodyY + 30, 8, 7);
+  for (const [dabX, dabY, color] of [
+    [-112, 4, BERET_RED],
+    [-94, -4, '#f0c43a'],
+    [-76, 6, '#3c78b4'],
+    [-82, 28, '#4f8a3c'],
+  ] as const) {
+    x.fillStyle = color;
+    ellipse(x, cx + dabX, bodyY + dabY, 8, 6);
+  }
+  // The brush, raised in the right hand.
+  x.strokeStyle = '#8a5a34';
+  x.lineWidth = 6;
+  x.beginPath();
+  x.moveTo(cx + 66, bodyY + 4);
+  x.lineTo(cx + 104, bodyY - 56);
+  x.stroke();
+  x.fillStyle = '#3c78b4';
+  x.beginPath();
+  x.ellipse(cx + 108, bodyY - 64, 6, 12, 0.6, 0, Math.PI * 2);
+  x.fill();
+  x.fillStyle = WOOL;
+  ellipse(x, cx + 66, bodyY + 8, 17, 15);
+  // The head: wool all round, a long pale face turned right, and drooping ears.
+  x.fillStyle = WOOL_SHADE;
+  for (const [puffX, puffY, size] of [
+    [-44, -10, 34],
+    [-30, -40, 32],
+    [6, -50, 32],
+    [-46, 24, 28],
+  ] as const) {
+    ellipse(x, cx + puffX, headY + puffY, size, size);
+  }
+  x.fillStyle = WOOL;
+  for (const [puffX, puffY, size] of [
+    [-36, -12, 30],
+    [-20, -38, 28],
+    [10, -44, 26],
+    [-38, 20, 24],
+  ] as const) {
+    ellipse(x, cx + puffX, headY + puffY, size, size);
+  }
+  x.fillStyle = '#e9d2c0';
+  x.beginPath();
+  x.ellipse(cx + 22, headY + 8, 44, 52, -0.25, 0, Math.PI * 2);
+  x.fill();
+  x.fillStyle = '#d8b9a6';
+  x.beginPath();
+  x.ellipse(cx - 34, headY + 4, 14, 30, 0.7, 0, Math.PI * 2);
+  x.fill();
+  // The nose and a little smile.
+  x.fillStyle = '#b77c75';
+  ellipse(x, cx + 52, headY + 30, 9, 7);
+  x.strokeStyle = '#7a4a45';
+  x.lineWidth = 3;
+  x.beginPath();
+  x.arc(cx + 44, headY + 40, 9, 0.2 * Math.PI, 0.8 * Math.PI);
+  x.stroke();
+  drawEye(x, cx + 28, headY - 2, eyes, { width: 8 });
+  x.fillStyle = 'rgb(240 110 100 / 30%)';
+  ellipse(x, cx + 16, headY + 26, 10, 6);
+  // The beret, tilted, with its little stalk.
+  x.fillStyle = BERET_RED;
+  x.beginPath();
+  x.ellipse(cx - 8, headY - 56, 54, 20, -0.15, 0, Math.PI * 2);
+  x.fill();
+  x.fillStyle = '#a8352c';
+  x.beginPath();
+  x.ellipse(cx - 6, headY - 46, 46, 8, -0.15, 0, Math.PI);
+  x.fill();
+  x.strokeStyle = '#a8352c';
+  x.lineWidth = 5;
+  x.beginPath();
+  x.moveTo(cx - 10, headY - 74);
+  x.lineTo(cx - 6, headY - 86);
+  x.stroke();
+}
+
+export const PAINTING_SIZE = 600;
+
+// Pinceau's painting of the lake, square, the one his puzzle cuts up: a sun and clouds in the sky,
+// green hills, a tree on the left bank, a red boat on the water and reeds on the right, framed, so
+// that every piece shows something of its own.
+export function drawPainting(): HTMLCanvasElement {
+  const size = PAINTING_SIZE;
+  const canvas = createCanvas(size, size);
+  const x = context(canvas);
+  const sky = x.createLinearGradient(0, 0, 0, size * 0.5);
+  sky.addColorStop(0, '#f4b77a');
+  sky.addColorStop(1, '#bfe0f0');
+  x.fillStyle = sky;
+  x.fillRect(0, 0, size, size);
+  // The sun, low on the right, and its rays.
+  x.fillStyle = '#f7d46a';
+  ellipse(x, size * 0.8, size * 0.2, 56, 56);
+  x.strokeStyle = 'rgb(247 212 106 / 70%)';
+  x.lineWidth = 8;
+  x.lineCap = 'round';
+  for (let ray = 0; ray < 10; ray++) {
+    const angle = (ray / 10) * Math.PI * 2;
+    x.beginPath();
+    x.moveTo(size * 0.8 + Math.cos(angle) * 72, size * 0.2 + Math.sin(angle) * 72);
+    x.lineTo(size * 0.8 + Math.cos(angle) * 96, size * 0.2 + Math.sin(angle) * 96);
+    x.stroke();
+  }
+  // Clouds on the left, and birds in the middle.
+  x.fillStyle = '#fbf6ea';
+  for (const [cloudX, cloudY, rx] of [
+    [0.16, 0.12, 60],
+    [0.26, 0.1, 44],
+    [0.42, 0.24, 40],
+  ] as const) {
+    ellipse(x, size * cloudX, size * cloudY, rx, rx * 0.5);
+  }
+  x.strokeStyle = '#4a4458';
+  x.lineWidth = 4;
+  for (const [birdX, birdY] of [
+    [0.5, 0.12],
+    [0.56, 0.16],
+  ] as const) {
+    x.beginPath();
+    x.moveTo(size * birdX - 14, size * birdY);
+    x.quadraticCurveTo(size * birdX - 6, size * birdY - 10, size * birdX, size * birdY);
+    x.quadraticCurveTo(size * birdX + 6, size * birdY - 10, size * birdX + 14, size * birdY);
+    x.stroke();
+  }
+  // Two rows of hills.
+  for (const [color, top, bump] of [
+    ['#7fae6a', 0.42, 0],
+    ['#5f9150', 0.5, 1.4],
+  ] as const) {
+    x.fillStyle = color;
+    x.beginPath();
+    x.moveTo(0, size);
+    for (let step = 0; step <= 20; step++) {
+      const along = step / 20;
+      x.lineTo(along * size, size * top - Math.sin(along * 6 + bump) * 26 - 14);
+    }
+    x.lineTo(size, size);
+    x.closePath();
+    x.fill();
+  }
+  // The lake, its ripples, and the red boat with its sail.
+  const water = x.createLinearGradient(0, size * 0.6, 0, size);
+  water.addColorStop(0, '#5aa0c8');
+  water.addColorStop(1, '#2f6f9a');
+  x.fillStyle = water;
+  x.fillRect(0, size * 0.62, size, size * 0.38);
+  x.strokeStyle = 'rgb(255 255 255 / 45%)';
+  x.lineWidth = 4;
+  for (const [rippleX, rippleY] of [
+    [0.1, 0.72],
+    [0.3, 0.86],
+    [0.62, 0.92],
+    [0.82, 0.76],
+    [0.46, 0.7],
+  ] as const) {
+    x.beginPath();
+    x.moveTo(size * rippleX - 20, size * rippleY);
+    x.lineTo(size * rippleX + 20, size * rippleY);
+    x.stroke();
+  }
+  x.fillStyle = '#c8453a';
+  x.beginPath();
+  x.moveTo(size * 0.4, size * 0.8);
+  x.lineTo(size * 0.6, size * 0.8);
+  x.lineTo(size * 0.56, size * 0.85);
+  x.lineTo(size * 0.44, size * 0.85);
+  x.closePath();
+  x.fill();
+  x.fillStyle = '#fbf6ea';
+  x.beginPath();
+  x.moveTo(size * 0.5, size * 0.66);
+  x.lineTo(size * 0.5, size * 0.79);
+  x.lineTo(size * 0.58, size * 0.79);
+  x.closePath();
+  x.fill();
+  // A round tree on the left bank.
+  x.fillStyle = '#7a4e2a';
+  x.fillRect(size * 0.12, size * 0.44, 18, size * 0.2);
+  x.fillStyle = '#3f7a3a';
+  ellipse(x, size * 0.14, size * 0.4, 70, 76);
+  x.fillStyle = '#4f8a3c';
+  ellipse(x, size * 0.11, size * 0.36, 44, 44);
+  x.fillStyle = '#d0443a';
+  for (const [appleX, appleY] of [
+    [0.1, 0.42],
+    [0.2, 0.36],
+    [0.16, 0.46],
+  ] as const) {
+    ellipse(x, size * appleX, size * appleY, 7, 7);
+  }
+  // Reeds and a bulrush on the right bank.
+  x.strokeStyle = '#4f7a34';
+  x.lineWidth = 6;
+  for (let reed = 0; reed < 6; reed++) {
+    const reedX = size * 0.8 + reed * 18;
+    x.beginPath();
+    x.moveTo(reedX, size);
+    x.quadraticCurveTo(reedX - 10, size * 0.84, reedX + (reed % 2 ? 8 : -6), size * 0.7);
+    x.stroke();
+  }
+  x.fillStyle = '#7a4e2a';
+  for (const reedX of [0.83, 0.89, 0.95]) {
+    roundedRect(x, size * reedX - 6, size * 0.68, 12, 34, 6);
+    x.fill();
+  }
+  // A water lily on the left, and the painter's signature.
+  x.fillStyle = '#5f9150';
+  ellipse(x, size * 0.18, size * 0.9, 34, 12);
+  x.fillStyle = '#f2b8c6';
+  ellipse(x, size * 0.2, size * 0.88, 10, 8);
+  x.fillStyle = '#fbf6ea';
+  x.font = `italic 700 34px ${'serif'}`;
+  x.fillText('P.', size * 0.86, size * 0.97);
+  // The frame.
+  x.strokeStyle = '#b8873e';
+  x.lineWidth = 18;
+  x.strokeRect(9, 9, size - 18, size - 18);
+  addGrain(canvas, 10, 501);
+  return canvas;
+}
+
+// Pinceau's easel, the painting on it, seen from the side of the path.
+export function drawEasel(drawing: CanvasRenderingContext2D, width: number, height: number) {
+  const x = drawing;
+  const cx = width / 2;
+  x.strokeStyle = '#8a5a34';
+  x.lineWidth = 12;
+  x.lineCap = 'round';
+  x.beginPath();
+  x.moveTo(cx - 60, height - 6);
+  x.lineTo(cx - 8, 20);
+  x.moveTo(cx + 60, height - 6);
+  x.lineTo(cx + 8, 20);
+  x.moveTo(cx, 40);
+  x.lineTo(cx + 24, height - 6);
+  x.stroke();
+  x.lineWidth = 10;
+  x.beginPath();
+  x.moveTo(cx - 70, height * 0.62);
+  x.lineTo(cx + 70, height * 0.62);
+  x.stroke();
+  const painting = drawPainting();
+  const side = width - 40;
+  x.drawImage(painting, 20, height * 0.62 - side - 4, side, side);
+}
+
+// --- Mme Ronron and her kitten, by Léa's block. -------------------------------------------------
+
+const CAT_GREY = '#9c938a';
+const CAT_DARK = '#6d655d';
+const SHAWL = '#9d7bb8';
+
+export const RONRON_SIZE = { width: 300, height: 360 };
+export const RONRON_FACE = { x: 150, y: 130, size: 170 };
+
+// Mme Ronron, the old tabby cat who lives in Léa's block: grey fur with darker stripes, round
+// glasses, a lilac shawl over her shoulders and a cane, worried for her kitten.
+export function drawRonron(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eyes: Eyes = 'open',
+) {
+  const x = drawing;
+  const cx = width / 2;
+  const bottom = height - 6;
+  const bodyY = bottom - 100;
+  const headY = bodyY - 112;
+  x.lineCap = 'round';
+  x.lineJoin = 'round';
+  // The tail, curling up behind.
+  x.strokeStyle = CAT_GREY;
+  x.lineWidth = 18;
+  x.beginPath();
+  x.moveTo(cx - 50, bottom - 30);
+  x.quadraticCurveTo(cx - 120, bottom - 60, cx - 100, bodyY - 30);
+  x.stroke();
+  // The body, in a long skirt, and the feet.
+  x.fillStyle = '#6a7f62';
+  x.beginPath();
+  x.moveTo(cx - 54, bodyY - 30);
+  x.quadraticCurveTo(cx - 80, bodyY + 70, cx - 70, bottom - 10);
+  x.lineTo(cx + 70, bottom - 10);
+  x.quadraticCurveTo(cx + 80, bodyY + 70, cx + 54, bodyY - 30);
+  x.closePath();
+  x.fill();
+  x.fillStyle = CAT_GREY;
+  ellipse(x, cx - 28, bottom - 8, 22, 10);
+  ellipse(x, cx + 30, bottom - 8, 22, 10);
+  // The shawl, knotted at the front.
+  x.fillStyle = SHAWL;
+  x.beginPath();
+  x.moveTo(cx - 70, bodyY - 50);
+  x.quadraticCurveTo(cx, bodyY - 80, cx + 70, bodyY - 50);
+  x.lineTo(cx + 30, bodyY + 30);
+  x.lineTo(cx, bodyY + 10);
+  x.lineTo(cx - 30, bodyY + 30);
+  x.closePath();
+  x.fill();
+  x.fillStyle = '#86669f';
+  ellipse(x, cx, bodyY - 10, 12, 10);
+  // The cane, in the right paw.
+  x.strokeStyle = '#7a4e2a';
+  x.lineWidth = 8;
+  x.beginPath();
+  x.moveTo(cx + 78, bottom - 6);
+  x.lineTo(cx + 72, bodyY - 20);
+  x.arc(cx + 60, bodyY - 20, 12, 0, Math.PI, true);
+  x.stroke();
+  x.fillStyle = CAT_GREY;
+  ellipse(x, cx + 70, bodyY - 8, 15, 13);
+  // The head, its ears, stripes and white muzzle.
+  x.fillStyle = CAT_GREY;
+  for (const side of [-1, 1]) {
+    x.beginPath();
+    x.moveTo(cx + side * 22, headY - 44);
+    x.lineTo(cx + side * 52, headY - 82);
+    x.lineTo(cx + side * 58, headY - 26);
+    x.closePath();
+    x.fill();
+  }
+  x.fillStyle = '#e8b8b0';
+  for (const side of [-1, 1]) {
+    x.beginPath();
+    x.moveTo(cx + side * 32, headY - 44);
+    x.lineTo(cx + side * 50, headY - 68);
+    x.lineTo(cx + side * 52, headY - 36);
+    x.closePath();
+    x.fill();
+  }
+  x.fillStyle = CAT_GREY;
+  ellipse(x, cx, headY, 66, 58);
+  x.strokeStyle = CAT_DARK;
+  x.lineWidth = 6;
+  for (const stripe of [-18, 0, 18]) {
+    x.beginPath();
+    x.moveTo(cx + stripe, headY - 56);
+    x.lineTo(cx + stripe * 0.8, headY - 36);
+    x.stroke();
+  }
+  x.fillStyle = '#f3ece2';
+  ellipse(x, cx, headY + 26, 34, 24);
+  x.fillStyle = '#d98a8a';
+  x.beginPath();
+  x.moveTo(cx - 8, headY + 12);
+  x.lineTo(cx + 8, headY + 12);
+  x.lineTo(cx, headY + 22);
+  x.closePath();
+  x.fill();
+  x.strokeStyle = '#5a5048';
+  x.lineWidth = 2.5;
+  for (const side of [-1, 1]) {
+    for (const tilt of [-6, 4]) {
+      x.beginPath();
+      x.moveTo(cx + side * 24, headY + 24);
+      x.lineTo(cx + side * 66, headY + 24 + tilt);
+      x.stroke();
+    }
+  }
+  // A worried mouth, the eyes behind round glasses.
+  x.lineWidth = 3;
+  x.beginPath();
+  x.arc(cx, headY + 40, 8, 1.15 * Math.PI, 1.85 * Math.PI);
+  x.stroke();
+  drawEye(x, cx - 24, headY - 8, eyes, { width: 7 });
+  drawEye(x, cx + 24, headY - 8, eyes, { width: 7 });
+  x.strokeStyle = '#b8873e';
+  x.lineWidth = 4;
+  for (const side of [-1, 1]) {
+    x.beginPath();
+    x.arc(cx + side * 24, headY - 8, 18, 0, Math.PI * 2);
+    x.stroke();
+  }
+  x.beginPath();
+  x.moveTo(cx - 6, headY - 10);
+  x.lineTo(cx + 6, headY - 10);
+  x.stroke();
+}
+
+export const KITTEN_SIZE = { width: 200, height: 220 };
+
+// Mistigri, Mme Ronron's kitten: a little ginger tabby in a striped scarf, glad to be found.
+export function drawKitten(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eyes: Eyes = 'open',
+) {
+  const x = drawing;
+  const cx = width / 2;
+  const bottom = height - 6;
+  const headY = bottom - 120;
+  const ginger = '#e39a4f';
+  x.lineCap = 'round';
+  x.lineJoin = 'round';
+  x.strokeStyle = ginger;
+  x.lineWidth = 12;
+  x.beginPath();
+  x.moveTo(cx + 30, bottom - 20);
+  x.quadraticCurveTo(cx + 80, bottom - 40, cx + 70, bottom - 90);
+  x.stroke();
+  x.fillStyle = ginger;
+  ellipse(x, cx, bottom - 38, 42, 36);
+  x.fillStyle = '#f6e3c8';
+  ellipse(x, cx, bottom - 30, 24, 26);
+  ellipse(x, cx - 20, bottom - 6, 14, 8);
+  ellipse(x, cx + 20, bottom - 6, 14, 8);
+  // The scarf, its end blowing.
+  x.fillStyle = '#3c78b4';
+  roundedRect(x, cx - 40, headY + 36, 80, 18, 8);
+  x.fill();
+  x.fillRect(cx + 18, headY + 44, 18, 40);
+  x.fillStyle = '#f0c43a';
+  x.fillRect(cx - 20, headY + 36, 10, 18);
+  x.fillRect(cx + 10, headY + 36, 10, 18);
+  x.fillRect(cx + 18, headY + 62, 18, 8);
+  x.fillStyle = ginger;
+  for (const side of [-1, 1]) {
+    x.beginPath();
+    x.moveTo(cx + side * 16, headY - 30);
+    x.lineTo(cx + side * 40, headY - 64);
+    x.lineTo(cx + side * 46, headY - 14);
+    x.closePath();
+    x.fill();
+  }
+  ellipse(x, cx, headY, 50, 44);
+  x.strokeStyle = '#c0712f';
+  x.lineWidth = 5;
+  for (const stripe of [-14, 0, 14]) {
+    x.beginPath();
+    x.moveTo(cx + stripe, headY - 42);
+    x.lineTo(cx + stripe * 0.8, headY - 26);
+    x.stroke();
+  }
+  x.fillStyle = '#f6e3c8';
+  ellipse(x, cx, headY + 18, 24, 18);
+  x.fillStyle = '#d98a8a';
+  ellipse(x, cx, headY + 10, 6, 4);
+  x.strokeStyle = '#5a3a2a';
+  x.lineWidth = 3;
+  x.beginPath();
+  x.arc(cx - 6, headY + 18, 6, 0.1 * Math.PI, 0.9 * Math.PI);
+  x.arc(cx + 6, headY + 18, 6, 0.1 * Math.PI, 0.9 * Math.PI);
+  x.stroke();
+  drawEye(x, cx - 18, headY - 6, eyes, { width: 8 });
+  drawEye(x, cx + 18, headY - 6, eyes, { width: 8 });
+  x.fillStyle = 'rgb(240 110 100 / 35%)';
+  ellipse(x, cx - 30, headY + 12, 8, 5);
+  ellipse(x, cx + 30, headY + 12, 8, 5);
+}
+
+// --- Flash the photographer, downtown. ----------------------------------------------------------
+
+const CHAMELEON = '#6cbf6a';
+const CHAMELEON_DARK = '#4a9a52';
+
+export const PHOTOGRAPHER_SIZE = { width: 300, height: 380 };
+export const PHOTOGRAPHER_FACE = { x: 170, y: 130, size: 170 };
+
+// Flash, the chameleon who photographs the big city's sky: green with a curled tail, a turret eye,
+// a cap turned backwards, a pocketed waistcoat and a camera on its strap.
+export function drawPhotographer(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eyes: Eyes = 'open',
+) {
+  const x = drawing;
+  const cx = width / 2;
+  const bottom = height - 6;
+  const bodyY = bottom - 110;
+  const headY = bodyY - 116;
+  x.lineCap = 'round';
+  x.lineJoin = 'round';
+  // The curled tail behind.
+  x.strokeStyle = CHAMELEON_DARK;
+  x.lineWidth = 16;
+  x.beginPath();
+  x.moveTo(cx - 40, bodyY + 50);
+  x.quadraticCurveTo(cx - 120, bodyY + 60, cx - 110, bodyY + 10);
+  x.arc(cx - 92, bodyY + 10, 18, Math.PI, Math.PI * 2.6);
+  x.stroke();
+  // Legs.
+  x.fillStyle = CHAMELEON_DARK;
+  for (const side of [-1, 1]) {
+    roundedRect(x, cx + side * 28 - 12, bodyY + 50, 24, bottom - bodyY - 50, 10);
+    x.fill();
+  }
+  // The body and its pale belly, the waistcoat over it.
+  x.fillStyle = CHAMELEON;
+  ellipse(x, cx, bodyY, 66, 80);
+  x.fillStyle = '#c7e6a8';
+  ellipse(x, cx + 14, bodyY + 10, 34, 58);
+  x.fillStyle = '#c99a5b';
+  for (const side of [-1, 1]) {
+    x.beginPath();
+    x.moveTo(cx + side * 10, bodyY - 74);
+    x.quadraticCurveTo(cx + side * 70, bodyY - 60, cx + side * 62, bodyY + 60);
+    x.lineTo(cx + side * 22, bodyY + 64);
+    x.closePath();
+    x.fill();
+  }
+  x.fillStyle = '#a87644';
+  roundedRect(x, cx - 52, bodyY + 4, 24, 20, 4);
+  x.fill();
+  roundedRect(x, cx + 32, bodyY + 4, 24, 20, 4);
+  x.fill();
+  // Spots along the back.
+  x.fillStyle = CHAMELEON_DARK;
+  for (const [spotX, spotY] of [
+    [-50, -40],
+    [-58, 0],
+    [-46, 40],
+  ] as const) {
+    ellipse(x, cx + spotX, bodyY + spotY, 7, 6);
+  }
+  // The camera on its strap, held at the chest.
+  x.strokeStyle = '#2c2a35';
+  x.lineWidth = 5;
+  x.beginPath();
+  x.moveTo(cx - 30, bodyY - 70);
+  x.lineTo(cx + 30, bodyY - 10);
+  x.stroke();
+  x.fillStyle = '#2c2a35';
+  roundedRect(x, cx + 14, bodyY - 20, 74, 48, 8);
+  x.fill();
+  x.fillStyle = '#4a4458';
+  roundedRect(x, cx + 26, bodyY - 30, 22, 12, 3);
+  x.fill();
+  x.fillStyle = '#8fb3d9';
+  ellipse(x, cx + 56, bodyY + 4, 17, 17);
+  x.fillStyle = '#2c2a35';
+  ellipse(x, cx + 56, bodyY + 4, 9, 9);
+  x.fillStyle = '#fbf6ea';
+  ellipse(x, cx + 52, bodyY, 3, 3);
+  x.fillStyle = CHAMELEON;
+  ellipse(x, cx + 12, bodyY + 10, 16, 14);
+  ellipse(x, cx + 92, bodyY + 10, 14, 13);
+  // The head: a pointed snout to the right, a casque on top, the turret eye.
+  x.fillStyle = CHAMELEON;
+  x.beginPath();
+  x.moveTo(cx - 50, headY + 30);
+  x.quadraticCurveTo(cx - 54, headY - 40, cx - 10, headY - 64);
+  x.quadraticCurveTo(cx + 40, headY - 50, cx + 84, headY + 6);
+  x.quadraticCurveTo(cx + 70, headY + 44, cx + 10, headY + 50);
+  x.quadraticCurveTo(cx - 40, headY + 52, cx - 50, headY + 30);
+  x.closePath();
+  x.fill();
+  x.strokeStyle = CHAMELEON_DARK;
+  x.lineWidth = 4;
+  x.beginPath();
+  x.moveTo(cx + 20, headY + 28);
+  x.quadraticCurveTo(cx + 50, headY + 34, cx + 76, headY + 12);
+  x.stroke();
+  x.fillStyle = CHAMELEON_DARK;
+  ellipse(x, cx + 22, headY - 4, 26, 26);
+  x.fillStyle = '#f0c43a';
+  ellipse(x, cx + 22, headY - 4, 17, 17);
+  drawEye(x, cx + 26, headY - 2, eyes, { width: 8 });
+  x.fillStyle = 'rgb(240 110 100 / 30%)';
+  ellipse(x, cx + 44, headY + 24, 9, 5);
+  // The cap, turned backwards, its peak behind.
+  x.fillStyle = '#d0443a';
+  x.beginPath();
+  x.moveTo(cx - 44, headY - 30);
+  x.quadraticCurveTo(cx - 30, headY - 84, cx + 16, headY - 70);
+  x.quadraticCurveTo(cx + 30, headY - 60, cx + 20, headY - 48);
+  x.closePath();
+  x.fill();
+  x.fillStyle = '#a8352c';
+  x.beginPath();
+  x.ellipse(cx - 58, headY - 34, 26, 8, 0.4, 0, Math.PI * 2);
+  x.fill();
+}
+
+export const CITY_SCENERY_SIZE = { width: 900, height: 600 };
+
+// One row of the big city's towers along the bottom of Flash's sky, cut out of paper: flat tops,
+// stepped crowns, a dome, antennas and water tanks, with rows of lit windows.
+function drawTowerRow(
+  towers: readonly { left: number; width: number; top: number; crown: string }[],
+  colors: { wall: string; shade: string; window: string },
+) {
+  return (drawing: CanvasRenderingContext2D, _width: number, height: number) => {
+    const x = drawing;
+    for (const tower of towers) {
+      const right = tower.left + tower.width;
+      x.fillStyle = colors.wall;
+      x.fillRect(tower.left, tower.top, tower.width, height - tower.top);
+      // The shaded side, for depth.
+      x.fillStyle = colors.shade;
+      x.fillRect(right - tower.width * 0.22, tower.top, tower.width * 0.22, height - tower.top);
+      x.fillStyle = colors.wall;
+      if (tower.crown === 'step') {
+        x.fillRect(tower.left + tower.width * 0.15, tower.top - 26, tower.width * 0.7, 28);
+        x.fillRect(tower.left + tower.width * 0.32, tower.top - 50, tower.width * 0.36, 26);
+      } else if (tower.crown === 'dome') {
+        x.beginPath();
+        x.ellipse(tower.left + tower.width / 2, tower.top, tower.width * 0.36, 30, 0, Math.PI, 0);
+        x.fill();
+      } else if (tower.crown === 'antenna') {
+        x.strokeStyle = colors.wall;
+        x.lineWidth = 5;
+        x.beginPath();
+        x.moveTo(tower.left + tower.width / 2, tower.top);
+        x.lineTo(tower.left + tower.width / 2, tower.top - 70);
+        x.stroke();
+        x.fillStyle = '#d0443a';
+        ellipse(x, tower.left + tower.width / 2, tower.top - 72, 5, 5);
+      } else if (tower.crown === 'tank') {
+        x.fillRect(tower.left + tower.width * 0.2, tower.top - 30, 30, 30);
+        x.beginPath();
+        x.moveTo(tower.left + tower.width * 0.2 - 4, tower.top - 30);
+        x.lineTo(tower.left + tower.width * 0.2 + 15, tower.top - 46);
+        x.lineTo(tower.left + tower.width * 0.2 + 34, tower.top - 30);
+        x.closePath();
+        x.fill();
+      }
+      // Rows of windows, some lit.
+      for (let row = tower.top + 18; row < height - 14; row += 24) {
+        for (let column = tower.left + 12; column < right - 18; column += 20) {
+          const isLit = (row * 7 + column * 3) % 5 < 3;
+          x.fillStyle = isLit ? colors.window : colors.shade;
+          x.fillRect(column, row, 9, 12);
+        }
+      }
+    }
+  };
+}
+
+// The big city's sky as Flash frames it: a warm afternoon sky deepening to blue at the top, the
+// sun, paper clouds, a far row of pale towers and a near row of darker ones, all cut out of paper
+// like the rest of the world.
+export function drawCityScenery(): HTMLCanvasElement {
+  const { width, height } = CITY_SCENERY_SIZE;
+  const canvas = createCanvas(width, height);
+  const x = context(canvas);
+  const sky = x.createLinearGradient(0, 0, 0, height);
+  sky.addColorStop(0, '#4f8fcf');
+  sky.addColorStop(0.55, '#9fd0ec');
+  sky.addColorStop(0.85, '#f6dcb0');
+  sky.addColorStop(1, '#f4c58f');
+  x.fillStyle = sky;
+  x.fillRect(0, 0, width, height);
+  // The sun, low on the left, with its soft glow.
+  const glow = x.createRadialGradient(170, 250, 20, 170, 250, 220);
+  glow.addColorStop(0, 'rgb(255 236 170 / 80%)');
+  glow.addColorStop(1, 'rgb(255 236 170 / 0%)');
+  x.fillStyle = glow;
+  x.fillRect(0, 30, 400, 440);
+  const sun = cutOut(
+    120,
+    120,
+    (art, w, h) => {
+      art.fillStyle = '#f7c948';
+      ellipse(art, w / 2, h / 2, w / 2, h / 2);
+      art.fillStyle = '#fbe28a';
+      ellipse(art, w / 2 - 14, h / 2 - 14, w / 4, h / 4);
+    },
+    6,
+    443,
+  );
+  pasteCutOut(x, sun, 170, 305, 100);
+  const cloud = cutOut(160, 90, drawCloud('#fbfbf6'), 6, 441);
+  for (const [cloudX, cloudY, size] of [
+    [130, 60, 58],
+    [560, 40, 44],
+    [790, 130, 52],
+    [380, 170, 34],
+    [680, 250, 30],
+  ]) {
+    pasteCutOut(x, cloud, cloudX, cloudY + size, size);
+  }
+  // A few birds, far off.
+  x.strokeStyle = 'rgb(44 42 53 / 55%)';
+  x.lineWidth = 3;
+  x.lineCap = 'round';
+  for (const [birdX, birdY] of [
+    [460, 110],
+    [482, 124],
+    [500, 104],
+  ]) {
+    x.beginPath();
+    x.moveTo(birdX - 9, birdY);
+    x.quadraticCurveTo(birdX - 4, birdY - 7, birdX, birdY);
+    x.quadraticCurveTo(birdX + 4, birdY - 7, birdX + 9, birdY);
+    x.stroke();
+  }
+  const far = cutOut(
+    width,
+    220,
+    drawTowerRow(
+      [
+        { left: 20, width: 90, top: 70, crown: 'flat' },
+        { left: 130, width: 70, top: 30, crown: 'antenna' },
+        { left: 230, width: 110, top: 90, crown: 'step' },
+        { left: 370, width: 80, top: 50, crown: 'dome' },
+        { left: 480, width: 100, top: 100, crown: 'flat' },
+        { left: 610, width: 70, top: 20, crown: 'antenna' },
+        { left: 700, width: 120, top: 80, crown: 'step' },
+        { left: 840, width: 60, top: 60, crown: 'flat' },
+      ],
+      { wall: '#a9b8cc', shade: '#97a7bd', window: '#e6eef5' },
+    ),
+    6,
+    444,
+  );
+  // Each row spans the whole width, a little past each edge so that its paper margin never shows.
+  x.drawImage(far, -14, height - 46 - 175, width + 28, 175);
+  const near = cutOut(
+    width,
+    170,
+    drawTowerRow(
+      [
+        { left: 0, width: 120, top: 60, crown: 'tank' },
+        { left: 140, width: 100, top: 20, crown: 'step' },
+        { left: 270, width: 130, top: 80, crown: 'flat' },
+        { left: 420, width: 90, top: 40, crown: 'antenna' },
+        { left: 540, width: 140, top: 90, crown: 'tank' },
+        { left: 700, width: 100, top: 30, crown: 'dome' },
+        { left: 820, width: 80, top: 70, crown: 'flat' },
+      ],
+      { wall: '#4f5d70', shade: '#3f4b5c', window: '#ffe5a0' },
+    ),
+    7,
+    445,
+  );
+  x.drawImage(near, -14, height + 8 - 135, width + 28, 135);
+  addGrain(canvas, 8, 442);
+  return canvas;
+}
+
+export const SKY_BALLOON_SIZE = { width: 200, height: 270 };
+// Where the envelope's middle is in its drawing, as a share of its height: the point that counts.
+export const SKY_BALLOON_CENTRE = 0.36;
+
+// A hot-air balloon drifting over the city: an envelope of alternating gores, shaded round, with a
+// shine, its crown band and skirt, the ropes and a wicker basket.
+export function drawSkyBalloon(colors: readonly [string, string]) {
+  return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
+    const x = drawing;
+    const cx = width / 2;
+    const cy = height * 0.36;
+    const rx = width * 0.46;
+    const ry = height * 0.34;
+    // The envelope's outline, round on top and narrowing to the skirt.
+    const envelope = () => {
+      x.beginPath();
+      x.moveTo(cx - rx * 0.32, cy + ry * 1.05);
+      x.bezierCurveTo(cx - rx * 1.2, cy + ry * 0.5, cx - rx * 1.05, cy - ry * 1.05, cx, cy - ry);
+      x.bezierCurveTo(
+        cx + rx * 1.05,
+        cy - ry * 1.05,
+        cx + rx * 1.2,
+        cy + ry * 0.5,
+        cx + rx * 0.32,
+        cy + ry * 1.05,
+      );
+      x.closePath();
+    };
+    x.save();
+    envelope();
+    x.clip();
+    x.fillStyle = colors[0];
+    x.fillRect(0, 0, width, height);
+    // Gores: curved bands from crown to skirt, every other one in the second colour.
+    x.fillStyle = colors[1];
+    for (const gore of [-0.62, 0, 0.62]) {
+      x.beginPath();
+      x.moveTo(cx, cy - ry);
+      x.quadraticCurveTo(
+        cx + rx * (gore - 0.2) * 1.4,
+        cy,
+        cx + rx * (gore - 0.12) * 0.4,
+        cy + ry * 1.1,
+      );
+      x.lineTo(cx + rx * (gore + 0.12) * 0.4, cy + ry * 1.1);
+      x.quadraticCurveTo(cx + rx * (gore + 0.2) * 1.4, cy, cx, cy - ry);
+      x.fill();
+    }
+    // Shading on the right, and a shine on the left.
+    const shade = x.createLinearGradient(cx - rx, 0, cx + rx, 0);
+    shade.addColorStop(0, 'rgb(255 255 255 / 18%)');
+    shade.addColorStop(0.55, 'rgb(0 0 0 / 0%)');
+    shade.addColorStop(1, 'rgb(0 0 0 / 28%)');
+    x.fillStyle = shade;
+    x.fillRect(0, 0, width, height);
+    x.fillStyle = 'rgb(255 255 255 / 45%)';
+    x.beginPath();
+    x.ellipse(cx - rx * 0.45, cy - ry * 0.45, rx * 0.14, ry * 0.3, -0.4, 0, Math.PI * 2);
+    x.fill();
+    x.restore();
+    // The skirt.
+    x.fillStyle = '#7f5530';
+    roundedRect(x, cx - rx * 0.34, cy + ry * 1.0, rx * 0.68, 10, 4);
+    x.fill();
+    // The ropes and the basket.
+    x.strokeStyle = '#6b4a2e';
+    x.lineWidth = 2.5;
+    const basketTop = height - 44;
+    for (const [from, to] of [
+      [-0.3, -0.18],
+      [-0.1, -0.06],
+      [0.1, 0.06],
+      [0.3, 0.18],
+    ]) {
+      x.beginPath();
+      x.moveTo(cx + rx * from, cy + ry * 1.05 + 8);
+      x.lineTo(cx + rx * to, basketTop);
+      x.stroke();
+    }
+    x.fillStyle = '#b8873e';
+    roundedRect(x, cx - 26, basketTop, 52, 38, 6);
+    x.fill();
+    x.strokeStyle = '#8a5a34';
+    x.lineWidth = 2;
+    for (let weave = 1; weave < 4; weave++) {
+      x.beginPath();
+      x.moveTo(cx - 24, basketTop + weave * 9.5);
+      x.lineTo(cx + 24, basketTop + weave * 9.5);
+      x.stroke();
+    }
+    x.fillStyle = '#8a5a34';
+    roundedRect(x, cx - 30, basketTop - 4, 60, 8, 4);
+    x.fill();
+  };
+}
+
+export const SKY_KITE_SIZE = { width: 160, height: 200 };
+// Where the kite's middle is in its drawing, as a share of its height.
+export const SKY_KITE_CENTRE = 0.42;
+
+// A diamond kite: four panels in two colours, the light catching the upper ones, its crossed spars,
+// and a bow where the tail ties on. The tail itself flutters in the scene.
+export function drawSkyKite(colors: readonly [string, string]) {
+  return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
+    const x = drawing;
+    const cx = width / 2;
+    const top = 8;
+    const middle = height * 0.42;
+    const bottom = height - 30;
+    const half = width * 0.44;
+    const panels = [
+      {
+        points: [
+          [cx, top],
+          [cx + half, middle],
+          [cx, middle],
+        ],
+        color: colors[0],
+        light: 0.22,
+      },
+      {
+        points: [
+          [cx, top],
+          [cx - half, middle],
+          [cx, middle],
+        ],
+        color: colors[1],
+        light: 0.3,
+      },
+      {
+        points: [
+          [cx, bottom],
+          [cx + half, middle],
+          [cx, middle],
+        ],
+        color: colors[1],
+        light: -0.12,
+      },
+      {
+        points: [
+          [cx, bottom],
+          [cx - half, middle],
+          [cx, middle],
+        ],
+        color: colors[0],
+        light: 0,
+      },
+    ] as const;
+    for (const { points, color, light } of panels) {
+      x.fillStyle = color;
+      x.beginPath();
+      x.moveTo(points[0][0], points[0][1]);
+      x.lineTo(points[1][0], points[1][1]);
+      x.lineTo(points[2][0], points[2][1]);
+      x.closePath();
+      x.fill();
+      x.fillStyle =
+        light > 0 ? `rgb(255 255 255 / ${light * 100}%)` : `rgb(0 0 0 / ${-light * 100}%)`;
+      x.fill();
+    }
+    x.strokeStyle = '#6b4a2e';
+    x.lineWidth = 4;
+    x.lineCap = 'round';
+    x.beginPath();
+    x.moveTo(cx, top + 4);
+    x.lineTo(cx, bottom - 4);
+    x.moveTo(cx - half + 6, middle);
+    x.lineTo(cx + half - 6, middle);
+    x.stroke();
+    // The bow at the bottom point.
+    x.fillStyle = colors[1];
+    for (const side of [-1, 1]) {
+      x.beginPath();
+      x.moveTo(cx, bottom + 4);
+      x.lineTo(cx + side * 18, bottom - 6);
+      x.lineTo(cx + side * 18, bottom + 14);
+      x.closePath();
+      x.fill();
+    }
+    x.fillStyle = '#6b4a2e';
+    ellipse(x, cx, bottom + 4, 5, 5);
+  };
+}
+
+// --- Where Mme Ronron's kitten hides. -----------------------------------------------------------
+
+export const HIDING_PROP_SIZE = { width: 220, height: 160 };
+
+// What each hiding place looks like, all drawn the same size, standing on the ground: a stack of
+// wooden crates, a round bush, a tub of flowers, or a hollow log.
+export function drawHidingProp(look: 'crates' | 'bush' | 'flowers' | 'log') {
+  return (drawing: CanvasRenderingContext2D, width: number, height: number) => {
+    const x = drawing;
+    const bottom = height - 4;
+    if (look === 'crates') {
+      for (const [left, top, size] of [
+        [20, bottom - 90, 90],
+        [110, bottom - 80, 80],
+        [56, bottom - 160, 74],
+      ] as const) {
+        x.fillStyle = '#c99a5b';
+        x.fillRect(left, top, size, size);
+        x.strokeStyle = '#8a5a34';
+        x.lineWidth = 6;
+        x.strokeRect(left + 3, top + 3, size - 6, size - 6);
+        x.beginPath();
+        x.moveTo(left + 6, top + 6);
+        x.lineTo(left + size - 6, top + size - 6);
+        x.stroke();
+      }
+    } else if (look === 'bush') {
+      x.fillStyle = '#3f7a3a';
+      for (const [bushX, bushY, size] of [
+        [60, bottom - 50, 52],
+        [160, bottom - 50, 52],
+        [110, bottom - 80, 66],
+      ] as const) {
+        ellipse(x, bushX, bushY, size, size * 0.9);
+      }
+      x.fillStyle = '#5a9a48';
+      for (const [bushX, bushY, size] of [
+        [70, bottom - 60, 34],
+        [150, bottom - 62, 32],
+        [104, bottom - 96, 40],
+      ] as const) {
+        ellipse(x, bushX, bushY, size, size * 0.8);
+      }
+      x.fillStyle = '#f2b8c6';
+      for (const [flowerX, flowerY] of [
+        [52, bottom - 70],
+        [130, bottom - 110],
+        [170, bottom - 54],
+      ] as const) {
+        ellipse(x, flowerX, flowerY, 6, 6);
+      }
+    } else if (look === 'flowers') {
+      // Stems and blooms, then the wooden tub in front.
+      x.strokeStyle = '#4f7a34';
+      x.lineWidth = 5;
+      const blooms = ['#d0443a', '#f0c43a', '#9d7bb8', '#f08a7e', '#fbf6ea'];
+      for (let stem = 0; stem < 9; stem++) {
+        const stemX = 40 + stem * 18;
+        const top = bottom - 110 - ((stem * 23) % 36);
+        x.beginPath();
+        x.moveTo(stemX, bottom - 60);
+        x.lineTo(stemX + (stem % 2 ? 6 : -6), top);
+        x.stroke();
+        x.fillStyle = blooms[stem % blooms.length];
+        ellipse(x, stemX + (stem % 2 ? 6 : -6), top, 11, 11);
+        x.fillStyle = '#f0c43a';
+        ellipse(x, stemX + (stem % 2 ? 6 : -6), top, 4, 4);
+      }
+      x.fillStyle = '#a87644';
+      x.beginPath();
+      x.moveTo(24, bottom - 70);
+      x.lineTo(width - 24, bottom - 70);
+      x.lineTo(width - 40, bottom);
+      x.lineTo(40, bottom);
+      x.closePath();
+      x.fill();
+      x.fillStyle = '#7f5530';
+      x.fillRect(30, bottom - 52, width - 60, 8);
+      x.fillRect(36, bottom - 24, width - 72, 8);
+    } else {
+      // A hollow log lying on its side, its dark opening towards the viewer's right.
+      x.fillStyle = '#8a5a34';
+      roundedRect(x, 20, bottom - 80, width - 70, 76, 30);
+      x.fill();
+      x.strokeStyle = '#6b4a2e';
+      x.lineWidth = 4;
+      for (const lineY of [bottom - 60, bottom - 36]) {
+        x.beginPath();
+        x.moveTo(40, lineY);
+        x.lineTo(width - 80, lineY + 4);
+        x.stroke();
+      }
+      x.fillStyle = '#c99a5b';
+      ellipse(x, width - 50, bottom - 42, 30, 38);
+      x.fillStyle = '#3a2618';
+      ellipse(x, width - 50, bottom - 42, 20, 28);
+      x.fillStyle = '#5a9a48';
+      ellipse(x, 70, bottom - 80, 16, 8);
+      ellipse(x, 96, bottom - 82, 12, 6);
+    }
+  };
+}

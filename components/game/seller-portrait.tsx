@@ -16,12 +16,16 @@ import {
   drawGaspard,
   drawHedgehog,
   drawHulotte,
+  drawKitten,
   drawLea,
   drawLucas,
+  drawPainter,
   drawPapy,
+  drawPhotographer,
   drawPostman,
   drawRaccoon,
   drawRamenChef,
+  drawRonron,
   drawTrotte,
   GARDENER_FACE,
   GARDENER_SIZE,
@@ -31,18 +35,25 @@ import {
   HEDGEHOG_SIZE,
   HULOTTE_FACE,
   HULOTTE_SIZE,
+  KITTEN_SIZE,
   LEA_FACE,
   LEA_SIZE,
   LUCAS_FACE,
   LUCAS_SIZE,
+  PAINTER_FACE,
+  PAINTER_SIZE,
   PAPY_FACE,
   PAPY_SIZE,
+  PHOTOGRAPHER_FACE,
+  PHOTOGRAPHER_SIZE,
   POSTMAN_FACE,
   POSTMAN_SIZE,
   RACCOON_FACE,
   RACCOON_SIZE,
   RAMEN_CHEF_FACE,
   RAMEN_CHEF_SIZE,
+  RONRON_FACE,
+  RONRON_SIZE,
   SELLERS,
   TROTTE_FACE,
   TROTTE_SIZE,
@@ -51,7 +62,7 @@ import {
 const PORTRAIT_SIZE = 208;
 
 // The characters with a portrait: the sellers, and the quest givers.
-type Character =
+export type Character =
   | keyof typeof SELLERS
   | 'binderSeller'
   | QuestGiver
@@ -61,7 +72,11 @@ type Character =
   | 'ramenChef'
   | 'dojoMaster'
   | 'gardener'
-  | 'postman';
+  | 'postman'
+  | 'painter'
+  | 'ronron'
+  | 'kitten'
+  | 'photographer';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -91,6 +106,18 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'postman') {
     return { draw: drawPostman, size: POSTMAN_SIZE, face: POSTMAN_FACE };
+  }
+  if (stock === 'painter') {
+    return { draw: drawPainter, size: PAINTER_SIZE, face: PAINTER_FACE };
+  }
+  if (stock === 'ronron') {
+    return { draw: drawRonron, size: RONRON_SIZE, face: RONRON_FACE };
+  }
+  if (stock === 'kitten') {
+    return { draw: drawKitten, size: KITTEN_SIZE, face: { x: 100, y: 100, size: 150 } };
+  }
+  if (stock === 'photographer') {
+    return { draw: drawPhotographer, size: PHOTOGRAPHER_SIZE, face: PHOTOGRAPHER_FACE };
   }
   if (stock === 'gardener') {
     return { draw: drawGardener, size: GARDENER_SIZE, face: GARDENER_FACE };

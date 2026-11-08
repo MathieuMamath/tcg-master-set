@@ -87,6 +87,8 @@ export const BEDROOM_FURNITURE = {
 export const TOWN_ENDS = { left: -20, right: 38 };
 export const TOWN_BUILDINGS = {
   flats: { x: -13.5, width: 4.6, doorX: -12.6 },
+  // Mme Ronron waits on the pavement left of her block, for news of her kitten.
+  ronron: { x: -16.6 },
   house: { x: -5, width: 4.2, doorX: -5 },
   // Gaspard stands behind his cart, under its awning.
   dalgona: { x: -0.1, width: 3.2, gaspardX: 0 },
@@ -164,8 +166,8 @@ const ARCADE_BOUNDS = {
 };
 
 // The Linden Park, reached by bus: Pépin's garden on the far left, with its fountain, flower beds
-// and sorting bins, then the stop, Papy Caillou beside his bench with his cards on it, and Lucas the
-// little otter at the edge of the lake on the right.
+// and sorting bins, then the stop, Papy Caillou beside his bench with his cards on it, Pinceau at
+// his easel painting the lake, and Lucas the little otter at the edge of the lake on the right.
 export const PARK_ENDS = { left: -20, right: 13 };
 export const PARK_SPOTS = {
   fountain: { x: -18.2, width: 1.8 },
@@ -175,6 +177,8 @@ export const PARK_SPOTS = {
   busStop: { x: -7.4, width: 3.6, signX: -8.9 },
   bench: { x: -2.6, width: 2.6 },
   papy: { x: -0.6 },
+  painter: { x: 2.2 },
+  easel: { x: 3.5, width: 1.2 },
   lake: { left: 4.4, right: 12.6 },
   lucas: { x: 6.2 },
 } as const;
@@ -191,6 +195,8 @@ export const DOWNTOWN_SPOTS = {
   ramen: { x: 22.4, width: 5.4, height: 5, doorX: 22.4 },
   // The dojo, white plaster and dark timber under a sweeping roof, its sliding doors in the middle.
   dojo: { x: 34, width: 6, height: 5.2, doorX: 34 },
+  // Flash, his camera at the ready, photographing the sky between the bureau and the ramen shop.
+  photographer: { x: 10.6 },
 } as const;
 // The towers along the pavement, and a farther row behind them, from left to right.
 export const DOWNTOWN_TOWERS = [
@@ -212,6 +218,43 @@ export const DOWNTOWN_BACK_TOWERS = [
   { x: 31.6, width: 3.8, height: 11, look: 'curtain' },
   { x: 37.2, width: 4.2, height: 13.5, look: 'diagrid' },
 ] as const;
+
+// Where Mme Ronron's kitten can hide, a different one each day: behind something drawn in the
+// village, the park or downtown, which the player searches with the interact key. Each stretch keeps
+// clear of the doors and the characters along it.
+export const HIDING_SPOTS = [
+  { id: 'houseCrates', place: 'town', x: -8.4, look: 'crates' },
+  { id: 'arcadeBush', place: 'town', x: 20.2, look: 'bush' },
+  { id: 'busFlowers', place: 'town', x: 25, look: 'flowers' },
+  { id: 'benchBush', place: 'park', x: -4.5, look: 'bush' },
+  { id: 'lakeLog', place: 'park', x: 10.8, look: 'log' },
+  { id: 'ramenCrates', place: 'downtown', x: 27, look: 'crates' },
+  { id: 'dojoFlowers', place: 'downtown', x: 29.4, look: 'flowers' },
+] as const satisfies readonly {
+  id: string;
+  place: SidePlaceId;
+  x: number;
+  look: 'crates' | 'bush' | 'flowers' | 'log';
+}[];
+export type HidingSpotId = (typeof HIDING_SPOTS)[number]['id'];
+const HIDING_REACH = 0.6;
+
+// The hiding places along a place, to search.
+function hidingSpotsIn(place: SidePlaceId): SideInteraction[] {
+  return HIDING_SPOTS.filter((spot) => spot.place === place).map(({ x }) => ({
+    interaction: 'search',
+    minX: x - HIDING_REACH,
+    maxX: x + HIDING_REACH,
+  }));
+}
+
+// The hiding place searched from here, if any.
+export function hidingSpotAlong(place: SidePlaceId, x: number): HidingSpotId | null {
+  return (
+    HIDING_SPOTS.find((spot) => spot.place === place && Math.abs(spot.x - x) <= HIDING_REACH)?.id ??
+    null
+  );
+}
 
 // The administrative office, high in its tower: a window onto the big city, a wall screen of
 // dashboards, Mme Hulotte's desk on the right, and the door in the left wall. Only admins get past
@@ -343,6 +386,13 @@ export const TOWN: SideRoom = {
   start: TOWN_BUILDINGS.house.doorX,
   // The bus stop's sign opens the map of the stops the bus serves.
   interactions: [
+    {
+      interaction: 'ronron',
+      minX: TOWN_BUILDINGS.ronron.x - 1.1,
+      maxX: TOWN_BUILDINGS.ronron.x + 1.1,
+      speaker: { x: TOWN_BUILDINGS.ronron.x },
+    },
+    ...hidingSpotsIn('town'),
     {
       interaction: 'gaspard',
       minX: TOWN_BUILDINGS.dalgona.gaspardX - 1.3,
@@ -520,11 +570,18 @@ export const PARK: SideRoom = {
       speaker: { x: PARK_SPOTS.papy.x },
     },
     {
+      interaction: 'painter',
+      minX: PARK_SPOTS.painter.x - 0.9,
+      maxX: PARK_SPOTS.easel.x + 0.5,
+      speaker: { x: PARK_SPOTS.painter.x },
+    },
+    {
       interaction: 'boy',
       minX: PARK_SPOTS.lucas.x - 1,
       maxX: PARK_SPOTS.lucas.x + 1,
       speaker: { x: PARK_SPOTS.lucas.x },
     },
+    ...hidingSpotsIn('park'),
   ],
   // The park is left by bus, from the stop's sign.
   exits: [],
@@ -546,6 +603,13 @@ export const DOWNTOWN: SideRoom = {
       maxX: DOWNTOWN_SPOTS.bureau.brutusX + 1,
       speaker: { x: DOWNTOWN_SPOTS.bureau.brutusX },
     },
+    {
+      interaction: 'photographer',
+      minX: DOWNTOWN_SPOTS.photographer.x - 1.2,
+      maxX: DOWNTOWN_SPOTS.photographer.x + 1.2,
+      speaker: { x: DOWNTOWN_SPOTS.photographer.x },
+    },
+    ...hidingSpotsIn('downtown'),
   ],
   // Downtown is left by bus, from the stop's sign. The bureau has no door of its own to use: Brutus
   // lets admins in. The ramen shop's door opens onto the pavement.

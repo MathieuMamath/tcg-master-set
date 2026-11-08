@@ -50,12 +50,27 @@ import {
 import { duplicateCoins } from '@/game/duplicate-coins';
 import { FISHING_QUEST, type FishedItem, fishItem, ITEM_COINS } from '@/game/fishing';
 import {
+  canSearchKitten,
+  isHidingSpot,
+  KITTEN_QUEST,
+  KITTEN_REWARD,
+  kittenSpotFor,
+} from '@/game/lost-kitten';
+import {
   dealMemoryGame,
   flipMemoryCard,
   GRANDPA_QUEST,
   MEMORY_REWARD,
   type MemoryStatus,
 } from '@/game/memory-game';
+import {
+  canFinishPuzzle,
+  checkMoves,
+  mixedBoard,
+  PUZZLE_QUEST,
+  puzzleCoins,
+  puzzleSeed,
+} from '@/game/painter-puzzle';
 import { canFinishWatering, WATERING_QUEST, WATERING_REWARD } from '@/game/park-watering';
 import {
   canFinishQuest,
@@ -92,6 +107,7 @@ import {
   STARTING_COINS,
   type Wallet,
 } from '@/game/shop-dialogue';
+import type { HidingSpotId } from '@/game/side-rooms';
 import { ADMIN_PLACES } from '@/game/side-rooms';
 import { type PlayerSpot, parseSpot } from '@/game/spot';
 import { type Visit, visitSeconds } from '@/game/visits';
@@ -115,6 +131,9 @@ export type PlayerProgress = {
   raffleDrawnOn: string | null;
   // Today's quests done, for the activity tracker.
   activity: DailyActivity;
+  // Whether Mme Ronron gave her hint today and the kitten is still lost, so that the hiding places
+  // can be searched.
+  isKittenHunted: boolean;
   // Whether Brutus lets the player into the administrative office.
   isAdmin: boolean;
   // How far the player's sleeps moved the game's clock on, in game minutes.
@@ -182,6 +201,19 @@ async function loadRewardDay(
     .from(playerQuests)
     .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId)));
   return attempt?.completedOn ?? null;
+}
+
+async function loadIsKittenHunted(database: Reader, userId: string): Promise<boolean> {
+  const [attempt] = await database
+    .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+    .from(playerQuests)
+    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, KITTEN_QUEST)));
+  const now = new Date();
+  return (
+    attempt?.startedAt != null &&
+    questDay(attempt.startedAt) === questDay(now) &&
+    canStartQuest(attempt, now)
+  );
 }
 
 // Every quest's last day at once, read into today's activity.
@@ -289,6 +321,7 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     cleanedOn: await loadRewardDay(getDb(), userId, GRANDMA_QUEST),
     raffleDrawnOn: await loadRewardDay(getDb(), userId, RAFFLE_QUEST),
     activity: await loadDailyActivity(getDb(), userId),
+    isKittenHunted: await loadIsKittenHunted(getDb(), userId),
     isAdmin: await isAdmin(userId),
     clockOffset: await loadClockOffset(getDb(), userId),
   };
@@ -416,55 +449,52 @@ export function startWateringQuest(userId: string): Promise<{ hasStarted: boolea
   return startQuestAttempt(userId, WATERING_QUEST);
 }
 
-// Mamie Noisette's quiz begins: its questions come from the moment it began, sent to the browser
-// without which answer is right. Starting again replaces a quiz that was left halfway.
-export async function startQuiz(
+// A chore whose draw comes from the moment it began: starting it records that moment, and sends
+// back what the browser needs to play it, drawn from it. Starting again replaces an attempt left
+// halfway.
+async function startSeededChore<Drawn>(
   userId: string,
-): Promise<{ hasStarted: false } | { hasStarted: true; questions: QuizQuestion[] }> {
-  const started = await startQuestAttempt(userId, QUIZ_QUEST);
-  if (!started.hasStarted) {
-    return { hasStarted: false };
-  }
-  const [attempt] = await getDb()
-    .select({ startedAt: playerQuests.startedAt })
-    .from(playerQuests)
-    .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, QUIZ_QUEST)));
-  return {
-    hasStarted: true,
-    questions: attempt?.startedAt ? quizFor(quizSeed(attempt.startedAt)) : [],
-  };
+  questId: string,
+  draw: (startedAt: Date) => Drawn,
+): Promise<{ hasStarted: false } | ({ hasStarted: true } & Drawn)> {
+  const started = await startQuestAttempt(userId, questId);
+  const [attempt] = started.hasStarted
+    ? await getDb()
+        .select({ startedAt: playerQuests.startedAt })
+        .from(playerQuests)
+        .where(and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId)))
+    : [];
+  return attempt?.startedAt
+    ? { hasStarted: true, ...draw(attempt.startedAt) }
+    : { hasStarted: false };
 }
 
-export type QuizResult = {
-  // Which answers were right, in the order of the questions.
-  checked: boolean[];
-  coins: number;
-  wallet: Wallet;
-};
-
-// The quiz is scored from the answers chosen, and paid once a day, by its right answers. Null when
-// no quiz is under way, or when the answers can't be its.
-export async function finishQuiz(userId: string, answers: unknown): Promise<QuizResult | null> {
+// A chore scored on the server from what the browser sends, and paid once a day by its score: the
+// attempt's row is locked and used up with the reward. `score` returns null for anything that
+// can't be this attempt's play, and the call then returns null too.
+async function finishScoredChore<Checked>(
+  userId: string,
+  questId: string,
+  score: (startedAt: Date, now: Date) => { checked: Checked; coins: number; points: number } | null,
+): Promise<{ checked: Checked; coins: number; wallet: Wallet } | null> {
   return getDb().transaction(async (transaction) => {
     const now = new Date();
     await loadWallet(transaction, userId);
-    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, QUIZ_QUEST));
+    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, questId));
     const [attempt] = await transaction
       .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
       .from(playerQuests)
       .where(quest)
       .for('update');
-    const checked =
-      attempt?.startedAt && canStartQuest(attempt, now) && canFinishQuiz(attempt.startedAt, now)
-        ? checkAnswers(quizFor(quizSeed(attempt.startedAt)), answers)
-        : null;
-    if (!attempt || !checked) {
+    const scored =
+      attempt?.startedAt && canStartQuest(attempt, now) ? score(attempt.startedAt, now) : null;
+    if (!attempt || !scored) {
       if (attempt?.startedAt) {
-        await recordEvent(transaction, userId, 'quest.rejected', { questId: QUIZ_QUEST });
+        await recordEvent(transaction, userId, 'quest.rejected', { questId });
       }
       return null;
     }
-    const coins = quizCoins(checked);
+    const { checked, coins, points } = scored;
     await transaction
       .update(playerQuests)
       .set({ startedAt: null, completedOn: questDay(now), paidCoins: coins })
@@ -477,13 +507,123 @@ export async function finishQuiz(userId: string, answers: unknown): Promise<Quiz
     }
     await recordEvent(transaction, userId, 'quest.finished', {
       coinsAfter: await coinsNow(transaction, userId),
-      questId: QUIZ_QUEST,
+      questId,
       outcome: coins > 0 ? 'rewarded' : 'none',
       coins,
       boosterSetId: null,
-      score: checked.filter(Boolean).length,
+      score: points,
     });
     return { checked, coins, wallet: await loadWallet(transaction, userId) };
+  });
+}
+
+// Mamie Noisette's quiz begins: its questions come from the moment it began, sent to the browser
+// without which answer is right.
+export function startQuiz(
+  userId: string,
+): Promise<{ hasStarted: false } | { hasStarted: true; questions: QuizQuestion[] }> {
+  return startSeededChore(userId, QUIZ_QUEST, (startedAt) => ({
+    questions: quizFor(quizSeed(startedAt)),
+  }));
+}
+
+export type QuizResult = {
+  // Which answers were right, in the order of the questions.
+  checked: boolean[];
+  coins: number;
+  wallet: Wallet;
+};
+
+// The quiz is scored from the answers chosen, and paid once a day, by its right answers. Null when
+// no quiz is under way, or when the answers can't be its.
+export function finishQuiz(userId: string, answers: unknown): Promise<QuizResult | null> {
+  return finishScoredChore(userId, QUIZ_QUEST, (startedAt, now) => {
+    const checked = canFinishQuiz(startedAt, now)
+      ? checkAnswers(quizFor(quizSeed(startedAt)), answers)
+      : null;
+    return checked
+      ? { checked, coins: quizCoins(checked), points: checked.filter(Boolean).length }
+      : null;
+  });
+}
+
+// Pinceau's puzzle begins: his painting, mixed up from the moment it began.
+export function startPuzzle(
+  userId: string,
+): Promise<{ hasStarted: false } | { hasStarted: true; board: number[] }> {
+  return startSeededChore(userId, PUZZLE_QUEST, (startedAt) => ({
+    board: mixedBoard(puzzleSeed(startedAt)),
+  }));
+}
+
+export type PuzzleResult = {
+  // How many moves finished it.
+  checked: number;
+  coins: number;
+  wallet: Wallet;
+};
+
+// The puzzle is played again from its moves, and paid once a day if they finish the painting,
+// more when they are few. Null when no puzzle is under way, or when the moves can't finish it.
+export function finishPuzzle(userId: string, moves: unknown): Promise<PuzzleResult | null> {
+  return finishScoredChore(userId, PUZZLE_QUEST, (startedAt, now) => {
+    const count = checkMoves(mixedBoard(puzzleSeed(startedAt)), moves);
+    return count !== null && canFinishPuzzle(startedAt, now, count)
+      ? { checked: count, coins: puzzleCoins(count), points: count }
+      : null;
+  });
+}
+
+// Mme Ronron gives her hint: the day's hiding place, the same all day. Asking again only restarts
+// the short wait before a search can find the kitten.
+export async function startKittenHunt(
+  userId: string,
+): Promise<{ hasStarted: false } | { hasStarted: true; spot: HidingSpotId }> {
+  const started = await startQuestAttempt(userId, KITTEN_QUEST);
+  return started.hasStarted
+    ? { hasStarted: true, spot: kittenSpotFor(userId, questDay(new Date())) }
+    : { hasStarted: false };
+}
+
+export type KittenSearch = { isFound: false } | { isFound: true; coins: number; wallet: Wallet };
+
+// A hiding place searched. Only the day's one finds the kitten, and pays, once a day. Null when no
+// hunt is under way, or the place isn't one.
+export async function searchForKitten(userId: string, spot: unknown): Promise<KittenSearch | null> {
+  if (!isHidingSpot(spot)) {
+    return null;
+  }
+  return getDb().transaction(async (transaction) => {
+    const now = new Date();
+    await loadWallet(transaction, userId);
+    const quest = and(eq(playerQuests.userId, userId), eq(playerQuests.questId, KITTEN_QUEST));
+    const [attempt] = await transaction
+      .select({ startedAt: playerQuests.startedAt, completedOn: playerQuests.completedOn })
+      .from(playerQuests)
+      .where(quest)
+      .for('update');
+    if (!attempt || !canStartQuest(attempt, now) || !canSearchKitten(attempt.startedAt, now)) {
+      return null;
+    }
+    if (spot !== kittenSpotFor(userId, questDay(now))) {
+      return { isFound: false };
+    }
+    await transaction
+      .update(playerQuests)
+      .set({ startedAt: null, completedOn: questDay(now), paidCoins: KITTEN_REWARD })
+      .where(quest);
+    await transaction
+      .update(playerWallets)
+      .set({ coins: sql`${playerWallets.coins} + ${KITTEN_REWARD}`, updatedAt: new Date() })
+      .where(eq(playerWallets.userId, userId));
+    await recordEvent(transaction, userId, 'quest.finished', {
+      coinsAfter: await coinsNow(transaction, userId),
+      questId: KITTEN_QUEST,
+      outcome: 'rewarded',
+      coins: KITTEN_REWARD,
+      boosterSetId: null,
+    });
+    return { isFound: true, coins: KITTEN_REWARD, wallet: await loadWallet(transaction, userId) };
   });
 }
 

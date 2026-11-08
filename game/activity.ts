@@ -1,7 +1,9 @@
 import { BASKETBALL_QUEST } from './basketball';
 import { DALGONA_QUEST } from './dalgona';
 import { FISHING_QUEST } from './fishing';
+import { KITTEN_QUEST } from './lost-kitten';
 import { GRANDPA_QUEST } from './memory-game';
+import { PUZZLE_QUEST } from './painter-puzzle';
 import { WATERING_QUEST } from './park-watering';
 import { GRANDMA_QUEST, questDay } from './quests';
 import { QUIZ_QUEST } from './quiz';
@@ -32,6 +34,10 @@ export const DAILY_QUESTS = [
   { id: QUIZ_QUEST, giver: 'bookshopQuiz' },
   { id: SHIFT_QUESTS.balloons, giver: 'bereniceBalloons' },
   { id: SHIFT_QUESTS.mail, giver: 'postMail' },
+  // Pinceau's puzzle at the park, Mme Ronron's lost kitten, and Flash's photos downtown.
+  { id: PUZZLE_QUEST, giver: 'painterPuzzle' },
+  { id: KITTEN_QUEST, giver: 'ronronKitten' },
+  { id: SHIFT_QUESTS.photos, giver: 'cityPhotos' },
 ] as const;
 
 export type DailyQuest = (typeof DAILY_QUESTS)[number];

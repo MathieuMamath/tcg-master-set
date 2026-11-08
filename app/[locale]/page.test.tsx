@@ -46,6 +46,7 @@ function renderHome(locale: Locale, messages: typeof en) {
           cleanedOn: null,
           raffleDrawnOn: null,
           activity: { done: [], isBonusClaimed: false },
+          isKittenHunted: false,
           isAdmin: false,
           clockOffset: 0,
         }}
