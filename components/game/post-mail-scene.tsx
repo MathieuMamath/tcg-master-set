@@ -40,7 +40,11 @@ export function MailShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const t = useTranslations('Post.mail');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateMail, []);
-  const { phase, state, start, press, secondsLeft } = useShift('mail', simulate, mailPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'mail',
+    simulate,
+    mailPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const bag = useMemo(() => mailBag(seed), [seed]);
@@ -51,6 +55,7 @@ export function MailShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="postman"
       job="mail"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

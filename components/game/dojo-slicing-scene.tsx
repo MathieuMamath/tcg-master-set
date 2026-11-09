@@ -103,7 +103,11 @@ export function SlicingShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const t = useTranslations('Dojo.slicing');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateSlicing, []);
-  const { phase, state, start, press, secondsLeft } = useShift('slicing', simulate, slicingPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'slicing',
+    simulate,
+    slicingPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const throws = useMemo(() => slicingThrows(seed), [seed]);
@@ -114,6 +118,7 @@ export function SlicingShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="dojoMaster"
       job="slicing"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

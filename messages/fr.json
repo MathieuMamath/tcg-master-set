@@ -1003,7 +1003,8 @@
       "villageQuests": "Du nouveau au village ! Mamie Noisette pose son quiz du jour, Bérénice lance le Pop’Ballons à son stand, et Gustave le héron ouvre la poste du village, entre la boutique et la librairie : trois nouvelles quêtes du jour.",
       "painterKittenPhotos": "Trois nouvelles quêtes du jour ! Pinceau le mouton peint au bord du lac du parc et a besoin d’aide pour son taquin, Mme Ronron cherche son chaton caché quelque part, et Flash le caméléon photographie le ciel de la grande ville.",
       "keyboardShortcuts": "Sur ordinateur, les touches s’affichent en bas de l’écran. Nouveaux raccourcis : B ouvre tes boosters, C ton classeur, et Échap les paramètres. Pendant l’ouverture d’un booster, Échap passe directement à tes nouvelles cartes.",
-      "mobileActionPrompt": "Sur téléphone, le bouton pour interagir s’affiche maintenant au-dessus du joystick et du bouton Dash, et ne se glisse plus entre les deux."
+      "mobileActionPrompt": "Sur téléphone, le bouton pour interagir s’affiche maintenant au-dessus du joystick et du bouton Dash, et ne se glisse plus entre les deux.",
+      "freezeLastMove": "À la fin d’un jeu de quête, l’écran reste sur ton dernier coup pour que tu voies comment il s’est passé. Appuie sur « Voir le score » quand tu es prêt."
     }
   },
   "Shift": {
@@ -1024,6 +1025,7 @@
     "timeLeft": "{seconds} s",
     "mistakes": "Erreurs",
     "giveUp": "Arrêter",
+    "seeScore": "Voir le score",
     "error": "Le service n’a pas pu être compté. Réessaie dans un instant.",
     "pay": "{score} points pour {coins} pièces",
     "points": "Points",

@@ -70,7 +70,11 @@ export function ServiceShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       simulateService(seed, presses, until),
     [],
   );
-  const { phase, state, start, press, secondsLeft } = useShift('service', simulate, servicePoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'service',
+    simulate,
+    servicePoints,
+  );
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const guests = useMemo(() => serviceGuests(seed), [seed]);
   const serve = (table: number) => press(table, (now) => canTouchTable(now, table));
@@ -80,6 +84,7 @@ export function ServiceShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="ramenChef"
       job="service"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={tService('howTo')}
       onStart={start}

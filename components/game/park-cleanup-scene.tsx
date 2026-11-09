@@ -75,7 +75,11 @@ export function CleanupShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const t = useTranslations('Garden.cleanup');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateCleanup, []);
-  const { phase, state, start, press, secondsLeft } = useShift('cleanup', simulate, cleanupPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'cleanup',
+    simulate,
+    cleanupPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const litter = useMemo(() => parkLitter(seed), [seed]);
@@ -86,6 +90,7 @@ export function CleanupShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="gardener"
       job="cleanup"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

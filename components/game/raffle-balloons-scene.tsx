@@ -55,7 +55,7 @@ export function BalloonsShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const t = useTranslations('Balloons.balloons');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateBalloons, []);
-  const { phase, state, start, press, secondsLeft } = useShift(
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
     'balloons',
     simulate,
     balloonsPoints,
@@ -71,6 +71,7 @@ export function BalloonsShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="berenice"
       job="balloons"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}
