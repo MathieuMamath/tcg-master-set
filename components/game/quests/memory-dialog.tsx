@@ -10,7 +10,7 @@ import {
   MEMORY_PAIRS,
   type MemoryStatus,
 } from '@/game/quests/memory-game';
-import { horizontalStep, verticalStep } from '@/game/world/menu-keys';
+import { horizontalStep, verticalStep } from '@/game/ui/menu-keys';
 import type { MemoryFlipAnswer } from '@/player/quests/memory';
 import { CardBack } from '../boosters/card-back';
 import { CardPicture } from '../boosters/card-picture';

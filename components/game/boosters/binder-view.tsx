@@ -24,7 +24,7 @@ import {
   turnPage,
 } from '@/game/cards/binder';
 import type { PlayableSet } from '@/game/cards/card-sets';
-import { pageStep } from '@/game/world/menu-keys';
+import { pageStep } from '@/game/ui/menu-keys';
 import { isFocusLost, moveThroughChoices, moveThroughChoicesOnScreen } from '../menu-focus';
 import { reportPlay } from '../report';
 import { TornPaper } from '../shop/shop-dialog';

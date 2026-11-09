@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
-import en from '../messages/en.json';
-import fr from '../messages/fr.json';
+import en from '@/messages/en.json';
+import fr from '@/messages/fr.json';
 import { nextProverb, PROVERB_COUNT, pickProverb } from './proverbs';
 
 test('every saying is written, in both languages', () => {

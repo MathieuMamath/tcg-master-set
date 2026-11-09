@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import type { PlayableSet, SetId } from '@/game/cards/card-sets';
 import { affordableBoosters, type ShopkeeperLine } from '@/game/cards/shop-dialogue';
-import { gridStep } from '@/game/world/menu-keys';
+import { gridStep } from '@/game/ui/menu-keys';
 import { BinderCover } from '../boosters/binder-cover';
 import { PackBody, PackEdge, packEdgeStyle } from '../boosters/pack-art';
 import { CoinIcon } from '../hud/hud-icons';

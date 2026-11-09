@@ -43,12 +43,13 @@ Taking Gaspard's dalgona as an example:
 
 | Folder | What it holds |
 |---|---|
-| `game/world/` | The places, their layout and doors (`side-rooms.ts`), walking and dashing, the bus, the clock, the sky, where the character stands, and the menus' keyboard moves. |
+| `game/world/` | The places, their layout and doors (`side-rooms.ts`), walking and dashing, the bus, the clock, the sky, and where the character stands. |
 | `game/cards/` | The sets, boosters and their recipes (`booster.ts`), binders, duplicate coins, the pull tiers, the shop's prices and dialogue, coupons, and the card statistics' export. |
-| `game/quests/` | One file per daily quest, the activity tracker and its bonus (`activity.ts`), and the timing rules they share (`quests.ts`). |
+| `game/quests/` | One file per daily quest, the activity tracker and its bonus (`activity.ts`), the timing rules they share (`quests.ts`), and Papy Caillou's sayings (`proverbs.ts`). |
 | `game/quests/shifts/` | The shifts: their shared rules and pay (`shifts.ts`), and one file per game, from Yuzu's three jobs to Flash's photos. |
 | `game/log/` | The event log's catalogue (`events.ts`), the browser's reports, visits, and the statistics' periods. |
-| `game/` | Shared tools: `seeded-random.ts`, the "What's new?" notes (`news.ts`), proverbs, and small animations. |
+| `game/ui/` | Pure calculations that serve the interface rather than the rules: moving through menus with the keys (`menu-keys.ts`, `spatial-focus.ts`), the dialogue's typewriter and the counters' roll. |
+| `game/` | What serves every domain: the seeded random numbers the games draw from (`seeded-random.ts`), and the "What's new?" notes (`news.ts`). |
 
 Every rule has its test beside it, as `<name>.test.ts`. Helpers shared by several tests are `<name>.test-helpers.ts`.
 

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
-import { countAt, countDuration } from '@/game/count-animation';
+import { countAt, countDuration } from '@/game/ui/count-animation';
 
 // Matches the duration of the ui-count-change and ui-count-tint animations.
 const CHANGE_MILLISECONDS = 1800;

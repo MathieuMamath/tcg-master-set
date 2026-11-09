@@ -9,7 +9,7 @@ import {
   type ShopkeeperLine,
   type ShopkeeperStock,
 } from '@/game/cards/shop-dialogue';
-import { revealedLength } from '@/game/typewriter';
+import { revealedLength } from '@/game/ui/typewriter';
 import { focusFirstChoice, moveThroughChoices, openDialog } from '../menu-focus';
 import { reportPlay } from '../report';
 import { SellerPortrait } from './seller-portrait';
