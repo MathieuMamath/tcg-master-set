@@ -48,7 +48,11 @@ export function ArcheryShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const tShift = useTranslations('Shift');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateArchery, []);
-  const { phase, state, start, press, secondsLeft } = useShift('archery', simulate, archeryPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'archery',
+    simulate,
+    archeryPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const setups = useMemo(() => arrowSetups(seed), [seed]);
@@ -79,6 +83,7 @@ export function ArcheryShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="dojoMaster"
       job="archery"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

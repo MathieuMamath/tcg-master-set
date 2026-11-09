@@ -41,7 +41,11 @@ export function DishesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const t = useTranslations('Ramen.dishes');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateDishes, []);
-  const { phase, state, start, press, secondsLeft } = useShift('dishes', simulate, dishesPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'dishes',
+    simulate,
+    dishesPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const act = (action: DishAction) =>
     press(DISH_ACTIONS.indexOf(action), (now) => canDo(now, action));
@@ -54,6 +58,7 @@ export function DishesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="ramenChef"
       job="dishes"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

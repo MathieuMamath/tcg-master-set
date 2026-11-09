@@ -39,7 +39,11 @@ export function KitchenShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const tIngredients = useTranslations('Ramen.shift.ingredients');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateKitchen, []);
-  const { phase, state, start, press, secondsLeft } = useShift('kitchen', simulate, kitchenPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'kitchen',
+    simulate,
+    kitchenPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const orders = useMemo(() => kitchenOrders(seed), [seed]);
@@ -50,6 +54,7 @@ export function KitchenShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="ramenChef"
       job="kitchen"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

@@ -46,7 +46,11 @@ export function StonesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const tShift = useTranslations('Shift');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulateStones, []);
-  const { phase, state, start, press, secondsLeft } = useShift('stones', simulate, stonesPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'stones',
+    simulate,
+    stonesPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const setups = useMemo(() => pebbleSetups(seed), [seed]);
@@ -76,6 +80,7 @@ export function StonesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="grandpa"
       job="stones"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

@@ -88,7 +88,11 @@ export function PhotosShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
   const tShift = useTranslations('Shift');
   const box = useRef<HTMLDivElement>(null);
   const simulate = useCallback(simulatePhotos, []);
-  const { phase, state, start, press, secondsLeft } = useShift('photos', simulate, photosPoints);
+  const { phase, state, start, press, showScore, secondsLeft } = useShift(
+    'photos',
+    simulate,
+    photosPoints,
+  );
   const isPlaying = phase.step === 'playing';
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const subjects = useMemo(() => skySubjects(seed), [seed]);
@@ -118,6 +122,7 @@ export function PhotosShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       host="photographer"
       job="photos"
       phase={phase}
+      onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
       onStart={start}

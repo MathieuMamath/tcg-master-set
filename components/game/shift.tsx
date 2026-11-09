@@ -48,7 +48,8 @@ export type ShiftEnd = ShiftOutcome | null | 'gaveUp';
 export type ShiftPhase =
   | { step: 'ready' }
   | { step: 'starting' }
-  | { step: 'playing'; seed: number; startedAt: number }
+  // Once over, the board stays as the last move left it, until the player asks for the score.
+  | { step: 'playing'; seed: number; startedAt: number; isOver: boolean }
   | { step: 'checking'; points: number }
   | { step: 'result'; result: ShiftOutcome }
   | { step: 'error' };
@@ -72,6 +73,12 @@ export function useShift<State extends Simulated>(
   const seed = phase.step === 'playing' ? phase.seed : 0;
   const startedAt = phase.step === 'playing' ? phase.startedAt : 0;
   const isPlaying = phase.step === 'playing';
+  const isFrozen = phase.step === 'playing' && phase.isOver;
+  // What the server counted, which arrives while the board is still shown, and whether the player
+  // asked to see it.
+  const [outcome, setOutcome] = useState<ShiftOutcome | 'error' | null>(null);
+  const [wantsScore, setWantsScore] = useState(false);
+  const endPoints = useRef(0);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: pressCount tells when the actions changed.
   const state = useMemo(
@@ -85,7 +92,8 @@ export function useShift<State extends Simulated>(
         return;
       }
       isOver.current = true;
-      setPhase({ step: 'checking', points: score });
+      endPoints.current = score;
+      setPhase((now) => (now.step === 'playing' ? { ...now, isOver: true } : now));
       try {
         const response = await fetch(`/api/quests/shift/finish?job=${job}`, {
           method: 'POST',
@@ -94,17 +102,32 @@ export function useShift<State extends Simulated>(
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
-        setPhase({ step: 'result', result: await response.json() });
+        setOutcome(await response.json());
       } catch {
-        setPhase({ step: 'error' });
+        setOutcome('error');
       }
     },
     [job],
   );
 
-  // The clock, every frame, so that the gauges move smoothly.
+  // The score shows once asked for, after the server's answer if it is still on its way.
   useEffect(() => {
-    if (!isPlaying) {
+    if (!wantsScore) {
+      return;
+    }
+    if (outcome === null) {
+      setPhase({ step: 'checking', points: endPoints.current });
+    } else if (outcome === 'error') {
+      setPhase({ step: 'error' });
+    } else {
+      setPhase({ step: 'result', result: outcome });
+    }
+  }, [wantsScore, outcome]);
+
+  // The clock, every frame, so that the gauges move smoothly. It stops with the shift, which leaves
+  // the board as the last move left it.
+  useEffect(() => {
+    if (!isPlaying || isFrozen) {
       return;
     }
     let frame = requestAnimationFrame(function tick() {
@@ -112,7 +135,7 @@ export function useShift<State extends Simulated>(
       frame = requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(frame);
-  }, [isPlaying, startedAt]);
+  }, [isPlaying, isFrozen, startedAt]);
 
   // The shift ends when its time is up, or once its end has come: its last mistake, or its last
   // pebble or arrow landing, which can come a moment after it was thrown. The server counts the
@@ -133,8 +156,15 @@ export function useShift<State extends Simulated>(
       const answer: { seed: number } = await response.json();
       actions.current = [];
       isOver.current = false;
+      setOutcome(null);
+      setWantsScore(false);
       setElapsed(0);
-      setPhase({ step: 'playing', seed: answer.seed, startedAt: performance.now() });
+      setPhase({
+        step: 'playing',
+        seed: answer.seed,
+        startedAt: performance.now(),
+        isOver: false,
+      });
     } catch {
       setPhase({ step: 'error' });
     }
@@ -165,6 +195,7 @@ export function useShift<State extends Simulated>(
     state,
     start,
     press,
+    showScore: () => setWantsScore(true),
     secondsLeft: Math.max(0, Math.ceil((shiftMs - elapsed) / 1000)),
   };
 }
@@ -279,6 +310,7 @@ export function ShiftFrame({
   secondsLeft,
   howTo,
   onStart,
+  onShowScore,
   onDone,
   onKeyDown,
   onKeyUp,
@@ -291,6 +323,7 @@ export function ShiftFrame({
   secondsLeft: number;
   howTo: string;
   onStart: () => void;
+  onShowScore: () => void;
   onDone: (end: ShiftEnd) => void;
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
   // For a game played by holding a key, such as drawing a bow.
@@ -302,6 +335,15 @@ export function ShiftFrame({
   const tHost = useTranslations(`Shift.hosts.${host}`);
   const isOpenedDirectly = useContext(ShiftOpenedDirectly);
   const rules = SHIFT_RULES[job];
+  const isOver = phase.step === 'playing' && phase.isOver;
+  const scoreButton = useRef<HTMLButtonElement>(null);
+
+  // Once over, the button to see the score takes the focus, for the keyboard.
+  useEffect(() => {
+    if (isOver) {
+      scoreButton.current?.focus();
+    }
+  }, [isOver]);
 
   useEffect(() => {
     if (phase.step !== 'starting' && phase.step !== 'checking') {
@@ -363,13 +405,26 @@ export function ShiftFrame({
         {phase.step === 'playing' && (
           <>
             {children}
-            <button
-              type="button"
-              onClick={() => onDone('gaveUp')}
-              className="mt-2 cursor-pointer text-ui-ink/70 underline"
-            >
-              {t('giveUp')}
-            </button>
+            {isOver ? (
+              <div className="mt-3 flex justify-center">
+                <button
+                  ref={scoreButton}
+                  type="button"
+                  onClick={onShowScore}
+                  className={`${CHOICE_CLASS} ui-pop-in bg-ui-accent!`}
+                >
+                  {t('seeScore')}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onDone('gaveUp')}
+                className="mt-2 cursor-pointer text-ui-ink/70 underline"
+              >
+                {t('giveUp')}
+              </button>
+            )}
           </>
         )}
 
