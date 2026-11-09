@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { openOwnedBooster } from '@/player/progress';
+import { openOwnedBooster } from '@/player/shop';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ openOwnedBooster: vi.fn() }));
+vi.mock('@/player/shop', () => ({ openOwnedBooster: vi.fn() }));
 
 function open(locale: string, set = 'swsh3') {
   return POST(

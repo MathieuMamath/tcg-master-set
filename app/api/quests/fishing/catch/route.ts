@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { reelInItem } from '@/player/progress';
+import { reelInItem } from '@/player/quests/fishing';
 
 export async function POST() {
   try {

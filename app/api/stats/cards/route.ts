@@ -1,7 +1,7 @@
 import { hasLocale } from 'next-intl';
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
-import { isPlayableSet } from '@/game/card-sets';
+import { isPlayableSet } from '@/game/cards/card-sets';
 import { routing } from '@/i18n/routing';
 import { loadSetDropOverview, loadSetDrops } from '@/stats/card-stats';
 

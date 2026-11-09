@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { finishShift } from '@/player/progress';
+import { finishShift } from '@/player/quests/shifts';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ finishShift: vi.fn() }));
+vi.mock('@/player/quests/shifts', () => ({ finishShift: vi.fn() }));
 
 function finish(job: string, body: string) {
   return POST(

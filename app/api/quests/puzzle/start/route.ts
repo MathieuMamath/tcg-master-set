@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { startPuzzle } from '@/player/progress';
+import { startPuzzle } from '@/player/quests/chores';
 
 export async function POST() {
   try {

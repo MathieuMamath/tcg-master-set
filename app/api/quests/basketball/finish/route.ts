@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { finishBasketball } from '@/player/progress';
+import { finishBasketball } from '@/player/quests/basketball';
 
 export async function POST(request: Request) {
   try {

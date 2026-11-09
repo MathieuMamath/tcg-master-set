@@ -73,7 +73,7 @@ The game connects as `tcg_app`, the role [`db/prod-runtime-role.sql`](db/prod-ru
 
 ## Contributing
 
-Work reaches `main` through squashed pull requests with [Conventional Commit](https://www.conventionalcommits.org/) titles. Each merge automatically produces a version tag, a changelog entry and a GitHub Release. The commands, the rules and how the code is laid out are in [`CLAUDE.md`](CLAUDE.md).
+Work reaches `main` through squashed pull requests with [Conventional Commit](https://www.conventionalcommits.org/) titles. Each merge automatically produces a version tag, a changelog entry and a GitHub Release. The commands and the rules are in [`CLAUDE.md`](CLAUDE.md), and how the code is laid out, folder by folder, in [`docs/architecture.md`](docs/architecture.md).
 
 ## Legal notice
 

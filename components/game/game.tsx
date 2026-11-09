@@ -2,131 +2,82 @@
 
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
-import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
-import { LANDING_REFERRER_KEY } from '@/components/landing-referrer';
-import { canClaimDailyBonus, DAILY_QUEST_GOAL, type DailyActivity } from '@/game/activity';
-import { addToCollection } from '@/game/binder';
-import { stopAt } from '@/game/bus';
-import type { PlayableSet, SetId } from '@/game/card-sets';
-import { isValidOffset, weatherAt } from '@/game/clock';
-import type { DalgonaShape, Press } from '@/game/dalgona';
-import type { MemoryStatus } from '@/game/memory-game';
-import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
-import { latestNewsId, NEWS, type NewsItem, parseLastSeenId, unreadNews } from '@/game/news';
-import { nextProverb, pickProverb } from '@/game/proverbs';
-import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests';
+import type { PlayableSet } from '@/game/cards/card-sets';
+import { boosterCount, totalBoosters, type Wallet } from '@/game/cards/shop-dialogue';
+import type { DailyActivity } from '@/game/quests/activity';
+import type { DalgonaShape, Press } from '@/game/quests/dalgona';
+import type { MemoryStatus } from '@/game/quests/memory-game';
+import { nextProverb, pickProverb } from '@/game/quests/proverbs';
+import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests/quests';
+import { stopAt } from '@/game/world/bus';
+import { weatherAt } from '@/game/world/clock';
+import { STILL } from '@/game/world/movement';
 import {
-  bindersForSale,
-  boosterCount,
-  type ShopkeeperLine,
-  type ShopkeeperStock,
-  setsSoldBy,
-  totalBoosters,
-  type Wallet,
-} from '@/game/shop-dialogue';
-import {
-  type HidingSpotId,
-  hidingSpotAlong,
   isDoorInteraction,
   OFFICE_FLOORS,
   type OfficeFloor,
   type SidePlaceId,
-} from '@/game/side-rooms';
-import type { PlayerSpot } from '@/game/spot';
-import type { Interaction, QuestGiver } from '@/game/world';
-import type {
-  BasketballResult,
-  DailyBonusClaim,
-  DalgonaResult,
-  FishingCatch,
-  KittenSearch,
-  PlayerProgress,
-  RaffleDraw,
-} from '@/player/progress';
-import { ActivityDialog, ActivityIcon } from './activity-dialog';
-import { AnimatedCount } from './animated-count';
-import { BasketballDialog } from './basketball-dialog';
-import { BinderView } from './binder-view';
-import { BoosterBag } from './booster-bag';
-import { BoosterOpening, type Opening } from './booster-opening';
-import { BusMap } from './bus-map';
-import { ControlsLegend } from './controls-legend';
-import { CouponRegister } from './coupon-register';
-import { DalgonaDialog } from './dalgona-dialog';
-import { ElevatorPanel } from './elevator-panel';
-import { FishingDialog } from './fishing-dialog';
-import { ClockBadge, useGameClock, WeatherLayer } from './game-clock';
-import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
-import { Joystick } from './joystick';
-import { MemoryDialog } from './memory-dialog';
-import { NewsSheet } from './news-sheet';
-import { NpcDialog, type Speaker } from './npc-dialog';
-import type { MovementInput } from './paper-scene';
+} from '@/game/world/side-rooms';
+import type { PlayerSpot } from '@/game/world/spot';
+import type { Interaction } from '@/game/world/world';
+import type { DailyBonusClaim } from '@/player/activity';
+import type { PlayerProgress } from '@/player/progress';
+import type { BasketballResult } from '@/player/quests/basketball';
+import type { DalgonaResult } from '@/player/quests/dalgona';
+import type { FishingCatch } from '@/player/quests/fishing';
+import type { RaffleDraw } from '@/player/quests/raffle';
+import { BinderView } from './boosters/binder-view';
+import { BoosterBag } from './boosters/booster-bag';
+import { BoosterOpening } from './boosters/booster-opening';
+import { useBoosterOpening } from './boosters/use-booster-opening';
+import { ActivityDialog } from './hud/activity-dialog';
+import { BusMap } from './hud/bus-map';
+import { ControlsLegend } from './hud/controls-legend';
+import { InteractionPrompts } from './hud/interaction-prompts';
+import { Joystick } from './hud/joystick';
+import { NewsSheet } from './hud/news-sheet';
+import { SaveNotice, useSaveNotice } from './hud/save-notice';
+import { SettingsMenu } from './hud/settings-menu';
+import { SleepScreen, useSleep } from './hud/sleep';
+import { TopBar } from './hud/top-bar';
+import { useNews } from './hud/use-news';
+import { CouponRegister } from './office/coupon-register';
+import { ElevatorPanel } from './office/elevator-panel';
+import { StatsDialog } from './office/stats-dialog';
 import { PlayerNameContext } from './player-name';
-import { PuzzleDialog } from './puzzle-dialog';
-import { QuestBanner } from './quest-banner';
-import { QuestDialog, type QuestLine } from './quest-dialog';
-import { QuizDialog } from './quiz-dialog';
-import { RaffleDialog } from './raffle-dialog';
-import { reportPlay } from './report';
-import { SaveNotice, useSaveNotice } from './save-notice';
-import { SettingsMenu } from './settings-menu';
-import type { ShiftHost } from './shift';
-import { ShiftDialog } from './shift-dialog';
-import { ShopDialog } from './shop-dialog';
-import { StatsDialog } from './stats-dialog';
-import { WateringDialog } from './watering-dialog';
+import { BasketballDialog } from './quests/basketball-dialog';
+import { DalgonaDialog } from './quests/dalgona-dialog';
+import { FishingDialog } from './quests/fishing-dialog';
+import { MemoryDialog } from './quests/memory-dialog';
+import { PuzzleDialog } from './quests/puzzle-dialog';
+import { QuestBanner } from './quests/quest-banner';
+import { QuestDialog, type QuestLine } from './quests/quest-dialog';
+import { QuizDialog } from './quests/quiz-dialog';
+import { RaffleDialog } from './quests/raffle-dialog';
+import { useKittenHunt } from './quests/use-kitten-hunt';
+import { WateringDialog } from './quests/watering-dialog';
+import { useGameClock, WeatherLayer } from './scene/game-clock';
+import type { MovementInput } from './scene/stage';
+import { ShiftDialog } from './shifts/shift-dialog';
+import { NpcDialog } from './shop/npc-dialog';
+import { SellerConversation } from './shop/seller-conversation';
+import type { Talk } from './talk';
+import { type GameKeyControls, useGameKeys } from './use-game-keys';
+import { useVisitReports } from './use-visit-reports';
 
 // Three.js needs the browser, and this keeps it out of the bundle of every other screen.
-const PaperScene = dynamic(() => import('./paper-scene').then((module) => module.PaperScene), {
-  ssr: false,
-});
+const PaperScene = dynamic(
+  () => import('./scene/paper-scene').then((module) => module.PaperScene),
+  {
+    ssr: false,
+  },
+);
 
-const INTERACT_KEY = 'KeyE';
-
-// Where the browser keeps the id of the last "What's new?" note it showed.
-const NEWS_SEEN_KEY = 'tcg-master-set:news-seen';
-
-// Papy Caillou and Bérénice are both quest givers and the hosts of a shift, a conversation of its
-// own that opens straight onto the game.
-type Talk =
-  | ShopkeeperStock
-  | 'binderSeller'
-  | QuestGiver
-  // Mme Ronron's kitten only speaks once found, never from the street.
-  | Exclude<Speaker, 'kitten'>
-  | ShiftHost
-  | 'grandpaStones'
-  | 'bereniceBalloons';
-
-// Talking to someone gets a speech bubble over their head, and everything else a prompt at the
-// bottom of the screen.
-function isTalk(interaction: Interaction): interaction is Extract<Talk, Interaction> {
-  return (
-    !isDoorInteraction(interaction) &&
-    interaction !== 'binder' &&
-    interaction !== 'basketball' &&
-    interaction !== 'scrub' &&
-    interaction !== 'busStop' &&
-    interaction !== 'elevator' &&
-    interaction !== 'bed' &&
-    interaction !== 'search'
-  );
-}
-const DASH_KEY = 'Space';
-// Shortcuts to the menus of the top of the screen, by where the key sits, like the movement keys.
-const BAG_KEY = 'KeyB';
-const BINDER_KEY = 'KeyC';
-const SETTINGS_KEY = 'Escape';
-// Set once this page has reported its visit, so that a remount doesn't count it twice.
-let isVisitRecorded = false;
 // The places under the open sky, where the weather falls and the night darkens the world.
 const OUTSIDE: ReadonlySet<SidePlaceId> = new Set(['town', 'park', 'downtown']);
-// How long the screen stays dark for a night's sleep, and the morning takes to come back.
-const NIGHT_MILLISECONDS = 1800;
-const WAKING_MILLISECONDS = 1600;
 
 // Where the character stands gives no advantage, so a save that fails is simply let go.
 function saveSpot(spot: PlayerSpot) {
@@ -170,11 +121,6 @@ export function Game({ player, sets, progress }: Props) {
   const [isWatering, setIsWatering] = useState(false);
   const [isQuizzing, setIsQuizzing] = useState(false);
   const [isPuzzling, setIsPuzzling] = useState(false);
-  // Where Mme Ronron's kitten hides today, once she gave her hint, and what the last search found.
-  const [kittenSpot, setKittenSpot] = useState<HidingSpotId | null>(null);
-  const [isKittenHintGiven, setIsKittenHintGiven] = useState(progress.isKittenHunted);
-  const [searchNote, setSearchNote] = useState<'nothing' | 'unavailable' | null>(null);
-  const [isKittenFound, setIsKittenFound] = useState(false);
   // The shape Gaspard handed over, while the player carves it.
   const [dalgonaShape, setDalgonaShape] = useState<DalgonaShape | null>(null);
   const [gaspardLine, setGaspardLine] = useState<QuestLine>('greeting');
@@ -191,7 +137,6 @@ export function Game({ player, sets, progress }: Props) {
     () => ({ offset: clockOffset, weather: clock?.weather ?? weatherAt(new Date(), clockOffset) }),
     [clockOffset, clock?.weather],
   );
-  const [sleep, setSleep] = useState<'asleep' | 'waking' | null>(null);
   // Where the character is, for the bus map to know which stop it is read at.
   const [place, setPlace] = useState<SidePlaceId>(progress.spot?.place ?? 'bedroom');
   // Where the character stands, kept by the scene, for saving it when the page is left.
@@ -201,15 +146,9 @@ export function Game({ player, sets, progress }: Props) {
   const [binders, setBinders] = useState(progress.binders);
   const isTalking = talkingTo !== null;
   const [wallet, setWallet] = useState(progress.wallet);
-  const [opening, setOpening] = useState<Opening | null>(null);
-  // Held back until the opening closes, so that the counters move in front of the player, and so
-  // that the coins don't give away a duplicate before the cards are shown.
-  const walletAfterOpening = useRef<Wallet | null>(null);
   const [isBinderOpen, setIsBinderOpen] = useState(false);
   const [isBagOpen, setIsBagOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  // The "What's new?" sheet, with the notes it tells besides the pinned ones.
-  const [newsShown, setNewsShown] = useState<readonly NewsItem[] | null>(null);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isCouponRegisterOpen, setIsCouponRegisterOpen] = useState(false);
@@ -217,26 +156,45 @@ export function Game({ player, sets, progress }: Props) {
   const [collection, setCollection] = useState(progress.collection);
   const { isSaving, showSaveNotice } = useSaveNotice();
   const locale = useLocale();
-  const tBooster = useTranslations('Booster');
-  const tSettings = useTranslations('Settings');
-  const tActivity = useTranslations('Activity');
   const tSpeakers = useTranslations('Speakers');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tStones = useTranslations('Stones');
   const tBalloons = useTranslations('Balloons');
-  const tQuiz = useTranslations('Quiz');
   const tGarden = useTranslations('Garden');
   const tTown = useTranslations('Town');
-  const tHails = useTranslations('Hails');
   const tBus = useTranslations('Bus');
-  const tQuest = useTranslations('Quest');
+  const stopWalking = () => {
+    input.current.keyboard = STILL;
+    input.current.joystick = STILL;
+  };
+  const { newsShown, closeNews, showAllNews } = useNews();
+  const { sleep, goToBed } = useSleep(clock?.canSleep ?? false, stopWalking, setClockOffset);
+  const { opening, pickBooster, cutBooster, closeOpening } = useBoosterOpening({
+    sets,
+    locale,
+    stopWalking,
+    setIsBagOpen,
+    setWallet,
+    setCollection,
+    showSaveNotice,
+  });
+  const kitten = useKittenHunt({
+    isHintGiven: progress.isKittenHunted,
+    activity,
+    talkingTo,
+    reached,
+    spot,
+    stopWalking,
+    setWallet,
+    setActivity,
+    showSaveNotice,
+  });
+  useVisitReports(locale, talkingTo, spot);
   // Beaten for the day, Papy Caillou only shares a saying: there is nothing to talk about.
   // Papy's memory game, won for the day, as the day's activity says: read again from the server
   // whenever a dialog closes, so that it never drifts from the database.
   const isMemoryWon = activity.done.includes('grandpa');
-  // The hiding places are only searched while the kitten is lost and Mme Ronron gave her hint.
-  const isKittenHunted = isKittenHintGiven && !activity.done.includes('ronronKitten');
-  const interaction = reached === 'search' && !isKittenHunted ? null : reached;
+  const interaction = reached === 'search' && !kitten.isKittenHunted ? null : reached;
   const isPapySaying = interaction === 'grandpa' && isMemoryWon;
   const isDialogOpen =
     isTalking ||
@@ -254,7 +212,7 @@ export function Game({ player, sets, progress }: Props) {
     isWatering ||
     isQuizzing ||
     isPuzzling ||
-    isKittenFound ||
+    kitten.isKittenFound ||
     dalgonaShape !== null ||
     isRaffling ||
     isBusMapOpen ||
@@ -266,13 +224,11 @@ export function Game({ player, sets, progress }: Props) {
   const boosterTotal = totalBoosters(wallet);
   const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
-  const isCutting = useRef(false);
-  const controls = useRef({
+  const controls = useRef<GameKeyControls>({
     interaction,
     isDialogOpen,
     hasBoosters: boosterTotal > 0,
-    goToBed: () => {},
-    search: () => {},
+    interact: () => {},
     openBag: () => {},
     openBinder: () => {},
     openSettings: () => {},
@@ -281,206 +237,12 @@ export function Game({ player, sets, progress }: Props) {
     interaction,
     isDialogOpen,
     hasBoosters: boosterTotal > 0,
-    goToBed: () => goToBed(),
-    search: () => searchHere(),
+    interact: () => interact(),
     openBag: () => openBag(),
     openBinder: () => openBinder(),
     openSettings: () => openSettings(),
   };
-
-  useEffect(() => {
-    const pressedKeys = new Set<string>();
-
-    const update = () => {
-      input.current.keyboard = keyboardDirection(pressedKeys);
-    };
-    const releaseKeys = () => {
-      pressedKeys.clear();
-      update();
-    };
-    // A button reached with the keyboard keeps Space, but one that was only clicked doesn't. The
-    // browser's own :focus-visible can't tell, since it turns on as soon as a key is pressed.
-    let lastUsedPointer = false;
-    const onPointerDown = () => {
-      lastUsedPointer = true;
-    };
-    const isPressingAButton = () =>
-      !lastUsedPointer && document.activeElement?.tagName === 'BUTTON';
-    // Whether anything had the keys when this press began: a dialog, a game or a conversation.
-    // Read before anything else hears the press, since Escape closes a dialog on its way, and the
-    // settings must not open in its place.
-    let wasBusy = false;
-    const isBusy = () =>
-      controls.current.isDialogOpen || document.querySelector('dialog[open]') !== null;
-    const onKeyDownFirst = () => {
-      wasBusy = isBusy();
-    };
-    // A shortcut is a key on its own, so that the browser's own, such as copying, still work.
-    const isShortcut = (event: KeyboardEvent, code: string) =>
-      event.code === code && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code === 'Tab') {
-        lastUsedPointer = false;
-      }
-      // While a dialog is open, the keys belong to it.
-      if (wasBusy || isBusy()) {
-        return;
-      }
-      if (isShortcut(event, SETTINGS_KEY)) {
-        event.preventDefault();
-        releaseKeys();
-        controls.current.openSettings();
-        return;
-      }
-      if (isShortcut(event, BINDER_KEY)) {
-        event.preventDefault();
-        releaseKeys();
-        controls.current.openBinder();
-        return;
-      }
-      if (isShortcut(event, BAG_KEY) && controls.current.hasBoosters) {
-        event.preventDefault();
-        releaseKeys();
-        controls.current.openBag();
-        return;
-      }
-      if (event.code === INTERACT_KEY && controls.current.interaction) {
-        event.preventDefault();
-        releaseKeys();
-        if (controls.current.interaction === 'binder') {
-          setIsBinderOpen(true);
-        } else if (isDoorInteraction(controls.current.interaction)) {
-          input.current.wantsDoor = true;
-        } else if (controls.current.interaction === 'basketball') {
-          setIsPlayingBasketball(true);
-        } else if (controls.current.interaction === 'scrub') {
-          input.current.wantsScrub = true;
-        } else if (controls.current.interaction === 'busStop') {
-          setIsBusMapOpen(true);
-        } else if (controls.current.interaction === 'elevator') {
-          setIsElevatorOpen(true);
-        } else if (controls.current.interaction === 'bed') {
-          controls.current.goToBed();
-        } else if (controls.current.interaction === 'search') {
-          controls.current.search();
-        } else {
-          setTalkingTo(controls.current.interaction);
-        }
-      } else if (event.code === DASH_KEY && !isPressingAButton()) {
-        event.preventDefault();
-        if (!event.repeat) {
-          input.current.wantsDash = true;
-        }
-      } else if (isMovementKey(event.code)) {
-        event.preventDefault();
-        // Walking away from a menu button gives Space back to the dash.
-        (document.activeElement as HTMLElement | null)?.blur();
-        pressedKeys.add(event.code);
-        update();
-      }
-    };
-    const onKeyUp = (event: KeyboardEvent) => {
-      pressedKeys.delete(event.code);
-      update();
-    };
-
-    window.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('keydown', onKeyDownFirst, { capture: true });
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-    // A key released in another window never sends keyup here.
-    window.addEventListener('blur', releaseKeys);
-
-    return () => {
-      window.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDownFirst, { capture: true });
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      window.removeEventListener('blur', releaseKeys);
-    };
-  }, []);
-
-  // On arrival, the sheet tells what changed since the last note this browser showed. Kept in the
-  // browser only: another device, or cleared site data, shows the recent notes again.
-  useEffect(() => {
-    try {
-      const unread = unreadNews(parseLastSeenId(localStorage.getItem(NEWS_SEEN_KEY)));
-      if (unread.length > 0) {
-        setNewsShown(unread);
-      }
-    } catch {
-      // No storage, such as in a private window: the sheet stays in the settings.
-    }
-  }, []);
-
-  const closeNews = () => {
-    setNewsShown(null);
-    try {
-      localStorage.setItem(NEWS_SEEN_KEY, String(latestNewsId()));
-    } catch {
-      // Without storage, the next visit tells the news again.
-    }
-  };
-
-  // A hiding place searched: the server alone knows where the kitten is, and pays when found.
-  const searchHere = async () => {
-    const hidingSpot = spot.current && hidingSpotAlong(spot.current.place, spot.current.x);
-    if (!hidingSpot) {
-      return;
-    }
-    stopWalking();
-    try {
-      const response = await fetch('/api/quests/kitten/search', {
-        method: 'POST',
-        body: JSON.stringify({ spot: hidingSpot }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const found: KittenSearch = await response.json();
-      if (!found.isFound) {
-        setSearchNote('nothing');
-        return;
-      }
-      setWallet(found.wallet);
-      showSaveNotice();
-      setActivity((current) =>
-        current.done.includes('ronronKitten')
-          ? current
-          : { ...current, done: [...current.done, 'ronronKitten'] },
-      );
-      setIsKittenFound(true);
-    } catch {
-      setSearchNote('unavailable');
-    }
-  };
-
-  // A search's note fades after a moment, or as soon as the character walks off.
-  useEffect(() => {
-    if (searchNote === null) {
-      return;
-    }
-    const timer = setTimeout(() => setSearchNote(null), 2500);
-    return () => clearTimeout(timer);
-  }, [searchNote]);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: a new place to stand clears the note.
-  useEffect(() => setSearchNote(null), [reached]);
-
-  // Talking to Mme Ronron while her kitten is lost gives her hint: the day's hiding place.
-  useEffect(() => {
-    if (talkingTo !== 'ronron' || kittenSpot !== null || activity.done.includes('ronronKitten')) {
-      return;
-    }
-    fetch('/api/quests/kitten/start', { method: 'POST' })
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then((answer: { hasStarted: boolean; spot?: HidingSpotId }) => {
-        if (answer.hasStarted && answer.spot) {
-          setKittenSpot(answer.spot);
-          setIsKittenHintGiven(true);
-        }
-      })
-      .catch(() => {});
-  }, [talkingTo, kittenSpot, activity.done]);
+  useGameKeys(input, controls);
 
   // The full card statistics, downloaded as a CSV file in the player's language.
   const downloadCardStats = () => {
@@ -488,11 +250,6 @@ export function Game({ player, sets, progress }: Props) {
     link.href = `/api/stats/cards/export?locale=${locale}`;
     link.download = '';
     link.click();
-  };
-
-  const stopWalking = () => {
-    input.current.keyboard = STILL;
-    input.current.joystick = STILL;
   };
 
   const interact = () => {
@@ -512,7 +269,7 @@ export function Game({ player, sets, progress }: Props) {
     } else if (interaction === 'bed') {
       goToBed();
     } else if (interaction === 'search') {
-      searchHere();
+      kitten.searchHere();
     } else if (interaction) {
       setTalkingTo(interaction);
     }
@@ -521,97 +278,6 @@ export function Game({ player, sets, progress }: Props) {
   const openBinder = () => {
     stopWalking();
     setIsBinderOpen(true);
-  };
-
-  const pickBooster = (setId: SetId) => {
-    const set = sets.find(({ id }) => id === setId);
-    if (!set) {
-      return;
-    }
-    stopWalking();
-    setIsBagOpen(false);
-    setOpening({ status: 'sealed', setId, setName: set.name, logoUrl: set.logoUrl });
-  };
-
-  // The server takes the booster and keeps the cards. This only shows the result. One request at
-  // a time: a second cut while the first is on its way would open another booster, and its
-  // refusal, once the bag is empty, would hide the cards the first one drew.
-  const cutBooster = async () => {
-    if (!opening || isCutting.current) {
-      return;
-    }
-    isCutting.current = true;
-    const pack = { setId: opening.setId, setName: opening.setName, logoUrl: opening.logoUrl };
-    setOpening({ status: 'cutting', ...pack });
-
-    try {
-      const response = await fetch(`/api/boosters/open?locale=${locale}&set=${pack.setId}`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const { cards, isGodPack, wallet: updated } = await response.json();
-      walletAfterOpening.current = updated;
-      setCollection((current) => addToCollection(current, cards));
-      setOpening({ status: 'ready', ...pack, cards, isGodPack });
-      showSaveNotice();
-    } catch {
-      setOpening({ status: 'error', ...pack });
-    } finally {
-      isCutting.current = false;
-    }
-  };
-
-  // Backing out of a sealed pack returns to the bag, to pick another one.
-  const closeOpening = () => {
-    if (opening?.status === 'sealed') {
-      reportPlay({ type: 'booster.abandoned', setId: opening.setId });
-      setIsBagOpen(true);
-    }
-    setOpening(null);
-    if (walletAfterOpening.current) {
-      setWallet(walletAfterOpening.current);
-      walletAfterOpening.current = null;
-    }
-  };
-
-  const buy = async (setId: SetId, quantity: number): Promise<ShopkeeperLine> => {
-    try {
-      const response = await fetch(`/api/shop/buy?set=${setId}&quantity=${quantity}`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const { wallet: updated, line } = await response.json();
-      setWallet(updated);
-      // A refused purchase changes nothing.
-      if (line === 'thanks') {
-        showSaveNotice();
-      }
-      return line;
-    } catch {
-      return 'unavailable';
-    }
-  };
-
-  const buyBinder = async (setId: SetId): Promise<ShopkeeperLine> => {
-    try {
-      const response = await fetch(`/api/binders/buy?set=${setId}`, { method: 'POST' });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const { wallet: updated, binders: bought, line } = await response.json();
-      setWallet(updated);
-      setBinders(bought);
-      if (line === 'thanks') {
-        showSaveNotice();
-      }
-      return line;
-    } catch {
-      return 'unavailable';
-    }
   };
 
   const startQuest = async (): Promise<QuestLine | null> => {
@@ -633,52 +299,6 @@ export function Game({ player, sets, progress }: Props) {
       return 'unavailable';
     }
   };
-
-  // Each opening of the page is a visit, for the statistics: once per page, even if this component
-  // mounts twice, with the kind of device and where the tab first came from.
-  useEffect(() => {
-    if (isVisitRecorded) {
-      return;
-    }
-    isVisitRecorded = true;
-    let referrer = document.referrer;
-    try {
-      referrer = sessionStorage.getItem(LANDING_REFERRER_KEY) || referrer;
-      // Once counted, a reload of the game is no longer a visit from that link.
-      sessionStorage.setItem(LANDING_REFERRER_KEY, '');
-    } catch {
-      // Without storage, the page's own referrer will do.
-    }
-    const device = window.matchMedia('(pointer: coarse)').matches ? 'phone' : 'desktop';
-    fetch('/api/player/visit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locale, device, referrer }),
-    }).catch(() => {});
-  }, [locale]);
-
-  // Each conversation that starts, for the statistics. Papy's skipping stones carry on his.
-  useEffect(() => {
-    if (talkingTo !== null && talkingTo !== 'grandpaStones' && talkingTo !== 'bereniceBalloons') {
-      reportPlay({ type: 'npc.talked', speaker: talkingTo });
-    }
-  }, [talkingTo]);
-
-  // Leaving the page saves where the character stands and closes the visit, by beacons that
-  // outlive the page.
-  useEffect(() => {
-    const saveOnLeave = () => {
-      navigator.sendBeacon('/api/player/visit/end');
-      if (spot.current) {
-        navigator.sendBeacon(
-          '/api/player/spot',
-          new Blob([JSON.stringify(spot.current)], { type: 'application/json' }),
-        );
-      }
-    };
-    window.addEventListener('pagehide', saveOnLeave);
-    return () => window.removeEventListener('pagehide', saveOnLeave);
-  }, []);
 
   const finishQuest = async () => {
     setQuest(null);
@@ -970,38 +590,6 @@ export function Game({ player, sets, progress }: Props) {
     }
   };
 
-  // At night, Pip sleeps until the morning: the server moves the clock on, while the screen goes
-  // dark for a moment. By day, he isn't sleepy and the bed does nothing.
-  const goToBed = async () => {
-    if (!clock?.canSleep || sleep !== null) {
-      return;
-    }
-    stopWalking();
-    setSleep('asleep');
-    const fellAsleep = Date.now();
-    let slept: number | null = null;
-    try {
-      const response = await fetch('/api/player/sleep', { method: 'POST' });
-      if (response.ok) {
-        const { clockOffset: offset } = (await response.json()) as { clockOffset: unknown };
-        slept = isValidOffset(offset) ? offset : null;
-      }
-    } catch {
-      // The night is simply cut short.
-    }
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.max(0, NIGHT_MILLISECONDS - (Date.now() - fellAsleep))),
-    );
-    if (slept === null) {
-      setSleep(null);
-      return;
-    }
-    setClockOffset(slept);
-    setSleep('waking');
-    await new Promise((resolve) => setTimeout(resolve, WAKING_MILLISECONDS));
-    setSleep(null);
-  };
-
   // To a floor of the administrative office, or out to the street, by Brutus or the lift.
   const goToFloor = (floor: OfficeFloor) => {
     input.current.travelTo = { to: floor.place, arrival: floor.arrival };
@@ -1053,157 +641,33 @@ export function Game({ player, sets, progress }: Props) {
         >
           {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
         </PaperScene>
-        <div className="absolute inset-x-4 top-5 flex items-start justify-between gap-3 font-game text-ui-ink">
-          <div className="flex min-w-0 flex-wrap items-center gap-3">
-            <p className="ui-tape max-w-44 -rotate-2 truncate ui-scrap px-3 pt-1.5 pb-1 font-display text-lg">
-              {player.username}
-            </p>
-            <p className="relative flex rotate-1 items-center gap-1.5 ui-scrap px-3 py-1 font-digits text-base font-bold">
-              <CoinIcon />
-              <AnimatedCount value={wallet.coins} format={(count) => t('coins', { count })} />
-            </p>
-            <button
-              type="button"
-              disabled={boosterTotal === 0}
-              aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
-              onClick={openBag}
-              aria-keyshortcuts="B"
-              className="relative flex -rotate-1 items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <BoosterIcon />
-              <AnimatedCount value={boosterTotal} format={(count) => t('boosters', { count })} />
-            </button>
-            <button
-              type="button"
-              onClick={openBinder}
-              aria-keyshortcuts="C"
-              className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
-            >
-              <BinderIcon />
-              {t('binderButton')}
-            </button>
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-3">
-            <button
-              type="button"
-              aria-label={tSettings('open')}
-              onClick={openSettings}
-              aria-keyshortcuts="Escape"
-              className="shrink-0 rotate-2 cursor-pointer ui-paper-button bg-ui-paper p-1.5"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
-                {[0, 45, 90, 135].map((angle) => (
-                  <path
-                    key={angle}
-                    d="M12 1v22"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    transform={`rotate(${angle} 12 12)`}
-                  />
-                ))}
-                <circle cx="12" cy="12" r="7" fill="currentColor" />
-                <circle cx="12" cy="12" r="3" fill="var(--ui-paper)" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label={tActivity('open', {
-                done: Math.min(activity.done.length, DAILY_QUEST_GOAL),
-                total: DAILY_QUEST_GOAL,
-              })}
-              onClick={openActivity}
-              className="relative flex -rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
-            >
-              <ActivityIcon />
-              {/* Quests past the bonus's six are extra, so the count stops there. */}
-              {Math.min(activity.done.length, DAILY_QUEST_GOAL)}/{DAILY_QUEST_GOAL}
-              {/* A reward waits to be claimed. */}
-              {canClaimDailyBonus(activity) && (
-                <span
-                  aria-hidden="true"
-                  className="ui-bob absolute -top-1.5 -right-1.5 size-3.5 rounded-full border-2 border-ui-paper bg-ui-stamp"
-                />
-              )}
-            </button>
-            {clock && <ClockBadge offset={clockOffset} clock={clock} />}
-          </div>
-        </div>
-        {isPapySaying && !isDialogOpen && (
-          // Papy Caillou's saying, in his speech bubble, once his memory game is won for the day.
-          // Pressing it, or the interact key, still talks to him, for his skipping stones.
-          <button
-            ref={bubble as RefObject<HTMLButtonElement | null>}
-            type="button"
-            aria-live="polite"
-            onClick={interact}
-            style={{ transform: 'translate(-200vw, 0)' }}
-            className="group absolute top-0 left-0 cursor-pointer pb-2.5 font-game text-ui-ink"
-          >
-            <span className="ui-pop-in block w-max max-w-[min(22rem,80vw)] rounded-[2rem] bg-ui-paper px-6 py-3 text-center shadow-[3px_4px_0_var(--ui-shadow)]">
-              <span className="block text-lg leading-snug">
-                « {tQuest(`grandpa.proverbs.${proverb}.text` as 'grandpa.proverbs.1.text')} »
-              </span>
-              <span className="mt-1 block text-sm text-ui-ink/60">
-                {tQuest(`grandpa.proverbs.${proverb}.source` as 'grandpa.proverbs.1.source')}
-              </span>
-              <span className="mt-1.5 flex items-center justify-center gap-2 text-base">
-                <kbd className="rounded-full bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
-                  E
-                </kbd>
-                {t('grandpa')}
-              </span>
-            </span>
-            <span
-              aria-hidden="true"
-              className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
-            />
-          </button>
-        )}
-        {interaction && !isDialogOpen && !isPapySaying && isTalk(interaction) && (
-          // A speech bubble that the scene moves just above the head of who the player can talk to.
-          <button
-            ref={bubble as RefObject<HTMLButtonElement | null>}
-            type="button"
-            aria-label={t(interaction)}
-            onClick={interact}
-            style={{ transform: 'translate(-200vw, 0)' }}
-            className="group absolute top-0 left-0 cursor-pointer pb-2.5 font-game text-xl text-ui-ink"
-          >
-            <span className="ui-pop-in flex items-center gap-2 rounded-[50%] bg-ui-paper px-9 py-3 shadow-[3px_4px_0_var(--ui-shadow)] transition-transform group-hover:-translate-y-0.5">
-              <kbd className="rounded-full bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
-                E
-              </kbd>
-              {/* What the character says, while the button's name says what pressing it does. */}
-              <span aria-hidden="true">{tHails(interaction, { name: player.username })}</span>
-            </span>
-            {/* The bubble's tail, pointing down at the speaker. */}
-            <span
-              aria-hidden="true"
-              className="absolute bottom-0.5 left-1/2 h-4 w-3 -translate-x-1/2 bg-ui-paper [clip-path:polygon(0_0,100%_0,30%_100%)]"
-            />
-          </button>
+        <TopBar
+          username={player.username}
+          coins={wallet.coins}
+          boosters={boosterTotal}
+          activity={activity}
+          clock={clock}
+          clockOffset={clockOffset}
+          onOpenBag={openBag}
+          onOpenBinder={openBinder}
+          onOpenSettings={openSettings}
+          onOpenActivity={openActivity}
+        />
+        {!isDialogOpen && (
+          <InteractionPrompts
+            interaction={interaction}
+            username={player.username}
+            papySaying={isPapySaying ? proverb : null}
+            canSleep={clock?.canSleep ?? false}
+            searchNote={kitten.searchNote}
+            bubble={bubble}
+            onInteract={interact}
+          />
         )}
         {/* The game's version, tucked in a corner so that testers can say which one they play. */}
         <p className="pointer-events-none absolute bottom-1 left-2 font-digits text-[0.65rem] text-ui-ink/45 select-none">
           {t('version', { version: process.env.APP_VERSION ?? '' })}
         </p>
-        {interaction && !isDialogOpen && !isTalk(interaction) && (
-          <button
-            type="button"
-            onClick={interact}
-            aria-disabled={interaction === 'bed' && !clock?.canSleep}
-            className="ui-bob absolute inset-x-0 bottom-16 mx-auto pointer-coarse:bottom-44 min-[48rem]:pointer-fine:bottom-22 flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
-          >
-            <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
-              E
-            </kbd>
-            {interaction === 'bed' && !clock?.canSleep
-              ? t('notSleepy')
-              : interaction === 'search' && searchNote
-                ? t(`searched.${searchNote}`)
-                : t(interaction)}
-          </button>
-        )}
         {!isTalking &&
           memoryCards === null &&
           !isFishing &&
@@ -1252,7 +716,7 @@ export function Game({ player, sets, progress }: Props) {
             onRedeemed={(updated) => setWallet(updated)}
             onShowNews={() => {
               setIsSettingsOpen(false);
-              setNewsShown(NEWS);
+              showAllNews();
             }}
             onClose={() => setIsSettingsOpen(false)}
           />
@@ -1441,15 +905,15 @@ export function Game({ player, sets, progress }: Props) {
             line={
               activity.done.includes('ronronKitten')
                 ? 'thanks'
-                : kittenSpot
-                  ? `hints.${kittenSpot}`
+                : kitten.kittenSpot
+                  ? `hints.${kitten.kittenSpot}`
                   : 'worried'
             }
             onClose={() => setTalkingTo(null)}
           />
         )}
-        {isKittenFound && (
-          <NpcDialog speaker="kitten" line="found" onClose={() => setIsKittenFound(false)} />
+        {kitten.isKittenFound && (
+          <NpcDialog speaker="kitten" line="found" onClose={kitten.closeKittenFound} />
         )}
         {talkingTo === 'archivist' && (
           // Bastien hands over the full card statistics as a file. The server checks the role again.
@@ -1553,43 +1017,19 @@ export function Game({ player, sets, progress }: Props) {
           talkingTo !== 'photographer' &&
           talkingTo !== 'grandpaStones' &&
           talkingTo !== 'bereniceBalloons' && (
-            <ShopDialog
+            <SellerConversation
               stock={talkingTo}
-              items={(talkingTo === 'binderSeller'
-                ? bindersForSale(sets)
-                : setsSoldBy(talkingTo, sets)
-              ).map((set) => {
-                const hasBinder = binders.includes(set.id);
-                return {
-                  set,
-                  refusal:
-                    talkingTo === 'binderSeller'
-                      ? hasBinder
-                        ? 'alreadyOwned'
-                        : null
-                      : hasBinder
-                        ? null
-                        : 'needsBinder',
-                  inBag: boosterCount(wallet, set.id),
-                };
-              })}
-              coins={wallet.coins}
-              onBuy={talkingTo === 'binderSeller' ? buyBinder : buy}
-              extra={
-                talkingTo === 'binderSeller'
-                  ? {
-                      label: tQuiz('start'),
-                      // Mamie Noisette's quiz, once a day: done, she says so instead.
-                      doneLine: activity.done.includes('bookshopQuiz')
-                        ? tQuiz('alreadyDone', { name: player.username })
-                        : null,
-                      onPress: () => {
-                        setTalkingTo(null);
-                        setIsQuizzing(true);
-                      },
-                    }
-                  : undefined
-              }
+              sets={sets}
+              binders={binders}
+              wallet={wallet}
+              isQuizDone={activity.done.includes('bookshopQuiz')}
+              onStartQuiz={() => {
+                setTalkingTo(null);
+                setIsQuizzing(true);
+              }}
+              onWallet={setWallet}
+              onBinders={setBinders}
+              showSaveNotice={showSaveNotice}
               onClose={() => setTalkingTo(null)}
             />
           )}
@@ -1614,16 +1054,7 @@ export function Game({ player, sets, progress }: Props) {
           />
         )}
         <SaveNotice isSaving={isSaving} />
-        {/* A night's sleep: the screen goes dark, then the morning comes back. */}
-        <div
-          role="status"
-          className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#141b33] font-display text-3xl text-ui-paper transition-opacity duration-700 ${
-            sleep === 'asleep' ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          {sleep === 'asleep' && t('sleeping', { name: player.username })}
-          {sleep === 'waking' && <span className="sr-only">{t('wakingUp')}</span>}
-        </div>
+        <SleepScreen sleep={sleep} name={player.username} />
       </div>
     </PlayerNameContext>
   );

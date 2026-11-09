@@ -1,7 +1,12 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cardSets, cardSetTranslations, cards, cardVariants } from '@/db/schema';
-import { isPlayableSet, PLAYABLE_SET_IDS, type PlayableSet, type SetId } from '@/game/card-sets';
+import {
+  isPlayableSet,
+  PLAYABLE_SET_IDS,
+  type PlayableSet,
+  type SetId,
+} from '@/game/cards/card-sets';
 
 // Only the sets that have been imported, so that the game never offers an empty one.
 export async function loadPlayableSets(locale: string): Promise<PlayableSet[]> {

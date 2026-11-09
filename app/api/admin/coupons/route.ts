@@ -1,7 +1,7 @@
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
 import { createCoupon, listCoupons } from '@/coupons/admin';
-import { parseCouponDraft } from '@/game/coupons';
+import { parseCouponDraft } from '@/game/cards/coupons';
 
 // Mlle Trotte's register, for admins only, checked on every request: Brutus at the door is only a
 // picture of this rule.

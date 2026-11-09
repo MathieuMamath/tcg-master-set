@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { claimDailyBonus } from '@/player/progress';
+import { claimDailyBonus } from '@/player/activity';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ claimDailyBonus: vi.fn() }));
+vi.mock('@/player/activity', () => ({ claimDailyBonus: vi.fn() }));
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});

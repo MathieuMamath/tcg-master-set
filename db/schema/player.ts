@@ -10,7 +10,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import type { MemoryGame } from '@/game/memory-game';
+import type { MemoryGame } from '@/game/quests/memory-game';
 import { users } from './auth';
 import { cardSets } from './cards';
 

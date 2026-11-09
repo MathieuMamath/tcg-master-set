@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { redeemCoupon } from '@/player/progress';
+import { redeemCoupon } from '@/player/coupons';
 
 // A player uses a coupon from the settings. The server alone checks and pays it.
 export async function POST(request: Request) {

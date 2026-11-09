@@ -1,6 +1,6 @@
 import { getPlayer } from '@/auth/session';
-import { isPlayableSet } from '@/game/card-sets';
-import { buyBinder } from '@/player/progress';
+import { isPlayableSet } from '@/game/cards/card-sets';
+import { buyBinder } from '@/player/shop';
 
 export async function POST(request: Request) {
   const setId = new URL(request.url).searchParams.get('set');

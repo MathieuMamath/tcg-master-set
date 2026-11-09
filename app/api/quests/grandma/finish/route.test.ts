@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { finishGrandmaQuest } from '@/player/progress';
+import { finishGrandmaQuest } from '@/player/quests/chores';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ finishGrandmaQuest: vi.fn() }));
+vi.mock('@/player/quests/chores', () => ({ finishGrandmaQuest: vi.fn() }));
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});

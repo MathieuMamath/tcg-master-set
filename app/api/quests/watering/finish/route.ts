@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { finishWateringQuest } from '@/player/progress';
+import { finishWateringQuest } from '@/player/quests/chores';
 
 export async function POST() {
   try {

@@ -22,8 +22,8 @@ import {
   parseSet,
 } from '../cards/tcgdex';
 import { cardSets, cardSetTranslations, cards, cardTranslations, cardVariants } from '../db/schema';
-import { boosterRecipe, unreachableSlots } from '../game/booster';
-import { isPlayableSet, PLAYABLE_SET_IDS } from '../game/card-sets';
+import { boosterRecipe, unreachableSlots } from '../game/cards/booster';
+import { isPlayableSet, PLAYABLE_SET_IDS } from '../game/cards/card-sets';
 
 const API_URL = 'https://api.tcgdex.net/v2';
 const CONCURRENT_REQUESTS = 5;

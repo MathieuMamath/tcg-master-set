@@ -1,7 +1,7 @@
 import { and, count, countDistinct, eq, gte, max, type SQL, sql } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { gameEvents } from '@/db/schema';
-import { GAME_EVENT_TYPES, type GameEventType } from '@/game/events';
+import { GAME_EVENT_TYPES, type GameEventType } from '@/game/log/events';
 import {
   type BalanceSummary,
   type BucketUnit,
@@ -9,7 +9,7 @@ import {
   periodStart,
   type StatsPeriod,
   statsBuckets,
-} from '@/game/stats';
+} from '@/game/log/stats';
 
 // The game's statistics, worked out from the event log on the server. Everything here counts and
 // adds up across players: no player's id, name or email ever leaves this module.

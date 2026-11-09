@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { flipGrandpaCard } from '@/player/progress';
+import { flipGrandpaCard } from '@/player/quests/memory';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ flipGrandpaCard: vi.fn() }));
+vi.mock('@/player/quests/memory', () => ({ flipGrandpaCard: vi.fn() }));
 
 function flip(position: string) {
   return POST(new NextRequest(`http://localhost/api/quests/grandpa/flip?position=${position}`));

@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { buyBooster } from '@/player/progress';
+import { buyBooster } from '@/player/shop';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ buyBooster: vi.fn() }));
+vi.mock('@/player/shop', () => ({ buyBooster: vi.fn() }));
 
 function buy(set: string, quantity?: string) {
   const query = quantity === undefined ? '' : `&quantity=${quantity}`;

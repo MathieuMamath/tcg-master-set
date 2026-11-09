@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { finishDalgona } from '@/player/progress';
+import { finishDalgona } from '@/player/quests/dalgona';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ finishDalgona: vi.fn() }));
+vi.mock('@/player/quests/dalgona', () => ({ finishDalgona: vi.fn() }));
 
 function finish(body: string) {
   return POST(new Request('http://localhost/api/quests/dalgona/finish', { method: 'POST', body }));

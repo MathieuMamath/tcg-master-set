@@ -2,12 +2,12 @@ import { NextRequest } from 'next/server';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
 import { type MemoryCard, pickMemoryCards } from '@/cards/memory-cards';
-import { startGrandpaQuest } from '@/player/progress';
+import { startGrandpaQuest } from '@/player/quests/memory';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/cards/memory-cards', () => ({ pickMemoryCards: vi.fn() }));
-vi.mock('@/player/progress', () => ({ startGrandpaQuest: vi.fn() }));
+vi.mock('@/player/quests/memory', () => ({ startGrandpaQuest: vi.fn() }));
 
 const CARDS: MemoryCard[] = Array.from({ length: 8 }, (_, index) => ({
   name: `Placeholder ${index}`,

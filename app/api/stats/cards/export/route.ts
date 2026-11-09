@@ -1,7 +1,7 @@
 import { hasLocale } from 'next-intl';
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
-import { cardStatsCsv } from '@/game/card-stats';
+import { cardStatsCsv } from '@/game/cards/card-stats';
 import { routing } from '@/i18n/routing';
 import { loadCardStatsRows } from '@/stats/card-stats';
 

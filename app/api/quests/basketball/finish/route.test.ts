@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { finishBasketball } from '@/player/progress';
+import { finishBasketball } from '@/player/quests/basketball';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ finishBasketball: vi.fn() }));
+vi.mock('@/player/quests/basketball', () => ({ finishBasketball: vi.fn() }));
 
 function finish(body: string) {
   return POST(

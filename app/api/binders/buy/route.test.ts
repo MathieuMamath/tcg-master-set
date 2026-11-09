@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { buyBinder } from '@/player/progress';
+import { buyBinder } from '@/player/shop';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ buyBinder: vi.fn() }));
+vi.mock('@/player/shop', () => ({ buyBinder: vi.fn() }));
 
 function buy(set: string) {
   return POST(new Request(`http://test.invalid/api/binders/buy?set=${set}`, { method: 'POST' }));

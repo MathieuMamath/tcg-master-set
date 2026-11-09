@@ -1,7 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cardSetTranslations, cards, cardTranslations, cardVariants } from '@/db/schema';
-import type { BinderCard } from '@/game/binder';
+import type { BinderCard } from '@/game/cards/binder';
 
 export async function loadBinderCatalogue(
   setId: string,
