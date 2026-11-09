@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.98](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.97...v0.1.98) (2026-11-09)
+
+### Features
+
+* **city:** show the controls and add keyboard shortcuts ([#100](https://github.com/MathieuMamath/tcg-master-set/issues/100)) ([0ca12e1](https://github.com/MathieuMamath/tcg-master-set/commit/0ca12e1fdd60cba30cf9b945b148578c7ca77f70))
+
 ## [0.1.97](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.96...v0.1.97) (2026-11-08)
 
 ### Features
