@@ -1192,7 +1192,7 @@ export function Game({ player, sets, progress }: Props) {
             type="button"
             onClick={interact}
             aria-disabled={interaction === 'bed' && !clock?.canSleep}
-            className="ui-bob absolute inset-x-0 bottom-16 mx-auto min-[48rem]:pointer-fine:bottom-22 flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
+            className="ui-bob absolute inset-x-0 bottom-16 mx-auto pointer-coarse:bottom-44 min-[48rem]:pointer-fine:bottom-22 flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
           >
             <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
               E

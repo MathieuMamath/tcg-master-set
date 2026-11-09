@@ -32,6 +32,7 @@ export const NEWS: readonly NewsItem[] = [
   { id: 15, key: 'villageQuests', date: '2026-11-08', kind: 'feature' },
   { id: 16, key: 'painterKittenPhotos', date: '2026-11-08', kind: 'feature' },
   { id: 17, key: 'keyboardShortcuts', date: '2026-11-09', kind: 'feature' },
+  { id: 18, key: 'mobileActionPrompt', date: '2026-11-09', kind: 'fix' },
 ];
 
 // A player who never saw the sheet only gets the latest notes, rather than the whole history.
