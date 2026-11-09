@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { searchForKitten } from '@/player/progress';
+import { searchForKitten } from '@/player/quests/kitten';
 
 export async function POST(request: Request) {
   try {

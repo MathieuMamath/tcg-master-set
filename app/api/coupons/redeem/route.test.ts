@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { redeemCoupon } from '@/player/progress';
+import { redeemCoupon } from '@/player/coupons';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ redeemCoupon: vi.fn() }));
+vi.mock('@/player/coupons', () => ({ redeemCoupon: vi.fn() }));
 
 function redeem(body: unknown) {
   return POST(

@@ -1,7 +1,7 @@
 import { hasLocale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
 import { loadBinderCatalogue } from '@/cards/binder-catalogue';
-import { isPlayableSet } from '@/game/card-sets';
+import { isPlayableSet } from '@/game/cards/card-sets';
 import { routing } from '@/i18n/routing';
 
 export const dynamic = 'force-dynamic';

@@ -1,8 +1,8 @@
 import { hasLocale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
-import { parseVisit } from '@/game/visits';
+import { parseVisit } from '@/game/log/visits';
 import { routing } from '@/i18n/routing';
-import { recordVisit } from '@/player/progress';
+import { recordVisit } from '@/player/visits';
 
 // The game's page was opened. A visit gives no advantage, so a failure is simply let go.
 export async function POST(request: Request) {

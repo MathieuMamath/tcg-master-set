@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { drawRaffleBall } from '@/player/progress';
+import { drawRaffleBall } from '@/player/quests/raffle';
 
 export async function POST() {
   try {

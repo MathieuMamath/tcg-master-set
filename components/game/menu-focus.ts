@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from 'react';
-import { horizontalStep, nextChoice, verticalStep } from '@/game/menu-keys';
-import { nearestInDirection } from '@/game/spatial-focus';
+import { horizontalStep, nextChoice, verticalStep } from '@/game/world/menu-keys';
+import { nearestInDirection } from '@/game/world/spatial-focus';
 
 function choicesIn(container: HTMLElement): HTMLElement[] {
   return Array.from(

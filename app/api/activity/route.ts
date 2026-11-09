@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { loadPlayerActivity } from '@/player/progress';
+import { loadPlayerActivity } from '@/player/activity';
 
 // Today's quests done, read again whenever the game closes a dialog.
 export async function GET() {

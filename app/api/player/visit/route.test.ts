@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { recordVisit } from '@/player/progress';
+import { recordVisit } from '@/player/visits';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ recordVisit: vi.fn() }));
+vi.mock('@/player/visits', () => ({ recordVisit: vi.fn() }));
 
 function visit(body: unknown) {
   return POST(

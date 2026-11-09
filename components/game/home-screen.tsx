@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import type { Player } from '@/auth/session';
-import type { PlayableSet } from '@/game/card-sets';
+import type { PlayableSet } from '@/game/cards/card-sets';
 import type { PlayerProgress } from '@/player/progress';
 import { Game } from './game';
 

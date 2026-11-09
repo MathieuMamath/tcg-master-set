@@ -1,7 +1,7 @@
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
-import { ADMIN_PLACES } from '@/game/side-rooms';
-import { parseSpot } from '@/game/spot';
+import { ADMIN_PLACES } from '@/game/world/side-rooms';
+import { parseSpot } from '@/game/world/spot';
 import { savePlayerSpot } from '@/player/progress';
 
 export async function POST(request: Request) {

@@ -1,6 +1,6 @@
 import type { getDb } from '@/db/client';
 import { gameEvents } from '@/db/schema';
-import type { GameEventDetails, GameEventType } from '@/game/events';
+import type { GameEventDetails, GameEventType } from '@/game/log/events';
 
 type Writer = Pick<ReturnType<typeof getDb>, 'insert'>;
 

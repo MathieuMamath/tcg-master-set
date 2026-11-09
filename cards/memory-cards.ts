@@ -1,8 +1,8 @@
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cards, cardTranslations } from '@/db/schema';
-import { PLAYABLE_SET_IDS } from '@/game/card-sets';
-import { MEMORY_PAIRS } from '@/game/memory-game';
+import { PLAYABLE_SET_IDS } from '@/game/cards/card-sets';
+import { MEMORY_PAIRS } from '@/game/quests/memory-game';
 
 export type MemoryCard = { name: string; imageUrl: string | null };
 

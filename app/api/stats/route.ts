@@ -1,6 +1,6 @@
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
-import { isStatsPeriod } from '@/game/stats';
+import { isStatsPeriod } from '@/game/log/stats';
 import { loadGameStats } from '@/stats/game-stats';
 
 // Mme Hulotte's reports, for admins only, checked here on every request: Brutus at the door is only

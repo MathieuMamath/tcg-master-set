@@ -1,5 +1,5 @@
 import { bigint, index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
-import type { GameEventType } from '@/game/events';
+import type { GameEventType } from '@/game/log/events';
 import { users } from './auth';
 
 // The game's event log, only ever added to, in the same transaction as what each event records.

@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { startFishingQuest } from '@/player/progress';
+import { startFishingQuest } from '@/player/quests/fishing';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ startFishingQuest: vi.fn() }));
+vi.mock('@/player/quests/fishing', () => ({ startFishingQuest: vi.fn() }));
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});

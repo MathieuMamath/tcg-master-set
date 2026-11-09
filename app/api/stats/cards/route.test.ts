@@ -1,7 +1,7 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
-import { PLAYABLE_SET_IDS } from '@/game/card-sets';
+import { PLAYABLE_SET_IDS } from '@/game/cards/card-sets';
 import { loadSetDropOverview, loadSetDrops } from '@/stats/card-stats';
 import { GET } from './route';
 

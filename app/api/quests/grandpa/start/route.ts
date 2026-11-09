@@ -2,9 +2,9 @@ import type { NextRequest } from 'next/server';
 import { hasLocale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
 import { pickMemoryCards } from '@/cards/memory-cards';
-import { MEMORY_PAIRS } from '@/game/memory-game';
+import { MEMORY_PAIRS } from '@/game/quests/memory-game';
 import { routing } from '@/i18n/routing';
-import { startGrandpaQuest } from '@/player/progress';
+import { startGrandpaQuest } from '@/player/quests/memory';
 
 export async function POST(request: NextRequest) {
   try {

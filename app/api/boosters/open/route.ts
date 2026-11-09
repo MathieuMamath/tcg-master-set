@@ -1,8 +1,8 @@
 import { hasLocale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
-import { isPlayableSet } from '@/game/card-sets';
+import { isPlayableSet } from '@/game/cards/card-sets';
 import { routing } from '@/i18n/routing';
-import { openOwnedBooster } from '@/player/progress';
+import { openOwnedBooster } from '@/player/shop';
 
 export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);

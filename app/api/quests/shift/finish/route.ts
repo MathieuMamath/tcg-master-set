@@ -1,6 +1,6 @@
 import { getPlayer } from '@/auth/session';
-import { isShiftJob } from '@/game/shifts';
-import { finishShift } from '@/player/progress';
+import { isShiftJob } from '@/game/quests/shifts/shifts';
+import { finishShift } from '@/player/quests/shifts';
 
 export async function POST(request: Request) {
   const job = new URL(request.url).searchParams.get('job');

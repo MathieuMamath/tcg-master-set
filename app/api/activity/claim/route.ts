@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { claimDailyBonus } from '@/player/progress';
+import { claimDailyBonus } from '@/player/activity';
 
 export async function POST() {
   try {

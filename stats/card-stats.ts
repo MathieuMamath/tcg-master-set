@@ -3,16 +3,16 @@ import { loadBinderCatalogue } from '@/cards/binder-catalogue';
 import { loadBoosterPool } from '@/cards/booster-pool';
 import { getDb } from '@/db/client';
 import { gameEvents } from '@/db/schema';
-import { slotKey } from '@/game/binder';
-import { boosterRecipe, expectedPulls } from '@/game/booster';
-import { PLAYABLE_SET_IDS } from '@/game/card-sets';
+import { slotKey } from '@/game/cards/binder';
+import { boosterRecipe, expectedPulls } from '@/game/cards/booster';
+import { PLAYABLE_SET_IDS } from '@/game/cards/card-sets';
 import {
   type CardDrop,
   type CardPulls,
   type CardStatsRow,
   cardDrops,
   dropRate,
-} from '@/game/card-stats';
+} from '@/game/cards/card-stats';
 
 // The draws of the boosters, card by card, worked out from the event log on the server. Only
 // openings that recorded their cards count, and nothing about who opened them leaves this module.

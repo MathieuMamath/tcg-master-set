@@ -1,7 +1,7 @@
 import { getPlayer } from '@/auth/session';
-import { isPlayableSet } from '@/game/card-sets';
-import { parseBoosterQuantity } from '@/game/shop-dialogue';
-import { buyBooster } from '@/player/progress';
+import { isPlayableSet } from '@/game/cards/card-sets';
+import { parseBoosterQuantity } from '@/game/cards/shop-dialogue';
+import { buyBooster } from '@/player/shop';
 
 export async function POST(request: Request) {
   const parameters = new URL(request.url).searchParams;

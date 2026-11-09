@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { finishDalgona } from '@/player/progress';
+import { finishDalgona } from '@/player/quests/dalgona';
 
 export async function POST(request: Request) {
   try {

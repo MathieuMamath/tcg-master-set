@@ -1,7 +1,7 @@
 import { count, desc, eq } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { couponRedemptions, coupons } from '@/db/schema';
-import type { CouponDraft } from '@/game/coupons';
+import type { CouponDraft } from '@/game/cards/coupons';
 import { recordEvent } from '@/player/events';
 
 // Mlle Trotte's register: the coupons admins made, and how many players used each. Only counts

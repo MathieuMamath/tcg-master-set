@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { recordVisitEnd } from '@/player/progress';
+import { recordVisitEnd } from '@/player/visits';
 
 // The game's page was left, by a beacon that outlives it. The server times the visit itself.
 export async function POST() {

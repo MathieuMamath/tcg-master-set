@@ -6,17 +6,8 @@ import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } fro
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
 import { LANDING_REFERRER_KEY } from '@/components/landing-referrer';
-import { canClaimDailyBonus, DAILY_QUEST_GOAL, type DailyActivity } from '@/game/activity';
-import { addToCollection } from '@/game/binder';
-import { stopAt } from '@/game/bus';
-import type { PlayableSet, SetId } from '@/game/card-sets';
-import { isValidOffset, weatherAt } from '@/game/clock';
-import type { DalgonaShape, Press } from '@/game/dalgona';
-import type { MemoryStatus } from '@/game/memory-game';
-import { isMovementKey, keyboardDirection, STILL } from '@/game/movement';
-import { latestNewsId, NEWS, type NewsItem, parseLastSeenId, unreadNews } from '@/game/news';
-import { nextProverb, pickProverb } from '@/game/proverbs';
-import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests';
+import { addToCollection } from '@/game/cards/binder';
+import type { PlayableSet, SetId } from '@/game/cards/card-sets';
 import {
   bindersForSale,
   boosterCount,
@@ -25,7 +16,16 @@ import {
   setsSoldBy,
   totalBoosters,
   type Wallet,
-} from '@/game/shop-dialogue';
+} from '@/game/cards/shop-dialogue';
+import { latestNewsId, NEWS, type NewsItem, parseLastSeenId, unreadNews } from '@/game/news';
+import { nextProverb, pickProverb } from '@/game/proverbs';
+import { canClaimDailyBonus, DAILY_QUEST_GOAL, type DailyActivity } from '@/game/quests/activity';
+import type { DalgonaShape, Press } from '@/game/quests/dalgona';
+import type { MemoryStatus } from '@/game/quests/memory-game';
+import { pickStains, questDay, type Stain, scrubStain } from '@/game/quests/quests';
+import { stopAt } from '@/game/world/bus';
+import { isValidOffset, weatherAt } from '@/game/world/clock';
+import { isMovementKey, keyboardDirection, STILL } from '@/game/world/movement';
 import {
   type HidingSpotId,
   hidingSpotAlong,
@@ -33,56 +33,57 @@ import {
   OFFICE_FLOORS,
   type OfficeFloor,
   type SidePlaceId,
-} from '@/game/side-rooms';
-import type { PlayerSpot } from '@/game/spot';
-import type { Interaction, QuestGiver } from '@/game/world';
-import type {
-  BasketballResult,
-  DailyBonusClaim,
-  DalgonaResult,
-  FishingCatch,
-  KittenSearch,
-  PlayerProgress,
-  RaffleDraw,
-} from '@/player/progress';
-import { ActivityDialog, ActivityIcon } from './activity-dialog';
-import { AnimatedCount } from './animated-count';
-import { BasketballDialog } from './basketball-dialog';
-import { BinderView } from './binder-view';
-import { BoosterBag } from './booster-bag';
-import { BoosterOpening, type Opening } from './booster-opening';
-import { BusMap } from './bus-map';
-import { ControlsLegend } from './controls-legend';
-import { CouponRegister } from './coupon-register';
-import { DalgonaDialog } from './dalgona-dialog';
-import { ElevatorPanel } from './elevator-panel';
-import { FishingDialog } from './fishing-dialog';
-import { ClockBadge, useGameClock, WeatherLayer } from './game-clock';
-import { BinderIcon, BoosterIcon, CoinIcon } from './hud-icons';
-import { Joystick } from './joystick';
-import { MemoryDialog } from './memory-dialog';
-import { NewsSheet } from './news-sheet';
-import { NpcDialog, type Speaker } from './npc-dialog';
-import type { MovementInput } from './paper-scene';
+} from '@/game/world/side-rooms';
+import type { PlayerSpot } from '@/game/world/spot';
+import type { Interaction, QuestGiver } from '@/game/world/world';
+import type { DailyBonusClaim } from '@/player/activity';
+import type { PlayerProgress } from '@/player/progress';
+import type { BasketballResult } from '@/player/quests/basketball';
+import type { DalgonaResult } from '@/player/quests/dalgona';
+import type { FishingCatch } from '@/player/quests/fishing';
+import type { KittenSearch } from '@/player/quests/kitten';
+import type { RaffleDraw } from '@/player/quests/raffle';
+import { BinderView } from './boosters/binder-view';
+import { BoosterBag } from './boosters/booster-bag';
+import { BoosterOpening, type Opening } from './boosters/booster-opening';
+import { ActivityDialog, ActivityIcon } from './hud/activity-dialog';
+import { AnimatedCount } from './hud/animated-count';
+import { BusMap } from './hud/bus-map';
+import { ControlsLegend } from './hud/controls-legend';
+import { BinderIcon, BoosterIcon, CoinIcon } from './hud/hud-icons';
+import { Joystick } from './hud/joystick';
+import { NewsSheet } from './hud/news-sheet';
+import { SaveNotice, useSaveNotice } from './hud/save-notice';
+import { SettingsMenu } from './hud/settings-menu';
+import { CouponRegister } from './office/coupon-register';
+import { ElevatorPanel } from './office/elevator-panel';
+import { StatsDialog } from './office/stats-dialog';
 import { PlayerNameContext } from './player-name';
-import { PuzzleDialog } from './puzzle-dialog';
-import { QuestBanner } from './quest-banner';
-import { QuestDialog, type QuestLine } from './quest-dialog';
-import { QuizDialog } from './quiz-dialog';
-import { RaffleDialog } from './raffle-dialog';
+import { BasketballDialog } from './quests/basketball-dialog';
+import { DalgonaDialog } from './quests/dalgona-dialog';
+import { FishingDialog } from './quests/fishing-dialog';
+import { MemoryDialog } from './quests/memory-dialog';
+import { PuzzleDialog } from './quests/puzzle-dialog';
+import { QuestBanner } from './quests/quest-banner';
+import { QuestDialog, type QuestLine } from './quests/quest-dialog';
+import { QuizDialog } from './quests/quiz-dialog';
+import { RaffleDialog } from './quests/raffle-dialog';
+import { WateringDialog } from './quests/watering-dialog';
 import { reportPlay } from './report';
-import { SaveNotice, useSaveNotice } from './save-notice';
-import { SettingsMenu } from './settings-menu';
-import type { ShiftHost } from './shift';
-import { ShiftDialog } from './shift-dialog';
-import { ShopDialog } from './shop-dialog';
-import { StatsDialog } from './stats-dialog';
-import { WateringDialog } from './watering-dialog';
+import { ClockBadge, useGameClock, WeatherLayer } from './scene/game-clock';
+import type { MovementInput } from './scene/stage';
+import type { ShiftHost } from './shifts/shift';
+import { ShiftDialog } from './shifts/shift-dialog';
+import { NpcDialog, type Speaker } from './shop/npc-dialog';
+import { ShopDialog } from './shop/shop-dialog';
 
 // Three.js needs the browser, and this keeps it out of the bundle of every other screen.
-const PaperScene = dynamic(() => import('./paper-scene').then((module) => module.PaperScene), {
-  ssr: false,
-});
+const PaperScene = dynamic(
+  () => import('./scene/paper-scene').then((module) => module.PaperScene),
+  {
+    ssr: false,
+  },
+);
 
 const INTERACT_KEY = 'KeyE';
 

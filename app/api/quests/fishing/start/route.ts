@@ -1,5 +1,5 @@
 import { getPlayer } from '@/auth/session';
-import { startFishingQuest } from '@/player/progress';
+import { startFishingQuest } from '@/player/quests/fishing';
 
 export async function POST() {
   try {

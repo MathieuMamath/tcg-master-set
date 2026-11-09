@@ -1,6 +1,6 @@
 import { getPlayer } from '@/auth/session';
-import { parseReport } from '@/game/reports';
-import { recordReport } from '@/player/progress';
+import { parseReport } from '@/game/log/reports';
+import { recordReport } from '@/player/visits';
 
 // How players play, reported by the browser for the statistics. Nothing here gives an advantage,
 // so a failure is simply let go.

@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { getPlayer } from '@/auth/session';
-import { drawRaffleBall } from '@/player/progress';
+import { drawRaffleBall } from '@/player/quests/raffle';
 import { POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
-vi.mock('@/player/progress', () => ({ drawRaffleBall: vi.fn() }));
+vi.mock('@/player/quests/raffle', () => ({ drawRaffleBall: vi.fn() }));
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});

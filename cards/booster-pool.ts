@@ -1,8 +1,8 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cardSetTranslations, cards, cardTranslations, cardVariants } from '@/db/schema';
-import type { DrawnCard, PoolCard } from '@/game/booster';
-import { cardTier, type PullTier } from '@/game/pull-tier';
+import type { DrawnCard, PoolCard } from '@/game/cards/booster';
+import { cardTier, type PullTier } from '@/game/cards/pull-tier';
 
 export type OpenedCard = {
   id: string;

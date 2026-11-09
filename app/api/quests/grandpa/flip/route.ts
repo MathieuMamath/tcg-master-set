@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { getPlayer } from '@/auth/session';
-import { flipGrandpaCard } from '@/player/progress';
+import { flipGrandpaCard } from '@/player/quests/memory';
 
 export async function POST(request: NextRequest) {
   try {
