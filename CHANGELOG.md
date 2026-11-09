@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.99](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.98...v0.1.99) (2026-11-09)
+
+### Bug Fixes
+
+* **city:** keep the action prompt clear of the joystick on phones ([#101](https://github.com/MathieuMamath/tcg-master-set/issues/101)) ([0200660](https://github.com/MathieuMamath/tcg-master-set/commit/020066066884c4410321c13e14e27aa54fd735d9))
+
 ## [0.1.98](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.97...v0.1.98) (2026-11-09)
 
 ### Features
