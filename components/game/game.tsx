@@ -52,6 +52,7 @@ import { BinderView } from './binder-view';
 import { BoosterBag } from './booster-bag';
 import { BoosterOpening, type Opening } from './booster-opening';
 import { BusMap } from './bus-map';
+import { ControlsLegend } from './controls-legend';
 import { CouponRegister } from './coupon-register';
 import { DalgonaDialog } from './dalgona-dialog';
 import { ElevatorPanel } from './elevator-panel';
@@ -115,6 +116,10 @@ function isTalk(interaction: Interaction): interaction is Extract<Talk, Interact
   );
 }
 const DASH_KEY = 'Space';
+// Shortcuts to the menus of the top of the screen, by where the key sits, like the movement keys.
+const BAG_KEY = 'KeyB';
+const BINDER_KEY = 'KeyC';
+const SETTINGS_KEY = 'Escape';
 // Set once this page has reported its visit, so that a remount doesn't count it twice.
 let isVisitRecorded = false;
 // The places under the open sky, where the weather falls and the night darkens the world.
@@ -262,12 +267,25 @@ export function Game({ player, sets, progress }: Props) {
   const bubble = useRef<HTMLElement>(null);
   const isFinishingQuest = useRef(false);
   const isCutting = useRef(false);
-  const controls = useRef({ interaction, isDialogOpen, goToBed: () => {}, search: () => {} });
+  const controls = useRef({
+    interaction,
+    isDialogOpen,
+    hasBoosters: boosterTotal > 0,
+    goToBed: () => {},
+    search: () => {},
+    openBag: () => {},
+    openBinder: () => {},
+    openSettings: () => {},
+  });
   controls.current = {
     interaction,
     isDialogOpen,
+    hasBoosters: boosterTotal > 0,
     goToBed: () => goToBed(),
     search: () => searchHere(),
+    openBag: () => openBag(),
+    openBinder: () => openBinder(),
+    openSettings: () => openSettings(),
   };
 
   useEffect(() => {
@@ -288,12 +306,42 @@ export function Game({ player, sets, progress }: Props) {
     };
     const isPressingAButton = () =>
       !lastUsedPointer && document.activeElement?.tagName === 'BUTTON';
+    // Whether anything had the keys when this press began: a dialog, a game or a conversation.
+    // Read before anything else hears the press, since Escape closes a dialog on its way, and the
+    // settings must not open in its place.
+    let wasBusy = false;
+    const isBusy = () =>
+      controls.current.isDialogOpen || document.querySelector('dialog[open]') !== null;
+    const onKeyDownFirst = () => {
+      wasBusy = isBusy();
+    };
+    // A shortcut is a key on its own, so that the browser's own, such as copying, still work.
+    const isShortcut = (event: KeyboardEvent, code: string) =>
+      event.code === code && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'Tab') {
         lastUsedPointer = false;
       }
       // While a dialog is open, the keys belong to it.
-      if (controls.current.isDialogOpen) {
+      if (wasBusy || isBusy()) {
+        return;
+      }
+      if (isShortcut(event, SETTINGS_KEY)) {
+        event.preventDefault();
+        releaseKeys();
+        controls.current.openSettings();
+        return;
+      }
+      if (isShortcut(event, BINDER_KEY)) {
+        event.preventDefault();
+        releaseKeys();
+        controls.current.openBinder();
+        return;
+      }
+      if (isShortcut(event, BAG_KEY) && controls.current.hasBoosters) {
+        event.preventDefault();
+        releaseKeys();
+        controls.current.openBag();
         return;
       }
       if (event.code === INTERACT_KEY && controls.current.interaction) {
@@ -337,6 +385,7 @@ export function Game({ player, sets, progress }: Props) {
     };
 
     window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('keydown', onKeyDownFirst, { capture: true });
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
     // A key released in another window never sends keyup here.
@@ -344,6 +393,7 @@ export function Game({ player, sets, progress }: Props) {
 
     return () => {
       window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('keydown', onKeyDownFirst, { capture: true });
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('blur', releaseKeys);
@@ -1017,6 +1067,7 @@ export function Game({ player, sets, progress }: Props) {
               disabled={boosterTotal === 0}
               aria-label={`${t('boosters', { count: boosterTotal })}. ${tBooster('title')}`}
               onClick={openBag}
+              aria-keyshortcuts="B"
               className="relative flex -rotate-1 items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold enabled:cursor-pointer enabled:bg-ui-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
               <BoosterIcon />
@@ -1025,6 +1076,7 @@ export function Game({ player, sets, progress }: Props) {
             <button
               type="button"
               onClick={openBinder}
+              aria-keyshortcuts="C"
               className="flex rotate-1 cursor-pointer items-center gap-1.5 ui-paper-button bg-ui-paper px-3 py-1 font-digits text-base font-bold"
             >
               <BinderIcon />
@@ -1036,6 +1088,7 @@ export function Game({ player, sets, progress }: Props) {
               type="button"
               aria-label={tSettings('open')}
               onClick={openSettings}
+              aria-keyshortcuts="Escape"
               className="shrink-0 rotate-2 cursor-pointer ui-paper-button bg-ui-paper p-1.5"
             >
               <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
@@ -1139,7 +1192,7 @@ export function Game({ player, sets, progress }: Props) {
             type="button"
             onClick={interact}
             aria-disabled={interaction === 'bed' && !clock?.canSleep}
-            className="ui-bob absolute inset-x-0 bottom-16 mx-auto flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
+            className="ui-bob absolute inset-x-0 bottom-16 mx-auto min-[48rem]:pointer-fine:bottom-22 flex w-fit cursor-pointer items-center gap-2 ui-paper-button bg-ui-paper py-1 pr-4 pl-1.5 font-game text-xl text-ui-ink"
           >
             <kbd className="ui-scrap bg-ui-accent px-2 font-digits text-sm font-bold pointer-coarse:hidden">
               E
@@ -1158,9 +1211,7 @@ export function Game({ player, sets, progress }: Props) {
           dalgonaShape === null &&
           !isRaffling && (
             <>
-              <p className="pointer-events-none absolute inset-x-0 bottom-4 px-4 text-center text-sm opacity-70 pointer-coarse:hidden">
-                {t('keyboardHint')}
-              </p>
+              <ControlsLegend />
               <Joystick
                 onChange={(direction) => {
                   input.current.joystick = direction;
