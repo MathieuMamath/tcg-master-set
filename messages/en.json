@@ -1002,7 +1002,8 @@
       "parkQuests": "At Linden Park, Pépin the squirrel gardener has you clean up the lawn and water his flowers, and Papy Caillou teaches you to skip stones: three new daily quests. The clean-up and the stones can be replayed for every star, and the gentle watering is done once a day.",
       "villageQuests": "News in the village! Mamie Noisette asks her daily quiz, Bérénice runs Pop’Balloons at her stand, and Gustave the heron opens the village post, between the shop and the bookshop: three new daily quests.",
       "painterKittenPhotos": "Three new daily quests! Pinceau the sheep paints by the park’s lake and needs help with his sliding puzzle, Mme Ronron is looking for her kitten hidden somewhere, and Flash the chameleon photographs the big city’s sky.",
-      "keyboardShortcuts": "On a computer, the keys now show at the bottom of the screen. New shortcuts: B opens your boosters, C your binder, and Esc the settings. While opening a booster, Esc skips straight to your new cards."
+      "keyboardShortcuts": "On a computer, the keys now show at the bottom of the screen. New shortcuts: B opens your boosters, C your binder, and Esc the settings. While opening a booster, Esc skips straight to your new cards.",
+      "mobileActionPrompt": "On phones, the button to interact now shows above the joystick and the Dash button, rather than squeezed between them."
     }
   },
   "Shift": {

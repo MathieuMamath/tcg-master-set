@@ -5,6 +5,9 @@ import { version } from './package.json';
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // A second development server, such as an agent's preview next to the owner's, needs a build
+  // folder of its own, since `next dev` locks the one it uses.
+  distDir: process.env.NEXT_DIST_DIR ?? '.next',
   // The game's version, shown discreetly in a corner of the screen. The release job bumps it in
   // package.json after each merge, and that push deploys again with the new number.
   env: { APP_VERSION: version },
