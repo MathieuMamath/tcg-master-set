@@ -4,6 +4,16 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.100](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.99...v0.1.100) (2026-11-09)
+
+### Features
+
+* **quests:** freeze a finished shift on its last move ([#102](https://github.com/MathieuMamath/tcg-master-set/issues/102)) ([3c53fb7](https://github.com/MathieuMamath/tcg-master-set/commit/3c53fb7001dede95cb86ec37ec632577a8e44c8e))
+
+### Refactoring
+
+* restructure the code by domain ([#103](https://github.com/MathieuMamath/tcg-master-set/issues/103)) ([7e93eca](https://github.com/MathieuMamath/tcg-master-set/commit/7e93eca721e091a534a307942c475ba96ed590ce))
+
 ## [0.1.99](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.98...v0.1.99) (2026-11-09)
 
 ### Bug Fixes
