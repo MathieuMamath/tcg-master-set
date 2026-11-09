@@ -8,7 +8,23 @@
   },
   "Game": {
     "version": "v{version}",
-    "keyboardHint": "Utilise les flèches gauche et droite ou Q et D pour marcher, Espace pour un dash, et Tab pour atteindre les menus.",
+    "controls": {
+      "label": "Commandes",
+      "or": "ou",
+      "walk": "Marcher",
+      "dash": "Dash",
+      "bag": "Boosters",
+      "binder": "Classeur",
+      "keys": {
+        "arrowLeft": "Flèche gauche",
+        "arrowRight": "Flèche droite",
+        "left": "Q",
+        "right": "D",
+        "space": "Espace",
+        "bag": "B",
+        "binder": "C"
+      }
+    },
     "webglUnavailable": "Ce jeu a besoin de WebGL, que ton navigateur ne prend pas en charge ou a désactivé.",
     "coins": "{count, plural, one {# pièce} other {# pièces}}",
     "boosters": "{count, plural, one {# booster} other {# boosters}}",
@@ -985,7 +1001,8 @@
       "dojo": "Le dojo ouvre en ville, à côté de Ramen Yuzu ! Maître Kaito, un vieux blaireau, t’entraîne à la découpe de légumes et au tir à l’arc : deux nouvelles quêtes du jour payées en pièces. Au dojo comme chez Yuzu, rejoue autant que tu veux : chaque nouvelle étoile du jour te rapporte la différence en pièces, jusqu’à 300 pièces pour trois étoiles.",
       "parkQuests": "Au parc des Tilleuls, Pépin l’écureuil jardinier te confie la pelouse à nettoyer et ses fleurs à arroser, et Papy Caillou t’apprend les ricochets : trois nouvelles quêtes du jour. Le nettoyage et les ricochets se rejouent pour chaque étoile, et l’arrosage, tout doux, se fait une fois par jour.",
       "villageQuests": "Du nouveau au village ! Mamie Noisette pose son quiz du jour, Bérénice lance le Pop’Ballons à son stand, et Gustave le héron ouvre la poste du village, entre la boutique et la librairie : trois nouvelles quêtes du jour.",
-      "painterKittenPhotos": "Trois nouvelles quêtes du jour ! Pinceau le mouton peint au bord du lac du parc et a besoin d’aide pour son taquin, Mme Ronron cherche son chaton caché quelque part, et Flash le caméléon photographie le ciel de la grande ville."
+      "painterKittenPhotos": "Trois nouvelles quêtes du jour ! Pinceau le mouton peint au bord du lac du parc et a besoin d’aide pour son taquin, Mme Ronron cherche son chaton caché quelque part, et Flash le caméléon photographie le ciel de la grande ville.",
+      "keyboardShortcuts": "Sur ordinateur, les touches s’affichent en bas de l’écran. Nouveaux raccourcis : B ouvre tes boosters, C ton classeur, et Échap les paramètres. Pendant l’ouverture d’un booster, Échap passe directement à tes nouvelles cartes."
     }
   },
   "Shift": {

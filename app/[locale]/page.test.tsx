@@ -67,8 +67,8 @@ test('the home screen shows the game title and the player', () => {
 });
 
 test('the home screen follows the selected language', () => {
-  expect(renderHome('en', en)).toContain(en.Game.keyboardHint);
-  expect(renderHome('fr', fr)).toContain(fr.Game.keyboardHint);
+  expect(renderHome('en', en)).toContain(en.Game.controls.walk);
+  expect(renderHome('fr', fr)).toContain(fr.Game.controls.walk);
 });
 
 test('a visitor without an account is sent to sign up, in their language', async () => {

@@ -502,7 +502,19 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
         }
       }}
       onClose={onClose}
-      onKeyDown={moveThroughChoices}
+      onKeyDown={(event) => {
+        // While the cards are being revealed, Escape skips to the summary, like the skip button.
+        // Elsewhere before the summary, it does nothing: stopping the cancel isn't enough, since
+        // the browser closes a dialog on a second Escape without asking unless the key is stopped.
+        if (event.key === 'Escape' && !canLeave) {
+          event.preventDefault();
+          if (opening.status === 'ready' && step === 'reveal') {
+            setStep('summary');
+          }
+          return;
+        }
+        moveThroughChoices(event);
+      }}
       // The light effects reach past the screen, which must not make it scroll.
       className={`m-0 size-full max-h-none max-w-none bg-ui-ink/95 p-4 font-game backdrop:bg-transparent ${
         opening.status === 'ready' && step !== 'summary' ? 'overflow-hidden' : ''
