@@ -1,11 +1,12 @@
 // Buying boosters and binders, and opening a booster, which pays for its duplicates.
 
-import { and, eq, gt, gte, sql } from 'drizzle-orm';
+import { and, eq, gte, sql } from 'drizzle-orm';
 import { loadBoosterPool, loadOpenedCards, type RevealedCard } from '@/cards/booster-pool';
 import { getDb } from '@/db/client';
 import { playerBinders, playerBoosters, playerCards, playerWallets } from '@/db/schema';
 import { firstCopies, slotKey } from '@/game/cards/binder';
 import { boosterRecipe, openBooster } from '@/game/cards/booster';
+import type { BoosterLotSize } from '@/game/cards/booster-lots';
 import type { SetId } from '@/game/cards/card-sets';
 import { duplicateCoins } from '@/game/cards/duplicate-coins';
 import {
@@ -17,11 +18,13 @@ import {
 import { recordEvent } from './events';
 import { coinsNow, loadBinders, loadWallet } from './wallet';
 
-export type OpenedBooster = {
+// One booster of a lot, with its cards as revealed, new or paid for as duplicates.
+export type OpenedPack = { cards: RevealedCard[]; isGodPack: boolean };
+
+export type OpenedBoosters = {
   setName: string;
   logoUrl: string | null;
-  cards: RevealedCard[];
-  isGodPack: boolean;
+  packs: OpenedPack[];
   wallet: Wallet;
 };
 
@@ -117,17 +120,31 @@ export async function buyBinder(
 // bought its binder yet: boosters won from quests or coupons wait in the bag until it is bought.
 // Everything that can fail on reading the catalogue happens first, so that a failure never costs
 // a booster.
-export async function openOwnedBooster(
+// Opens a lot of one set's boosters, one, five or ten, in one transaction: each is drawn, its
+// cards added, its duplicates paid and its opening recorded in turn, as if opened one by one, so a
+// card from the first counts as owned for the next.
+export async function openOwnedBoosters(
   userId: string,
   setId: SetId,
   locale: string,
-): Promise<OpenedBooster | 'needsBinder' | null> {
+  size: BoosterLotSize,
+): Promise<OpenedBoosters | 'needsBinder' | null> {
   const pool = await loadBoosterPool(setId);
-  const opened = openBooster(pool, boosterRecipe(setId, pool));
-  if (!opened) {
-    throw new Error(`Set ${setId} can't fill a booster`);
-  }
-  const details = await loadOpenedCards(opened.cards, setId, locale);
+  const recipe = boosterRecipe(setId, pool);
+  const drawn = Array.from({ length: size }, () => {
+    const opened = openBooster(pool, recipe);
+    if (!opened) {
+      throw new Error(`Set ${setId} can't fill a booster`);
+    }
+    return opened;
+  });
+  // Every card of the lot at once, then shared out again pack by pack.
+  const details = await loadOpenedCards(
+    drawn.flatMap(({ cards }) => cards),
+    setId,
+    locale,
+  );
+  const rarities = new Map(pool.map(({ id, rarity }) => [id, rarity]));
 
   return getDb().transaction(async (transaction) => {
     const [binder] = await transaction
@@ -138,14 +155,15 @@ export async function openOwnedBooster(
       return 'needsBinder' as const;
     }
 
+    // The whole lot is taken, or none of it.
     const [taken] = await transaction
       .update(playerBoosters)
-      .set({ count: sql`${playerBoosters.count} - 1` })
+      .set({ count: sql`${playerBoosters.count} - ${size}` })
       .where(
         and(
           eq(playerBoosters.userId, userId),
           eq(playerBoosters.setId, setId),
-          gt(playerBoosters.count, 0),
+          gte(playerBoosters.count, size),
         ),
       )
       .returning({ count: playerBoosters.count });
@@ -153,45 +171,55 @@ export async function openOwnedBooster(
       return null;
     }
 
-    const added = await transaction
-      .insert(playerCards)
-      .values(opened.cards.map(({ cardId, variant }) => ({ userId, cardId, variant, count: 1 })))
-      .onConflictDoUpdate({
-        target: [playerCards.userId, playerCards.cardId, playerCards.variant],
-        set: { count: sql`${playerCards.count} + 1` },
-      })
-      .returning({
-        cardId: playerCards.cardId,
-        variant: playerCards.variant,
-        count: playerCards.count,
+    const packs: OpenedPack[] = [];
+    let offset = 0;
+    for (const opened of drawn) {
+      const packDetails = details.cards.slice(offset, offset + opened.cards.length);
+      offset += opened.cards.length;
+      const added = await transaction
+        .insert(playerCards)
+        .values(opened.cards.map(({ cardId, variant }) => ({ userId, cardId, variant, count: 1 })))
+        .onConflictDoUpdate({
+          target: [playerCards.userId, playerCards.cardId, playerCards.variant],
+          set: { count: sql`${playerCards.count} + 1` },
+        })
+        .returning({
+          cardId: playerCards.cardId,
+          variant: playerCards.variant,
+          count: playerCards.count,
+        });
+      const firsts = firstCopies(added);
+      const cards = packDetails.map((card) => {
+        const isNew = firsts.has(slotKey(card.id, card.variant));
+        return {
+          ...card,
+          isNew,
+          coins: isNew ? 0 : duplicateCoins(rarities.get(card.id) ?? null),
+        };
       });
-    const firsts = firstCopies(added);
-    const rarities = new Map(pool.map(({ id, rarity }) => [id, rarity]));
-    const cards = details.cards.map((card) => {
-      const isNew = firsts.has(slotKey(card.id, card.variant));
-      return { ...card, isNew, coins: isNew ? 0 : duplicateCoins(rarities.get(card.id) ?? null) };
-    });
 
-    // In the same transaction, so that the coins can't be lost or earned twice.
-    const duplicateTotal = cards.reduce((total, { coins }) => total + coins, 0);
-    await transaction
-      .update(playerWallets)
-      .set({ coins: sql`${playerWallets.coins} + ${duplicateTotal}`, updatedAt: new Date() })
-      .where(eq(playerWallets.userId, userId));
-    await recordEvent(transaction, userId, 'booster.opened', {
-      coinsAfter: await coinsNow(transaction, userId),
-      setId,
-      isGodPack: opened.isGodPack,
-      bestTier: Math.max(0, ...cards.map(({ tier }) => tier)),
-      newCards: cards.filter(({ isNew }) => isNew).length,
-      duplicateCoins: duplicateTotal,
-      cards: opened.cards.map(({ cardId, variant }) => ({ cardId, variant })),
-    });
+      // In the same transaction, so that the coins can't be lost or earned twice.
+      const duplicateTotal = cards.reduce((total, { coins }) => total + coins, 0);
+      await transaction
+        .update(playerWallets)
+        .set({ coins: sql`${playerWallets.coins} + ${duplicateTotal}`, updatedAt: new Date() })
+        .where(eq(playerWallets.userId, userId));
+      await recordEvent(transaction, userId, 'booster.opened', {
+        coinsAfter: await coinsNow(transaction, userId),
+        setId,
+        isGodPack: opened.isGodPack,
+        bestTier: Math.max(0, ...cards.map(({ tier }) => tier)),
+        newCards: cards.filter(({ isNew }) => isNew).length,
+        duplicateCoins: duplicateTotal,
+        cards: opened.cards.map(({ cardId, variant }) => ({ cardId, variant })),
+      });
+      packs.push({ cards, isGodPack: opened.isGodPack });
+    }
 
     return {
-      ...details,
-      cards,
-      isGodPack: opened.isGodPack,
+      setName: details.setName,
+      logoUrl: details.logoUrl,
+      packs,
       wallet: await loadWallet(transaction, userId),
     };
   });

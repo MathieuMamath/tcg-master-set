@@ -1,7 +1,9 @@
 import { type Dispatch, type SetStateAction, useRef, useState } from 'react';
 import { addToCollection, type Collection } from '@/game/cards/binder';
+import type { BoosterLotSize } from '@/game/cards/booster-lots';
 import type { PlayableSet, SetId } from '@/game/cards/card-sets';
 import type { Wallet } from '@/game/cards/shop-dialogue';
+import type { OpenedBoosters } from '@/player/shop';
 import { reportPlay } from '../report';
 import type { Opening } from './booster-opening';
 
@@ -15,7 +17,8 @@ type Options = {
   showSaveNotice: () => void;
 };
 
-// A booster taken out of the bag, cut, and shown card by card.
+// A booster, or a lot of five or ten, taken out of the bag, cut, and shown: card by card for one,
+// all together for a lot.
 export function useBoosterOpening({
   sets,
   locale,
@@ -31,14 +34,14 @@ export function useBoosterOpening({
   const walletAfterOpening = useRef<Wallet | null>(null);
   const isCutting = useRef(false);
 
-  const pickBooster = (setId: SetId) => {
+  const pickBooster = (setId: SetId, size: BoosterLotSize) => {
     const set = sets.find(({ id }) => id === setId);
     if (!set) {
       return;
     }
     stopWalking();
     setIsBagOpen(false);
-    setOpening({ status: 'sealed', setId, setName: set.name, logoUrl: set.logoUrl });
+    setOpening({ status: 'sealed', setId, setName: set.name, logoUrl: set.logoUrl, size });
   };
 
   // The server takes the booster and keeps the cards. This only shows the result. One request at
@@ -49,20 +52,31 @@ export function useBoosterOpening({
       return;
     }
     isCutting.current = true;
-    const pack = { setId: opening.setId, setName: opening.setName, logoUrl: opening.logoUrl };
+    const pack = {
+      setId: opening.setId,
+      setName: opening.setName,
+      logoUrl: opening.logoUrl,
+      size: opening.size,
+    };
     setOpening({ status: 'cutting', ...pack });
 
     try {
-      const response = await fetch(`/api/boosters/open?locale=${locale}&set=${pack.setId}`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `/api/boosters/open?locale=${locale}&set=${pack.setId}&count=${pack.size}`,
+        { method: 'POST' },
+      );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      const { cards, isGodPack, wallet: updated } = await response.json();
+      const { packs, wallet: updated }: OpenedBoosters = await response.json();
       walletAfterOpening.current = updated;
-      setCollection((current) => addToCollection(current, cards));
-      setOpening({ status: 'ready', ...pack, cards, isGodPack });
+      setCollection((current) =>
+        addToCollection(
+          current,
+          packs.flatMap(({ cards }) => cards),
+        ),
+      );
+      setOpening({ status: 'ready', ...pack, packs });
       showSaveNotice();
     } catch {
       setOpening({ status: 'error', ...pack });

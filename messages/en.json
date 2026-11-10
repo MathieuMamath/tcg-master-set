@@ -179,7 +179,11 @@
     "done": "Done",
     "error": "The booster couldn't be opened. It's still in your bag.",
     "retry": "Try again",
-    "back": "Back"
+    "back": "Back",
+    "lotTag": "A lot of {count} boosters",
+    "lotSummaryTitle": "Your {count} boosters",
+    "lotNewCards": "{count, plural, =0 {No new card} one {# new card} other {# new cards}}",
+    "openLot": "Open {count} {name} boosters at once"
   },
   "Binder": {
     "title": "Binder",
@@ -1006,7 +1010,8 @@
       "mobileActionPrompt": "On phones, the button to interact now shows above the joystick and the Dash button, rather than squeezed between them.",
       "freezeLastMove": "At the end of a quest game, the screen now stays on your last move so you can see how it went. Press “See the score” when you’re ready.",
       "lowStones": "Papy Caillou’s skipping stones are more like the real thing: throw low and flat, the dial’s little grey line follows the wind, and a guide with Papy’s tip opens before you start.",
-      "reachableStars": "Some games’ three stars asked for an almost perfect game. Gustave’s mail, Yuzu’s washing up and kitchen, and Maître Kaito’s archery now ask a little less: still a challenge, but within your reach."
+      "reachableStars": "Some games’ three stars asked for an almost perfect game. Gustave’s mail, Yuzu’s washing up and kitchen, and Maître Kaito’s archery now ask a little less: still a challenge, but within your reach.",
+      "boosterLots": "Got lots of boosters? In your bag, open 5 or 10 at once: a single cut, then all your cards at a glance, the best first."
     }
   },
   "Shift": {

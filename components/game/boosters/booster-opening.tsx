@@ -12,8 +12,10 @@ import {
 } from 'react';
 import type { RevealedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/cards/booster';
+import type { BoosterLotSize } from '@/game/cards/booster-lots';
 import type { SetId } from '@/game/cards/card-sets';
 import { type PullTier, packTier } from '@/game/cards/pull-tier';
+import type { OpenedPack } from '@/player/shop';
 import { moveThroughChoices } from '../menu-focus';
 import { CardBack } from './card-back';
 import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
@@ -33,12 +35,55 @@ const FIRST_FLASHING_TIER = 3;
 
 // Sealed until the player cuts it: only then does the server take the booster and draw the cards,
 // so that cancelling costs nothing and can't be used to draw again.
-export type Opening = { setId: SetId; setName: string; logoUrl: string | null } & (
+// A booster, or a lot of five or ten of one set, from the bag to its cards.
+export type Opening = {
+  setId: SetId;
+  setName: string;
+  logoUrl: string | null;
+  size: BoosterLotSize;
+} & (
   | { status: 'sealed' }
   | { status: 'cutting' }
   | { status: 'error' }
-  | { status: 'ready'; cards: RevealedCard[]; isGodPack: boolean }
+  | { status: 'ready'; packs: OpenedPack[] }
 );
+
+// How many boosters a lot holds, on a tag pinned to its pack.
+function LotTag({ size }: { size: BoosterLotSize }) {
+  const t = useTranslations('Booster');
+  return size > 1 ? (
+    <span className="absolute -top-3 -right-4 z-10 rotate-[5deg] ui-scrap bg-ui-accent px-2.5 py-0.5 text-xl font-semibold text-ui-ink">
+      <span aria-hidden="true">×{size}</span>
+      <span className="sr-only">{t('lotTag', { count: size })}</span>
+    </span>
+  ) : null;
+}
+
+// Each card with a key of its own: a lot can hold the same card twice, told apart by how many
+// times it came before.
+function keyedCards(cards: readonly RevealedCard[]) {
+  const seen = new Map<string, number>();
+  return cards.map((card) => {
+    const slot = `${card.id}-${card.variant}`;
+    const times = seen.get(slot) ?? 0;
+    seen.set(slot, times + 1);
+    return { card, key: `${slot}-${times}` };
+  });
+}
+
+// Every card of a lot, the best first, then the new ones before the duplicates.
+function lotCards(packs: readonly OpenedPack[]): RevealedCard[] {
+  return packs
+    .flatMap(({ cards }) => cards)
+    .map((card, order) => ({ card, order }))
+    .sort(
+      (a, b) =>
+        b.card.tier - a.card.tier ||
+        Number(b.card.isNew) - Number(a.card.isNew) ||
+        a.order - b.order,
+    )
+    .map(({ card }) => card);
+}
 
 // Golden writing across the top left corner, sized from the card, which ranges from small to full
 // screen. A card without it is a duplicate, whose coins the summary adds up.
@@ -62,12 +107,14 @@ function SealedPack({
   setId,
   setName,
   logoUrl,
+  size,
   onTorn,
   onCancel,
 }: {
   setId: SetId;
   setName: string;
   logoUrl: string | null;
+  size: BoosterLotSize;
   onTorn: () => void;
   onCancel: () => void;
 }) {
@@ -137,6 +184,7 @@ function SealedPack({
         className="ui-pop-in relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)] cursor-grab touch-none select-none outline-offset-4 active:cursor-grabbing"
       >
         <PackBody setId={setId} setName={setName} logoUrl={logoUrl} cut={progress} />
+        <LotTag size={size} />
         {/* The edge in two parts: what is still attached, and what lifts from the scissors. */}
         <PackEdge style={{ clipPath: `inset(-50% -50% -50% ${progress * 100}%)` }} />
         <PackEdge
@@ -189,10 +237,12 @@ function CutPack({
   setId,
   setName,
   logoUrl,
+  size,
 }: {
   setId: SetId;
   setName: string;
   logoUrl: string | null;
+  size: BoosterLotSize;
 }) {
   return (
     <div className="flex flex-col items-center gap-6">
@@ -201,6 +251,7 @@ function CutPack({
         className="relative aspect-[5/7.6] w-[min(calc(100vw-2rem),47vh,22.5rem)]"
       >
         <PackBody setId={setId} setName={setName} logoUrl={logoUrl} cut={1} />
+        <LotTag size={size} />
         <span aria-hidden="true" className="absolute inset-x-0 top-[13%] h-1 bg-ui-ink" />
       </div>
       <div className="h-14" />
@@ -395,26 +446,43 @@ function EnlargedCard({ card, onClose }: { card: RevealedCard; onClose: () => vo
   );
 }
 
+// Every card of the booster, or of the whole lot, the best first, to enlarge one by one.
 function Summary({
   cards,
   isGodPack,
+  size,
   onClose,
 }: {
   cards: RevealedCard[];
   isGodPack: boolean;
+  size: BoosterLotSize;
   onClose: () => void;
 }) {
   const t = useTranslations('Booster');
   const [enlarged, setEnlarged] = useState<RevealedCard | null>(null);
   const coinsEarned = cards.reduce((total, { coins }) => total + coins, 0);
+  const newCards = cards.filter(({ isNew }) => isNew).length;
+  const isLot = size > 1;
 
   return (
-    <div className="relative flex h-full flex-col items-center justify-center gap-4">
+    <div
+      className={`relative flex h-full flex-col items-center gap-4 ${
+        isLot ? 'justify-start py-2' : 'justify-center'
+      }`}
+    >
       {isGodPack && <GodPackBanner />}
-      <h2 className="font-display text-2xl text-ui-paper">{t('summaryTitle')}</h2>
-      <ul inert={enlarged !== null} className="grid w-full max-w-3xl grid-cols-5 gap-1.5 sm:gap-2">
-        {cards.map((card) => (
-          <li key={card.id} className="ui-pop-in aspect-[5/7]">
+      <h2 className="font-display text-2xl text-ui-paper">
+        {isLot ? t('lotSummaryTitle', { count: size }) : t('summaryTitle')}
+      </h2>
+      {isLot && <p className="-mt-2 text-ui-paper/80">{t('lotNewCards', { count: newCards })}</p>}
+      <ul
+        inert={enlarged !== null}
+        className={`grid w-full max-w-3xl grid-cols-5 gap-1.5 sm:gap-2 ${
+          isLot ? 'min-h-0 flex-1 overflow-y-auto p-2' : ''
+        }`}
+      >
+        {keyedCards(cards).map(({ card, key }) => (
+          <li key={key} className="ui-pop-in aspect-[5/7]">
             <button
               type="button"
               aria-label={t(card.isNew ? 'enlargeNewCard' : 'enlargeCard', { name: card.name })}
@@ -469,7 +537,8 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
   const t = useTranslations('Booster');
   const dialog = useRef<HTMLDialogElement>(null);
   const [step, setStep] = useState<'pull' | 'reveal' | 'summary'>('pull');
-  const finishPull = useCallback(() => setStep('reveal'), []);
+  const isLot = opening.size > 1;
+  const finishPull = useCallback(() => setStep(isLot ? 'summary' : 'reveal'), [isLot]);
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -481,11 +550,14 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
     dialog.current?.querySelector('button')?.focus();
   }, [opening.status, step]);
 
+  // A lot climbs up to its best card, and skips the reveal card by card for its summary.
+  const allCards = opening.status === 'ready' ? opening.packs.flatMap(({ cards }) => cards) : [];
+  const isGodPack = opening.status === 'ready' && opening.packs.some((pack) => pack.isGodPack);
   const tier =
     opening.status === 'ready'
       ? packTier(
-          opening.cards.map((card) => card.tier),
-          opening.isGodPack,
+          allCards.map((card) => card.tier),
+          isGodPack,
         )
       : 0;
 
@@ -526,6 +598,7 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
             setId={opening.setId}
             setName={opening.setName}
             logoUrl={opening.logoUrl}
+            size={opening.size}
             onTorn={onCut}
             onCancel={onClose}
           />
@@ -533,7 +606,12 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
       )}
       {opening.status === 'cutting' && (
         <div className="flex h-full items-center justify-center">
-          <CutPack setId={opening.setId} setName={opening.setName} logoUrl={opening.logoUrl} />
+          <CutPack
+            setId={opening.setId}
+            setName={opening.setName}
+            logoUrl={opening.logoUrl}
+            size={opening.size}
+          />
         </div>
       )}
       {opening.status === 'error' && (
@@ -559,7 +637,7 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
       )}
       {opening.status === 'ready' && (
         <div className="flex h-full items-center justify-center">
-          {opening.isGodPack && step !== 'pull' && (
+          {isGodPack && step !== 'pull' && (
             <div
               aria-hidden="true"
               className="ui-god-pack-glow pointer-events-none fixed inset-0"
@@ -571,20 +649,25 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
               setName={opening.setName}
               logoUrl={opening.logoUrl}
               tier={tier}
-              isGodPack={opening.isGodPack}
+              isGodPack={isGodPack}
               onDone={finishPull}
             />
           )}
           {step === 'reveal' && (
             <Reveal
-              cards={opening.cards}
-              isGodPack={opening.isGodPack}
+              cards={opening.packs[0].cards}
+              isGodPack={isGodPack}
               arrivalTier={tier}
               onFinished={() => setStep('summary')}
             />
           )}
           {step === 'summary' && (
-            <Summary cards={opening.cards} isGodPack={opening.isGodPack} onClose={onClose} />
+            <Summary
+              cards={isLot ? lotCards(opening.packs) : opening.packs[0].cards}
+              isGodPack={isGodPack}
+              size={opening.size}
+              onClose={onClose}
+            />
           )}
         </div>
       )}
