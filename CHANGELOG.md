@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.101](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.100...v0.1.101) (2026-11-10)
+
+### Features
+
+* **quests:** throw Papy Caillou's stones low and flat, with a guide ([#104](https://github.com/MathieuMamath/tcg-master-set/issues/104)) ([27285f7](https://github.com/MathieuMamath/tcg-master-set/commit/27285f79a123a8fc9d8699dfd93c506c1d977b94))
+
 ## [0.1.100](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.99...v0.1.100) (2026-11-09)
 
 ### Features
