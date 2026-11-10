@@ -75,16 +75,20 @@ export type ShiftRules = {
   pay: readonly [ShiftPay, ShiftPay, ShiftPay];
 };
 
+// Each shift's three steps of pay. The third star is meant to be hard but not to ask for a perfect
+// game: a player who reacts in about 0.7 seconds, or misses a timing by about 40 milliseconds,
+// reaches it in a good share of games, as `shifts-stars.test.ts` checks.
 export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
   dishes: {
     seconds: 45,
     // Scrub, rinse, stack, and carry the pile to Yuzu.
     choices: DISH_ACTIONS.length,
     pay: [
-      { score: 16, coins: 120 },
-      { score: 28, coins: 200 },
-      // A careful washer stays near 32: three stars ask for a taller, riskier pile.
-      { score: 35, coins: 300 },
+      { score: 12, coins: 120 },
+      { score: 20, coins: 200 },
+      // Every bowl takes several presses, but no thought: pressing every half-second, piles of
+      // five reach about 32, and every 0.6 seconds about 24.
+      { score: 27, coins: 300 },
     ],
   },
   kitchen: {
@@ -94,7 +98,7 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
     pay: [
       { score: 20, coins: 120 },
       { score: 36, coins: 200 },
-      { score: 50, coins: 300 },
+      { score: 48, coins: 300 },
     ],
   },
   service: {
@@ -124,7 +128,7 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
     pay: [
       { score: 50, coins: 120 },
       { score: 75, coins: 200 },
-      { score: 105, coins: 300 },
+      { score: 95, coins: 300 },
     ],
   },
   cleanup: {
@@ -164,7 +168,9 @@ export const SHIFT_RULES: Record<ShiftJob, ShiftRules> = {
     pay: [
       { score: 20, coins: 120 },
       { score: 40, coins: 200 },
-      { score: 65, coins: 300 },
+      // A letter takes a reaction's time to read on top of its slide: a good sorter, reading a
+      // stamp in about 0.7 seconds, reaches about 55.
+      { score: 55, coins: 300 },
     ],
   },
   photos: {

@@ -1005,7 +1005,8 @@
       "keyboardShortcuts": "On a computer, the keys now show at the bottom of the screen. New shortcuts: B opens your boosters, C your binder, and Esc the settings. While opening a booster, Esc skips straight to your new cards.",
       "mobileActionPrompt": "On phones, the button to interact now shows above the joystick and the Dash button, rather than squeezed between them.",
       "freezeLastMove": "At the end of a quest game, the screen now stays on your last move so you can see how it went. Press “See the score” when you’re ready.",
-      "lowStones": "Papy Caillou’s skipping stones are more like the real thing: throw low and flat, the dial’s little grey line follows the wind, and a guide with Papy’s tip opens before you start."
+      "lowStones": "Papy Caillou’s skipping stones are more like the real thing: throw low and flat, the dial’s little grey line follows the wind, and a guide with Papy’s tip opens before you start.",
+      "reachableStars": "Some games’ three stars asked for an almost perfect game. Gustave’s mail, Yuzu’s washing up and kitchen, and Maître Kaito’s archery now ask a little less: still a challenge, but within your reach."
     }
   },
   "Shift": {
