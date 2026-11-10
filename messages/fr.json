@@ -1004,7 +1004,8 @@
       "painterKittenPhotos": "Trois nouvelles quêtes du jour ! Pinceau le mouton peint au bord du lac du parc et a besoin d’aide pour son taquin, Mme Ronron cherche son chaton caché quelque part, et Flash le caméléon photographie le ciel de la grande ville.",
       "keyboardShortcuts": "Sur ordinateur, les touches s’affichent en bas de l’écran. Nouveaux raccourcis : B ouvre tes boosters, C ton classeur, et Échap les paramètres. Pendant l’ouverture d’un booster, Échap passe directement à tes nouvelles cartes.",
       "mobileActionPrompt": "Sur téléphone, le bouton pour interagir s’affiche maintenant au-dessus du joystick et du bouton Dash, et ne se glisse plus entre les deux.",
-      "freezeLastMove": "À la fin d’un jeu de quête, l’écran reste sur ton dernier coup pour que tu voies comment il s’est passé. Appuie sur « Voir le score » quand tu es prêt."
+      "freezeLastMove": "À la fin d’un jeu de quête, l’écran reste sur ton dernier coup pour que tu voies comment il s’est passé. Appuie sur « Voir le score » quand tu es prêt.",
+      "lowStones": "Les ricochets de Papy Caillou ressemblent davantage aux vrais : on lance bas et à plat, la petite ligne grise du cadran suit le vent, et un guide avec l’astuce de Papy s’ouvre avant de commencer."
     }
   },
   "Shift": {
@@ -1069,6 +1070,17 @@
         "over": "La pellicule est finie !",
         "back": "Retourner voir Flash"
       }
+    },
+    "tips": {
+      "show": "Voir l’astuce",
+      "carousel": "guide",
+      "label": "Le guide du jeu",
+      "slide": "page",
+      "page": "Page {index} sur {count}",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "back": "Retour",
+      "start": "C’est parti !"
     }
   },
   "Ramen": {
@@ -1330,7 +1342,7 @@
       "unavailable": "Hmm, le lac est trop agité. Repasse dans un instant."
     },
     "stones": {
-      "howTo": "Cinq galets à faire ricocher. Une aiguille balaie l’angle : appuie sur Espace, sur le bouton ou touche le lac pour la fixer. Une jauge balaie alors la force : appuie de nouveau pour lancer. Le bon angle est au milieu, déplacé par le vent qui fait pencher les roseaux, et la bonne force tout en haut de la zone verte. Dix rebonds ou plus : bonus de champion !",
+      "howTo": "Cinq galets à faire ricocher. Une aiguille balaie l’angle : appuie sur Espace, sur le bouton ou touche le lac pour la fixer. Une jauge balaie alors la force : appuie de nouveau pour lancer. Comme sur un vrai lac, lance bas et à plat, sur la petite ligne grise, que le vent déplace, et la force au milieu de la zone verte. Dix rebonds ou plus : bonus de champion !",
       "angle": "Fixer l’angle",
       "strength": "Fixer la force et lancer",
       "wait": "Galet suivant…",
@@ -1345,10 +1357,28 @@
       "papy": {
         "start": "Regarde les roseaux : ils te disent d’où vient le vent.",
         "skipped": "Pas mal du tout !",
-        "sank": "Plouf… Plus à plat, plus fort !",
+        "sank": "Plouf… Plus bas, plus à plat !",
         "champion": "Ça, c’est un lancer de champion !",
         "calm": "Prends ton temps.",
         "wind": "Le vent souffle fort : décale ton angle."
+      },
+      "tips": {
+        "flat": {
+          "title": "Bas et à plat",
+          "text": "Une aiguille balaie l’angle. Arrête-la bas, sur la petite ligne grise : comme sur un vrai lac, un galet lancé trop haut coule."
+        },
+        "wind": {
+          "title": "Le vent",
+          "text": "Le vent déplace un peu la ligne grise, et les roseaux penchent avec lui. Vent vers la droite : un peu plus haut. Vent vers la gauche : encore plus bas."
+        },
+        "strength": {
+          "title": "La force",
+          "text": "Une fois l’angle fixé, une jauge monte et descend. Lance quand elle est au milieu de la zone verte : ni trop fort, ni trop doux."
+        },
+        "secret": {
+          "title": "L’astuce de Papy",
+          "text": "L’aiguille sur la ligne grise, la jauge au milieu du vert : douze rebonds. Dès dix, bonus de champion. Le premier galet n’a presque pas de vent : assure-le !"
+        }
       }
     }
   },
