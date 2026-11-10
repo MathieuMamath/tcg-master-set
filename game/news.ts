@@ -36,6 +36,7 @@ export const NEWS: readonly NewsItem[] = [
   { id: 19, key: 'freezeLastMove', date: '2026-11-09', kind: 'feature' },
   { id: 20, key: 'lowStones', date: '2026-11-10', kind: 'feature' },
   { id: 21, key: 'reachableStars', date: '2026-11-10', kind: 'fix' },
+  { id: 22, key: 'boosterLots', date: '2026-11-10', kind: 'feature' },
 ];
 
 // A player who never saw the sheet only gets the latest notes, rather than the whole history.
