@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.102](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.101...v0.1.102) (2026-11-10)
+
+### Balance
+
+* **quests:** make every shift's third star reachable without a perfect game ([#105](https://github.com/MathieuMamath/tcg-master-set/issues/105)) ([04a482b](https://github.com/MathieuMamath/tcg-master-set/commit/04a482b089657122cca90b55fb95c5ad60f0d0f4))
+
 ## [0.1.101](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.100...v0.1.101) (2026-11-10)
 
 ### Features
