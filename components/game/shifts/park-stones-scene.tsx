@@ -5,6 +5,8 @@ import { type KeyboardEvent, useCallback, useMemo, useRef } from 'react';
 import {
   angleAt,
   BEST_STRENGTH,
+  bestAngle,
+  CALM_ANGLE,
   canThrow,
   landsAt,
   PEBBLES,
@@ -84,6 +86,38 @@ export function StonesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
       onShowScore={showScore}
       secondsLeft={secondsLeft}
       howTo={t('howTo')}
+      tips={[
+        {
+          title: t('tips.flat.title'),
+          text: t('tips.flat.text'),
+          picture: <AngleDial angle={CALM_ANGLE} target={CALM_ANGLE} isHeld />,
+        },
+        {
+          title: t('tips.wind.title'),
+          text: t('tips.wind.text'),
+          picture: (
+            <>
+              <AngleDial angle={CALM_ANGLE + 0.08} target={CALM_ANGLE + 0.08} isHeld={false} />
+              <AngleDial angle={CALM_ANGLE - 0.08} target={CALM_ANGLE - 0.08} isHeld={false} />
+            </>
+          ),
+        },
+        {
+          title: t('tips.strength.title'),
+          text: t('tips.strength.text'),
+          picture: <StrengthGauge strength={BEST_STRENGTH} isActive />,
+        },
+        {
+          title: t('tips.secret.title'),
+          text: t('tips.secret.text'),
+          picture: (
+            <>
+              <AngleDial angle={CALM_ANGLE} target={CALM_ANGLE} isHeld />
+              <StrengthGauge strength={BEST_STRENGTH} isActive />
+            </>
+          ),
+        },
+      ]}
       onStart={start}
       onDone={onDone}
       onKeyDown={onKeyDown}
@@ -251,35 +285,12 @@ function Lake({
           aria-hidden="true"
           className="absolute right-2 bottom-2 flex items-end gap-2.5 rounded-md bg-[#fbf6ea]/95 p-2 shadow-[2px_3px_0_var(--ui-shadow)]"
         >
-          {/* The angle: flat to the right, steep upwards. */}
-          <span className="relative block size-16 overflow-hidden rounded-tr-full border-t-4 border-r-4 border-ui-ink/35 bg-[#cfe6f2] sm:size-20">
-            <span
-              className="absolute bottom-0 left-0 h-0.5 w-[92%] origin-left rounded-full bg-ui-ink/25"
-              style={{ rotate: '-45deg' }}
-            />
-            <span
-              className={`absolute bottom-0 left-0 h-1.5 w-[95%] origin-left rounded-full ${
-                state.heldAngle ? 'bg-[#e8a33e]' : 'bg-[#c8453a]'
-              }`}
-              style={{ rotate: `${-angle * 90}deg` }}
-            />
-          </span>
-          {/* The strength: the green band is where a throw is best, waiting until the angle is
-              held. */}
-          <span
-            className={`relative block h-16 w-5 overflow-hidden rounded-full border-2 border-ui-ink/35 bg-white sm:h-20 ${
-              state.heldAngle ? '' : 'opacity-50'
-            }`}
-          >
-            <span
-              className="absolute inset-x-0 bottom-0 bg-[#e8b33e]"
-              style={{ height: `${strength * 100}%` }}
-            />
-            <span
-              className="absolute inset-x-0 border-y-2 border-[#2f7a3a] bg-[#5fbf5a]/45"
-              style={{ bottom: `${(BEST_STRENGTH - 0.1) * 100}%`, height: '20%' }}
-            />
-          </span>
+          <AngleDial
+            angle={angle}
+            target={setup ? bestAngle(setup) : null}
+            isHeld={state.heldAngle !== null}
+          />
+          <StrengthGauge strength={strength} isActive={state.heldAngle !== null} />
         </span>
       )}
       {wind && (
@@ -316,4 +327,54 @@ function remarkOf(
     return t('papy.wind');
   }
   return state.throws.length === 0 ? t('papy.start') : t('papy.calm');
+}
+
+// The angle's dial, a quarter of a circle: flat to the right, upright at the top. A faint line marks
+// the right angle, which the wind moves, and the needle turns orange once held.
+export function AngleDial({
+  angle,
+  target,
+  isHeld,
+}: {
+  angle: number;
+  target: number | null;
+  isHeld: boolean;
+}) {
+  return (
+    <span className="relative block size-16 shrink-0 overflow-hidden rounded-tr-full border-t-4 border-r-4 border-ui-ink/35 bg-[#cfe6f2] sm:size-20">
+      {target !== null && (
+        <span
+          className="absolute bottom-0 left-0 h-0.5 w-[92%] origin-left rounded-full bg-ui-ink/30"
+          style={{ rotate: `${-target * 90}deg` }}
+        />
+      )}
+      <span
+        className={`absolute bottom-0 left-0 h-1.5 w-[95%] origin-left rounded-full ${
+          isHeld ? 'bg-[#e8a33e]' : 'bg-[#c8453a]'
+        }`}
+        style={{ rotate: `${-angle * 90}deg` }}
+      />
+    </span>
+  );
+}
+
+// The strength's gauge: the green band is where a throw is best, its middle the very best. Greyed
+// until the angle is held.
+export function StrengthGauge({ strength, isActive }: { strength: number; isActive: boolean }) {
+  return (
+    <span
+      className={`relative block h-16 w-5 shrink-0 overflow-hidden rounded-full border-2 border-ui-ink/35 bg-white sm:h-20 ${
+        isActive ? '' : 'opacity-50'
+      }`}
+    >
+      <span
+        className="absolute inset-x-0 bottom-0 bg-[#e8b33e]"
+        style={{ height: `${strength * 100}%` }}
+      />
+      <span
+        className="absolute inset-x-0 border-y-2 border-[#2f7a3a] bg-[#5fbf5a]/45"
+        style={{ bottom: `${(BEST_STRENGTH - 0.1) * 100}%`, height: '20%' }}
+      />
+    </span>
+  );
 }

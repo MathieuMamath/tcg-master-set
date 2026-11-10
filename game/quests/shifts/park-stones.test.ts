@@ -26,6 +26,20 @@ describe('a pebble', () => {
     const [setup] = pebbleSetups(SEED);
     expect(bestAngle({ ...setup, wind: 1 })).toBeGreaterThan(bestAngle({ ...setup, wind: -1 }));
   });
+
+  test('wants a low, flat throw, as on a real lake', () => {
+    const [setup] = pebbleSetups(SEED);
+    // From about 11 to 29 degrees, whatever the wind.
+    for (const wind of [-1, 0, 1]) {
+      const angle = bestAngle({ ...setup, wind }) * 90;
+      expect(angle).toBeGreaterThan(10);
+      expect(angle).toBeLessThan(30);
+    }
+    // Thrown up at 45 degrees, a pebble hardly skips, and past about 47 it sinks.
+    const calm = { ...setup, wind: 0 };
+    expect(skipsOf(calm, 0.5, BEST_STRENGTH)).toBeLessThanOrEqual(1);
+    expect(skipsOf(calm, 0.53, BEST_STRENGTH)).toBe(0);
+  });
 });
 
 describe('a shift', () => {

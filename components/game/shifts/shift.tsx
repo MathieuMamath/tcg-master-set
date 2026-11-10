@@ -301,14 +301,19 @@ export function HostSays({ host, text }: { host: ShiftHost; text: string }) {
   );
 }
 
-// The frame around a shift: its title and clock, how to play before it starts, the score while it
-// runs, and the stars once it is counted.
+// A page of a shift's guide, shown before it starts: a picture of what the player will see, and a few
+// words about it.
+export type ShiftTip = { title: string; text: string; picture?: ReactNode };
+
+// The frame around a shift: its title and clock, how to play before it starts, with a guide to leaf
+// through for the shifts that have one, the score while it runs, and the stars once it is counted.
 export function ShiftFrame({
   job,
   host,
   phase,
   secondsLeft,
   howTo,
+  tips,
   onStart,
   onShowScore,
   onDone,
@@ -322,6 +327,7 @@ export function ShiftFrame({
   phase: ShiftPhase;
   secondsLeft: number;
   howTo: string;
+  tips?: readonly ShiftTip[];
   onStart: () => void;
   onShowScore: () => void;
   onDone: (end: ShiftEnd) => void;
@@ -337,6 +343,18 @@ export function ShiftFrame({
   const rules = SHIFT_RULES[job];
   const isOver = phase.step === 'playing' && phase.isOver;
   const scoreButton = useRef<HTMLButtonElement>(null);
+  // The guide's page being read, or null while how to play shows.
+  const [tipShown, setTipShown] = useState<number | null>(null);
+  const tipButton = useRef<HTMLButtonElement>(null);
+
+  // Each page of the guide puts the focus on the button that leads on, and leaving the guide puts it
+  // back on the first choice.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() =>
+      tipShown === null ? box.current && focusFirstChoice(box.current) : tipButton.current?.focus(),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [tipShown, box]);
 
   // Once over, the button to see the score takes the focus, for the keyboard.
   useEffect(() => {
@@ -378,7 +396,21 @@ export function ShiftFrame({
           )}
         </div>
 
-        {(phase.step === 'ready' || phase.step === 'starting') && (
+        {tips && tipShown !== null && (phase.step === 'ready' || phase.step === 'starting') && (
+          <TipsCarousel
+            tips={tips}
+            index={tipShown}
+            nextButton={tipButton}
+            onShow={setTipShown}
+            onStart={() => {
+              setTipShown(null);
+              onStart();
+            }}
+            onBack={() => setTipShown(null)}
+          />
+        )}
+
+        {tipShown === null && (phase.step === 'ready' || phase.step === 'starting') && (
           <>
             <p className="mt-2 text-lg leading-snug">{howTo}</p>
             <ul className="mt-2 text-ui-ink/70">
@@ -395,6 +427,11 @@ export function ShiftFrame({
               >
                 {t('start')}
               </button>
+              {tips && (
+                <button type="button" onClick={() => setTipShown(0)} className={CHOICE_CLASS}>
+                  {t('tips.show')}
+                </button>
+              )}
               <button type="button" onClick={() => onDone('gaveUp')} className={CHOICE_CLASS}>
                 {isOpenedDirectly ? t('notNow') : tHost('back')}
               </button>
@@ -508,4 +545,75 @@ export function pressHandlers(onPress: () => void) {
       }
     },
   };
+}
+
+// The guide, a page at a time: its picture and words, dots for where the reader is, and buttons to
+// go back, go on, or start once at the end.
+function TipsCarousel({
+  tips,
+  index,
+  nextButton,
+  onShow,
+  onStart,
+  onBack,
+}: {
+  tips: readonly ShiftTip[];
+  index: number;
+  nextButton: RefObject<HTMLButtonElement | null>;
+  onShow: (index: number) => void;
+  onStart: () => void;
+  onBack: () => void;
+}) {
+  const t = useTranslations('Shift.tips');
+  const tip = tips[index];
+  const isLast = index === tips.length - 1;
+  return (
+    <section aria-roledescription={t('carousel')} aria-label={t('label')} className="mt-2">
+      <fieldset
+        key={index}
+        aria-roledescription={t('slide')}
+        aria-label={t('page', { index: index + 1, count: tips.length })}
+        className="ui-pop-in m-0 flex min-h-40 min-w-0 flex-col items-center gap-3 rounded-sm border-0 bg-[#efe6d2] px-4 py-4 text-center sm:flex-row sm:text-left"
+      >
+        {tip.picture && (
+          <div
+            aria-hidden="true"
+            className="flex shrink-0 items-end gap-2.5 rounded-md bg-ui-paper p-2 shadow-[2px_3px_0_var(--ui-shadow)]"
+          >
+            {tip.picture}
+          </div>
+        )}
+        <div>
+          <h3 className="font-display text-lg">{tip.title}</h3>
+          <p className="mt-1 text-lg leading-snug">{tip.text}</p>
+        </div>
+      </fieldset>
+      <div aria-hidden="true" className="mt-2 flex justify-center gap-1.5">
+        {tips.map(({ title }, dot) => (
+          <span
+            key={title}
+            className={`size-2.5 rounded-full ${dot === index ? 'bg-ui-ink' : 'bg-ui-ink/20'}`}
+          />
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2.5">
+        <button
+          ref={nextButton}
+          type="button"
+          onClick={() => (isLast ? onStart() : onShow(index + 1))}
+          className={`${CHOICE_CLASS} bg-ui-accent!`}
+        >
+          {isLast ? t('start') : t('next')}
+        </button>
+        {index > 0 && (
+          <button type="button" onClick={() => onShow(index - 1)} className={CHOICE_CLASS}>
+            {t('previous')}
+          </button>
+        )}
+        <button type="button" onClick={onBack} className={CHOICE_CLASS}>
+          {t('back')}
+        </button>
+      </div>
+    </section>
+  );
 }

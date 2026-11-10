@@ -1,7 +1,10 @@
 // Skipping stones on Linden Park's lake, with Papy Caillou: five pebbles, each thrown in two presses.
 // A needle sweeps the angle, and the first press holds it; then a gauge sweeps the strength, and the
-// second press throws. The closer both are to the right throw, the more the pebble skips. The lake's
-// wind moves the right angle, and the reeds lean with it. A throw of many skips earns a bonus.
+// second press throws. The closer both are to the right throw, the more the pebble skips. As on a real
+// lake, the right throw is low and flat, about 20 degrees, the angle physicists measured as the best
+// (Clanet and others, Nature, 2004), and past about 47 degrees a pebble no longer skips. The lake's
+// wind moves the right angle a little, and the reeds lean with it. A throw of many skips earns a
+// bonus.
 //
 // Everything follows from the seed and the presses, so that the browser draws the same shift the
 // server plays again: `simulateStones` is both. Every press is the same: throwing.
@@ -19,8 +22,10 @@ export const CHAMPION_BONUS = 3;
 export const BEST_STRENGTH = 0.8;
 const ANGLE_SPREAD = 0.3;
 const STRENGTH_SPREAD = 0.28;
-// How far the strongest wind moves the right angle.
-const WIND_SHIFT = 0.2;
+// The right angle without wind, on the dial from flat (0) to upright (1): about 20 degrees.
+export const CALM_ANGLE = 0.22;
+// How far the strongest wind moves the right angle: about 9 degrees either way.
+const WIND_SHIFT = 0.1;
 // How long a pebble takes for each skip, then the time to pick up the next.
 export const SKIP_MS = 160;
 const NEXT_PEBBLE_MS = 900;
@@ -67,7 +72,7 @@ export function strengthAt(setup: PebbleSetup, heldAt: number, now: number): num
 
 // The right angle for a pebble, moved by its wind.
 export function bestAngle(setup: PebbleSetup): number {
-  return 0.5 + setup.wind * WIND_SHIFT;
+  return CALM_ANGLE + setup.wind * WIND_SHIFT;
 }
 
 // How many times a pebble thrown at this angle and strength skips.
