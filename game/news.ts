@@ -40,6 +40,7 @@ export const NEWS: readonly NewsItem[] = [
   { id: 23, key: 'clearShiftEnd', date: '2026-11-12', kind: 'fix' },
   { id: 24, key: 'binderLastPage', date: '2026-11-12', kind: 'fix' },
   { id: 25, key: 'binderPageJump', date: '2026-11-12', kind: 'feature' },
+  { id: 26, key: 'binderSwitch', date: '2026-11-12', kind: 'feature' },
 ];
 
 // A player who never saw the sheet only gets the latest notes, rather than the whole history.

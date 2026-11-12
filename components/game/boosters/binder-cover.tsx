@@ -4,8 +4,17 @@ import { SetLogo } from './set-logo';
 
 // A binder's cover, as Mamie Noisette sells it: the set's striped paper cut out with a white
 // edge, a dark spine with its rivets, and the set's logo. In the player's own binders, a label
-// stuck on it also shows how many of its cards they have.
-export function BinderCover({ set, owned }: { set: PlayableSet; owned?: number }) {
+// stuck on it also shows how many of its cards they have, in smaller figures on a small cover,
+// such as in the list to switch binders, so that they keep to one line.
+export function BinderCover({
+  set,
+  owned,
+  isSmall = false,
+}: {
+  set: PlayableSet;
+  owned?: number;
+  isSmall?: boolean;
+}) {
   return (
     <span
       style={{ background: packPaper(set.id) }}
@@ -24,7 +33,11 @@ export function BinderCover({ set, owned }: { set: PlayableSet; owned?: number }
       </span>
       {owned !== undefined && (
         <span className="absolute right-0 bottom-[6%] left-[15%] flex justify-center">
-          <span className="-rotate-2 ui-scrap px-2 pt-0.5 font-digits text-xs font-bold text-ui-ink">
+          <span
+            className={`-rotate-2 ui-scrap pt-0.5 font-digits font-bold whitespace-nowrap text-ui-ink ${
+              isSmall ? 'px-1 text-[0.6rem] sm:text-[0.65rem]' : 'px-2 text-xs'
+            }`}
+          >
             {owned} / {set.slotTotal}
           </span>
         </span>
@@ -52,11 +65,22 @@ function InsidePage() {
   );
 }
 
-// The binder's name on a strip of paper taped above its pages, with how full it is.
-export function BinderTitle({ name, progress }: { name: string; progress: string }) {
+// The binder's logo on a strip of paper taped above its pages, with how full it is. Its name stays
+// for screen readers, and shows in the logo's place when it can't be loaded.
+export function BinderTitle({
+  name,
+  logoUrl,
+  progress,
+}: {
+  name: string;
+  logoUrl: string | null;
+  progress: string;
+}) {
   return (
-    <div className="-rotate-1 ui-tape ui-scrap px-5 pt-2 pb-1 text-center text-ui-ink">
-      <h2 className="font-display text-xl">{name}</h2>
+    <div className="-rotate-1 ui-tape ui-scrap flex flex-col items-center px-5 pt-2 pb-1 text-center text-ui-ink">
+      <h2 className="flex h-12 w-44 items-center justify-center font-display text-xl sm:h-14 sm:w-52">
+        <SetLogo setName={name} logoUrl={logoUrl} />
+      </h2>
       <p className="text-sm text-ui-ink/75">{progress}</p>
     </div>
   );
@@ -76,7 +100,7 @@ function WideOpening({ set, owned }: { set: PlayableSet; owned: number }) {
     <div className="flex h-full flex-col items-center gap-4">
       {/* Kept out of sight, to hold the room the title takes once the pages are shown. */}
       <div className="invisible">
-        <BinderTitle name={set.name} progress="&nbsp;" />
+        <BinderTitle name={set.name} logoUrl={set.logoUrl} progress="&nbsp;" />
       </div>
       <div className="flex min-h-0 w-full justify-center gap-2">
         <div className={`${WIDE_PAGE_WIDTH_CLASS} aspect-[5/7]`} />
