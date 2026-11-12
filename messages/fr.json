@@ -1012,7 +1012,8 @@
       "lowStones": "Les ricochets de Papy Caillou ressemblent davantage aux vrais : on lance bas et à plat, la petite ligne grise du cadran suit le vent, et un guide avec l’astuce de Papy s’ouvre avant de commencer.",
       "reachableStars": "Les trois étoiles de certains jeux demandaient une partie presque parfaite. Le tri du courrier de Gustave, la plonge et la cuisine de Yuzu, et le tir à l’arc de Maître Kaito en demandent un peu moins : toujours un défi, mais à ta portée.",
       "boosterLots": "Tu as beaucoup de boosters ? Dans ton sac, ouvre-les par 5 ou par 10 d’un coup : une seule découpe, puis toutes tes cartes d’un coup d’œil, les meilleures en premier.",
-      "clearShiftEnd": "Les ricochets, le tir à l’arc et les photos semblaient bloqués une fois tous les galets, flèches ou photos utilisés. Ils affichent maintenant clairement « Terminé ! » : appuie sur « Voir le score » pour ton résultat."
+      "clearShiftEnd": "Les ricochets, le tir à l’arc et les photos semblaient bloqués une fois tous les galets, flèches ou photos utilisés. Ils affichent maintenant clairement « Terminé ! » : appuie sur « Voir le score » pour ton résultat.",
+      "binderLastPage": "Sur ordinateur, la flèche de droite du classeur ne tourne plus une page dans le vide une fois arrivé à la fin."
     }
   },
   "Shift": {

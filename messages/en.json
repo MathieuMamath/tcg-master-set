@@ -1012,7 +1012,8 @@
       "lowStones": "Papy Caillou’s skipping stones are more like the real thing: throw low and flat, the dial’s little grey line follows the wind, and a guide with Papy’s tip opens before you start.",
       "reachableStars": "Some games’ three stars asked for an almost perfect game. Gustave’s mail, Yuzu’s washing up and kitchen, and Maître Kaito’s archery now ask a little less: still a challenge, but within your reach.",
       "boosterLots": "Got lots of boosters? In your bag, open 5 or 10 at once: a single cut, then all your cards at a glance, the best first.",
-      "clearShiftEnd": "The skipping stones, archery and photos looked stuck once every pebble, arrow or shot was used. They now clearly say “Finished!”: press “See the score” for your result."
+      "clearShiftEnd": "The skipping stones, archery and photos looked stuck once every pebble, arrow or shot was used. They now clearly say “Finished!”: press “See the score” for your result.",
+      "binderLastPage": "On a computer, the binder’s right arrow no longer turns a page into nothing once you reach the end."
     }
   },
   "Shift": {

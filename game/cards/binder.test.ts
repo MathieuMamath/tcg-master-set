@@ -127,6 +127,15 @@ describe('pages side by side', () => {
     expect(turnPage(0, -1, FIVE_PAGES, 2)).toBe(0);
     expect(turnPage(4, 1, FIVE_PAGES, 2)).toBe(4);
   });
+
+  test('stays on the last spread of a binder with an even number of pages', () => {
+    const SIX_PAGES = FIVE_PAGES + 9;
+    // Pages 5 and 6 are on show: nothing lies beyond, on either page of the spread.
+    expect(turnPage(4, 1, SIX_PAGES, 2)).toBe(4);
+    expect(turnPage(5, 1, SIX_PAGES, 2)).toBe(5);
+    expect(turnPage(4, -1, SIX_PAGES, 2)).toBe(2);
+    expect(turnPage(5, 1, SIX_PAGES, 1)).toBe(5);
+  });
 });
 
 describe('ownedInSet', () => {

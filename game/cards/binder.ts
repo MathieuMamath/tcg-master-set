@@ -65,6 +65,9 @@ export function pagesShown(page: number, slotTotal: number, pagesAtOnce: number)
   );
 }
 
+// The page to turn to, or the same page when the binder's end leaves nothing to turn: the last
+// spread of a binder with an even number of pages ends on its right page, which clamping alone
+// would turn to while it is already on show.
 export function turnPage(
   page: number,
   direction: -1 | 1,
@@ -72,7 +75,9 @@ export function turnPage(
   pagesAtOnce: number,
 ): number {
   const [first] = pagesShown(page, slotTotal, pagesAtOnce);
-  return clampPage(first + direction * pagesAtOnce, slotTotal);
+  const target = clampPage(first + direction * pagesAtOnce, slotTotal);
+  const [targetFirst] = pagesShown(target, slotTotal, pagesAtOnce);
+  return targetFirst === first ? page : targetFirst;
 }
 
 export function ownedSlotCount(slots: readonly BinderSlot[], collection: Collection): number {
