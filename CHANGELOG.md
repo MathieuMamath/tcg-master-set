@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.105](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.104...v0.1.105) (2026-11-12)
+
+### Bug Fixes
+
+* **binder:** stop the right arrow turning past the last spread ([#108](https://github.com/MathieuMamath/tcg-master-set/issues/108)) ([f260cb6](https://github.com/MathieuMamath/tcg-master-set/commit/f260cb6f57d0f963c946069d3ff7fa7b09a08736))
+
 ## [0.1.104](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.103...v0.1.104) (2026-11-12)
 
 ### Bug Fixes
