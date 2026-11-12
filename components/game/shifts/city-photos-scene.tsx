@@ -173,7 +173,11 @@ export function PhotosShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
             >
               <span className="size-3 rounded-full bg-[#d0443a]" />
             </span>
-            {isReady ? t('shoot') : t('charging')}
+            {state.endedAt !== null
+              ? t('film', { count: 0 })
+              : isReady
+                ? t('shoot')
+                : t('charging')}
             <kbd className="ml-1 font-digits text-xs opacity-70 pointer-coarse:hidden">␣</kbd>
           </button>
           <HostSays host="photographer" text={remarkOf(state, t)} />

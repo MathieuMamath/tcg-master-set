@@ -360,6 +360,8 @@ export function ShiftFrame({
   useEffect(() => {
     if (isOver) {
       scoreButton.current?.focus();
+      // On a small screen, the button can sit below the fold.
+      scoreButton.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   }, [isOver]);
 
@@ -389,11 +391,16 @@ export function ShiftFrame({
           <h2 id="shift-title" className="font-display text-xl">
             {t(`titles.${job}`)}
           </h2>
-          {phase.step === 'playing' && (
-            <p className="font-digits text-lg font-bold tabular-nums">
-              {t('timeLeft', { seconds: secondsLeft })}
-            </p>
-          )}
+          {phase.step === 'playing' &&
+            (isOver ? (
+              // The clock stops with the shift: saying so, rather than showing the seconds it
+              // stopped at, which looked like a game stuck halfway.
+              <p className="ui-pop-in font-display text-lg text-[#3f8a6a]">{t('finished')}</p>
+            ) : (
+              <p className="font-digits text-lg font-bold tabular-nums">
+                {t('timeLeft', { seconds: secondsLeft })}
+              </p>
+            ))}
         </div>
 
         {tips && tipShown !== null && (phase.step === 'ready' || phase.step === 'starting') && (
@@ -441,14 +448,25 @@ export function ShiftFrame({
 
         {phase.step === 'playing' && (
           <>
-            {children}
+            {/* Once over, the board stays as the last move left it, but no longer answers, and the
+                host's words say the shift is over, so that it doesn't look stuck. */}
+            <div className="relative">
+              <div inert={isOver}>{children}</div>
+              {isOver && (
+                <p className="pointer-events-none absolute inset-x-0 top-10 z-20 flex justify-center">
+                  <span className="ui-pop-in -rotate-3 ui-scrap bg-ui-accent px-5 py-1 font-display text-2xl">
+                    {tHost('over')}
+                  </span>
+                </p>
+              )}
+            </div>
             {isOver ? (
               <div className="mt-3 flex justify-center">
                 <button
                   ref={scoreButton}
                   type="button"
                   onClick={onShowScore}
-                  className={`${CHOICE_CLASS} ui-pop-in bg-ui-accent!`}
+                  className={`${CHOICE_CLASS} ui-pop-in ui-bob bg-ui-accent! px-6! text-xl!`}
                 >
                   {t('seeScore')}
                 </button>
