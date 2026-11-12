@@ -213,7 +213,8 @@
     "pageKeys": "Page Up and Page Down to turn the pages, Home and End for the first and last",
     "firstPage": "First page",
     "lastPage": "Last page",
-    "pickPage": "Go to a page"
+    "pickPage": "Go to a page",
+    "switchBinder": "Switch binder, {name} open"
   },
   "Settings": {
     "open": "Settings",
@@ -1017,7 +1018,8 @@
       "boosterLots": "Got lots of boosters? In your bag, open 5 or 10 at once: a single cut, then all your cards at a glance, the best first.",
       "clearShiftEnd": "The skipping stones, archery and photos looked stuck once every pebble, arrow or shot was used. They now clearly say “Finished!”: press “See the score” for your result.",
       "binderLastPage": "On a computer, the binder’s right arrow no longer turns a page into nothing once you reach the end.",
-      "binderPageJump": "In the binder, jump straight to the first or last page, or touch the page number to pick the one you want. On a keyboard, Home and End work too."
+      "binderPageJump": "In the binder, jump straight to the first or last page, or touch the page number to pick the one you want. On a keyboard, Home and End work too.",
+      "binderSwitch": "The binder now shows its set’s logo. Touch it to switch straight to another of your binders without closing it."
     }
   },
   "Shift": {

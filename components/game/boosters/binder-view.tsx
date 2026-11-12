@@ -193,6 +193,60 @@ function PageSheet({
 // A page on its way over: the side it starts from, and the side it shows once turned.
 type Turn = { direction: -1 | 1; before: (number | null)[]; id: number };
 
+// The player's other binders, small covers under the title, to switch straight to one. The keys
+// move through them, and Escape closes the list without leaving the binder.
+function BinderSwitcher({
+  binders,
+  current,
+  onPick,
+  onClose,
+}: {
+  binders: readonly OwnedBinder[];
+  current: string;
+  onPick: (set: PlayableSet) => void;
+  onClose: () => void;
+}) {
+  const t = useTranslations('Binder');
+  const list = useRef<HTMLFieldSetElement>(null);
+
+  useEffect(() => {
+    list.current?.querySelector<HTMLElement>('[aria-current="true"]')?.focus();
+  }, []);
+
+  return (
+    <fieldset
+      ref={list}
+      aria-label={t('chooseBinder')}
+      onKeyDown={(event) => {
+        // Kept here, or the pages around would move through their pockets with the same key.
+        event.stopPropagation();
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          onClose();
+          return;
+        }
+        moveThroughChoicesOnScreen(event);
+      }}
+      className="ui-pop-in absolute top-full left-1/2 m-0 mt-3 flex max-h-[60dvh] w-[min(34rem,calc(100vw-2rem))] min-w-0 -translate-x-1/2 flex-wrap justify-center gap-3 overflow-y-auto border-0 ui-scrap p-3"
+    >
+      {binders.map(({ owned, ...set }) => (
+        <button
+          key={set.id}
+          type="button"
+          // Not `disabled`, which would take the focus away from the keyboard.
+          aria-disabled={owned === 0}
+          aria-current={set.id === current ? 'true' : undefined}
+          aria-label={`${set.name}. ${t('progress', { owned, total: set.slotTotal })}`}
+          onClick={() => owned > 0 && onPick(set)}
+          className="relative aspect-[5/6] w-20 rounded-md outline-none transition-transform focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-dashed focus-visible:outline-ui-stamp not-aria-disabled:cursor-pointer not-aria-disabled:hover:-translate-y-1 aria-[current=true]:-translate-y-1 aria-[current=true]:ring-4 aria-[current=true]:ring-ui-accent aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:grayscale sm:w-24"
+        >
+          <BinderCover set={set} owned={owned} isSmall />
+        </button>
+      ))}
+    </fieldset>
+  );
+}
+
 // An arrow to the first or the last page: a triangle against a bar.
 function EndArrow({ side }: { side: 'first' | 'last' }) {
   return (
@@ -229,9 +283,10 @@ function PagePicker({
       ref={list}
       aria-label={t('pickPage')}
       onKeyDown={(event) => {
+        // Kept here, or the pages around would move through their pockets with the same key.
+        event.stopPropagation();
         if (event.key === 'Escape') {
           event.preventDefault();
-          event.stopPropagation();
           onClose();
           return;
         }
@@ -260,8 +315,25 @@ function spreadOf(shown: readonly number[], pagesAtOnce: number): (number | null
   return Array.from({ length: pagesAtOnce }, (_, index) => shown[index] ?? null);
 }
 
-function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Collection }) {
+type OwnedBinder = PlayableSet & { owned: number };
+
+function Pages({
+  catalogue,
+  collection,
+  set,
+  binders,
+  onSwitch,
+}: {
+  catalogue: Catalogue;
+  collection: Collection;
+  // The binder open, and the others with cards in them, to switch to without closing it.
+  set: PlayableSet;
+  binders: readonly OwnedBinder[];
+  onSwitch: (set: PlayableSet) => void;
+}) {
   const t = useTranslations('Binder');
+  const [isSwitching, setIsSwitching] = useState(false);
+  const titleButton = useRef<HTMLButtonElement>(null);
   const slots = useMemo(() => binderSlots(catalogue.cards), [catalogue]);
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState<BinderSlot | null>(null);
@@ -425,10 +497,49 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
       onKeyDown={moveThroughChoicesOnScreen}
       className="flex h-full flex-col items-center gap-4"
     >
-      <BinderTitle
-        name={catalogue.setName}
-        progress={t('progress', { owned: ownedSlotCount(slots, collection), total: slots.length })}
-      />
+      {/* The title opens the other binders, to switch to one without going back to the shelf. */}
+      <div inert={detail !== null} className="relative z-30">
+        <button
+          ref={titleButton}
+          type="button"
+          aria-expanded={isSwitching}
+          aria-haspopup="true"
+          aria-label={t('switchBinder', { name: catalogue.setName })}
+          onClick={() => setIsSwitching((open) => !open)}
+          className="group relative cursor-pointer rounded-sm outline-none focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-dashed focus-visible:outline-ui-stamp"
+        >
+          <BinderTitle
+            name={catalogue.setName}
+            logoUrl={set.logoUrl}
+            progress={t('progress', {
+              owned: ownedSlotCount(slots, collection),
+              total: slots.length,
+            })}
+          />
+          <span
+            aria-hidden="true"
+            className="absolute -right-3 bottom-1 rotate-6 ui-scrap bg-ui-accent px-1.5 text-sm font-bold transition-transform group-hover:translate-y-0.5"
+          >
+            ▾
+          </span>
+        </button>
+        {isSwitching && (
+          <BinderSwitcher
+            binders={binders}
+            current={set.id}
+            onPick={(picked) => {
+              setIsSwitching(false);
+              if (picked.id !== set.id) {
+                onSwitch(picked);
+              }
+            }}
+            onClose={() => {
+              setIsSwitching(false);
+              titleButton.current?.focus();
+            }}
+          />
+        )}
+      </div>
       <div inert={detail !== null} className="relative flex min-h-0 w-full justify-center gap-2">
         {under.map((shownPage, index) => (
           <div
@@ -650,6 +761,13 @@ export function BinderView({ sets, collection, onClose }: Props) {
     setIsOpening(true);
   };
 
+  // Straight from one binder to another, without the shelf or the opening.
+  const switchTo = (set: PlayableSet) => {
+    reportPlay({ type: 'binder.viewed', setId: set.id });
+    setChosenSet(set);
+    setIsOpening(false);
+  };
+
   const closeBinder = () => {
     setChosenSet(null);
     setIsOpening(false);
@@ -718,7 +836,17 @@ export function BinderView({ sets, collection, onClose }: Props) {
       )}
       {chosenSet && !isOpening && (
         <div className="relative h-full pt-12 sm:pt-0">
-          {catalogue && <Pages catalogue={catalogue} collection={collection} />}
+          {catalogue && (
+            <Pages
+              // A new binder opens on its first page.
+              key={chosenSet.id}
+              catalogue={catalogue}
+              collection={collection}
+              set={chosenSet}
+              binders={binders}
+              onSwitch={switchTo}
+            />
+          )}
           {!catalogue && !hasFailed && (
             <div className="flex h-full items-center justify-center text-xl">{t('loading')}</div>
           )}

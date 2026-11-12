@@ -213,7 +213,8 @@
     "pageKeys": "Page préc. et Page suiv. pour tourner les pages, Début et Fin pour la première et la dernière",
     "firstPage": "Première page",
     "lastPage": "Dernière page",
-    "pickPage": "Aller à une page"
+    "pickPage": "Aller à une page",
+    "switchBinder": "Changer de classeur, {name} ouvert"
   },
   "Settings": {
     "open": "Réglages",
@@ -1017,7 +1018,8 @@
       "boosterLots": "Tu as beaucoup de boosters ? Dans ton sac, ouvre-les par 5 ou par 10 d’un coup : une seule découpe, puis toutes tes cartes d’un coup d’œil, les meilleures en premier.",
       "clearShiftEnd": "Les ricochets, le tir à l’arc et les photos semblaient bloqués une fois tous les galets, flèches ou photos utilisés. Ils affichent maintenant clairement « Terminé ! » : appuie sur « Voir le score » pour ton résultat.",
       "binderLastPage": "Sur ordinateur, la flèche de droite du classeur ne tourne plus une page dans le vide une fois arrivé à la fin.",
-      "binderPageJump": "Dans le classeur, saute directement à la première ou à la dernière page, ou touche le numéro de page pour choisir celle que tu veux. Au clavier, Début et Fin marchent aussi."
+      "binderPageJump": "Dans le classeur, saute directement à la première ou à la dernière page, ou touche le numéro de page pour choisir celle que tu veux. Au clavier, Début et Fin marchent aussi.",
+      "binderSwitch": "Le classeur affiche le logo de sa série. Touche-le pour passer directement à un autre de tes classeurs, sans le refermer."
     }
   },
   "Shift": {
