@@ -156,7 +156,13 @@ export function StonesShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
               isHolding ? 'bg-[#2f6f8a]' : 'bg-[#3c78b4]'
             }`}
           >
-            {!isReady ? t('wait') : isHolding ? t('strength') : t('angle')}
+            {state.endedAt !== null
+              ? t('pebbles', { count: 0 })
+              : !isReady
+                ? t('wait')
+                : isHolding
+                  ? t('strength')
+                  : t('angle')}
             <kbd className="ml-2 font-digits text-xs opacity-70 pointer-coarse:hidden">␣</kbd>
           </button>
           <HostSays host="grandpa" text={remarkOf(state, setups[state.throws.length]?.wind, t)} />

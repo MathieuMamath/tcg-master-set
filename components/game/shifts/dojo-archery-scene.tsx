@@ -111,7 +111,13 @@ export function ArcheryShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
               isHolding ? 'bg-[#7a3a22]' : 'bg-[#6b4a2e]'
             }`}
           >
-            {!isReady ? t('wait') : isHolding ? t('aimY') : t('aimX')}
+            {state.endedAt !== null
+              ? t('arrows', { count: 0 })
+              : !isReady
+                ? t('wait')
+                : isHolding
+                  ? t('aimY')
+                  : t('aimX')}
             <kbd className="ml-2 font-digits text-xs opacity-70 pointer-coarse:hidden">␣</kbd>
           </button>
           <HostSays host="dojoMaster" text={remarkOf(state, setups[state.shots.length]?.wind, t)} />
