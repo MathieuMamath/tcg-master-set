@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.104](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.103...v0.1.104) (2026-11-12)
+
+### Bug Fixes
+
+* **quests:** make a shift's end clear instead of looking stuck ([#107](https://github.com/MathieuMamath/tcg-master-set/issues/107)) ([cc573c5](https://github.com/MathieuMamath/tcg-master-set/commit/cc573c5685ab356cd1073e998e19780e15fa77fb)), references [#102](https://github.com/MathieuMamath/tcg-master-set/issues/102) [#102](https://github.com/MathieuMamath/tcg-master-set/issues/102)
+
 ## [0.1.103](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.102...v0.1.103) (2026-11-10)
 
 ### Features
