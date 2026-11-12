@@ -16,12 +16,13 @@ import {
   binderSlots,
   bindersToChoose,
   type Collection,
+  goToPage,
   ownedInSet,
   ownedSlotCount,
+  pageChoices,
   pageCount,
   pagesShown,
   slotsOnPage,
-  turnPage,
 } from '@/game/cards/binder';
 import type { PlayableSet } from '@/game/cards/card-sets';
 import { pageStep } from '@/game/ui/menu-keys';
@@ -192,6 +193,67 @@ function PageSheet({
 // A page on its way over: the side it starts from, and the side it shows once turned.
 type Turn = { direction: -1 | 1; before: (number | null)[]; id: number };
 
+// An arrow to the first or the last page: a triangle against a bar.
+function EndArrow({ side }: { side: 'first' | 'last' }) {
+  return (
+    <span aria-hidden="true" className="inline-flex items-center">
+      {side === 'first' && <span className="mr-px h-3 w-0.5 bg-current" />}
+      {side === 'first' ? '◀' : '▶'}
+      {side === 'last' && <span className="ml-px h-3 w-0.5 bg-current" />}
+    </span>
+  );
+}
+
+// Every page, or every spread on a wide screen, to jump straight to, above the page number. The
+// keys move through them, and Escape closes the list without closing the binder.
+function PagePicker({
+  choices,
+  current,
+  onPick,
+  onClose,
+}: {
+  choices: readonly { first: number; last: number }[];
+  current: number;
+  onPick: (page: number) => void;
+  onClose: () => void;
+}) {
+  const t = useTranslations('Binder');
+  const list = useRef<HTMLFieldSetElement>(null);
+
+  useEffect(() => {
+    list.current?.querySelector<HTMLElement>('[aria-current="page"]')?.focus();
+  }, []);
+
+  return (
+    <fieldset
+      ref={list}
+      aria-label={t('pickPage')}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          onClose();
+          return;
+        }
+        moveThroughChoicesOnScreen(event);
+      }}
+      className="ui-pop-in absolute bottom-full left-1/2 z-30 m-0 mb-3 grid min-w-0 border-0 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 grid-cols-4 gap-1.5 ui-scrap p-3 sm:grid-cols-6"
+    >
+      {choices.map(({ first, last }) => (
+        <button
+          key={first}
+          type="button"
+          aria-current={first === current ? 'page' : undefined}
+          onClick={() => onPick(first)}
+          className="cursor-pointer rounded-xs bg-[#e6ece8] px-1 py-1 font-digits text-sm font-bold shadow-[1px_2px_0_var(--ui-shadow)] outline-none hover:-translate-y-0.5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-dashed focus-visible:outline-ui-stamp aria-[current=page]:bg-ui-accent"
+        >
+          {first === last ? first + 1 : `${first + 1}-${last + 1}`}
+        </button>
+      ))}
+    </fieldset>
+  );
+}
+
 // The page shown in each place, left then right on a wide screen, or the single one on a narrow
 // screen. A missing page at the end of the binder leaves a blank sheet.
 function spreadOf(shown: readonly number[], pagesAtOnce: number): (number | null)[] {
@@ -212,13 +274,15 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
   const lastShown = shown[shown.length - 1];
   const spread = spreadOf(shown, pagesAtOnce);
 
-  // Turns from the pages on show, which the animation keeps until the page has gone over.
-  const turn = useCallback(
-    (direction: -1 | 1) => {
-      const next = turnPage(page, direction, slots.length, pagesAtOnce);
+  // Turns to the spread of a page, from the pages on show, which the animation keeps until the page
+  // has gone over: forward or back, whether a spread away or many.
+  const turnTo = useCallback(
+    (target: number) => {
+      const next = goToPage(page, target, slots.length, pagesAtOnce);
       if (next === page) {
         return;
       }
+      const direction = next > page ? 1 : -1;
       const isStill = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       setTurning(
         isStill
@@ -233,6 +297,17 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
     },
     [page, slots.length, pagesAtOnce],
   );
+  const turn = useCallback(
+    (direction: -1 | 1) => turnTo(shown[0] + direction * pagesAtOnce),
+    [turnTo, shown[0], pagesAtOnce],
+  );
+  const isAtStart = shown[0] === 0;
+  const isAtEnd = lastShown === pages - 1;
+  // The list of pages to jump to, open from the page number, and closed by any turn of the page.
+  const [isPicking, setIsPicking] = useState(false);
+  const pageButton = useRef<HTMLButtonElement>(null);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new page is what closes the list.
+  useEffect(() => setIsPicking(false), [page]);
 
   // On the window, because the focus can be anywhere in the dialog, such as on its close button.
   useEffect(() => {
@@ -245,12 +320,16 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
       if (step) {
         event.preventDefault();
         turn(step);
+      } else if (event.code === 'Home' || event.code === 'End') {
+        // Home and End go to the first and last pages.
+        event.preventDefault();
+        turnTo(event.code === 'Home' ? 0 : pages - 1);
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [detail, turn]);
+  }, [detail, turn, turnTo, pages]);
 
   // On arrival, and when a turned page takes away the pocket that had the focus.
   // biome-ignore lint/correctness/useExhaustiveDependencies: a new page is what can lose the focus.
@@ -387,34 +466,79 @@ function Pages({ catalogue, collection }: { catalogue: Catalogue; collection: Co
           </div>
         )}
       </div>
-      <div inert={detail !== null} className="flex items-center gap-3 text-ui-ink">
+      <div
+        inert={detail !== null}
+        className="relative flex items-center gap-2 text-ui-ink sm:gap-3"
+      >
         {/* Not `disabled`, which would take the focus away at the first and last pages. */}
         <button
           type="button"
-          aria-disabled={shown[0] === 0}
+          aria-disabled={isAtStart}
+          aria-label={t('firstPage')}
+          onClick={() => turnTo(0)}
+          className={NAV_BUTTON_CLASS}
+        >
+          <EndArrow side="first" />
+        </button>
+        <button
+          type="button"
+          aria-disabled={isAtStart}
           aria-label={t('previousPage')}
           onClick={() => turn(-1)}
           className={NAV_BUTTON_CLASS}
         >
           ◀
         </button>
-        <span
-          aria-live="polite"
-          className="ui-scrap px-3 pt-1 pb-0.5 font-digits text-sm font-bold"
+        <button
+          ref={pageButton}
+          type="button"
+          aria-expanded={isPicking}
+          aria-haspopup="true"
+          aria-label={t('pickPage')}
+          onClick={() => setIsPicking((open) => !open)}
+          className="cursor-pointer ui-paper-button bg-ui-paper px-3 pt-1 pb-0.5 font-digits text-sm font-bold"
         >
-          {shown.length === 2
-            ? t('pages', { first: shown[0] + 1, last: lastShown + 1, total: pages })
-            : t('page', { current: shown[0] + 1, total: pages })}
-        </span>
+          <span aria-live="polite">
+            {shown.length === 2
+              ? t('pages', { first: shown[0] + 1, last: lastShown + 1, total: pages })
+              : t('page', { current: shown[0] + 1, total: pages })}
+          </span>
+          <span aria-hidden="true" className="ml-1.5 text-xs">
+            ▾
+          </span>
+        </button>
         <button
           type="button"
-          aria-disabled={lastShown === pages - 1}
+          aria-disabled={isAtEnd}
           aria-label={t('nextPage')}
           onClick={() => turn(1)}
           className={NAV_BUTTON_CLASS}
         >
           ▶
         </button>
+        <button
+          type="button"
+          aria-disabled={isAtEnd}
+          aria-label={t('lastPage')}
+          onClick={() => turnTo(pages - 1)}
+          className={NAV_BUTTON_CLASS}
+        >
+          <EndArrow side="last" />
+        </button>
+        {isPicking && (
+          <PagePicker
+            choices={pageChoices(slots.length, pagesAtOnce)}
+            current={shown[0]}
+            onPick={(target) => {
+              setIsPicking(false);
+              turnTo(target);
+            }}
+            onClose={() => {
+              setIsPicking(false);
+              pageButton.current?.focus();
+            }}
+          />
+        )}
       </div>
       <p className="text-sm text-ui-ink/70 pointer-coarse:hidden">{t('pageKeys')}</p>
       {detail && (
