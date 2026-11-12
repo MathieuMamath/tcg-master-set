@@ -75,9 +75,32 @@ export function turnPage(
   pagesAtOnce: number,
 ): number {
   const [first] = pagesShown(page, slotTotal, pagesAtOnce);
-  const target = clampPage(first + direction * pagesAtOnce, slotTotal);
-  const [targetFirst] = pagesShown(target, slotTotal, pagesAtOnce);
+  return goToPage(page, first + direction * pagesAtOnce, slotTotal, pagesAtOnce);
+}
+
+// The page to show for a page asked for, such as the first, the last or one picked by its number:
+// the first page of its spread, or the same page when that spread is already on show.
+export function goToPage(
+  page: number,
+  target: number,
+  slotTotal: number,
+  pagesAtOnce: number,
+): number {
+  const [first] = pagesShown(page, slotTotal, pagesAtOnce);
+  const [targetFirst] = pagesShown(clampPage(target, slotTotal), slotTotal, pagesAtOnce);
   return targetFirst === first ? page : targetFirst;
+}
+
+// What can be turned to at once: every page on a narrow screen, every spread on a wide one, each
+// with its first and last pages.
+export function pageChoices(
+  slotTotal: number,
+  pagesAtOnce: number,
+): { first: number; last: number }[] {
+  return Array.from({ length: Math.ceil(pageCount(slotTotal) / pagesAtOnce) }, (_, index) => {
+    const shown = pagesShown(index * pagesAtOnce, slotTotal, pagesAtOnce);
+    return { first: shown[0], last: shown[shown.length - 1] };
+  });
 }
 
 export function ownedSlotCount(slots: readonly BinderSlot[], collection: Collection): number {

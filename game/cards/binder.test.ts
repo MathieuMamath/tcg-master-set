@@ -6,8 +6,10 @@ import {
   bindersToChoose,
   clampPage,
   firstCopies,
+  goToPage,
   ownedInSet,
   ownedSlotCount,
+  pageChoices,
   pageCount,
   pagesShown,
   SLOTS_PER_PAGE,
@@ -126,6 +128,24 @@ describe('pages side by side', () => {
   test('stays within the binder', () => {
     expect(turnPage(0, -1, FIVE_PAGES, 2)).toBe(0);
     expect(turnPage(4, 1, FIVE_PAGES, 2)).toBe(4);
+  });
+
+  test('goes straight to any page, by its spread', () => {
+    const SIX_PAGES = FIVE_PAGES + 9;
+    expect(goToPage(2, 0, SIX_PAGES, 2)).toBe(0);
+    expect(goToPage(0, 5, SIX_PAGES, 2)).toBe(4);
+    expect(goToPage(0, 99, SIX_PAGES, 2)).toBe(4);
+    expect(goToPage(3, 2, SIX_PAGES, 2)).toBe(3);
+    expect(goToPage(0, 3, SIX_PAGES, 1)).toBe(3);
+  });
+
+  test('offers every page, or every spread', () => {
+    expect(pageChoices(FIVE_PAGES, 1).map(({ first }) => first)).toEqual([0, 1, 2, 3, 4]);
+    expect(pageChoices(FIVE_PAGES, 2)).toEqual([
+      { first: 0, last: 1 },
+      { first: 2, last: 3 },
+      { first: 4, last: 4 },
+    ]);
   });
 
   test('stays on the last spread of a binder with an even number of pages', () => {

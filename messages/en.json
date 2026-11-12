@@ -210,7 +210,10 @@
       "wPromo": "Promo"
     },
     "noBinderYet": "Buy your first binder from Granny Hazel, at the bookshop past the shop.",
-    "pageKeys": "Page Up and Page Down turn the pages"
+    "pageKeys": "Page Up and Page Down to turn the pages, Home and End for the first and last",
+    "firstPage": "First page",
+    "lastPage": "Last page",
+    "pickPage": "Go to a page"
   },
   "Settings": {
     "open": "Settings",
@@ -1013,7 +1016,8 @@
       "reachableStars": "Some games’ three stars asked for an almost perfect game. Gustave’s mail, Yuzu’s washing up and kitchen, and Maître Kaito’s archery now ask a little less: still a challenge, but within your reach.",
       "boosterLots": "Got lots of boosters? In your bag, open 5 or 10 at once: a single cut, then all your cards at a glance, the best first.",
       "clearShiftEnd": "The skipping stones, archery and photos looked stuck once every pebble, arrow or shot was used. They now clearly say “Finished!”: press “See the score” for your result.",
-      "binderLastPage": "On a computer, the binder’s right arrow no longer turns a page into nothing once you reach the end."
+      "binderLastPage": "On a computer, the binder’s right arrow no longer turns a page into nothing once you reach the end.",
+      "binderPageJump": "In the binder, jump straight to the first or last page, or touch the page number to pick the one you want. On a keyboard, Home and End work too."
     }
   },
   "Shift": {
