@@ -5,6 +5,7 @@ test('lists every type of the catalogue once', () => {
   const catalogue: Record<keyof GameEventDetails, true> = {
     'player.signed_up': true,
     'player.signed_in': true,
+    'player.password_reset': true,
     'binder.bought': true,
     'booster.bought': true,
     'booster.opened': true,

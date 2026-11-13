@@ -26,6 +26,7 @@ export type AuthErrorKey =
   | 'invalidPassword'
   | 'passwordMismatch'
   | 'tooManyAttempts'
+  | 'invalidToken'
   | 'unavailable';
 
 // Better Auth's own messages are in English and not meant for players.
@@ -48,6 +49,8 @@ export function authErrorKey(code: string | undefined, status: number | undefine
     case 'USERNAME_TOO_SHORT':
     case 'USERNAME_TOO_LONG':
       return 'invalidUsername';
+    case 'INVALID_TOKEN':
+      return 'invalidToken';
     case 'PASSWORD_TOO_SHORT':
     case 'PASSWORD_TOO_LONG':
       return 'invalidPassword';

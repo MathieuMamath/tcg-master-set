@@ -2,6 +2,7 @@ import type { Locale } from 'next-intl';
 import { getPlayer } from '@/auth/session';
 import { AuthForm } from '@/components/auth/auth-form';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { canSendEmail } from '@/email';
 import { redirect } from '@/i18n/navigation';
 
 type Props = {
@@ -19,7 +20,7 @@ export default async function LoginPage({ params }: Props) {
   return (
     <>
       <LocaleSwitcher />
-      <AuthForm mode="login" />
+      <AuthForm mode="login" canResetPassword={canSendEmail()} />
     </>
   );
 }

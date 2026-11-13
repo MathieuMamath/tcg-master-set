@@ -6,6 +6,17 @@
   "Home": {
     "title": "TCG Master Set"
   },
+  "Email": {
+    "passwordReset": {
+      "subject": "Choisis un nouveau mot de passe pour {game}",
+      "greeting": "Bonjour,",
+      "asked": "Quelqu’un a demandé à réinitialiser le mot de passe de ton compte {game}.",
+      "action": "Pour choisir un nouveau mot de passe, ouvre ce lien :",
+      "button": "Choisir un nouveau mot de passe",
+      "validity": "Le lien fonctionne pendant {minutes} minutes, et une seule fois.",
+      "ignore": "Si tu n’as rien demandé, ignore cet email : ton mot de passe reste le même."
+    }
+  },
   "Game": {
     "version": "v{version}",
     "controls": {
@@ -242,6 +253,21 @@
     "goToLogin": "Se connecter",
     "noAccount": "Pas encore de compte ?",
     "goToSignup": "Créer un compte",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgotTitle": "Mot de passe oublié ?",
+    "forgotIntro": "Indique l’email de ton compte. On t’envoie un lien pour choisir un nouveau mot de passe.",
+    "forgotAction": "M’envoyer un lien",
+    "forgotSent": "Si un compte utilise {email}, un lien pour choisir un nouveau mot de passe est en route. Il fonctionne pendant {minutes} minutes. Pense à regarder dans tes spams.",
+    "backToLogin": "Retour à la connexion",
+    "resetTitle": "Choisis un nouveau mot de passe",
+    "resetIntro": "Choisis un nouveau mot de passe pour ton compte. Tes autres sessions seront ensuite fermées.",
+    "newPassword": "Nouveau mot de passe",
+    "resetAction": "Enregistrer mon nouveau mot de passe",
+    "resetDoneTitle": "Mot de passe changé",
+    "resetExpiredTitle": "Ce lien ne fonctionne plus",
+    "resetDone": "Ton nouveau mot de passe est enregistré. Tu peux te connecter avec dès maintenant.",
+    "resetExpired": "Il a expiré ou a déjà servi. Demandes-en un nouveau.",
+    "askAgain": "Demander un nouveau lien",
     "errors": {
       "invalidCredentials": "E-mail ou mot de passe incorrect.",
       "emailTaken": "Cet e-mail est déjà utilisé.",
@@ -251,7 +277,8 @@
       "invalidPassword": "Choisis un mot de passe qui respecte la règle indiquée dessous.",
       "passwordMismatch": "Les deux mots de passe ne sont pas identiques.",
       "tooManyAttempts": "Trop de tentatives. Attends un instant avant de réessayer.",
-      "unavailable": "Quelque chose s'est mal passé. Réessaie dans un instant."
+      "unavailable": "Quelque chose s'est mal passé. Réessaie dans un instant.",
+      "invalidToken": "Ce lien ne fonctionne plus : il a expiré ou a déjà servi. Demandes-en un nouveau."
     }
   },
   "LocaleSwitcher": {

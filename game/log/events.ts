@@ -9,6 +9,8 @@ export type GameEventDetails = {
   // A player created an account, or signed in to one.
   'player.signed_up': Record<string, never>;
   'player.signed_in': Record<string, never>;
+  // A player set a new password from the link of a reset email.
+  'player.password_reset': Record<string, never>;
   // Coins spent at the bookshop and the shop.
   'binder.bought': { setId: string; coins: number; coinsAfter?: number };
   'booster.bought': { setId: string; quantity: number; coins: number; coinsAfter?: number };
@@ -93,6 +95,7 @@ export type GameEventType = keyof GameEventDetails;
 export const GAME_EVENT_TYPES = [
   'player.signed_up',
   'player.signed_in',
+  'player.password_reset',
   'binder.bought',
   'booster.bought',
   'booster.opened',

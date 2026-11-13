@@ -59,7 +59,7 @@ pnpm dev
 
 ## Deploying
 
-The `Dockerfile` builds the standalone Next.js server, run by a user without privileges, and needs neither a database nor a secret to build. The container listens on port 3000 and checks itself on `/api/health`, which answers 503 when the database can't be reached. It needs a PostgreSQL database and three variables, listed in [`.env.example`](.env.example): `DATABASE_URL`, `AUTH_SECRET`, and `APP_URL`, the public address, which sign-in and the link previews depend on.
+The `Dockerfile` builds the standalone Next.js server, run by a user without privileges, and needs neither a database nor a secret to build. The container listens on port 3000 and checks itself on `/api/health`, which answers 503 when the database can't be reached. It needs a PostgreSQL database and three variables, listed in [`.env.example`](.env.example): `DATABASE_URL`, `AUTH_SECRET`, and `APP_URL`, the public address, which sign-in, the link previews and the emails' links depend on. Three more, `SCALEWAY_SECRET_KEY`, `SCALEWAY_PROJECT_ID` and `EMAIL_FROM`, send emails through [Scaleway Transactional Email](https://www.scaleway.com/en/transactional-email-tem/), from a domain verified there. Until they are set, the game hides password reset.
 
 Deploying the image changes nothing in the database. The migrations, the runtime role and the cards are applied by hand, with the database owner's address, before the code that needs them goes live:
 
