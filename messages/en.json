@@ -169,7 +169,8 @@
       "more": "One more",
       "max": "Max",
       "maxLabel": "As many as I can: {count}",
-      "presetLabel": "{count} boosters"
+      "presetLabel": "{count} boosters",
+      "enterKey": "Enter"
     }
   },
   "Booster": {
@@ -1057,7 +1058,8 @@
       "summaryNewTag": "Cards you didn’t own yet now get a big gold “NEW” tag, stamped on their corner, when revealed and in the summary, even when opening five or ten boosters at once.",
       "passwordReset": "Forgot your password? A link on the sign-in page now sends you an email to choose a new one.",
       "paperMenus": "The sign-in pages and the settings menu got a makeover, with soft paper sheets and chunkier buttons, and the kraft around the village now has the grain of real cardboard.",
-      "quickQuantity": "Buying many boosters is quicker: pick ×5, ×10, ×20 or Max in one touch, type the number you want, or hold + or − to count fast."
+      "quickQuantity": "Buying many boosters is quicker: pick ×5, ×10, ×20 or Max in one touch, type the number you want, or hold + or − to count fast.",
+      "enterToBuy": "Buying at Mamie Noisette’s, or at the Card Den, is quicker with a keyboard: pick with the arrows, press Enter to buy, and go straight on to the next."
     }
   },
   "Shift": {
