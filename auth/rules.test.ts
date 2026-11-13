@@ -32,6 +32,7 @@ describe('authErrorKey', () => {
     ['INVALID_EMAIL', 'invalidEmail'],
     ['USERNAME_TOO_SHORT', 'invalidUsername'],
     ['PASSWORD_TOO_SHORT', 'invalidPassword'],
+    ['INVALID_TOKEN', 'invalidToken'],
   ])('maps %s', (code, key) => {
     expect(authErrorKey(code, 400)).toBe(key);
   });

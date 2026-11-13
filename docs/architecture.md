@@ -10,7 +10,7 @@ Everything the game does goes through three layers, and each folder belongs to o
 |---|---|---|---|
 | **Rules** | `game/` | Plain functions: no React, no database, no network. Given data, they compute a result. | The browser **and** the server |
 | **Display** | `components/`, `app/[locale]/` | React and Three.js: what the player sees and presses. | The browser |
-| **Server** | `player/`, `stats/`, `cards/`, `coupons/`, `auth/`, `db/`, `app/api/` | Reads and writes the database, checks who is asking, pays and charges. | The server only |
+| **Server** | `player/`, `stats/`, `cards/`, `coupons/`, `auth/`, `email/`, `db/`, `app/api/` | Reads and writes the database, checks who is asking, pays and charges. | The server only |
 
 The rules run on both sides so that the server never trusts the browser and still plays by the same rules. A shift, for instance, is simulated in the browser from its seed and presses to draw it, then replayed on the server by the same function to count it.
 
@@ -66,7 +66,7 @@ Every rule has its test beside it, as `<name>.test.ts`. Helpers shared by severa
 | `components/game/quests/` | The quests' dialogs and games, one per quest outside the shifts. |
 | `components/game/shifts/` | The shifts: their shared frame and logic (`shift.tsx`), the hosts' conversation (`shift-dialog.tsx`), and one scene per game. |
 | `components/game/office/` | The administrative office: the statistics, the coupon register and the lift. |
-| `components/auth/`, `components/brand/` | The sign-up and sign-in forms, and the icons and link previews. |
+| `components/auth/`, `components/brand/` | The sign-up, sign-in and password reset forms, and the icons and link previews. |
 
 Hooks sit beside what they serve, such as `use-game-keys.ts` for the keyboard or `quests/use-kitten-hunt.ts` for Mme Ronron's kitten.
 
@@ -79,7 +79,8 @@ Hooks sit beside what they serve, such as `use-game-keys.ts` for the keyboard or
 | `stats/` | The administrative office's statistics, from aggregate queries on the event log. |
 | `cards/` | The card catalogue: importing it from TCGdex, the booster pools and the binders' contents. |
 | `coupons/` | The coupons admins create. |
-| `auth/` | Accounts, sessions and roles. |
+| `auth/` | Accounts, sessions and roles, and resetting a forgotten password (`password-reset.ts`). |
+| `email/` | Sending emails: through Scaleway once it is set up, printed in the server's output otherwise, and the emails' contents, such as `password-reset.ts`. |
 | `db/` | The schema (`db/schema/`), its migrations (`db/migrations/`) and the client. |
 | `app/api/` | The HTTP routes, one folder per action, each a thin layer over the modules above. |
 

@@ -11,7 +11,12 @@ const PLAYER_FILES = readdirSync(join(process.cwd(), 'player'), {
 })
   .filter((file) => file.endsWith('.ts') && !file.endsWith('.test.ts'))
   .map((file) => join('player', file));
-const RECORDING_FILES = [...PLAYER_FILES, 'auth/server.ts', 'coupons/admin.ts'];
+const RECORDING_FILES = [
+  ...PLAYER_FILES,
+  'auth/server.ts',
+  'auth/password-reset.ts',
+  'coupons/admin.ts',
+];
 
 const sources = RECORDING_FILES.map((file) => readFileSync(join(process.cwd(), file), 'utf8')).join(
   '\n',

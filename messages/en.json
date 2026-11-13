@@ -6,6 +6,17 @@
   "Home": {
     "title": "TCG Master Set"
   },
+  "Email": {
+    "passwordReset": {
+      "subject": "Choose a new password for {game}",
+      "greeting": "Hello,",
+      "asked": "Someone asked to reset the password of your {game} account.",
+      "action": "To choose a new password, open this link:",
+      "button": "Choose a new password",
+      "validity": "The link works for {minutes} minutes, and only once.",
+      "ignore": "If you didn't ask for this, ignore this email: your password stays as it is."
+    }
+  },
   "Game": {
     "version": "v{version}",
     "controls": {
@@ -242,6 +253,21 @@
     "goToLogin": "Sign in",
     "noAccount": "New here?",
     "goToSignup": "Create an account",
+    "forgotPassword": "Forgot your password?",
+    "forgotTitle": "Forgot your password?",
+    "forgotIntro": "Type the email of your account. We'll send you a link to choose a new password.",
+    "forgotAction": "Send me a link",
+    "forgotSent": "If an account uses {email}, a link to choose a new password is on its way. It works for {minutes} minutes. Remember to look in your spam folder.",
+    "backToLogin": "Back to sign in",
+    "resetTitle": "Choose a new password",
+    "resetIntro": "Pick a new password for your account. Your other sessions will then be closed.",
+    "newPassword": "New password",
+    "resetAction": "Save my new password",
+    "resetDoneTitle": "Password changed",
+    "resetExpiredTitle": "This link no longer works",
+    "resetDone": "Your new password is saved. You can sign in with it now.",
+    "resetExpired": "It has expired or has already been used. Ask for a new one.",
+    "askAgain": "Ask for a new link",
     "errors": {
       "invalidCredentials": "Wrong email or password.",
       "emailTaken": "This email is already in use.",
@@ -251,7 +277,8 @@
       "invalidPassword": "Please choose a password that follows the rule below it.",
       "passwordMismatch": "The two passwords don't match.",
       "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
-      "unavailable": "Something went wrong. Please try again in a moment."
+      "unavailable": "Something went wrong. Please try again in a moment.",
+      "invalidToken": "This link no longer works: it has expired or has already been used. Ask for a new one."
     }
   },
   "LocaleSwitcher": {

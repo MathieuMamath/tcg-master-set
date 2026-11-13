@@ -6,6 +6,12 @@ import { getDb } from '@/db/client';
 import * as schema from '@/db/schema';
 import { recordEvent } from '@/player/events';
 import {
+  RESET_IDENTIFIER_PREFIX,
+  RESET_TOKEN_MINUTES,
+  recordPasswordReset,
+  sendResetPasswordEmail,
+} from './password-reset';
+import {
   isValidUsername,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
@@ -49,6 +55,17 @@ function createAuth() {
       enabled: true,
       minPasswordLength: PASSWORD_MIN_LENGTH,
       maxPasswordLength: PASSWORD_MAX_LENGTH,
+      // A forgotten password is reset by email: see `password-reset.ts`.
+      sendResetPassword: sendResetPasswordEmail,
+      onPasswordReset: recordPasswordReset,
+      resetPasswordTokenExpiresIn: RESET_TOKEN_MINUTES * 60,
+      // A reset is what a player does when someone else may know the password, so every open
+      // session ends, theirs included.
+      revokeSessionsOnPasswordReset: true,
+    },
+    // Reset tokens are stored hashed, so that a leaked table hands out no working link.
+    verification: {
+      storeIdentifier: { default: 'plain', overrides: { [RESET_IDENTIFIER_PREFIX]: 'hashed' } },
     },
     session: { expiresIn: SESSION_DAYS * SECONDS_PER_DAY },
     // Players only hand over an email, a username and a password, so nothing else is kept.
