@@ -9,12 +9,16 @@
   "Email": {
     "passwordReset": {
       "subject": "Choose a new password for {game}",
+      "preview": "Your link to choose a new password, valid for {minutes} minutes.",
+      "heading": "Forgot your password?",
       "greeting": "Hello,",
       "asked": "Someone asked to reset the password of your {game} account.",
-      "action": "To choose a new password, open this link:",
+      "action": "To choose a new one, follow the link below.",
       "button": "Choose a new password",
       "validity": "The link works for {minutes} minutes, and only once.",
-      "ignore": "If you didn't ask for this, ignore this email: your password stays as it is."
+      "ignore": "If you didn't ask for this, ignore this email: your password stays as it is.",
+      "fallback": "The button doesn't work? Copy this link into your browser:",
+      "footer": "This email was sent by {game} because a password reset was asked for. Nobody reads replies to this address."
     }
   },
   "Game": {
@@ -1047,7 +1051,8 @@
       "binderLastPage": "On a computer, the binder’s right arrow no longer turns a page into nothing once you reach the end.",
       "binderPageJump": "In the binder, jump straight to the first or last page, or touch the page number to pick the one you want. On a keyboard, Home and End work too.",
       "binderSwitch": "The binder now shows its set’s logo. Touch it to switch straight to another of your binders without closing it.",
-      "summaryNewTag": "Cards you didn’t own yet now get a big gold “NEW” tag, stamped on their corner, when revealed and in the summary, even when opening five or ten boosters at once."
+      "summaryNewTag": "Cards you didn’t own yet now get a big gold “NEW” tag, stamped on their corner, when revealed and in the summary, even when opening five or ten boosters at once.",
+      "passwordReset": "Forgot your password? A link on the sign-in page now sends you an email to choose a new one."
     }
   },
   "Shift": {

@@ -80,7 +80,7 @@ Hooks sit beside what they serve, such as `use-game-keys.ts` for the keyboard or
 | `cards/` | The card catalogue: importing it from TCGdex, the booster pools and the binders' contents. |
 | `coupons/` | The coupons admins create. |
 | `auth/` | Accounts, sessions and roles, and resetting a forgotten password (`password-reset.ts`). |
-| `email/` | Sending emails: through Scaleway once it is set up, printed in the server's output otherwise, and the emails' contents, such as `password-reset.ts`. |
+| `email/` | Sending emails: through Scaleway once it is set up, printed in the server's output otherwise, the look they share (`layout.ts`, with its banner drawn by `app/email-header.png/`), and each email's contents, such as `password-reset.ts`. |
 | `db/` | The schema (`db/schema/`), its migrations (`db/migrations/`) and the client. |
 | `app/api/` | The HTTP routes, one folder per action, each a thin layer over the modules above. |
 

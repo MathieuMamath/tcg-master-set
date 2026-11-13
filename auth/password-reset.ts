@@ -82,6 +82,7 @@ export async function sendResetPasswordEmail({
         passwordResetEmail({
           to: user.email,
           url: resetPageUrl(appUrl, locale, token),
+          appUrl,
           locale,
           minutes: RESET_TOKEN_MINUTES,
         }),
