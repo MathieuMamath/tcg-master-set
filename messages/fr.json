@@ -9,12 +9,16 @@
   "Email": {
     "passwordReset": {
       "subject": "Choisis un nouveau mot de passe pour {game}",
+      "preview": "Ton lien pour choisir un nouveau mot de passe, valable {minutes} minutes.",
+      "heading": "Mot de passe oublié ?",
       "greeting": "Bonjour,",
       "asked": "Quelqu’un a demandé à réinitialiser le mot de passe de ton compte {game}.",
-      "action": "Pour choisir un nouveau mot de passe, ouvre ce lien :",
+      "action": "Pour en choisir un nouveau, suis le lien ci-dessous.",
       "button": "Choisir un nouveau mot de passe",
       "validity": "Le lien fonctionne pendant {minutes} minutes, et une seule fois.",
-      "ignore": "Si tu n’as rien demandé, ignore cet email : ton mot de passe reste le même."
+      "ignore": "Si tu n’as rien demandé, ignore cet email : ton mot de passe reste le même.",
+      "fallback": "Le bouton ne marche pas ? Copie ce lien dans ton navigateur :",
+      "footer": "Cet email t’a été envoyé par {game} parce qu’une réinitialisation de mot de passe a été demandée. Personne ne lit les réponses à cette adresse."
     }
   },
   "Game": {
@@ -1047,7 +1051,8 @@
       "binderLastPage": "Sur ordinateur, la flèche de droite du classeur ne tourne plus une page dans le vide une fois arrivé à la fin.",
       "binderPageJump": "Dans le classeur, saute directement à la première ou à la dernière page, ou touche le numéro de page pour choisir celle que tu veux. Au clavier, Début et Fin marchent aussi.",
       "binderSwitch": "Le classeur affiche le logo de sa série. Touche-le pour passer directement à un autre de tes classeurs, sans le refermer.",
-      "summaryNewTag": "Les cartes que tu n’avais pas encore reçoivent maintenant une grande étiquette dorée « NEW », tamponnée sur leur coin, à la révélation comme dans le résumé, même en ouvrant cinq ou dix boosters d’un coup."
+      "summaryNewTag": "Les cartes que tu n’avais pas encore reçoivent maintenant une grande étiquette dorée « NEW », tamponnée sur leur coin, à la révélation comme dans le résumé, même en ouvrant cinq ou dix boosters d’un coup.",
+      "passwordReset": "Mot de passe oublié ? Un lien sur la page de connexion t’envoie maintenant un email pour en choisir un nouveau."
     }
   },
   "Shift": {
