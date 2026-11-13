@@ -13,6 +13,44 @@ import {
 } from './core';
 
 // The shadow a diorama's front edge casts on the table it stands on, darkest under the edge.
+// The kraft of the table the diorama stands on, as a tile that repeats without seams: the page's
+// own colour, crossed by fine fibres and faint pale streaks like the page around the scene.
+export const KRAFT_TILE = 256;
+export function drawKraft(): HTMLCanvasElement {
+  const size = KRAFT_TILE;
+  const canvas = createCanvas(size, size);
+  const x = context(canvas);
+  const random = seededRandom(42);
+  x.fillStyle = '#c8a574';
+  x.fillRect(0, 0, size, size);
+  // Each stroke is drawn again one tile over in every direction, so that the edges meet.
+  const stroke = (fromX: number, fromY: number, toX: number, toY: number) => {
+    for (const offsetX of [-size, 0, size]) {
+      for (const offsetY of [-size, 0, size]) {
+        x.beginPath();
+        x.moveTo(fromX + offsetX, fromY + offsetY);
+        x.lineTo(toX + offsetX, toY + offsetY);
+        x.stroke();
+      }
+    }
+  };
+  x.lineCap = 'round';
+  for (let index = 0; index < 260; index += 1) {
+    const isDark = random() < 0.6;
+    x.strokeStyle = isDark
+      ? `rgb(110 75 40 / ${8 + random() * 10}%)`
+      : `rgb(255 240 210 / ${8 + random() * 12}%)`;
+    x.lineWidth = 0.6 + random() * 1.4;
+    const length = 6 + random() * 26;
+    const angle = (-68 + (random() - 0.5) * 24) * (Math.PI / 180);
+    const startX = random() * size;
+    const startY = random() * size;
+    stroke(startX, startY, startX + Math.cos(angle) * length, startY + Math.sin(angle) * length);
+  }
+  addGrain(canvas, 10, 7);
+  return canvas;
+}
+
 export function drawEdgeShadow(): HTMLCanvasElement {
   const canvas = createCanvas(4, 128);
   const x = context(canvas);

@@ -8,6 +8,7 @@ import {
   DoubleSide,
   type Group,
   type MeshBasicMaterial,
+  RepeatWrapping,
   SRGBColorSpace,
   type Texture,
 } from 'three';
@@ -18,6 +19,7 @@ import {
   drawCorrugatedEdge,
   drawDoor,
   drawEdgeShadow,
+  drawKraft,
   drawUprightCorrugatedEdge,
 } from '../art/bedroom';
 import { solidTop } from '../art/card-den';
@@ -80,22 +82,32 @@ export function texture(canvas: HTMLCanvasElement): Texture {
   return map;
 }
 
-// Outside, the diorama stands on a table of kraft, the same as the page behind the rooms, so that
-// the sky never shows below its front edge. Being part of the scene, the table darkens at night
-// with the rest of the world, and the edge casts a soft shadow on it.
-const TABLE_COLOR = '#c8a574';
+// Outside, the diorama stands on a table of kraft, the same as the page behind the rooms, fibres
+// included, so that the sky never shows below its front edge. Being part of the scene, the table
+// darkens at night with the rest of the world, and the edge casts a soft shadow on it.
 const TABLE_DEPTH = 20;
 const EDGE_SHADOW_DEPTH = 0.9;
+// How much of the table one tile of kraft covers, so that its fibres are about the size of the
+// page's around the scene.
+const KRAFT_TILE_UNITS = 4;
 
 export function DioramaTable({ center, width }: { center: number; width: number }) {
   const shadow = useMemo(() => texture(drawEdgeShadow()), []);
+  const tableWidth = width + 70;
+  const kraft = useMemo(() => {
+    const map = texture(drawKraft());
+    map.wrapS = RepeatWrapping;
+    map.wrapT = RepeatWrapping;
+    map.repeat.set(tableWidth / KRAFT_TILE_UNITS, TABLE_DEPTH / KRAFT_TILE_UNITS);
+    return map;
+  }, [tableWidth]);
   const top = -0.36;
   const z = STREET_FRONT_Z + 0.07;
   return (
     <>
       <mesh position={[center, top - TABLE_DEPTH / 2, z]}>
-        <planeGeometry args={[width + 70, TABLE_DEPTH]} />
-        <meshBasicMaterial color={TABLE_COLOR} toneMapped={false} />
+        <planeGeometry args={[tableWidth, TABLE_DEPTH]} />
+        <meshBasicMaterial map={kraft} toneMapped={false} />
       </mesh>
       <mesh position={[center, top - EDGE_SHADOW_DEPTH / 2, z + 0.01]}>
         <planeGeometry args={[width, EDGE_SHADOW_DEPTH]} />

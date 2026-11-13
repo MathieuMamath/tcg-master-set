@@ -270,7 +270,7 @@
     "resetDoneTitle": "Password changed",
     "resetExpiredTitle": "This link no longer works",
     "resetDone": "Your new password is saved. You can sign in with it now.",
-    "resetExpired": "It has expired or has already been used. Ask for a new one.",
+    "resetExpired": "This link no longer works: it has expired or has already been used. Ask for a new one.",
     "askAgain": "Ask for a new link",
     "errors": {
       "invalidCredentials": "Wrong email or password.",
@@ -1052,7 +1052,8 @@
       "binderPageJump": "In the binder, jump straight to the first or last page, or touch the page number to pick the one you want. On a keyboard, Home and End work too.",
       "binderSwitch": "The binder now shows its set’s logo. Touch it to switch straight to another of your binders without closing it.",
       "summaryNewTag": "Cards you didn’t own yet now get a big gold “NEW” tag, stamped on their corner, when revealed and in the summary, even when opening five or ten boosters at once.",
-      "passwordReset": "Forgot your password? A link on the sign-in page now sends you an email to choose a new one."
+      "passwordReset": "Forgot your password? A link on the sign-in page now sends you an email to choose a new one.",
+      "paperMenus": "The sign-in pages and the settings menu got a makeover, with soft paper sheets and chunkier buttons, and the kraft around the village now has the grain of real cardboard."
     }
   },
   "Shift": {

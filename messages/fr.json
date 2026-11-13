@@ -270,7 +270,7 @@
     "resetDoneTitle": "Mot de passe changé",
     "resetExpiredTitle": "Ce lien ne fonctionne plus",
     "resetDone": "Ton nouveau mot de passe est enregistré. Tu peux te connecter avec dès maintenant.",
-    "resetExpired": "Il a expiré ou a déjà servi. Demandes-en un nouveau.",
+    "resetExpired": "Ce lien ne fonctionne plus : il a expiré ou a déjà servi. Demandes-en un nouveau.",
     "askAgain": "Demander un nouveau lien",
     "errors": {
       "invalidCredentials": "E-mail ou mot de passe incorrect.",
@@ -1052,7 +1052,8 @@
       "binderPageJump": "Dans le classeur, saute directement à la première ou à la dernière page, ou touche le numéro de page pour choisir celle que tu veux. Au clavier, Début et Fin marchent aussi.",
       "binderSwitch": "Le classeur affiche le logo de sa série. Touche-le pour passer directement à un autre de tes classeurs, sans le refermer.",
       "summaryNewTag": "Les cartes que tu n’avais pas encore reçoivent maintenant une grande étiquette dorée « NEW », tamponnée sur leur coin, à la révélation comme dans le résumé, même en ouvrant cinq ou dix boosters d’un coup.",
-      "passwordReset": "Mot de passe oublié ? Un lien sur la page de connexion t’envoie maintenant un email pour en choisir un nouveau."
+      "passwordReset": "Mot de passe oublié ? Un lien sur la page de connexion t’envoie maintenant un email pour en choisir un nouveau.",
+      "paperMenus": "Les pages de connexion et le menu des réglages font peau neuve, avec des feuilles de papier aux coins doux et des boutons bien ronds, et le kraft autour du village a maintenant le grain d’un vrai carton."
     }
   },
   "Shift": {
