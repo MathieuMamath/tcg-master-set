@@ -2,8 +2,7 @@
 
 import { useId, useState } from 'react';
 
-const INPUT_CLASS =
-  'w-full rounded-sm border-2 border-ui-ink/30 bg-white px-3 py-2 text-lg text-ui-ink outline-none focus:border-ui-ink focus:bg-ui-accent/20';
+const INPUT_CLASS = 'ui-field w-full px-3 py-2 text-lg text-ui-ink';
 
 export function Field({
   label,
@@ -57,7 +56,7 @@ export function PasswordField({
             aria-label={showLabel}
             aria-pressed={isShown}
             title={showLabel}
-            className="absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-sm text-ui-ink/60 outline-none hover:text-ui-ink focus-visible:text-ui-ink focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ui-stamp"
+            className="absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-[0.7rem] text-ui-ink/60 outline-none hover:text-ui-ink focus-visible:text-ui-ink focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ui-stamp"
           >
             <EyeIcon isOpen={isShown} />
           </button>

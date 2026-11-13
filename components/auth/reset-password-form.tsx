@@ -11,7 +11,7 @@ import {
   PASSWORD_MIN_LENGTH,
 } from '@/auth/rules';
 import { Link } from '@/i18n/navigation';
-import { AUTH_BUTTON_CLASS, AuthCard, AuthError } from './auth-card';
+import { AUTH_BUTTON_CLASS, AUTH_FOOTER_CLASS, AuthCard, AuthError } from './auth-card';
 import { PasswordField } from './fields';
 
 type Props = {
@@ -70,7 +70,7 @@ export function ResetPasswordForm({ token }: Props) {
             <AuthError>{t('resetExpired')}</AuthError>
           </div>
         )}
-        <p className="mt-5 text-center">
+        <p className={AUTH_FOOTER_CLASS}>
           <Link
             href={isDone ? '/login' : '/forgot-password'}
             className={`inline-block ${AUTH_BUTTON_CLASS}`}

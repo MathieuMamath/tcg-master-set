@@ -14,7 +14,7 @@ import {
   USERNAME_MIN_LENGTH,
 } from '@/auth/rules';
 import { Link } from '@/i18n/navigation';
-import { AUTH_BUTTON_CLASS, AuthCard, AuthError } from './auth-card';
+import { AUTH_BUTTON_CLASS, AUTH_FOOTER_CLASS, AuthCard, AuthError } from './auth-card';
 import { Field, PasswordField } from './fields';
 
 type Props = {
@@ -125,7 +125,7 @@ export function AuthForm({ mode, canResetPassword = false }: Props) {
           {t(isSignup ? 'signupAction' : 'loginAction')}
         </button>
       </form>
-      <p className="mt-5 text-center">
+      <p className={AUTH_FOOTER_CLASS}>
         {t(isSignup ? 'hasAccount' : 'noAccount')}{' '}
         <Link href={isSignup ? '/login' : '/signup'} className="font-semibold underline">
           {t(isSignup ? 'goToLogin' : 'goToSignup')}

@@ -5,7 +5,7 @@ import { type FormEvent, useState } from 'react';
 import { authClient } from '@/auth/client';
 import { type AuthErrorKey, authErrorKey } from '@/auth/rules';
 import { Link } from '@/i18n/navigation';
-import { AUTH_BUTTON_CLASS, AuthCard, AuthError } from './auth-card';
+import { AUTH_BUTTON_CLASS, AUTH_FOOTER_CLASS, AuthCard, AuthError } from './auth-card';
 import { Field } from './fields';
 
 // Asks for a reset link. The answer is the same whether the address has an account or not, so
@@ -54,7 +54,7 @@ export function ForgotPasswordForm({ minutes }: { minutes: number }) {
           {t('forgotSent', { email: sentTo, minutes })}
         </p>
       )}
-      <p className="mt-5 text-center">
+      <p className={AUTH_FOOTER_CLASS}>
         <Link href="/login" className="font-semibold underline">
           {t('backToLogin')}
         </Link>
