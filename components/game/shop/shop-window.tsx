@@ -54,6 +54,9 @@ function Total({ coins, isCompact = false }: { coins: number; isCompact?: boolea
   );
 }
 
+// When the grid and the details stand side by side, as on a desktop: Tailwind's `md`.
+const SIDE_BY_SIDE = '(min-width: 48rem)';
+
 // The first item that can be bought, or the first of all.
 function firstOnSale(items: readonly ShopItem[]): SetId | undefined {
   return (items.find(({ refusal }) => refusal === null) ?? items[0])?.set.id;
@@ -150,18 +153,19 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
     }
   };
 
-  const buy = async () => {
-    if (isBuying || refusal) {
+  const buyItem = async (item: ShopItem, count: number) => {
+    if (isBuying || (item.refusal ?? (coins < price * count ? 'notEnoughCoins' : null))) {
       return;
     }
     setIsBuying(true);
-    const line = await onBuy(selected.set.id, quantity);
+    const line = await onBuy(item.set.id, count);
     setIsBuying(false);
-    setAnswer({ setId: selected.set.id, line });
+    setAnswer({ setId: item.set.id, line });
     if (line === 'thanks') {
       setQuantity(1);
     }
   };
+  const buy = () => buyItem(selected, quantity);
 
   return (
     <TornPaper className="flex max-h-[calc(100dvh-2rem)] flex-col px-4 pt-4 pb-5 sm:px-6 sm:pt-5">
@@ -211,6 +215,7 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
         <div
           ref={grid}
           role="listbox"
+          aria-keyshortcuts="Enter"
           aria-label={t(kind === 'binder' ? 'window.bindersList' : 'window.boostersList')}
           onKeyDown={onGridKeyDown}
           className={`grid max-h-[min(32rem,calc(100dvh-11rem))] grid-cols-[repeat(auto-fill,minmax(7.25rem,1fr))] content-start gap-3.5 overflow-y-auto p-2 max-md:grid-cols-2 ${
@@ -232,12 +237,25 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
                   setIsShowingDetails(true);
                 }}
                 onKeyDown={(event) => {
-                  if (event.code === 'Enter' || event.code === 'Space') {
-                    event.preventDefault();
-                    choose(set.id);
-                    setIsShowingDetails(true);
-                    requestAnimationFrame(() => buyButton.current?.focus());
+                  if (event.code !== 'Enter' && event.code !== 'Space') {
+                    return;
                   }
+                  event.preventDefault();
+                  // Beside the details, the key buys at once and the keyboard stays in the
+                  // grid, to go on to the next item. On a phone, it opens the details first.
+                  if (window.matchMedia(SIDE_BY_SIDE).matches) {
+                    const item = items.find((candidate) => candidate.set.id === set.id);
+                    if (!isSelected) {
+                      choose(set.id);
+                    }
+                    if (item) {
+                      void buyItem(item, isSelected ? quantity : 1);
+                    }
+                    return;
+                  }
+                  choose(set.id);
+                  setIsShowingDetails(true);
+                  requestAnimationFrame(() => buyButton.current?.focus());
                 }}
                 className={`relative flex cursor-pointer flex-col items-center gap-1.5 rounded-xs bg-[#efe6d2] px-2 pt-2.5 pb-2 text-center shadow-[2px_3px_0_var(--ui-shadow)] transition-transform odd:-rotate-[0.6deg] even:rotate-[0.6deg] hover:-translate-y-0.5 ${
                   isSelected
@@ -339,6 +357,13 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
               }`}
             >
               {t('window.buy')}
+              {/* The grid's own shortcut, for a keyboard beside a mouse on a wide screen. */}
+              <span
+                aria-hidden="true"
+                className="ml-2 hidden rounded-md border border-ui-ink/30 border-b-3 bg-ui-paper px-1.5 align-middle font-digits text-xs font-bold text-ui-ink md:pointer-fine:inline-block"
+              >
+                {t('window.enterKey')}
+              </span>
             </button>
           </div>
           {refusal && (
