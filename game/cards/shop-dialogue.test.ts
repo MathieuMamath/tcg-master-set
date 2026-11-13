@@ -5,12 +5,14 @@ import {
   BOOSTER_PRICE,
   bindersForSale,
   boosterCount,
+  clampBoosterQuantity,
   MAX_BOOSTER_QUANTITY,
   parseBoosterQuantity,
   SHOPKEEPER_STOCKS,
   STARTING_COINS,
   setsSoldBy,
   totalBoosters,
+  typedBoosterQuantity,
 } from './shop-dialogue';
 
 describe('the wallet', () => {
@@ -122,5 +124,26 @@ describe('affordableBoosters', () => {
 
   test('still offers one booster to a player who has too few coins', () => {
     expect(affordableBoosters(0)).toBe(1);
+  });
+});
+
+describe('the quantity picked in the shop window', () => {
+  test('stays between one and the most the player can buy', () => {
+    expect(clampBoosterQuantity(0, 20)).toBe(1);
+    expect(clampBoosterQuantity(-4, 20)).toBe(1);
+    expect(clampBoosterQuantity(12, 20)).toBe(12);
+    expect(clampBoosterQuantity(35, 20)).toBe(20);
+  });
+
+  test('keeps only the digits typed, held in range', () => {
+    expect(typedBoosterQuantity('20', 99)).toBe(20);
+    expect(typedBoosterQuantity(' 1a5 ', 99)).toBe(15);
+    expect(typedBoosterQuantity('500', 99)).toBe(99);
+    expect(typedBoosterQuantity('0', 99)).toBe(1);
+  });
+
+  test('waits while the field is empty', () => {
+    expect(typedBoosterQuantity('', 99)).toBeNull();
+    expect(typedBoosterQuantity('abc', 99)).toBeNull();
   });
 });

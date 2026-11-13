@@ -23,6 +23,22 @@ export function parseBoosterQuantity(value: string | null): number | null {
     : null;
 }
 
+// The quantities the shop window offers in one touch, beside its "max". Those the player can't
+// afford are shown but can't be picked.
+export const BOOSTER_QUANTITY_PRESETS = [5, 10, 20] as const;
+
+// A quantity kept between one and the most the player can buy at once.
+export function clampBoosterQuantity(quantity: number, most: number): number {
+  return Math.min(most, Math.max(1, Math.round(quantity)));
+}
+
+// What a quantity typed in the shop window becomes: the digits kept, then held in range, or
+// nothing while the field is empty.
+export function typedBoosterQuantity(text: string, most: number): number | null {
+  const digits = text.replace(/\D/g, '');
+  return digits === '' ? null : clampBoosterQuantity(Number(digits), most);
+}
+
 export type Wallet = {
   coins: number;
   boosters: Readonly<Partial<Record<SetId, number>>>;

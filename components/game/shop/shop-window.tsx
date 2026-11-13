@@ -8,6 +8,7 @@ import { gridStep } from '@/game/ui/menu-keys';
 import { BinderCover } from '../boosters/binder-cover';
 import { PackBody, PackEdge, packEdgeStyle } from '../boosters/pack-art';
 import { CoinIcon } from '../hud/hud-icons';
+import { QuantityPicker } from './quantity-picker';
 import { SellerPortrait } from './seller-portrait';
 import { TornPaper } from './shop-dialog';
 
@@ -32,8 +33,26 @@ type Props = {
 };
 
 const CARDS_PER_BOOSTER = 10;
-const QUANTITY_BUTTON_CLASS =
-  'size-8 cursor-pointer ui-paper-button bg-[#e6ece8] text-xl leading-none outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-dashed focus-visible:outline-ui-stamp aria-disabled:cursor-not-allowed aria-disabled:opacity-40';
+// What the chosen item costs, all boosters counted, kept on one line. Beside the quantity, where
+// room is short, only the coin and the number show, the words left to screen readers.
+function Total({ coins, isCompact = false }: { coins: number; isCompact?: boolean }) {
+  const t = useTranslations('Shopkeeper');
+  const locale = useLocale();
+  const words = t('window.coins', { count: coins });
+  return (
+    <span className="flex items-center gap-1.5 font-digits text-lg font-bold whitespace-nowrap">
+      <CoinIcon />
+      {isCompact ? (
+        <>
+          <span aria-hidden="true">{new Intl.NumberFormat(locale).format(coins)}</span>
+          <span className="sr-only">{words}</span>
+        </>
+      ) : (
+        words
+      )}
+    </span>
+  );
+}
 
 // The first item that can be bought, or the first of all.
 function firstOnSale(items: readonly ShopItem[]): SetId | undefined {
@@ -298,40 +317,16 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
                 : t(answer.line === 'greeting' ? 'unavailable' : answer.line)}
             </p>
           )}
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-2">
-            {kind === 'booster' && (
-              <fieldset className="flex items-center gap-2">
-                <legend className="sr-only">{t('window.quantity')}</legend>
-                <button
-                  type="button"
-                  aria-label={t('window.less')}
-                  aria-disabled={quantity <= 1}
-                  onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                  className={QUANTITY_BUTTON_CLASS}
-                >
-                  −
-                </button>
-                <output
-                  aria-live="polite"
-                  className="w-7 text-center font-digits text-xl font-bold"
-                >
-                  {quantity}
-                </output>
-                <button
-                  type="button"
-                  aria-label={t('window.more')}
-                  aria-disabled={quantity >= mostAtOnce}
-                  onClick={() => setQuantity((current) => Math.min(mostAtOnce, current + 1))}
-                  className={QUANTITY_BUTTON_CLASS}
-                >
-                  +
-                </button>
-              </fieldset>
+          <div className="mt-auto grid gap-3 pt-2">
+            {kind === 'booster' ? (
+              <QuantityPicker quantity={quantity} most={mostAtOnce} onChange={setQuantity}>
+                <Total coins={total} isCompact />
+              </QuantityPicker>
+            ) : (
+              <div className="flex justify-end">
+                <Total coins={total} />
+              </div>
             )}
-            <span className="flex items-center gap-1.5 font-digits text-lg font-bold">
-              <CoinIcon />
-              {t('window.coins', { count: total })}
-            </span>
             <button
               ref={buyButton}
               type="button"
