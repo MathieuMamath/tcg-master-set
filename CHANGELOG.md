@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.112](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.111...v0.1.112) (2026-11-13)
+
+### Features
+
+* **shop:** pick large booster quantities quickly, in one steady layout ([#115](https://github.com/MathieuMamath/tcg-master-set/issues/115)) ([71c52c9](https://github.com/MathieuMamath/tcg-master-set/commit/71c52c9a339547238fc55670cc34ccea0189b645))
+
 ## [0.1.111](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.110...v0.1.111) (2026-11-13)
 
 ### Features
