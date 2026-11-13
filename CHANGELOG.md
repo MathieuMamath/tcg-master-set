@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.110](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.109...v0.1.110) (2026-11-13)
+
+### Features
+
+* **accounts:** dress the password reset email in the game's paper style ([#113](https://github.com/MathieuMamath/tcg-master-set/issues/113)) ([e68f322](https://github.com/MathieuMamath/tcg-master-set/commit/e68f3228009f77e5371cbb0fa271e1f30c535f9b))
+
 ## [0.1.109](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.108...v0.1.109) (2026-11-13)
 
 ### Features
