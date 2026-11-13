@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.108](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.107...v0.1.108) (2026-11-13)
+
+### Bug Fixes
+
+* **boosters:** stamp a clear gold NEW tag on new cards ([#111](https://github.com/MathieuMamath/tcg-master-set/issues/111)) ([25b05c2](https://github.com/MathieuMamath/tcg-master-set/commit/25b05c20ea6eee2ce7b62666083fecac608e0630))
+
 ## [0.1.107](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.106...v0.1.107) (2026-11-12)
 
 ### Features
