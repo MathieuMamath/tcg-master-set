@@ -427,14 +427,32 @@ body {
   animation: ui-pull-tease 700ms ease-in-out infinite;
 }
 
-.ui-new-mark {
-  background: linear-gradient(105deg, #e8a317 35%, #fff6c9 50%, #e8a317 65%);
+/* A gold tag stamped over a new card's corner, a light sweeping across it, so that a new card
+reads at a glance, from the smallest summary card to the full screen. */
+@keyframes ui-new-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-24deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.92) rotate(-10deg);
+  }
+  100% {
+    transform: scale(1) rotate(-12deg);
+  }
+}
+
+.ui-new-badge {
+  background: linear-gradient(105deg, #f3c14b 35%, #fff6c9 50%, #f3c14b 65%);
   background-size: 250% 100%;
-  background-clip: text;
-  color: transparent;
-  /* The outline keeps the gold readable on every card, even the yellow ones. */
-  filter: drop-shadow(0 0 0.04em #5a3a00) drop-shadow(0 0.04em 0.06em rgb(0 0 0 / 60%));
-  animation: ui-shine 2600ms linear infinite;
+  box-shadow:
+    0 0.12em 0 rgb(0 0 0 / 40%),
+    0 0 0.8em 0.1em rgb(255 214 90 / 75%);
+  transform: rotate(-12deg);
+  animation:
+    ui-new-stamp 420ms 120ms cubic-bezier(0.3, 1.4, 0.5, 1) backwards,
+    ui-shine 2600ms linear infinite;
 }
 
 @keyframes ui-count-bump {
@@ -806,7 +824,7 @@ him, the bus rumbling, and dots that wait. */
   .ui-pull-flash,
   .ui-pull-arrive,
   .ui-pull-tease,
-  .ui-new-mark,
+  .ui-new-badge,
   .ui-count-bump,
   .ui-count-change,
   .ui-travel-run,

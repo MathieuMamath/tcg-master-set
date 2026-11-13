@@ -85,14 +85,15 @@ function lotCards(packs: readonly OpenedPack[]): RevealedCard[] {
     .map(({ card }) => card);
 }
 
-// Golden writing across the top left corner, sized from the card, which ranges from small to full
-// screen. A card without it is a duplicate, whose coins the summary adds up.
+// A gold tag stamped over the top left corner, sized from the card, which ranges from a small
+// summary card to the full screen, with a floor so that it always reads. A card without it is a
+// duplicate, whose coins the summary adds up.
 function NewMark() {
   const t = useTranslations('Booster');
 
   return (
     <span className="pointer-events-none absolute inset-0 [container-type:inline-size]">
-      <span className="ui-new-mark absolute top-[14cqw] left-[3cqw] origin-left -rotate-45 text-[10cqw] leading-none font-bold">
+      <span className="ui-new-badge absolute -top-[max(0.4rem,3cqw)] -left-[max(0.4rem,3cqw)] rounded-[0.2em] border-[max(2px,0.6cqw)] border-ui-ink px-[0.35em] py-[0.05em] text-[max(1rem,9cqw)] leading-tight font-bold text-ui-ink uppercase">
         {t('new')}
       </span>
     </span>
@@ -497,10 +498,10 @@ function Summary({
               }`}
             >
               <CardPicture name={card.name} imageUrl={card.imageUrl} quality="low" />
-              {card.isNew && <NewMark />}
               {isSpecial(card) && (
                 <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
               )}
+              {card.isNew && <NewMark />}
             </button>
           </li>
         ))}

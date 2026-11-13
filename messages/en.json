@@ -1019,7 +1019,8 @@
       "clearShiftEnd": "The skipping stones, archery and photos looked stuck once every pebble, arrow or shot was used. They now clearly say “Finished!”: press “See the score” for your result.",
       "binderLastPage": "On a computer, the binder’s right arrow no longer turns a page into nothing once you reach the end.",
       "binderPageJump": "In the binder, jump straight to the first or last page, or touch the page number to pick the one you want. On a keyboard, Home and End work too.",
-      "binderSwitch": "The binder now shows its set’s logo. Touch it to switch straight to another of your binders without closing it."
+      "binderSwitch": "The binder now shows its set’s logo. Touch it to switch straight to another of your binders without closing it.",
+      "summaryNewTag": "Cards you didn’t own yet now get a big gold “NEW” tag, stamped on their corner, when revealed and in the summary, even when opening five or ten boosters at once."
     }
   },
   "Shift": {
