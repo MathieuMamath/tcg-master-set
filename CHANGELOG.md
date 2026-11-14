@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.115](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.114...v0.1.115) (2026-11-14)
+
+### Features
+
+* **accounts:** let admins deactivate and reactivate a coupon ([#118](https://github.com/MathieuMamath/tcg-master-set/issues/118)) ([374ccf4](https://github.com/MathieuMamath/tcg-master-set/commit/374ccf407b8389ff88cc7d38dc2a845a5a5434d8))
+
 ## [0.1.114](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.113...v0.1.114) (2026-11-14)
 
 ### Bug Fixes
