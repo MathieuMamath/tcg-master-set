@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.120](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.119...v0.1.120) (2026-11-14)
+
+### Bug Fixes
+
+* **binder:** keep the enlarged card clear of the title and the close button ([#123](https://github.com/MathieuMamath/tcg-master-set/issues/123)) ([d0a2ebf](https://github.com/MathieuMamath/tcg-master-set/commit/d0a2ebf4e8f354f1736a5f991ff5fe19cc8c1943))
+
 ## [0.1.119](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.118...v0.1.119) (2026-11-14)
 
 ### Content
