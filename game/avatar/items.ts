@@ -1,7 +1,8 @@
 // The things the player wears, each in one slot: a scarf, a hat and a piece of gear, worn at the
 // same time and never mixed. The catalogue lives here, in the code, as every item needs its
 // drawing anyway; the server reads its prices and slots from here, never from the browser.
-export const ITEM_SLOTS = ['scarf', 'hat', 'gear'] as const;
+// From the head down, as the wardrobe shows them.
+export const ITEM_SLOTS = ['hat', 'scarf', 'gear'] as const;
 
 export type ItemSlot = (typeof ITEM_SLOTS)[number];
 
@@ -21,6 +22,13 @@ export const ITEMS = {
   pompomKnit: { slot: 'scarf', price: SCARF_PRICE },
   polkaBow: { slot: 'scarf', price: SCARF_PRICE },
   starryNight: { slot: 'scarf', price: SCARF_PRICE },
+  // The hatter's hats, downtown, from the simplest to the finest.
+  beanie: { slot: 'hat', price: 2000 },
+  beret: { slot: 'hat', price: 2500 },
+  flatCap: { slot: 'hat', price: 3000 },
+  boater: { slot: 'hat', price: 3500 },
+  bowler: { slot: 'hat', price: 4500 },
+  topHat: { slot: 'hat', price: 6000 },
   satchel: { slot: 'gear', price: 0 },
 } as const satisfies Record<string, ItemDefinition>;
 
@@ -34,8 +42,8 @@ export type ScarfId = ItemIn<'scarf'>;
 export type HatId = ItemIn<'hat'>;
 export type GearId = ItemIn<'gear'>;
 
-// What a player wears in each slot. A slot can be empty: none is for now but the hat, as there is
-// no hat yet.
+// What a player wears in each slot. A slot can be empty: only the hat for now, which nobody wears
+// at first.
 export type WornItems = { scarf: ScarfId | null; hat: HatId | null; gear: GearId | null };
 
 // What everyone starts with.

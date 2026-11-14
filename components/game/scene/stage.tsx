@@ -69,6 +69,8 @@ export type SceneSigns = {
   dojo: string;
   // On the gold sign over Maison Éventail, downtown.
   boutique: string;
+  // On the brass sign over Sir Moustache's hat shop, downtown.
+  hatter: string;
 };
 
 // A long pause in the tab must not teleport the character.

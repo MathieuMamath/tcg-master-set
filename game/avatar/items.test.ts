@@ -30,9 +30,12 @@ describe('the item catalogue', () => {
     }
   });
 
-  it('sells four scarves at the boutique', () => {
-    const forSale = itemsIn('scarf').filter((id) => ITEMS[id].price > 0);
-    expect(forSale).toHaveLength(4);
+  it('sells four scarves at the boutique, and six hats at the hatter', () => {
+    expect(itemsIn('scarf').filter((id) => ITEMS[id].price > 0)).toHaveLength(4);
+    expect(itemsIn('hat')).toHaveLength(6);
+    for (const hat of itemsIn('hat')) {
+      expect(ITEMS[hat].price).toBeGreaterThan(0);
+    }
   });
 
   it('only counts as owned what was bought, beside the starter items', () => {

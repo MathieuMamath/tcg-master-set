@@ -53,6 +53,7 @@ const KNOWN_PLACES = new Set([
   'ramen',
   'dojo',
   'boutique',
+  'hatter',
 ]);
 
 // The reports show on Mme Hulotte's computer, a dark dashboard on its screen, unlike the game's

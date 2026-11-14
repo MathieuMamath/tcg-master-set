@@ -101,7 +101,11 @@
     "leaveBoutique": "Sortir",
     "boutiqueSeller": "Parler (Mlle Éventail)",
     "fittingRoom": "Entrer en cabine",
-    "mirror": "Se regarder dans le miroir"
+    "mirror": "Se regarder dans le miroir",
+    "enterHatter": "Entrer chez le chapelier",
+    "leaveHatter": "Sortir",
+    "hatter": "Parler (Sir Moustache)",
+    "hatterMirror": "Essayer des chapeaux"
   },
   "Shopkeeper": {
     "names": {
@@ -593,7 +597,8 @@
     "ramen": "Ramen Yuzu",
     "dojo": "Dojo Kaito",
     "post": "Poste du village",
-    "boutique": "Maison Éventail"
+    "boutique": "Maison Éventail",
+    "hatter": "Chapellerie Moustache"
   },
   "Hails": {
     "latest": "Méga bienvenue !",
@@ -616,7 +621,8 @@
     "ronron": "Tu n’as pas vu mon petit ?",
     "photographer": "Une photo du ciel ?",
     "archivist": "Besoin des archives ?",
-    "boutiqueSeller": "Un brin d’élégance ?"
+    "boutiqueSeller": "Un brin d’élégance ?",
+    "hatter": "Un chapeau, très cher ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -808,6 +814,14 @@
       "lines": {
         "greeting": "Bienvenue à la Maison Éventail. Chacune de nos écharpes est tissée à la main, une pièce d’exception. On ne choisit pas une écharpe sans se voir dans le miroir : passez donc en cabine pour les essayer."
       }
+    },
+    "hatter": {
+      "name": "Sir Moustache",
+      "title": "le morse chapelier",
+      "mirror": "Essayer devant le miroir",
+      "lines": {
+        "greeting": "Ah, bienvenue, bienvenue ! Un gentleman sans chapeau, c’est une phrase sans point final. Du bonnet au haut-de-forme, j’ai tout ce qu’il vous faut : allez donc vous voir devant le miroir."
+      }
     }
   },
   "Stats": {
@@ -917,7 +931,8 @@
       "coupons": "L’étage des coupons",
       "ramen": "Ramen Yuzu",
       "dojo": "Le dojo",
-      "boutique": "La Maison Éventail"
+      "boutique": "La Maison Éventail",
+      "hatter": "La chapellerie"
     },
     "log": {
       "title": "Couverture du journal",
@@ -1099,7 +1114,8 @@
       "version02": "Le jeu passe en version 0.2 ! Merci d’avoir joué et testé la version 0.1. Des nouveautés arrivent dans cette série.",
       "avatarSpecies": "Une armoire est arrivée dans ta chambre ! Ouvre-la pour changer d’animal : renard, tortue, chien, chat, lapin, ours, loup, gorille, panda roux ou pingouin, avec ton écharpe et ta sacoche.",
       "boutique": "La Maison Éventail ouvre dans la grande ville ! Mlle Éventail, une paonne très chic, vend quatre écharpes de luxe : à essayer, acheter et porter dans sa cabine d’essayage.",
-      "mirrorAndWardrobe": "Un grand miroir trône désormais dans ta chambre : c’est là que tu changes d’animal. Ton armoire, elle, te sert à t’habiller avec les écharpes que tu as achetées."
+      "mirrorAndWardrobe": "Un grand miroir trône désormais dans ta chambre : c’est là que tu changes d’animal. Ton armoire, elle, te sert à t’habiller avec les écharpes que tu as achetées.",
+      "hatter": "La Chapellerie Moustache ouvre dans la grande ville ! Sir Moustache, un vieux morse très distingué, vend six chapeaux, du bonnet à pompon au haut-de-forme : à essayer devant son miroir. Ton armoire range aussi tes chapeaux : tu peux en changer, ou rester tête nue, quand tu veux."
     }
   },
   "Shift": {
@@ -1708,29 +1724,29 @@
     "stop": "Arrêter"
   },
   "FittingRoom": {
-    "title": "La cabine d’essayage",
-    "hint": "Essaie les écharpes devant le miroir. Celles que tu as déjà s’enfilent tout de suite.",
-    "wearing": "Tu la portes",
-    "wear": "La porter",
+    "boutique": {
+      "title": "La cabine d’essayage",
+      "hint": "Essaie les écharpes devant le miroir. Celles que tu as déjà s’enfilent tout de suite.",
+      "close": "Sortir de la cabine"
+    },
+    "hatter": {
+      "title": "Le miroir du chapelier",
+      "hint": "Essaie les chapeaux devant le miroir. Ceux que tu as déjà se mettent tout de suite.",
+      "close": "Laisser le miroir"
+    },
+    "wearing": "C’est ce que tu portes",
+    "wear": "Porter",
     "buy": "L’acheter · {price, number} pièces",
     "price": "{price, number} pièces",
-    "worn": "Portée",
+    "worn": "Sur toi",
     "owned": "À toi",
-    "close": "Sortir de la cabine",
     "notes": {
-      "thanks": "Elle est à toi, et tu la portes déjà !",
-      "worn": "C’est fait, tu la portes.",
-      "notEnoughCoins": "Il te manque des pièces pour celle-ci.",
+      "thanks": "Acheté, et déjà sur toi !",
+      "worn": "Et voilà, c’est sur toi.",
+      "notEnoughCoins": "Il te manque des pièces pour celui-ci.",
       "alreadyOwned": "Tu l’as déjà.",
-      "notForSale": "Celle-ci n’est pas à vendre.",
-      "unavailable": "La cabine est coincée : réessaie."
-    },
-    "scarves": {
-      "blueStripes": "L’écharpe bleue",
-      "tartan": "Le tartan",
-      "pompomKnit": "Le tricot à pompons",
-      "polkaBow": "Le nœud à pois",
-      "starryNight": "La nuit étoilée"
+      "notForSale": "Pas à vendre.",
+      "unavailable": "Le miroir s’est voilé : réessaie."
     }
   },
   "Mirror": {
@@ -1754,10 +1770,32 @@
   },
   "Wardrobe": {
     "title": "L’armoire",
-    "hint": "Choisis l’écharpe que tu veux porter.",
-    "worn": "Portée",
+    "hint": "Choisis ce que tu veux porter.",
+    "shelves": {
+      "scarf": "Écharpes",
+      "hat": "Chapeaux"
+    },
+    "noHat": "Sans chapeau",
+    "worn": "Sur toi",
     "close": "Fermer",
-    "more": "D’autres écharpes t’attendent à la Maison Éventail, dans la grande ville.",
+    "more": {
+      "scarf": "D’autres écharpes t’attendent à la Maison Éventail, dans la grande ville.",
+      "hat": "D’autres chapeaux t’attendent chez Sir Moustache, dans la grande ville."
+    },
     "failed": "L’armoire est coincée : ton changement n’a pas été gardé. Réessaie."
+  },
+  "Items": {
+    "blueStripes": "L’écharpe bleue",
+    "tartan": "Le tartan",
+    "pompomKnit": "Le tricot à pompons",
+    "polkaBow": "Le nœud à pois",
+    "starryNight": "La nuit étoilée",
+    "beanie": "Le bonnet à pompon",
+    "beret": "Le béret",
+    "flatCap": "La casquette gavroche",
+    "boater": "Le canotier",
+    "bowler": "Le chapeau melon",
+    "topHat": "Le haut-de-forme",
+    "satchel": "La sacoche"
   }
 }

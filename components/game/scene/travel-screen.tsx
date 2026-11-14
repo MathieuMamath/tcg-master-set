@@ -97,8 +97,11 @@ export function TravelScreen({ phase, placeName, mode, facing: runFacing, tip, b
   const t = useTranslations('Travel');
   const calm = useCalm();
   const isClosed = phase === 'covering' || phase === 'covered';
-  const { species, scarf } = useWornLook();
-  const pip = useMemo(() => cutOut(240, 300, pipAs(species, scarf), 10, 21), [species, scarf]);
+  const { species, scarf, hat } = useWornLook();
+  const pip = useMemo(
+    () => cutOut(240, 300, pipAs(species, scarf, hat), 10, 21),
+    [species, scarf, hat],
+  );
   const bus = useMemo(() => cutOut(560, 250, drawBus(busLine), 9, 68), [busLine]);
   const isElevator = mode === 'elevatorUp' || mode === 'elevatorDown';
   const elevator = useMemo(

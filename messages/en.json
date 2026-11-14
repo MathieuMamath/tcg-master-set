@@ -101,7 +101,11 @@
     "leaveBoutique": "Leave",
     "boutiqueSeller": "Talk (Mlle Éventail)",
     "fittingRoom": "Go into the fitting room",
-    "mirror": "Look in the mirror"
+    "mirror": "Look in the mirror",
+    "enterHatter": "Go into the hat shop",
+    "leaveHatter": "Leave",
+    "hatter": "Talk (Sir Moustache)",
+    "hatterMirror": "Try on hats"
   },
   "Shopkeeper": {
     "names": {
@@ -593,7 +597,8 @@
     "ramen": "Ramen Yuzu",
     "dojo": "Dojo Kaito",
     "post": "Village Post",
-    "boutique": "Maison Éventail"
+    "boutique": "Maison Éventail",
+    "hatter": "Moustache Hatters"
   },
   "Hails": {
     "latest": "A mega welcome!",
@@ -616,7 +621,8 @@
     "ronron": "Have you seen my little one?",
     "photographer": "A photo of the sky?",
     "archivist": "Need the archives?",
-    "boutiqueSeller": "A touch of elegance?"
+    "boutiqueSeller": "A touch of elegance?",
+    "hatter": "A hat, old chap?"
   },
   "Bus": {
     "title": "Bus map",
@@ -808,6 +814,14 @@
       "lines": {
         "greeting": "Welcome to Maison Éventail. Each of our scarves is woven by hand, a truly exceptional piece. One never chooses a scarf without seeing oneself in the mirror: do step into the fitting room and try them on."
       }
+    },
+    "hatter": {
+      "name": "Sir Moustache",
+      "title": "the walrus hatter",
+      "mirror": "Try them on in the mirror",
+      "lines": {
+        "greeting": "Ah, welcome, welcome! A gentleman without a hat is a sentence without a full stop. From the beanie to the top hat, I have everything you need: do go and see yourself in the mirror."
+      }
     }
   },
   "Stats": {
@@ -917,7 +931,8 @@
       "coupons": "The coupon floor",
       "ramen": "Ramen Yuzu",
       "dojo": "The dojo",
-      "boutique": "Maison Éventail"
+      "boutique": "Maison Éventail",
+      "hatter": "The hat shop"
     },
     "log": {
       "title": "Log coverage",
@@ -1099,7 +1114,8 @@
       "version02": "The game moves on to version 0.2! Thank you for playing and testing version 0.1. New things are on their way in this series.",
       "avatarSpecies": "A wardrobe has arrived in your bedroom! Open it to change animal: fox, turtle, dog, cat, rabbit, bear, wolf, gorilla, red panda or penguin, with your scarf and satchel.",
       "boutique": "Maison Éventail opens in the big city! Mlle Éventail, a very chic peahen, sells four luxury scarves: try them on, buy them and wear them in her fitting room.",
-      "mirrorAndWardrobe": "A tall mirror now stands in your bedroom: that’s where you change animal. Your wardrobe is for getting dressed, with the scarves you bought."
+      "mirrorAndWardrobe": "A tall mirror now stands in your bedroom: that’s where you change animal. Your wardrobe is for getting dressed, with the scarves you bought.",
+      "hatter": "Moustache Hatters opens in the big city! Sir Moustache, a most distinguished old walrus, sells six hats, from the pompom beanie to the top hat: try them on in his mirror. Your wardrobe keeps your hats too: change them, or go bareheaded, whenever you like."
     }
   },
   "Shift": {
@@ -1704,29 +1720,29 @@
     "stop": "Stop"
   },
   "FittingRoom": {
-    "title": "The fitting room",
-    "hint": "Try the scarves on in front of the mirror. Those you already have go on at once.",
+    "boutique": {
+      "title": "The fitting room",
+      "hint": "Try the scarves on in front of the mirror. Those you already have go on at once.",
+      "close": "Leave the fitting room"
+    },
+    "hatter": {
+      "title": "The hatter’s mirror",
+      "hint": "Try the hats on in front of the mirror. Those you already have go on at once.",
+      "close": "Step away from the mirror"
+    },
     "wearing": "You’re wearing it",
     "wear": "Wear it",
     "buy": "Buy it · {price, number} coins",
     "price": "{price, number} coins",
     "worn": "Worn",
     "owned": "Yours",
-    "close": "Leave the fitting room",
     "notes": {
-      "thanks": "It’s yours, and you’re already wearing it!",
+      "thanks": "Bought, and you’re already wearing it!",
       "worn": "Done, you’re wearing it.",
       "notEnoughCoins": "You need more coins for this one.",
       "alreadyOwned": "You already have it.",
-      "notForSale": "This one isn’t for sale.",
-      "unavailable": "The fitting room is stuck: please try again."
-    },
-    "scarves": {
-      "blueStripes": "The blue scarf",
-      "tartan": "The tartan",
-      "pompomKnit": "The pompom knit",
-      "polkaBow": "The polka-dot bow",
-      "starryNight": "The starry night"
+      "notForSale": "Not for sale.",
+      "unavailable": "The mirror misted up: please try again."
     }
   },
   "Mirror": {
@@ -1750,10 +1766,32 @@
   },
   "Wardrobe": {
     "title": "The wardrobe",
-    "hint": "Choose the scarf you want to wear.",
+    "hint": "Choose what you want to wear.",
+    "shelves": {
+      "scarf": "Scarves",
+      "hat": "Hats"
+    },
+    "noHat": "No hat",
     "worn": "Worn",
     "close": "Close",
-    "more": "More scarves await you at Maison Éventail, in the big city.",
+    "more": {
+      "scarf": "More scarves await you at Maison Éventail, in the big city.",
+      "hat": "More hats await you at Sir Moustache’s, in the big city."
+    },
     "failed": "The wardrobe is stuck: your change wasn’t kept. Please try again."
+  },
+  "Items": {
+    "blueStripes": "The blue scarf",
+    "tartan": "The tartan",
+    "pompomKnit": "The pompom knit",
+    "polkaBow": "The polka-dot bow",
+    "starryNight": "The starry night",
+    "beanie": "The pompom beanie",
+    "beret": "The beret",
+    "flatCap": "The flat cap",
+    "boater": "The boater",
+    "bowler": "The bowler hat",
+    "topHat": "The top hat",
+    "satchel": "The satchel"
   }
 }
