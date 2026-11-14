@@ -4,6 +4,18 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.2.0](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.120...v0.2.0) (2026-11-14)
+
+### ⚠ BREAKING CHANGES
+
+* nothing breaks. While the version is below 1.0.0, a
+  breaking change is what moves it to the next minor, so this marker only
+  starts the 0.2 series.
+
+  🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+* start the 0.2 series ([#124](https://github.com/MathieuMamath/tcg-master-set/issues/124))
+
 ## [0.1.120](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.119...v0.1.120) (2026-11-14)
 
 ### Bug Fixes
