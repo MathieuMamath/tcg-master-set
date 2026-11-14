@@ -2,9 +2,10 @@
 // the wardrobe. Every animal keeps the same round shape, scarf and satchel, and only its ears, its
 // coat and a few features change.
 
-import { type ScarfId, STARTER_LOOK } from '@/game/avatar/items';
+import { type HatId, type ScarfId, STARTER_LOOK } from '@/game/avatar/items';
 import type { AvatarSpecies } from '@/game/avatar/species';
 import { drawEye, type Eyes, ellipse, roundedRect } from './core';
+import { drawWornHat } from './hats';
 import { drawScarfEnd, drawScarfFront } from './scarves';
 
 type Coat = {
@@ -59,6 +60,7 @@ export function drawPip(
   eyes: Eyes = 'open',
   species: AvatarSpecies = 'fox',
   scarf: ScarfId | null = STARTER_LOOK.scarf,
+  hat: HatId | null = STARTER_LOOK.hat,
 ) {
   const x = drawing;
   const cx = width / 2 - 6;
@@ -127,6 +129,10 @@ export function drawPip(
   }
 
   drawGear(x, cx, by, scarf);
+  // The hat last, over the head and the ears' bases.
+  if (hat) {
+    drawWornHat(x, cx, by, hat);
+  }
 }
 
 // The fox's pointed ears, which the wolf shares. They are drawn mirrored around the body's middle,
@@ -439,12 +445,13 @@ const drawers = new Map<string, typeof drawPip>();
 export function pipAs(
   species: AvatarSpecies,
   scarf: ScarfId | null = STARTER_LOOK.scarf,
+  hat: HatId | null = STARTER_LOOK.hat,
 ): typeof drawPip {
-  const key = `${species}/${scarf ?? 'none'}`;
+  const key = `${species}/${scarf ?? 'none'}/${hat ?? 'none'}`;
   let drawer = drawers.get(key);
   if (!drawer) {
     drawer = (drawing, width, height, eyes = 'open') =>
-      drawPip(drawing, width, height, eyes, species, scarf);
+      drawPip(drawing, width, height, eyes, species, scarf, hat);
     drawers.set(key, drawer);
   }
   return drawer;

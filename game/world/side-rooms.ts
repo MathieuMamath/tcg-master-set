@@ -14,7 +14,8 @@ export type SidePlaceId =
   | 'coupons'
   | 'ramen'
   | 'dojo'
-  | 'boutique';
+  | 'boutique'
+  | 'hatter';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -33,6 +34,8 @@ export const DOOR_INTERACTIONS = [
   'leaveDojo',
   'enterBoutique',
   'leaveBoutique',
+  'enterHatter',
+  'leaveHatter',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -205,12 +208,13 @@ export const DOWNTOWN_SPOTS = {
   photographer: { x: 10.6 },
   // Maison Éventail, the luxury boutique, a low shop front between the bureau and Flash.
   boutique: { x: 6.2, width: 4.8, height: 4.6, doorX: 7.2 },
+  // Sir Moustache's hat shop, between Flash and the ramen shop.
+  hatter: { x: 16.6, width: 4.4, height: 4.6, doorX: 17.6 },
 } as const;
 // The towers along the pavement, and a farther row behind them, from left to right.
 export const DOWNTOWN_TOWERS = [
   { x: -4.6, width: 4.4, height: 13, look: 'curtain' },
   { x: 11.8, width: 5, height: 15, look: 'ribbon' },
-  { x: 16.6, width: 3.8, height: 13.5, look: 'diagrid' },
   { x: 28.2, width: 4.4, height: 14, look: 'setback' },
   { x: 39.6, width: 4, height: 13, look: 'ribbon' },
 ] as const;
@@ -343,6 +347,21 @@ export const BOUTIQUE_SELLER_X = BOUTIQUE_FURNITURE.counter.x;
 const BOUTIQUE_BOUNDS = {
   minX: BOUTIQUE_WALLS.left + CHARACTER_HALF_WIDTH,
   maxX: BOUTIQUE_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+
+// Sir Moustache's hat shop, inside: the tall mirror against the left wall, the stands of hats, his
+// counter of hatboxes, and the door in the right wall.
+export const HATTER_WALLS = { left: -5.5, right: 5.5 };
+export const HATTER_FURNITURE = {
+  mirror: { x: -4.2, width: 1.6 },
+  stands: { x: -1.2, width: 2.6 },
+  counter: { x: 2, width: 2.6 },
+} as const;
+export const HATTER_X = HATTER_FURNITURE.counter.x;
+
+const HATTER_BOUNDS = {
+  minX: HATTER_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: HATTER_WALLS.right - CHARACTER_HALF_WIDTH,
 };
 
 // The places only admins may be in, whose spot is neither saved nor restored for anyone else.
@@ -666,6 +685,13 @@ export const DOWNTOWN: SideRoom = {
       arrival: { x: BOUTIQUE_BOUNDS.maxX, facing: -1 },
     },
     {
+      interaction: 'enterHatter',
+      minX: DOWNTOWN_SPOTS.hatter.doorX - DOOR_REACH,
+      maxX: DOWNTOWN_SPOTS.hatter.doorX + DOOR_REACH,
+      to: 'hatter',
+      arrival: { x: HATTER_BOUNDS.maxX, facing: -1 },
+    },
+    {
       interaction: 'enterDojo',
       minX: DOWNTOWN_SPOTS.dojo.doorX - DOOR_REACH,
       maxX: DOWNTOWN_SPOTS.dojo.doorX + DOOR_REACH,
@@ -775,6 +801,34 @@ export const COUPONS: SideRoom = {
   exits: [],
 };
 
+export const HATTER: SideRoom = {
+  id: 'hatter',
+  bounds: HATTER_BOUNDS,
+  start: HATTER_BOUNDS.maxX,
+  interactions: [
+    {
+      interaction: 'hatterMirror',
+      minX: HATTER_BOUNDS.minX,
+      maxX: HATTER_FURNITURE.mirror.x + HATTER_FURNITURE.mirror.width / 2 + 0.2,
+    },
+    {
+      interaction: 'hatter',
+      minX: HATTER_X - 1.4,
+      maxX: HATTER_X + 1.4,
+      speaker: { x: HATTER_X },
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveHatter',
+      minX: HATTER_BOUNDS.maxX - DOOR_REACH,
+      maxX: HATTER_BOUNDS.maxX,
+      to: 'downtown',
+      arrival: { x: DOWNTOWN_SPOTS.hatter.doorX, facing: 1 },
+    },
+  ],
+};
+
 export const BOUTIQUE: SideRoom = {
   id: 'boutique',
   bounds: BOUTIQUE_BOUNDS,
@@ -817,6 +871,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   ramen: RAMEN,
   dojo: DOJO,
   boutique: BOUTIQUE,
+  hatter: HATTER,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

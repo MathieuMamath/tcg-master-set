@@ -64,4 +64,10 @@ export type Interaction =
   | 'enterBoutique'
   | 'leaveBoutique'
   | 'boutiqueSeller'
-  | 'fittingRoom';
+  | 'fittingRoom'
+  // Sir Moustache's hat shop downtown: its door, the old walrus who keeps it, and its tall mirror,
+  // where hats are tried, bought and put on.
+  | 'enterHatter'
+  | 'leaveHatter'
+  | 'hatter'
+  | 'hatterMirror';

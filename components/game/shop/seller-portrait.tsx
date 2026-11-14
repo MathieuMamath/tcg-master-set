@@ -7,6 +7,7 @@ import { drawPeahen, PEAHEN_FACE, PEAHEN_SIZE } from '../art/boutique';
 import { drawRaccoon, RACCOON_FACE, RACCOON_SIZE, SELLERS } from '../art/card-den';
 import { drawGaspard, GASPARD_FACE, GASPARD_SIZE } from '../art/dalgona';
 import { DOJO_MASTER_FACE, DOJO_MASTER_SIZE, drawDojoMaster } from '../art/dojo';
+import { drawWalrus, WALRUS_FACE, WALRUS_SIZE } from '../art/hatter';
 import { drawLea, LEA_FACE, LEA_SIZE } from '../art/lea';
 import {
   ARCHIVIST_FACE,
@@ -50,7 +51,8 @@ export type Character =
   | 'ronron'
   | 'kitten'
   | 'photographer'
-  | 'boutiqueSeller';
+  | 'boutiqueSeller'
+  | 'hatter';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -92,6 +94,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'kitten') {
     return { draw: drawKitten, size: KITTEN_SIZE, face: { x: 100, y: 100, size: 150 } };
+  }
+  if (stock === 'hatter') {
+    return { draw: drawWalrus, size: WALRUS_SIZE, face: WALRUS_FACE };
   }
   if (stock === 'boutiqueSeller') {
     return { draw: drawPeahen, size: PEAHEN_SIZE, face: PEAHEN_FACE };

@@ -25,6 +25,7 @@ import { Coupons } from './coupons';
 import { Dojo } from './dojo';
 import { Downtown } from './downtown';
 import { Flat } from './flat';
+import { Hatter } from './hatter';
 import { Park } from './park';
 import { FIELD_OF_VIEW, MIN_CAMERA_DISTANCE, Pip } from './pip';
 import { Ramen } from './ramen';
@@ -135,6 +136,7 @@ export function PaperScene({
     ramen: signs.ramen,
     dojo: signs.dojo,
     boutique: signs.boutique,
+    hatter: signs.hatter,
   };
   const [visit, setVisit] = useState<{
     number: number;
@@ -265,6 +267,7 @@ export function PaperScene({
             {visit.place === 'ramen' && <Ramen speakerTops={speakerTops} />}
             {visit.place === 'dojo' && <Dojo speakerTops={speakerTops} />}
             {visit.place === 'boutique' && <Boutique speakerTops={speakerTops} />}
+            {visit.place === 'hatter' && <Hatter speakerTops={speakerTops} />}
             <Pip
               input={input}
               room={SIDE_PLACES[visit.place]}

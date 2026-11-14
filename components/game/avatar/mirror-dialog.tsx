@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
-import type { ScarfId } from '@/game/avatar/items';
+import type { HatId, ScarfId } from '@/game/avatar/items';
 import { AVATAR_SPECIES, type AvatarSpecies } from '@/game/avatar/species';
 import { pipAs } from '../art/pip';
 import { moveThroughChoicesOnScreen, openDialog } from '../menu-focus';
@@ -12,6 +12,7 @@ type Props = {
   species: AvatarSpecies;
   // The scarf worn, which every animal is shown in.
   scarf: ScarfId | null;
+  hat: HatId | null;
   // Whether the last change could not be saved, and was taken back.
   hasFailed: boolean;
   onWear: (species: AvatarSpecies) => void;
@@ -20,7 +21,7 @@ type Props = {
 
 // The standing mirror in the bedroom: every animal the player can walk about as, each drawn with the
 // scarf and the satchel, the one worn marked. Choosing one puts it on at once.
-export function MirrorDialog({ species, scarf, hasFailed, onWear, onClose }: Props) {
+export function MirrorDialog({ species, scarf, hat, hasFailed, onWear, onClose }: Props) {
   const t = useTranslations('Mirror');
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -65,7 +66,7 @@ export function MirrorDialog({ species, scarf, hasFailed, onWear, onClose }: Pro
                     className="group relative flex w-full cursor-pointer flex-col items-center rounded-xl border-3 border-ui-ink/15 bg-[#fffdf7] px-1 pt-2 pb-1.5 outline-none transition-transform hover:-translate-y-0.5 hover:border-ui-ink/50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-dashed focus-visible:outline-ui-stamp aria-pressed:border-ui-ink aria-pressed:bg-ui-accent/40"
                   >
                     <CanvasArt
-                      draw={pipAs(choice, scarf)}
+                      draw={pipAs(choice, scarf, hat)}
                       width={240}
                       height={300}
                       className="aspect-[4/5] w-full max-w-28"

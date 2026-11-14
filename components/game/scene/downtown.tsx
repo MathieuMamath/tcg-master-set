@@ -1,4 +1,5 @@
-// The big city's street, its towers, and Maison Éventail, Ramen Yuzu and the dojo between them.
+// The big city's street, its towers, and Maison Éventail, the hat shop, Ramen Yuzu and the dojo
+// between them.
 
 import { type RefObject, useMemo } from 'react';
 import {
@@ -13,6 +14,7 @@ import { drawBusShelter } from '../art/bus';
 import { cutOut } from '../art/core';
 import { drawDojo } from '../art/dojo';
 import { drawBureauTower, drawPavement, drawTower } from '../art/downtown';
+import { drawHatterFront } from '../art/hatter';
 import { BRUTUS_SIZE, drawBrutus } from '../art/office';
 import { drawPhotographer, PHOTOGRAPHER_SIZE } from '../art/photos';
 import { drawRamenShop } from '../art/ramen';
@@ -139,6 +141,21 @@ export function Downtown({
       ),
     [fontsReady, signs.boutique, boutique.width, boutique.height],
   );
+  const { hatter } = DOWNTOWN_SPOTS;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const hatterFront = useMemo(
+    () =>
+      texture(
+        cutOut(
+          Math.round(hatter.width * PIXELS_PER_UNIT),
+          Math.round(hatter.height * PIXELS_PER_UNIT),
+          drawHatterFront(signs.hatter),
+          9,
+          258,
+        ),
+      ),
+    [fontsReady, signs.hatter, hatter.width, hatter.height],
+  );
   const { dojo } = DOWNTOWN_SPOTS;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const dojoFront = useMemo(
@@ -232,6 +249,14 @@ export function Downtown({
         x={boutique.x}
         z={DOWNTOWN_TOWERS_Z + 0.2}
         height={boutique.height}
+        shadow={textures.shadow}
+      />
+      {/* Sir Moustache's hat shop, between Flash and Ramen Yuzu. */}
+      <Furniture
+        map={hatterFront}
+        x={hatter.x}
+        z={DOWNTOWN_TOWERS_Z + 0.2}
+        height={hatter.height}
         shadow={textures.shadow}
       />
       {/* The dojo, past the last tower. */}
