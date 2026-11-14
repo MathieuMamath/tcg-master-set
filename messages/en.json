@@ -1059,7 +1059,8 @@
       "passwordReset": "Forgot your password? A link on the sign-in page now sends you an email to choose a new one.",
       "paperMenus": "The sign-in pages and the settings menu got a makeover, with soft paper sheets and chunkier buttons, and the kraft around the village now has the grain of real cardboard.",
       "quickQuantity": "Buying many boosters is quicker: pick ×5, ×10, ×20 or Max in one touch, type the number you want, or hold + or − to count fast.",
-      "enterToBuy": "Buying at Mamie Noisette’s, or at the Card Den, is quicker with a keyboard: pick with the arrows, press Enter to buy, and go straight on to the next."
+      "enterToBuy": "Buying at Mamie Noisette’s, or at the Card Den, is quicker with a keyboard: pick with the arrows, press Enter to buy, and go straight on to the next.",
+      "boosterControlsFix": "Buying boosters is steady again: + and − count one per click and only race when held, and Enter on a booster goes to its quantity, where Enter buys."
     }
   },
   "Shift": {
