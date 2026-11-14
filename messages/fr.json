@@ -121,7 +121,7 @@
     },
     "notEnoughCoins": "Oups, il te manque des pièces.",
     "unavailable": "Oups, la caisse ne marche pas pour l'instant. Réessaie.",
-    "needsBinder": "Il te faut d'abord son classeur. Mamie Noisette en vend à la librairie, juste après.",
+    "needsBinder": "Il te faut d’abord son classeur. Mamie Noisette en vend au Coin des Pages : en sortant, va à droite, c’est juste après la poste.",
     "alreadyOwned": "Tu as déjà ce classeur.",
     "sellers": {
       "latest": "Filou",
@@ -179,7 +179,7 @@
     "bagCount": "{name} ({count})",
     "bagLocked": "{name} ({count}), classeur requis",
     "lockedTag": "Classeur requis",
-    "needsBinder": "Il te faut d’abord le classeur {name}. Mamie Noisette le vend à la librairie.",
+    "needsBinder": "Il te faut d’abord le classeur {name}. Mamie Noisette le vend au Coin des Pages, dans la rue du village, à droite de la Tanière aux Cartes, après la poste.",
     "tearHint": "Fais glisser en haut du paquet pour le découper",
     "tearKeyboard": "Découper le paquet",
     "tearKeyHint": "ou appuie sur Espace",
@@ -228,7 +228,8 @@
       "firstEdition": "1re éd.",
       "wPromo": "Promo"
     },
-    "noBinderYet": "Achète ton premier classeur chez Mamie Noisette, à la librairie après la boutique.",
+    "noBinderYet": "Achète ton premier classeur chez Mamie Noisette !",
+    "noBinderDirections": "Sa librairie, le Coin des Pages, est dans la rue du village : en sortant de la maison, va à droite, après la Tanière aux Cartes et la poste.",
     "pageKeys": "Page préc. et Page suiv. pour tourner les pages, Début et Fin pour la première et la dernière",
     "firstPage": "Première page",
     "lastPage": "Dernière page",

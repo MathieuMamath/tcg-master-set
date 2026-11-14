@@ -809,6 +809,9 @@ export function BinderView({ sets, collection, onClose }: Props) {
             <h2 className="max-w-xl -rotate-1 ui-tape ui-scrap px-5 pt-2.5 pb-1.5 text-center font-display text-2xl">
               {sets.length > 0 ? t('chooseBinder') : t('noBinderYet')}
             </h2>
+            {sets.length === 0 && (
+              <p className="max-w-md text-center text-ui-ink/80">{t('noBinderDirections')}</p>
+            )}
             {sets.length > 0 && binders.every(({ owned }) => owned === 0) && (
               <p className="text-center text-ui-ink/80">{t('noCardsYet')}</p>
             )}
