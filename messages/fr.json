@@ -1077,7 +1077,8 @@
       "boosterControlsFix": "Acheter des boosters est de nouveau fiable : + et − comptent un par clic et ne s’emballent que si tu restes appuyé, et Entrée sur un booster mène à sa quantité, où Entrée achète.",
       "holoFoil": "Les cartes holo et reverse brillent enfin : un reflet arc-en-ciel pailleté, sur l’illustration pour les holo et tout autour pour les reverse, qui suit ta souris quand tu inclines la carte.",
       "packVolume": "Les boosters ont l’air bien remplis : leur film se bombe sous les cartes, se pince aux soudures et accroche la lumière.",
-      "pullEffectsSetting": "Les effets d’ouverture te gâchent la surprise ? Désactive-les dans les réglages : tes boosters s’ouvriront sans les lumières qui montent jusqu’à leur meilleure carte."
+      "pullEffectsSetting": "Les effets d’ouverture te gâchent la surprise ? Désactive-les dans les réglages : tes boosters s’ouvriront sans les lumières qui montent jusqu’à leur meilleure carte.",
+      "binderCardView": "Une carte agrandie dans le classeur a maintenant l’écran pour elle seule : le logo de la série et le bouton pour fermer le classeur ne la cachent plus."
     }
   },
   "Shift": {

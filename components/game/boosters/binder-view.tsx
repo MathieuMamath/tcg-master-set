@@ -147,7 +147,8 @@ function CardDetail({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-ui-ink/85 p-4">
+    // Above the binder's title and its close button, so that nothing but the card and its label shows.
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-ui-ink/85 p-4">
       <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
         <TiltCard variant={slot.variant} isFullArt={slot.card.isFullArt}>
           <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="max" />
@@ -328,6 +329,7 @@ function Pages({
   set,
   binders,
   onSwitch,
+  onDetailChange,
 }: {
   catalogue: Catalogue;
   collection: Collection;
@@ -335,6 +337,8 @@ function Pages({
   set: PlayableSet;
   binders: readonly OwnedBinder[];
   onSwitch: (set: PlayableSet) => void;
+  // Whether a card is shown enlarged, which hides the binder's close button.
+  onDetailChange: (isShown: boolean) => void;
 }) {
   const t = useTranslations('Binder');
   const [isSwitching, setIsSwitching] = useState(false);
@@ -342,6 +346,8 @@ function Pages({
   const slots = useMemo(() => binderSlots(catalogue.cards), [catalogue]);
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState<BinderSlot | null>(null);
+  const isDetailShown = detail !== null;
+  useEffect(() => onDetailChange(isDetailShown), [isDetailShown, onDetailChange]);
   const [turning, setTurning] = useState<Turn | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const isWide = useWideScreen();
@@ -684,6 +690,8 @@ export function BinderView({ sets, collection, onClose }: Props) {
   const [attempt, setAttempt] = useState(0);
   const [chosenSet, setChosenSet] = useState<PlayableSet | null>(null);
   const [isOpening, setIsOpening] = useState(false);
+  // A card shown enlarged, over which the close button would stand.
+  const [isCardShown, setIsCardShown] = useState(false);
   const setId = chosenSet?.id;
   const isBinderChosen = chosenSet !== null;
   const isWide = useWideScreen();
@@ -790,6 +798,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
       <span aria-hidden="true" className="ui-paper-grain absolute inset-0" />
       {chosenSet ? (
         <button
+          hidden={isCardShown}
           type="button"
           onClick={closeBinder}
           className={`${CLOSE_BUTTON_CLASS} absolute top-4 right-4 z-20`}
@@ -853,6 +862,7 @@ export function BinderView({ sets, collection, onClose }: Props) {
               set={chosenSet}
               binders={binders}
               onSwitch={switchTo}
+              onDetailChange={setIsCardShown}
             />
           )}
           {!catalogue && !hasFailed && (

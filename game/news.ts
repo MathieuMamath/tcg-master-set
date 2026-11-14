@@ -50,6 +50,7 @@ export const NEWS: readonly NewsItem[] = [
   { id: 33, key: 'holoFoil', date: '2026-11-14', kind: 'feature' },
   { id: 34, key: 'packVolume', date: '2026-11-14', kind: 'feature' },
   { id: 35, key: 'pullEffectsSetting', date: '2026-11-14', kind: 'feature' },
+  { id: 36, key: 'binderCardView', date: '2026-11-14', kind: 'fix' },
 ];
 
 // A player who never saw the sheet only gets the latest notes, rather than the whole history.
