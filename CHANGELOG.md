@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.119](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.118...v0.1.119) (2026-11-14)
+
+### Content
+
+* **binder:** tell new players where Mamie Noisette's bookshop is ([#122](https://github.com/MathieuMamath/tcg-master-set/issues/122)) ([e2abb8e](https://github.com/MathieuMamath/tcg-master-set/commit/e2abb8e09416e678a860fa802d3b34f191a509b1))
+
 ## [0.1.118](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.117...v0.1.118) (2026-11-14)
 
 ### Features
