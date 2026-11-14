@@ -12,12 +12,14 @@ import { BASKETBALL_QUEST } from '@/game/quests/basketball';
 import { KITTEN_QUEST } from '@/game/quests/lost-kitten';
 import { canStartQuest, GRANDMA_QUEST, questDay } from '@/game/quests/quests';
 import { RAFFLE_QUEST } from '@/game/quests/raffle';
+import type { PlayerSettings } from '@/game/ui/settings';
 import { canSleep, isValidOffset, minuteOfDay, offsetAfterSleep } from '@/game/world/clock';
 import { ADMIN_PLACES } from '@/game/world/side-rooms';
 import { type PlayerSpot, parseSpot } from '@/game/world/spot';
 import { loadDailyActivity } from './activity';
 import { recordEvent } from './events';
 import { loadBasketballHighScore } from './quests/basketball';
+import { loadSettings } from './settings';
 import { loadBinders, loadWallet, type Reader } from './wallet';
 
 export type PlayerProgress = {
@@ -41,6 +43,8 @@ export type PlayerProgress = {
   isAdmin: boolean;
   // How far the player's sleeps moved the game's clock on, in game minutes.
   clockOffset: number;
+  // The player's own preferences, from the settings menu.
+  settings: PlayerSettings;
 };
 
 // The day a quest last paid its reward.
@@ -113,6 +117,7 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     isKittenHunted: await loadIsKittenHunted(getDb(), userId),
     isAdmin: await isAdmin(userId),
     clockOffset: await loadClockOffset(getDb(), userId),
+    settings: await loadSettings(getDb(), userId),
   };
 }
 

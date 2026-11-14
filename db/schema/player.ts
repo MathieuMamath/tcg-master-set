@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   check,
   doublePrecision,
   integer,
@@ -71,6 +72,17 @@ export const playerClocks = pgTable(
   },
   (table) => [check('player_clocks_offset_within_a_day', sql`${table.offset} between 0 and 1439`)],
 );
+
+// The player's own preferences, kept so that they hold on every device and visit. A missing row
+// means the defaults.
+export const playerSettings = pgTable('player_settings', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  // Whether a cut pack climbs through light effects up to its best card before showing it.
+  pullEffects: boolean('pull_effects').notNull().default(true),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const playerCards = pgTable(
   'player_cards',

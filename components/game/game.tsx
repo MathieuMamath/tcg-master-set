@@ -131,6 +131,7 @@ export function Game({ player, sets, progress }: Props) {
   const [isElevatorOpen, setIsElevatorOpen] = useState(false);
   // The game's clock, moved on by the player's sleeps, and the night's sleep while it lasts.
   const [clockOffset, setClockOffset] = useState(progress.clockOffset);
+  const [settings, setSettings] = useState(progress.settings);
   const clock = useGameClock(clockOffset);
   // The scene only loads in the browser, so it can read the weather before the first check.
   const skyClock = useMemo(
@@ -701,7 +702,14 @@ export function Game({ player, sets, progress }: Props) {
             onClose={() => setIsBinderOpen(false)}
           />
         )}
-        {opening && <BoosterOpening opening={opening} onCut={cutBooster} onClose={closeOpening} />}
+        {opening && (
+          <BoosterOpening
+            opening={opening}
+            pullEffects={settings.pullEffects}
+            onCut={cutBooster}
+            onClose={closeOpening}
+          />
+        )}
         {isBagOpen && (
           <BoosterBag
             boosters={ownedBoosters}
@@ -713,6 +721,8 @@ export function Game({ player, sets, progress }: Props) {
         {isSettingsOpen && (
           <SettingsMenu
             sets={sets}
+            settings={settings}
+            onSettingsChange={setSettings}
             onRedeemed={(updated) => setWallet(updated)}
             onShowNews={() => {
               setIsSettingsOpen(false);

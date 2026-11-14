@@ -239,6 +239,11 @@
     "open": "Settings",
     "title": "Settings",
     "language": "Language",
+    "pullEffects": "Opening effects",
+    "pullEffectsOn": "On",
+    "pullEffectsOff": "Off",
+    "pullEffectsHint": "The lights that climb up to a pack's best card before you see it. Turn them off to keep the surprise.",
+    "settingFailed": "The setting couldn't be saved. Try again in a moment.",
     "signOut": "Sign out",
     "close": "Close"
   },
@@ -1070,7 +1075,8 @@
       "enterToBuy": "Buying at Mamie Noisette’s, or at the Card Den, is quicker with a keyboard: pick with the arrows, press Enter to buy, and go straight on to the next.",
       "boosterControlsFix": "Buying boosters is steady again: + and − count one per click and only race when held, and Enter on a booster goes to its quantity, where Enter buys.",
       "holoFoil": "Holo and reverse holo cards finally shine: a rainbow foil with glitter, on the illustration for holos and around it for reverses, that follows your mouse as you tilt the card.",
-      "packVolume": "Booster packs look full now: their foil bulges with the cards inside, pinches at the seals and catches the light."
+      "packVolume": "Booster packs look full now: their foil bulges with the cards inside, pinches at the seals and catches the light.",
+      "pullEffectsSetting": "Opening effects give the cards away? Turn them off in the settings: your packs then open without the lights climbing up to their best card."
     }
   },
   "Shift": {

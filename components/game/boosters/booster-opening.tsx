@@ -276,12 +276,15 @@ function Reveal({
   cards,
   isGodPack,
   arrivalTier,
+  canTease,
   onFinished,
 }: {
   cards: RevealedCard[];
   isGodPack: boolean;
   // The tier of the pack, whose flash this screen fades out of.
   arrivalTier: PullTier;
+  // Whether a great card may be announced before it shows, which the player can turn off.
+  canTease: boolean;
   onFinished: () => void;
 }) {
   const t = useTranslations('Booster');
@@ -293,7 +296,7 @@ function Reveal({
   const { canvas, emit } = useSparks();
   const cardBox = useRef<HTMLDivElement>(null);
   // Before a great card, the current one trembles and the button calls for it.
-  const isTeasing = (next?.tier ?? 0) >= FIRST_TEASED_TIER;
+  const isTeasing = canTease && (next?.tier ?? 0) >= FIRST_TEASED_TIER;
 
   // Loaded ahead of time, so that each card appears the moment it's revealed.
   useEffect(() => {
@@ -530,11 +533,13 @@ function Summary({
 
 type Props = {
   opening: Opening;
+  // Whether a cut pack climbs through light effects up to its best card, from the settings.
+  pullEffects: boolean;
   onCut: () => void;
   onClose: () => void;
 };
 
-export function BoosterOpening({ opening, onCut, onClose }: Props) {
+export function BoosterOpening({ opening, pullEffects, onCut, onClose }: Props) {
   const t = useTranslations('Booster');
   const dialog = useRef<HTMLDialogElement>(null);
   const [step, setStep] = useState<'pull' | 'reveal' | 'summary'>('pull');
@@ -561,6 +566,11 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
           isGodPack,
         )
       : 0;
+  // Without the pull effects, nothing tells what the pack holds before its cards show: it opens
+  // plainly, a god pack is only told in the summary, and no great card is announced ahead. Each
+  // card still shines as it is revealed, since it is in sight by then.
+  const announcedTier = pullEffects ? tier : 0;
+  const isGodPackAnnounced = isGodPack && (pullEffects || step === 'summary');
 
   const canLeave = opening.status === 'sealed' || opening.status === 'error' || step === 'summary';
 
@@ -638,7 +648,7 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
       )}
       {opening.status === 'ready' && (
         <div className="flex h-full items-center justify-center">
-          {isGodPack && step !== 'pull' && (
+          {isGodPackAnnounced && step !== 'pull' && (
             <div
               aria-hidden="true"
               className="ui-god-pack-glow pointer-events-none fixed inset-0"
@@ -649,16 +659,17 @@ export function BoosterOpening({ opening, onCut, onClose }: Props) {
               setId={opening.setId}
               setName={opening.setName}
               logoUrl={opening.logoUrl}
-              tier={tier}
-              isGodPack={isGodPack}
+              tier={announcedTier}
+              isGodPack={isGodPack && pullEffects}
               onDone={finishPull}
             />
           )}
           {step === 'reveal' && (
             <Reveal
               cards={opening.packs[0].cards}
-              isGodPack={isGodPack}
-              arrivalTier={tier}
+              isGodPack={isGodPackAnnounced}
+              arrivalTier={announcedTier}
+              canTease={pullEffects}
               onFinished={() => setStep('summary')}
             />
           )}
