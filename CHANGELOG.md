@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.2.1](https://github.com/MathieuMamath/tcg-master-set/compare/v0.2.0...v0.2.1) (2026-11-14)
+
+### Features
+
+* **city:** let players choose the animal they walk about as ([#125](https://github.com/MathieuMamath/tcg-master-set/issues/125)) ([3dc8841](https://github.com/MathieuMamath/tcg-master-set/commit/3dc88414bf6e5717608ec848067d9e0a8b94d16f))
+
 ## [0.2.0](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.120...v0.2.0) (2026-11-14)
 
 ### ⚠ BREAKING CHANGES

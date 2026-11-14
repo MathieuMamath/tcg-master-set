@@ -1,6 +1,6 @@
 {
   "name": "tcg-master-set",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "A cozy single-player game in paper cut-outs about opening booster packs and completing master set binders.",
   "repository": "github:MathieuMamath/tcg-master-set",
