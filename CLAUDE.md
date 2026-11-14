@@ -76,6 +76,8 @@ The server only takes the booster and draws the cards when the pack is cut. Unti
 
 Opening a booster pays for its duplicates in the same transaction, from the values in `game/cards/duplicate-coins.ts`. A duplicate is a version of a card the player already owns. The copy is kept, so that the binder still counts it.
 
+Special versions catch the light, by `cardFoil` in `game/cards/foil.ts`, drawn by `components/game/boosters/card-foil.tsx`: as on the real cards, a holo's rainbow foil with glitter covers only its illustration's window, or the whole card when its illustration fills it, as for an ex or an illustration rare, known from its rarity in English by `isFullArtRarity`, and a reverse's covers everything but the window, the other special versions getting a passing shine. `TiltCard` moves the foil's light with the pointer; at rest, and on small cards, it drifts by itself, still for players who ask for less motion.
+
 Once cut, the pack climbs through light effects up to its best card, from a `PullTier` in `game/cards/pull-tier.ts`. The server gives each card its tier from the rarity in English. A new rarity needs a tier there, or it gets the plain opening.
 
 A card's `rarity` column is in English, because game rules compare it. Translated rarities are for display only.

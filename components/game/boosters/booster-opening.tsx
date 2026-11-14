@@ -14,10 +14,12 @@ import type { RevealedCard } from '@/cards/booster-pool';
 import { isTearComplete, tearProgress } from '@/game/cards/booster';
 import type { BoosterLotSize } from '@/game/cards/booster-lots';
 import type { SetId } from '@/game/cards/card-sets';
+import { cardFoil } from '@/game/cards/foil';
 import { type PullTier, packTier } from '@/game/cards/pull-tier';
 import type { OpenedPack } from '@/player/shop';
 import { moveThroughChoices } from '../menu-focus';
 import { CardBack } from './card-back';
+import { CardFoil } from './card-foil';
 import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
 import { PackBody, PackEdge, packEdgeStyle } from './pack-art';
 import { PullRays, PullScene, tierColor, tierColors } from './pull-scene';
@@ -356,7 +358,7 @@ function Reveal({
           <PullRays tier={tier} className="top-1/2 left-1/2 size-[170vmin] -translate-1/2" />
         )}
         <div className="ui-card-flip relative size-full">
-          <TiltCard isSpecial={current !== null && isSpecial(current)}>
+          <TiltCard variant={current?.variant ?? 'normal'} isFullArt={current?.isFullArt}>
             {current ? (
               <>
                 <CardPicture name={current.name} imageUrl={current.imageUrl} quality="high" />
@@ -426,7 +428,7 @@ function EnlargedCard({ card, onClose }: { card: RevealedCard; onClose: () => vo
   return (
     <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
       <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
-        <TiltCard isSpecial={isSpecial(card)}>
+        <TiltCard variant={card.variant} isFullArt={card.isFullArt}>
           <CardPicture name={card.name} imageUrl={card.imageUrl} quality="max" />
           {card.isNew && <NewMark />}
         </TiltCard>
@@ -494,13 +496,11 @@ function Summary({
                   : undefined
               }
               className={`relative block size-full cursor-pointer rounded-[4.5%/3.2%] outline-offset-2 ${
-                isSpecial(card) ? 'shadow-[0_0_0.9rem_0.15rem_var(--ui-accent)]' : ''
+                isSpecial(card) ? 'ui-foil-idle shadow-[0_0_0.9rem_0.15rem_var(--ui-accent)]' : ''
               }`}
             >
               <CardPicture name={card.name} imageUrl={card.imageUrl} quality="low" />
-              {isSpecial(card) && (
-                <span className="ui-shine pointer-events-none absolute inset-0 rounded-[4.5%/3.2%]" />
-              )}
+              <CardFoil foil={cardFoil(card.variant, card.isFullArt)} />
               {card.isNew && <NewMark />}
             </button>
           </li>

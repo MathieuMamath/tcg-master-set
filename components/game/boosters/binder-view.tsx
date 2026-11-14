@@ -25,6 +25,7 @@ import {
   slotsOnPage,
 } from '@/game/cards/binder';
 import type { PlayableSet } from '@/game/cards/card-sets';
+import { cardFoil } from '@/game/cards/foil';
 import { pageStep } from '@/game/ui/menu-keys';
 import { isFocusLost, moveThroughChoices, moveThroughChoicesOnScreen } from '../menu-focus';
 import { reportPlay } from '../report';
@@ -40,6 +41,7 @@ import {
   WIDE_OPENING_MILLISECONDS,
   WIDE_PAGE_WIDTH_CLASS,
 } from './binder-cover';
+import { CardFoil } from './card-foil';
 import { CardPicture, ENLARGED_CARD_CLASS } from './card-picture';
 import { TiltCard } from './tilt-card';
 
@@ -88,9 +90,12 @@ function Pocket({ slot, count, onOpen }: { slot: BinderSlot; count: number; onOp
       type="button"
       onClick={onOpen}
       aria-label={t('viewCard', { name: slot.card.name, count })}
-      className={`${POCKET_CLASS} block w-full cursor-pointer outline-offset-2`}
+      className={`${POCKET_CLASS} block w-full cursor-pointer outline-offset-2 ${
+        cardFoil(slot.variant, slot.card.isFullArt) ? 'ui-foil-idle' : ''
+      }`}
     >
       <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="low" />
+      <CardFoil foil={cardFoil(slot.variant, slot.card.isFullArt)} />
       {/* The light on the pocket's plastic sleeve. */}
       <span
         aria-hidden="true"
@@ -144,7 +149,7 @@ function CardDetail({
   return (
     <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-ui-ink/85 p-4">
       <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
-        <TiltCard isSpecial={slot.variant !== 'normal'}>
+        <TiltCard variant={slot.variant} isFullArt={slot.card.isFullArt}>
           <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="max" />
         </TiltCard>
       </div>
