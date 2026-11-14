@@ -87,6 +87,8 @@ export type GameEventDetails = {
     boosters: number;
     coinsAfter: number;
   };
+  // A player changed the animal they walk about as, at the wardrobe in the bedroom.
+  'avatar.changed': { species: string };
 };
 
 // Every event that changes a player's coins also carries `coinsAfter`, their coins once it was
@@ -119,6 +121,7 @@ export const GAME_EVENT_TYPES = [
   'coupon.deactivated',
   'coupon.reactivated',
   'coupon.redeemed',
+  'avatar.changed',
 ] as const satisfies readonly GameEventType[];
 
 export type GameEvent = {

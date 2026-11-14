@@ -120,6 +120,13 @@
       "when": 1794628569824,
       "tag": "0016_huge_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794659115209,
+      "tag": "0017_chemical_beast",
+      "breakpoints": true
     }
   ]
 }

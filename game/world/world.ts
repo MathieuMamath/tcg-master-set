@@ -35,6 +35,8 @@ export type Interaction =
   | 'busStop'
   // Going to bed, which only sends Pip to sleep at night.
   | 'bed'
+  // Opening the wardrobe in the bedroom, to change the animal the player walks about as.
+  | 'wardrobe'
   // The ramen shop downtown, and its chef, who hires the player for its three jobs.
   | 'enterRamen'
   | 'leaveRamen'

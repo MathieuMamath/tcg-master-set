@@ -3,6 +3,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { type RefObject, useMemo, useRef } from 'react';
 import { type Group, type Mesh, type MeshBasicMaterial, Vector3 } from 'three';
+import type { AvatarSpecies } from '@/game/avatar/species';
 import { type Stain, stainAlong } from '@/game/quests/quests';
 import { type DashState, NO_DASH, tickDash } from '@/game/world/dash';
 import { STILL } from '@/game/world/movement';
@@ -18,7 +19,7 @@ import {
 import type { PlayerSpot } from '@/game/world/spot';
 import type { Interaction } from '@/game/world/world';
 import { drawShadowBlob } from '../art/bedroom';
-import { drawPip } from '../art/pip';
+import { pipAs } from '../art/pip';
 import { createPaperBalls, emitPaperBall, PaperBalls } from './paper-balls';
 import {
   blinker,
@@ -60,6 +61,7 @@ export function Pip({
   onInteractionChange,
   onExit,
   onScrub,
+  species,
 }: {
   input: RefObject<MovementInput>;
   room: SideRoom;
@@ -72,8 +74,10 @@ export function Pip({
   onInteractionChange: (interaction: Interaction | null) => void;
   onExit: (travel: Travel) => void;
   onScrub: (id: number) => void;
+  // The animal the player walks about as.
+  species: AvatarSpecies;
 }) {
-  const pip = useMemo(() => blinker(240, 300, drawPip, 10, 21), []);
+  const pip = useMemo(() => blinker(240, 300, pipAs(species), 10, 21), [species]);
   const pipMaterial = useRef<MeshBasicMaterial>(null);
   useBlink(pipMaterial, pip);
   const blob = useMemo(() => texture(drawShadowBlob()), []);

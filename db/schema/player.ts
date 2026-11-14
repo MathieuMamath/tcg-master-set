@@ -84,6 +84,16 @@ export const playerSettings = pgTable('player_settings', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// The look the player walks about as, chosen at the wardrobe in the bedroom. A missing row means
+// the fox everyone starts as.
+export const playerAvatars = pgTable('player_avatars', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  species: text('species').notNull().default('fox'),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const playerCards = pgTable(
   'player_cards',
   {

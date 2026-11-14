@@ -65,7 +65,7 @@ describe.each(Object.values(SIDE_PLACES))('the $id', (place) => {
 });
 
 describe('the bedroom', () => {
-  test('starts the character away from the bookcase and the door', () => {
+  test('starts the character away from the furniture and the door', () => {
     expect(interactionAlong(BEDROOM, BEDROOM.start)).toBeNull();
   });
 
@@ -84,6 +84,10 @@ describe('the bedroom', () => {
 
   test('the binders can be opened in front of the bookcase', () => {
     expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.bookcase.x)).toBe('binder');
+  });
+
+  test('the wardrobe opens in front of it', () => {
+    expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.wardrobe.x)).toBe('wardrobe');
   });
 
   test('Pip goes to bed in front of it, and nowhere else', () => {

@@ -14,6 +14,7 @@ import {
 import type { Facing } from '@/game/world/side-walk';
 import type { PlayerSpot } from '@/game/world/spot';
 import type { Interaction } from '@/game/world/world';
+import { useAvatarSpecies } from '../avatar/avatar-context';
 import { usePlayerName } from '../player-name';
 import { Arcade } from './arcade';
 import { Bedroom } from './bedroom';
@@ -116,6 +117,8 @@ export function PaperScene({
 }: Props) {
   const tTravel = useTranslations('Travel');
   const playerName = usePlayerName();
+  // Read here, outside the canvas, which doesn't pass the game's contexts on.
+  const species = useAvatarSpecies();
   // Each place by the name on its sign, or else its own.
   const placeNames: Record<SidePlaceId, string> = {
     bedroom: tTravel('places.bedroom', { name: playerName }),
@@ -270,6 +273,7 @@ export function PaperScene({
               onInteractionChange={onInteractionChange}
               onExit={goThrough}
               onScrub={onScrub}
+              species={species}
             />
           </group>
           {OUTSIDE_PLACES.has(visit.place) && <LightVeil />}
