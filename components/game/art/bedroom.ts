@@ -196,8 +196,8 @@ export function drawBookcase(drawing: CanvasRenderingContext2D, width: number, h
   x.fillRect(width - 28, height - 14, 18, 14);
 }
 
-// The wardrobe where Pip changes look: two doors, a mirror on the left one, and the end of a
-// scarf caught in the gap between them.
+// The wardrobe where Pip gets dressed: two doors, a mirror on the left one, and the end of a scarf
+// caught in the gap between them.
 export function drawWardrobe(drawing: CanvasRenderingContext2D, width: number, height: number) {
   const x = drawing;
   const crown = 22;
@@ -244,6 +244,38 @@ export function drawWardrobe(drawing: CanvasRenderingContext2D, width: number, h
   x.fillStyle = WOOD_DARK;
   x.fillRect(12, height - 14, 18, 14);
   x.fillRect(width - 30, height - 14, 18, 14);
+}
+
+// The standing mirror where Pip changes into another animal: a tall oval glass that tilts in its
+// wooden frame, on two splayed feet.
+export function drawStandingMirror(
+  drawing: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+) {
+  const x = drawing;
+  const cx = width / 2;
+  const glassY = height * 0.38;
+  const glassHeight = height * 0.34;
+  // The uprights and the feet.
+  x.fillStyle = WOOD_DARK;
+  x.fillRect(8, glassY - 10, 9, height - glassY);
+  x.fillRect(width - 17, glassY - 10, 9, height - glassY);
+  x.fillRect(0, height - 12, 30, 10);
+  x.fillRect(width - 30, height - 12, 30, 10);
+  // The oval frame, its glass, and a gleam.
+  x.fillStyle = WOOD;
+  ellipse(x, cx, glassY, width / 2 - 14, glassHeight);
+  x.fillStyle = '#cfe3ea';
+  ellipse(x, cx, glassY, width / 2 - 24, glassHeight - 10);
+  x.fillStyle = 'rgb(255 255 255 / 60%)';
+  x.beginPath();
+  x.ellipse(cx - 12, glassY - 22, 6, glassHeight * 0.55, -0.15, 0, Math.PI * 2);
+  x.fill();
+  // The pegs it tilts on.
+  x.fillStyle = '#f3c14b';
+  ellipse(x, 12, glassY, 6, 6);
+  ellipse(x, width - 12, glassY, 6, 6);
 }
 
 // A tall house plant with broad leaves, in a terracotta pot.

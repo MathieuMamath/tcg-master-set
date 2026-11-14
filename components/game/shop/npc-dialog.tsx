@@ -14,7 +14,8 @@ export type Speaker =
   | 'trotte'
   | 'painter'
   | 'ronron'
-  | 'kitten';
+  | 'kitten'
+  | 'boutiqueSeller';
 
 type Props = {
   speaker: Speaker;

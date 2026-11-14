@@ -91,8 +91,27 @@ export const playerAvatars = pgTable('player_avatars', {
     .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' }),
   species: text('species').notNull().default('fox'),
+  // What is worn in each slot, by its id in the code's catalogue, `game/avatar/items.ts`. Null
+  // means the slot is empty.
+  scarf: text('scarf').default('blueStripes'),
+  hat: text('hat'),
+  gear: text('gear').default('satchel'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// The items each player bought at the boutique, whatever their slot. The starter items everyone has
+// get no row.
+export const playerItems = pgTable(
+  'player_items',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    itemId: text('item_id').notNull(),
+    boughtAt: timestamp('bought_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.itemId] })],
+);
 
 export const playerCards = pgTable(
   'player_cards',

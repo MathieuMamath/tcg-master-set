@@ -8,6 +8,7 @@ import {
   drawDesk,
   drawPlanks,
   drawShadowBlob,
+  drawStandingMirror,
   drawWallpaper,
   drawWardrobe,
 } from '../art/bedroom';
@@ -15,8 +16,8 @@ import { cutOut } from '../art/core';
 import { SkyWindow } from './sky';
 import { doorTexture, Furniture, RoomShell, texture, WINDOW } from './stage';
 
-// The bedroom: the bed against the left wall, the wardrobe beside it, the desk under the window, the
-// bookcase and a plant, and the door out in the right wall.
+// The bedroom: the bed against the left wall, the wardrobe beside it, the desk under the window, a
+// standing mirror, the bookcase and a plant, and the door out in the right wall.
 export function Bedroom() {
   const textures = useMemo(
     () => ({
@@ -28,10 +29,11 @@ export function Bedroom() {
       desk: texture(cutOut(230, 128, drawDesk, 9, 43)),
       chair: texture(cutOut(95, 150, drawChair, 8, 44)),
       wardrobe: texture(cutOut(170, 280, drawWardrobe, 9, 47)),
+      mirror: texture(cutOut(110, 240, drawStandingMirror, 8, 48)),
     }),
     [],
   );
-  const { bed, desk, chair, bookcase, plant, wardrobe } = BEDROOM_FURNITURE;
+  const { bed, desk, chair, bookcase, plant, wardrobe, mirror } = BEDROOM_FURNITURE;
   return (
     <>
       <RoomShell walls={BEDROOM_WALLS} doorSide="right" textures={textures.room} />
@@ -49,6 +51,13 @@ export function Bedroom() {
         x={wardrobe.x}
         z={-1.3}
         height={2.7}
+        shadow={textures.shadow}
+      />
+      <Furniture
+        map={textures.mirror}
+        x={mirror.x}
+        z={-0.9}
+        height={2.3}
         shadow={textures.shadow}
       />
       <Furniture map={textures.bed} x={bed.x} z={-0.7} height={1.5} shadow={textures.shadow} />

@@ -35,8 +35,10 @@ export type Interaction =
   | 'busStop'
   // Going to bed, which only sends Pip to sleep at night.
   | 'bed'
-  // Opening the wardrobe in the bedroom, to change the animal the player walks about as.
+  // Opening the wardrobe in the bedroom, to put on a scarf the player has, and looking in its
+  // standing mirror, to change the animal they walk about as.
   | 'wardrobe'
+  | 'mirror'
   // The ramen shop downtown, and its chef, who hires the player for its three jobs.
   | 'enterRamen'
   | 'leaveRamen'
@@ -56,4 +58,10 @@ export type Interaction =
   | 'ronron'
   | 'search'
   // Flash, the chameleon who photographs the big city's sky.
-  | 'photographer';
+  | 'photographer'
+  // Maison Éventail, the luxury boutique downtown: its door, Mlle Éventail the peahen who keeps it,
+  // and its fitting room, where scarves are tried, bought and put on.
+  | 'enterBoutique'
+  | 'leaveBoutique'
+  | 'boutiqueSeller'
+  | 'fittingRoom';

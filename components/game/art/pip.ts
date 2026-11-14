@@ -2,8 +2,10 @@
 // the wardrobe. Every animal keeps the same round shape, scarf and satchel, and only its ears, its
 // coat and a few features change.
 
+import { type ScarfId, STARTER_LOOK } from '@/game/avatar/items';
 import type { AvatarSpecies } from '@/game/avatar/species';
 import { drawEye, type Eyes, ellipse, roundedRect } from './core';
+import { drawScarfEnd, drawScarfFront } from './scarves';
 
 type Coat = {
   fur: string;
@@ -56,6 +58,7 @@ export function drawPip(
   height: number,
   eyes: Eyes = 'open',
   species: AvatarSpecies = 'fox',
+  scarf: ScarfId | null = STARTER_LOOK.scarf,
 ) {
   const x = drawing;
   const cx = width / 2 - 6;
@@ -69,20 +72,8 @@ export function drawPip(
   }
 
   // The scarf's end, flying behind.
-  x.fillStyle = '#2f74ae';
-  x.beginPath();
-  x.moveTo(cx - 70, by - 104);
-  x.quadraticCurveTo(cx - 100, by - 112, cx - 116, by - 86);
-  x.lineTo(cx - 104, by - 74);
-  x.quadraticCurveTo(cx - 92, by - 92, cx - 66, by - 86);
-  x.fill();
-  x.strokeStyle = '#2f74ae';
-  x.lineWidth = 3;
-  for (let fringe = 0; fringe < 3; fringe++) {
-    x.beginPath();
-    x.moveTo(cx - 114 + fringe * 5, by - 84 + fringe * 4);
-    x.lineTo(cx - 122 + fringe * 5, by - 78 + fringe * 4);
-    x.stroke();
+  if (scarf) {
+    drawScarfEnd(x, cx, by, scarf);
   }
 
   // Feet, broad and heavy on the gorilla.
@@ -135,7 +126,7 @@ export function drawPip(
     drawWhiskers(x, cx, by);
   }
 
-  drawGear(x, cx, by);
+  drawGear(x, cx, by, scarf);
 }
 
 // The fox's pointed ears, which the wolf shares. They are drawn mirrored around the body's middle,
@@ -395,8 +386,8 @@ function drawShell(x: CanvasRenderingContext2D, cx: number, by: number) {
   }
 }
 
-// The scarf and the satchel, the same on every animal.
-function drawGear(x: CanvasRenderingContext2D, cx: number, by: number) {
+// The scarf and the satchel, which fit every animal.
+function drawGear(x: CanvasRenderingContext2D, cx: number, by: number, scarf: ScarfId | null) {
   // The satchel's strap.
   x.strokeStyle = '#8c4b2e';
   x.lineWidth = 7;
@@ -405,54 +396,9 @@ function drawGear(x: CanvasRenderingContext2D, cx: number, by: number) {
   x.quadraticCurveTo(cx, by - 60, cx - 58, by - 52);
   x.stroke();
 
-  // The scarf round the neck, striped.
-  x.beginPath();
-  x.moveTo(cx - 88, by - 110);
-  x.quadraticCurveTo(cx + 4, by - 84, cx + 94, by - 110);
-  x.lineTo(cx + 92, by - 86);
-  x.quadraticCurveTo(cx + 4, by - 58, cx - 86, by - 86);
-  x.closePath();
-  x.fillStyle = '#3d8fd1';
-  x.fill();
-  x.save();
-  x.clip();
-  x.fillStyle = '#2f74ae';
-  for (let stripe = 0; stripe < 7; stripe++) {
-    x.beginPath();
-    x.moveTo(cx - 76 + stripe * 28, by - 120);
-    x.lineTo(cx - 68 + stripe * 28, by - 120);
-    x.lineTo(cx - 64 + stripe * 28, by - 50);
-    x.lineTo(cx - 72 + stripe * 28, by - 50);
-    x.fill();
+  if (scarf) {
+    drawScarfFront(x, cx, by, scarf);
   }
-  x.fillStyle = 'rgb(255 255 255 / 22%)';
-  x.beginPath();
-  x.moveTo(cx - 80, by - 104);
-  x.quadraticCurveTo(cx + 4, by - 80, cx + 88, by - 104);
-  x.lineTo(cx + 88, by - 98);
-  x.quadraticCurveTo(cx + 4, by - 74, cx - 80, by - 98);
-  x.fill();
-  x.restore();
-
-  // The scarf's knot, hanging in front.
-  for (const [offsetX, angle, tailWidth, tailHeight] of [
-    [70, 0.12, 18, 40],
-    [80, -0.3, 16, 32],
-  ]) {
-    x.save();
-    x.translate(cx + offsetX, by - 80);
-    x.rotate(angle);
-    x.fillStyle = '#3d8fd1';
-    roundedRect(x, -tailWidth / 2, 0, tailWidth, tailHeight, 6);
-    x.fill();
-    x.fillStyle = '#2f74ae';
-    x.fillRect(-tailWidth / 2, tailHeight - 10, tailWidth, 6);
-    x.restore();
-  }
-  x.fillStyle = '#2f74ae';
-  ellipse(x, cx + 74, by - 82, 13, 11);
-  x.fillStyle = '#3d8fd1';
-  ellipse(x, cx + 73, by - 84, 9, 7);
 
   // The satchel, with three cards sticking out.
   x.fillStyle = '#b4552f';
@@ -486,16 +432,20 @@ function drawGear(x: CanvasRenderingContext2D, cx: number, by: number) {
   ellipse(x, cx - 65, by - 50, 5, 5);
 }
 
-const drawers = new Map<AvatarSpecies, typeof drawPip>();
+const drawers = new Map<string, typeof drawPip>();
 
-// Pip as the given animal, as a drawing function that stays the same for the same animal, so that
-// what draws it only draws again when the animal changes.
-export function pipAs(species: AvatarSpecies): typeof drawPip {
-  let drawer = drawers.get(species);
+// Pip as the given animal and scarf, as a drawing function that stays the same for the same look,
+// so that what draws it only draws again when the look changes.
+export function pipAs(
+  species: AvatarSpecies,
+  scarf: ScarfId | null = STARTER_LOOK.scarf,
+): typeof drawPip {
+  const key = `${species}/${scarf ?? 'none'}`;
+  let drawer = drawers.get(key);
   if (!drawer) {
     drawer = (drawing, width, height, eyes = 'open') =>
-      drawPip(drawing, width, height, eyes, species);
-    drawers.set(species, drawer);
+      drawPip(drawing, width, height, eyes, species, scarf);
+    drawers.set(key, drawer);
   }
   return drawer;
 }

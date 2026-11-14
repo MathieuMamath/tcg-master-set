@@ -24,7 +24,7 @@ import {
   PATH_SCENERY_SIZE,
 } from '../art/park-games';
 import { pipAs } from '../art/pip';
-import { useAvatarSpecies } from '../avatar/avatar-context';
+import { useWornLook } from '../avatar/avatar-context';
 import {
   CanvasArt,
   digitKeys,
@@ -140,7 +140,7 @@ export function CleanupShift({ onDone }: { onDone: (end: ShiftEnd) => void }) {
 // The path: the park behind, the ground moving under Pip's steps, the cart of bins behind him, the
 // litter coming from the right, and the circle of his reach, lit when a piece is in it.
 function Path({ state, litter }: { state: CleanupState; litter: readonly Litter[] }) {
-  const species = useAvatarSpecies();
+  const look = useWornLook();
   const t = useTranslations('Garden.cleanup');
   const reaching = inReach(state, litter);
   const handled = new Set(
@@ -234,7 +234,12 @@ function Path({ state, litter }: { state: CleanupState; litter: readonly Litter[
         className="ui-bob absolute bottom-[6%] h-[50%] -translate-x-1/2"
         style={{ left: `${PIP_X}%`, aspectRatio: '240 / 300' }}
       >
-        <CanvasArt draw={pipAs(species)} width={240} height={300} className="size-full" />
+        <CanvasArt
+          draw={pipAs(look.species, look.scarf)}
+          width={240}
+          height={300}
+          className="size-full"
+        />
       </span>
       {/* The litter coming along the path. */}
       {coming.map(({ piece, index }) => {

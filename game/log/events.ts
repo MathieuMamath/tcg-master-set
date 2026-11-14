@@ -87,8 +87,12 @@ export type GameEventDetails = {
     boosters: number;
     coinsAfter: number;
   };
-  // A player changed the animal they walk about as, at the wardrobe in the bedroom.
+  // A player changed the animal they walk about as, at the mirror in the bedroom.
   'avatar.changed': { species: string };
+  // An item bought at the boutique downtown, its slot, and what it cost.
+  'item.bought': { itemId: string; slot: string; coins: number; coinsAfter: number };
+  // An item put on, in the boutique's fitting room or at the wardrobe, or a slot left empty.
+  'item.worn': { itemId: string | null; slot: string };
 };
 
 // Every event that changes a player's coins also carries `coinsAfter`, their coins once it was
@@ -122,6 +126,8 @@ export const GAME_EVENT_TYPES = [
   'coupon.reactivated',
   'coupon.redeemed',
   'avatar.changed',
+  'item.bought',
+  'item.worn',
 ] as const satisfies readonly GameEventType[];
 
 export type GameEvent = {

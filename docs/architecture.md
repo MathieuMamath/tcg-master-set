@@ -47,7 +47,7 @@ Taking Gaspard's dalgona as an example:
 | `game/cards/` | The sets, boosters and their recipes (`booster.ts`), binders, duplicate coins, the pull tiers, the shop's prices and dialogue, coupons, and the card statistics' export. |
 | `game/quests/` | One file per daily quest, the activity tracker and its bonus (`activity.ts`), the timing rules they share (`quests.ts`), and Papy Caillou's sayings (`proverbs.ts`). |
 | `game/quests/shifts/` | The shifts: their shared rules and pay (`shifts.ts`), and one file per game, from Yuzu's three jobs to Flash's photos. |
-| `game/avatar/` | The animals the player can walk about as (`species.ts`). |
+| `game/avatar/` | The animals the player can walk about as (`species.ts`), and the catalogue of what is worn in each slot, scarf, hat and gear, with prices (`items.ts`). |
 | `game/log/` | The event log's catalogue (`events.ts`), the browser's reports, visits, and the statistics' periods. |
 | `game/ui/` | Pure calculations that serve the interface rather than the rules: moving through menus with the keys (`menu-keys.ts`, `spatial-focus.ts`), the dialogue's typewriter and the counters' roll. |
 | `game/` | What serves every domain: the seeded random numbers the games draw from (`seeded-random.ts`), and the "What's new?" notes (`news.ts`). |
@@ -62,7 +62,7 @@ Every rule has its test beside it, as `<name>.test.ts`. Helpers shared by severa
 | `components/game/art/` | The drawings, made by code on canvases: `core.ts` for the shared tools, then one file per place with its characters, such as `dojo.ts`. |
 | `components/game/scene/` | The paper diorama in Three.js: `paper-scene.tsx` sets it up and moves between places, `stage.tsx` holds what every place is built from, then one file per place, plus `sky.tsx`, `outdoors.tsx`, `pip.tsx` and the travel screen. |
 | `components/game/hud/` | What lies over the scene: the top bar, the prompts and speech bubbles, the settings, the activity tracker, the news sheet, the controls legend, the joystick and the sleep screen. |
-| `components/game/avatar/` | The animal the player walks about as, shared through `avatar-context.tsx`, and the bedroom's wardrobe to change it. |
+| `components/game/avatar/` | The animal the player walks about as, shared through `avatar-context.tsx`, the bedroom's mirror to change it, its wardrobe to put on a scarf, and the boutique's fitting room to try, buy and wear scarves. |
 | `components/game/shop/` | The sellers: conversations, shop windows and portraits. |
 | `components/game/boosters/` | The booster bag, the opening and its effects, and the binder. |
 | `components/game/quests/` | The quests' dialogs and games, one per quest outside the shifts. |

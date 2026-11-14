@@ -27,6 +27,8 @@ test('lists every type of the catalogue once', () => {
     'coupon.reactivated': true,
     'coupon.redeemed': true,
     'avatar.changed': true,
+    'item.bought': true,
+    'item.worn': true,
   };
 
   expect([...GAME_EVENT_TYPES].sort()).toEqual(Object.keys(catalogue).sort());

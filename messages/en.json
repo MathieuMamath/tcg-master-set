@@ -96,7 +96,12 @@
       "nothing": "Nothing here… Mistigri is somewhere else.",
       "unavailable": "You can’t search right now."
     },
-    "archivist": "Talk (Bastien)"
+    "archivist": "Talk (Bastien)",
+    "enterBoutique": "Go into Maison Éventail",
+    "leaveBoutique": "Leave",
+    "boutiqueSeller": "Talk (Mlle Éventail)",
+    "fittingRoom": "Go into the fitting room",
+    "mirror": "Look in the mirror"
   },
   "Shopkeeper": {
     "names": {
@@ -587,7 +592,8 @@
     "bureau": "Administrative Office",
     "ramen": "Ramen Yuzu",
     "dojo": "Dojo Kaito",
-    "post": "Village Post"
+    "post": "Village Post",
+    "boutique": "Maison Éventail"
   },
   "Hails": {
     "latest": "A mega welcome!",
@@ -609,7 +615,8 @@
     "painter": "Got an eye for art?",
     "ronron": "Have you seen my little one?",
     "photographer": "A photo of the sky?",
-    "archivist": "Need the archives?"
+    "archivist": "Need the archives?",
+    "boutiqueSeller": "A touch of elegance?"
   },
   "Bus": {
     "title": "Bus map",
@@ -793,6 +800,14 @@
         "greeting": "Hello! I keep every booster’s archives here. I can print you the full card statistics: every version of every set, how many times it came out, and how many times it should have."
       },
       "export": "Export the card statistics"
+    },
+    "boutiqueSeller": {
+      "name": "Mlle Éventail",
+      "title": "the peahen of Maison Éventail",
+      "fittingRoom": "Try them on",
+      "lines": {
+        "greeting": "Welcome to Maison Éventail. Each of our scarves is woven by hand, a truly exceptional piece. One never chooses a scarf without seeing oneself in the mirror: do step into the fitting room and try them on."
+      }
     }
   },
   "Stats": {
@@ -901,7 +916,8 @@
       "bureau": "The administrative office",
       "coupons": "The coupon floor",
       "ramen": "Ramen Yuzu",
-      "dojo": "The dojo"
+      "dojo": "The dojo",
+      "boutique": "Maison Éventail"
     },
     "log": {
       "title": "Log coverage",
@@ -1081,7 +1097,9 @@
       "pullEffectsSetting": "Opening effects give the cards away? Turn them off in the settings: your packs then open without the lights climbing up to their best card.",
       "binderCardView": "A card enlarged in the binder now has the screen to itself: the set’s logo and the button to close the binder no longer cover it.",
       "version02": "The game moves on to version 0.2! Thank you for playing and testing version 0.1. New things are on their way in this series.",
-      "avatarSpecies": "A wardrobe has arrived in your bedroom! Open it to change animal: fox, turtle, dog, cat, rabbit, bear, wolf, gorilla, red panda or penguin, with your scarf and satchel."
+      "avatarSpecies": "A wardrobe has arrived in your bedroom! Open it to change animal: fox, turtle, dog, cat, rabbit, bear, wolf, gorilla, red panda or penguin, with your scarf and satchel.",
+      "boutique": "Maison Éventail opens in the big city! Mlle Éventail, a very chic peahen, sells four luxury scarves: try them on, buy them and wear them in her fitting room.",
+      "mirrorAndWardrobe": "A tall mirror now stands in your bedroom: that’s where you change animal. Your wardrobe is for getting dressed, with the scarves you bought."
     }
   },
   "Shift": {
@@ -1685,12 +1703,38 @@
     "close": "Close",
     "stop": "Stop"
   },
-  "Wardrobe": {
-    "title": "The wardrobe",
+  "FittingRoom": {
+    "title": "The fitting room",
+    "hint": "Try the scarves on in front of the mirror. Those you already have go on at once.",
+    "wearing": "You’re wearing it",
+    "wear": "Wear it",
+    "buy": "Buy it · {price, number} coins",
+    "price": "{price, number} coins",
+    "worn": "Worn",
+    "owned": "Yours",
+    "close": "Leave the fitting room",
+    "notes": {
+      "thanks": "It’s yours, and you’re already wearing it!",
+      "worn": "Done, you’re wearing it.",
+      "notEnoughCoins": "You need more coins for this one.",
+      "alreadyOwned": "You already have it.",
+      "notForSale": "This one isn’t for sale.",
+      "unavailable": "The fitting room is stuck: please try again."
+    },
+    "scarves": {
+      "blueStripes": "The blue scarf",
+      "tartan": "The tartan",
+      "pompomKnit": "The pompom knit",
+      "polkaBow": "The polka-dot bow",
+      "starryNight": "The starry night"
+    }
+  },
+  "Mirror": {
+    "title": "The mirror",
     "hint": "Choose the animal you want to be. Your scarf and satchel come along, whatever you pick.",
     "worn": "Worn",
     "close": "Close",
-    "failed": "The wardrobe is stuck: your change wasn’t kept. Please try again.",
+    "failed": "The mirror is misted up: your change wasn’t kept. Please try again.",
     "species": {
       "fox": "Fox",
       "turtle": "Turtle",
@@ -1703,5 +1747,13 @@
       "redPanda": "Red panda",
       "penguin": "Penguin"
     }
+  },
+  "Wardrobe": {
+    "title": "The wardrobe",
+    "hint": "Choose the scarf you want to wear.",
+    "worn": "Worn",
+    "close": "Close",
+    "more": "More scarves await you at Maison Éventail, in the big city.",
+    "failed": "The wardrobe is stuck: your change wasn’t kept. Please try again."
   }
 }
