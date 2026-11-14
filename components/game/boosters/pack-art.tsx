@@ -98,7 +98,8 @@ export function PackBody({
   cut?: number;
 }) {
   return (
-    <span className="absolute inset-0 drop-shadow-[4px_6px_0_var(--ui-shadow)]">
+    // A paper-cut shadow as for everything else, and a soft one under it for the pack's thickness.
+    <span className="absolute inset-0 [filter:drop-shadow(4px_6px_0_var(--ui-shadow))_drop-shadow(0_10px_14px_rgb(0_0_0/30%))]">
       <span
         style={{ clipPath: cut > 0 ? cutOutline(cut) : undefined }}
         className="absolute inset-0"
@@ -112,6 +113,8 @@ export function PackBody({
             <SetLogo setName={setName} logoUrl={logoUrl} />
           </span>
           <span className="ui-pack-band absolute inset-x-0 bottom-0 h-[7%]" />
+          <span className="ui-pack-volume pointer-events-none absolute inset-0" />
+          <span className="ui-pack-gloss pointer-events-none absolute inset-0" />
           <span className="ui-paper-grain absolute inset-0" />
         </span>
       </span>
@@ -135,6 +138,11 @@ export function PackEdge({ style, className = '' }: { style?: CSSProperties; cla
           className="absolute inset-x-0 top-0"
         />
         <span className="ui-pack-band absolute inset-0" />
+        {/* The same curve as the body below, so that the edge meets it seamlessly. */}
+        <span
+          style={{ height: `${10000 / EDGE_HEIGHT}%` }}
+          className="ui-pack-volume pointer-events-none absolute inset-x-0 top-0"
+        />
         <span className="ui-paper-grain absolute inset-0" />
       </span>
     </span>
