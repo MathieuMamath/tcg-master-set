@@ -105,7 +105,11 @@
     "enterHatter": "Entrer chez le chapelier",
     "leaveHatter": "Sortir",
     "hatter": "Parler (Sir Moustache)",
-    "hatterMirror": "Essayer des chapeaux"
+    "hatterMirror": "Essayer des chapeaux",
+    "enterStore": "Entrer aux Grandes Galeries",
+    "leaveStore": "Sortir",
+    "bagSeller": "Parler (Mme Poche)",
+    "storeMirror": "Essayer des sacoches"
   },
   "Shopkeeper": {
     "names": {
@@ -598,7 +602,9 @@
     "dojo": "Dojo Kaito",
     "post": "Poste du village",
     "boutique": "Maison Éventail",
-    "hatter": "Chapellerie Moustache"
+    "hatter": "Chapellerie Moustache",
+    "store": "Les Grandes Galeries",
+    "bagShop": "Poche & Cie"
   },
   "Hails": {
     "latest": "Méga bienvenue !",
@@ -622,7 +628,8 @@
     "photographer": "Une photo du ciel ?",
     "archivist": "Besoin des archives ?",
     "boutiqueSeller": "Un brin d’élégance ?",
-    "hatter": "Un chapeau, très cher ?"
+    "hatter": "Un chapeau, très cher ?",
+    "bagSeller": "Besoin d’un sac ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -822,6 +829,14 @@
       "lines": {
         "greeting": "Ah, bienvenue, bienvenue ! Un gentleman sans chapeau, c’est une phrase sans point final. Du bonnet au haut-de-forme, j’ai tout ce qu’il vous faut : allez donc vous voir devant le miroir."
       }
+    },
+    "bagSeller": {
+      "name": "Mme Poche",
+      "title": "la kangourou des sacoches",
+      "mirror": "Essayer devant le miroir",
+      "lines": {
+        "greeting": "Bienvenue aux Grandes Galeries ! Je suis la première à avoir ouvert mon comptoir, les autres vendeurs arrivent bientôt. Des sacs, j’en ai plein la poche : allez donc les essayer devant le miroir."
+      }
     }
   },
   "Stats": {
@@ -932,7 +947,8 @@
       "ramen": "Ramen Yuzu",
       "dojo": "Le dojo",
       "boutique": "La Maison Éventail",
-      "hatter": "La chapellerie"
+      "hatter": "La chapellerie",
+      "store": "Les Grandes Galeries"
     },
     "log": {
       "title": "Couverture du journal",
@@ -1115,7 +1131,8 @@
       "avatarSpecies": "Une armoire est arrivée dans ta chambre ! Ouvre-la pour changer d’animal : renard, tortue, chien, chat, lapin, ours, loup, gorille, panda roux ou pingouin, avec ton écharpe et ta sacoche.",
       "boutique": "La Maison Éventail ouvre dans la grande ville ! Mlle Éventail, une paonne très chic, vend quatre écharpes de luxe : à essayer, acheter et porter dans sa cabine d’essayage.",
       "mirrorAndWardrobe": "Un grand miroir trône désormais dans ta chambre : c’est là que tu changes d’animal. Ton armoire, elle, te sert à t’habiller avec les écharpes que tu as achetées.",
-      "hatter": "La Chapellerie Moustache ouvre dans la grande ville ! Sir Moustache, un vieux morse très distingué, vend six chapeaux, du bonnet à pompon au haut-de-forme : à essayer devant son miroir. Ton armoire range aussi tes chapeaux : tu peux en changer, ou rester tête nue, quand tu veux."
+      "hatter": "La Chapellerie Moustache ouvre dans la grande ville ! Sir Moustache, un vieux morse très distingué, vend six chapeaux, du bonnet à pompon au haut-de-forme : à essayer devant son miroir. Ton armoire range aussi tes chapeaux : tu peux en changer, ou rester tête nue, quand tu veux.",
+      "departmentStore": "Les Grandes Galeries ouvrent au bout de la rue de la grande ville ! Mme Poche, une kangourou, y tient le premier comptoir et vend quatre sacoches, de la besace en toile à la pochette dorée. D’autres vendeurs s’y installeront bientôt."
     }
   },
   "Shift": {
@@ -1747,6 +1764,11 @@
       "alreadyOwned": "Tu l’as déjà.",
       "notForSale": "Pas à vendre.",
       "unavailable": "Le miroir s’est voilé : réessaie."
+    },
+    "store": {
+      "title": "Le miroir des Grandes Galeries",
+      "hint": "Essaie les sacoches devant le miroir. Celles que tu as déjà se mettent tout de suite.",
+      "close": "Laisser le miroir"
     }
   },
   "Mirror": {
@@ -1773,14 +1795,16 @@
     "hint": "Choisis ce que tu veux porter.",
     "shelves": {
       "scarf": "Écharpes",
-      "hat": "Chapeaux"
+      "hat": "Chapeaux",
+      "gear": "Équipements"
     },
     "noHat": "Sans chapeau",
     "worn": "Sur toi",
     "close": "Fermer",
     "more": {
       "scarf": "D’autres écharpes t’attendent à la Maison Éventail, dans la grande ville.",
-      "hat": "D’autres chapeaux t’attendent chez Sir Moustache, dans la grande ville."
+      "hat": "D’autres chapeaux t’attendent chez Sir Moustache, dans la grande ville.",
+      "gear": "D’autres sacoches t’attendent aux Grandes Galeries, dans la grande ville."
     },
     "failed": "L’armoire est coincée : ton changement n’a pas été gardé. Réessaie."
   },
@@ -1796,6 +1820,10 @@
     "boater": "Le canotier",
     "bowler": "Le chapeau melon",
     "topHat": "Le haut-de-forme",
-    "satchel": "La sacoche"
+    "satchel": "La sacoche",
+    "canvasBag": "La besace en toile",
+    "denimBag": "La sacoche en jean",
+    "schoolBag": "Le cartable rouge",
+    "goldBag": "La pochette dorée"
   }
 }

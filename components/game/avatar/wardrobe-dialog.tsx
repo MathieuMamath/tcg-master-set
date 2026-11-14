@@ -2,7 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
-import { type HatId, type ItemId, itemsIn, ownsItem, type ScarfId } from '@/game/avatar/items';
+import {
+  type GearId,
+  type HatId,
+  type ItemId,
+  itemsIn,
+  ownsItem,
+  type ScarfId,
+} from '@/game/avatar/items';
 import type { AvatarSpecies } from '@/game/avatar/species';
 import { pipAs } from '../art/pip';
 import { moveThroughChoicesOnScreen, openDialog } from '../menu-focus';
@@ -13,6 +20,7 @@ type Props = {
   species: AvatarSpecies;
   scarf: ScarfId | null;
   hat: HatId | null;
+  gear: GearId | null;
   ownedItems: readonly ItemId[];
   // Whether the last change could not be saved, and was taken back.
   hasFailed: boolean;
@@ -32,6 +40,7 @@ export function WardrobeDialog({
   species,
   scarf,
   hat,
+  gear,
   ownedItems,
   hasFailed,
   onWear,
@@ -48,13 +57,14 @@ export function WardrobeDialog({
   const shelf = (slot: ShopSlot) => {
     const all: ItemId[] = itemsIn(slot);
     const owned = all.filter((choice) => ownsItem(ownedItems, choice));
-    const worn: ItemId | null = slot === 'scarf' ? scarf : hat;
+    const worn: ItemId | null = slot === 'scarf' ? scarf : slot === 'hat' ? hat : gear;
     // The character wearing an item of this shelf, or nothing on the head.
     const wearing = (item: ItemId | null) =>
       pipAs(
         species,
         slot === 'scarf' ? (item as ScarfId) : scarf,
         slot === 'hat' ? (item as HatId | null) : hat,
+        slot === 'gear' ? (item as GearId) : gear,
       );
     const choices: (ItemId | null)[] = slot === 'hat' ? [null, ...owned] : owned;
     return (
@@ -126,6 +136,7 @@ export function WardrobeDialog({
           <p className="text-center text-ui-ink/80">{t('hint')}</p>
           {shelf('hat')}
           {shelf('scarf')}
+          {shelf('gear')}
           {hasFailed && (
             <p role="alert" className="mt-3 text-center font-semibold text-ui-stamp">
               {t('failed')}

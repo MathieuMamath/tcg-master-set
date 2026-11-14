@@ -31,6 +31,7 @@ export function isTalk(interaction: Interaction): interaction is Extract<Talk, I
     interaction !== 'mirror' &&
     interaction !== 'fittingRoom' &&
     interaction !== 'hatterMirror' &&
+    interaction !== 'storeMirror' &&
     interaction !== 'search'
   );
 }

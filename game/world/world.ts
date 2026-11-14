@@ -70,4 +70,10 @@ export type Interaction =
   | 'enterHatter'
   | 'leaveHatter'
   | 'hatter'
-  | 'hatterMirror';
+  | 'hatterMirror'
+  // The department store downtown: its door, Mme Poche the kangaroo who sells bags at its first
+  // counter, and its cheval mirror, where bags are tried, bought and put on.
+  | 'enterStore'
+  | 'leaveStore'
+  | 'bagSeller'
+  | 'storeMirror';

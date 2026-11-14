@@ -82,6 +82,47 @@ function StreetLamp({
   );
 }
 
+// A building's lit windows at night: its glow added over the dark from dusk until dawn, like the
+// lamps', over the front standing at x, z, with the front's own size.
+export function LitWindows({
+  glow,
+  x,
+  z,
+  width,
+  height,
+}: {
+  glow: Texture;
+  x: number;
+  z: number;
+  width: number;
+  height: number;
+}) {
+  const { offset, weather } = useContext(SkyClockContext);
+  const material = useRef<MeshBasicMaterial>(null);
+  const easing = useEasing();
+  useFrame((_, delta) => {
+    if (material.current) {
+      const goal = lampLightAt(nowMinute(offset), weather) * 0.5;
+      material.current.opacity += (goal - material.current.opacity) * easing(delta, 2);
+      material.current.visible = material.current.opacity > 0.01;
+    }
+  });
+  return (
+    <mesh position={[x, height / 2, z + 0.06]} renderOrder={GLOW_ORDER}>
+      <planeGeometry args={[width, height]} />
+      <meshBasicMaterial
+        ref={material}
+        map={glow}
+        blending={AdditiveBlending}
+        transparent
+        opacity={0}
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
 // The lamps' drawings and their halo, drawn once for a place.
 function useLampTextures(style: LampStyle) {
   return useMemo(() => {

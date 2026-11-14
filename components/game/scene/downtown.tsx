@@ -1,5 +1,5 @@
 // The big city's street, its towers, and Maison Éventail, the hat shop, Ramen Yuzu and the dojo
-// between them.
+// between them, and the department store at its far end.
 
 import { type RefObject, useMemo } from 'react';
 import {
@@ -18,7 +18,8 @@ import { drawHatterFront } from '../art/hatter';
 import { BRUTUS_SIZE, drawBrutus } from '../art/office';
 import { drawPhotographer, PHOTOGRAPHER_SIZE } from '../art/photos';
 import { drawRamenShop } from '../art/ramen';
-import { HidingProps, Lamps } from './outdoors';
+import { drawStoreFront, drawStoreFrontGlow } from '../art/store';
+import { HidingProps, Lamps, LitWindows } from './outdoors';
 import { LiveCloud, SkyGradient, useSkyTextures } from './sky';
 import {
   blinker,
@@ -35,7 +36,7 @@ import {
   useFontsReady,
 } from './stage';
 
-const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8, 30.4, 38];
+const DOWNTOWN_LAMPS = [-7.2, -2, 4.4, 9.2, 14.2, 19.2, 25.8, 30.4, 38, 42, 58];
 
 const DOWNTOWN_TOWERS_Z = -1.6;
 const DOWNTOWN_BACK_TOWERS_Z = -5;
@@ -156,6 +157,31 @@ export function Downtown({
       ),
     [fontsReady, signs.hatter, hatter.width, hatter.height],
   );
+  const { store } = DOWNTOWN_SPOTS;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const storeFront = useMemo(
+    () =>
+      texture(
+        cutOut(
+          Math.round(store.width * PIXELS_PER_UNIT),
+          Math.round(store.height * PIXELS_PER_UNIT),
+          drawStoreFront(signs.store),
+          9,
+          273,
+        ),
+      ),
+    [fontsReady, signs.store, store.width, store.height],
+  );
+  const storeGlow = useMemo(
+    () =>
+      texture(
+        drawStoreFrontGlow(
+          Math.round(store.width * PIXELS_PER_UNIT),
+          Math.round(store.height * PIXELS_PER_UNIT),
+        ),
+      ),
+    [],
+  );
   const { dojo } = DOWNTOWN_SPOTS;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const dojoFront = useMemo(
@@ -258,6 +284,21 @@ export function Downtown({
         z={DOWNTOWN_TOWERS_Z + 0.2}
         height={hatter.height}
         shadow={textures.shadow}
+      />
+      {/* The department store, at the far end of the street. */}
+      <Furniture
+        map={storeFront}
+        x={store.x}
+        z={DOWNTOWN_TOWERS_Z + 0.2}
+        height={store.height}
+        shadow={textures.shadow}
+      />
+      <LitWindows
+        glow={storeGlow}
+        x={store.x}
+        z={DOWNTOWN_TOWERS_Z + 0.2}
+        width={store.width}
+        height={store.height}
       />
       {/* The dojo, past the last tower. */}
       <Furniture

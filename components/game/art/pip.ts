@@ -2,9 +2,10 @@
 // the wardrobe. Every animal keeps the same round shape, scarf and satchel, and only its ears, its
 // coat and a few features change.
 
-import { type HatId, type ScarfId, STARTER_LOOK } from '@/game/avatar/items';
+import { type GearId, type HatId, type ScarfId, STARTER_LOOK } from '@/game/avatar/items';
 import type { AvatarSpecies } from '@/game/avatar/species';
-import { drawEye, type Eyes, ellipse, roundedRect } from './core';
+import { drawBagStrap, drawWornBag } from './bags';
+import { drawEye, type Eyes, ellipse } from './core';
 import { drawWornHat } from './hats';
 import { drawScarfEnd, drawScarfFront } from './scarves';
 
@@ -52,7 +53,7 @@ const COATS: Record<AvatarSpecies, Coat> = {
 
 const INK = '#2c2a35';
 
-// Pip facing right, with a scarf and a satchel of cards, as the given animal.
+// Pip facing right, as the given animal, wearing the given hat, scarf and bag of cards.
 export function drawPip(
   drawing: CanvasRenderingContext2D,
   width: number,
@@ -61,6 +62,7 @@ export function drawPip(
   species: AvatarSpecies = 'fox',
   scarf: ScarfId | null = STARTER_LOOK.scarf,
   hat: HatId | null = STARTER_LOOK.hat,
+  gear: GearId | null = STARTER_LOOK.gear,
 ) {
   const x = drawing;
   const cx = width / 2 - 6;
@@ -128,7 +130,7 @@ export function drawPip(
     drawWhiskers(x, cx, by);
   }
 
-  drawGear(x, cx, by, scarf);
+  drawGear(x, cx, by, scarf, gear);
   // The hat last, over the head and the ears' bases.
   if (hat) {
     drawWornHat(x, cx, by, hat);
@@ -392,50 +394,23 @@ function drawShell(x: CanvasRenderingContext2D, cx: number, by: number) {
   }
 }
 
-// The scarf and the satchel, which fit every animal.
-function drawGear(x: CanvasRenderingContext2D, cx: number, by: number, scarf: ScarfId | null) {
-  // The satchel's strap.
-  x.strokeStyle = '#8c4b2e';
-  x.lineWidth = 7;
-  x.beginPath();
-  x.moveTo(cx + 62, by - 74);
-  x.quadraticCurveTo(cx, by - 60, cx - 58, by - 52);
-  x.stroke();
-
+// The scarf and the bag, which fit every animal.
+function drawGear(
+  x: CanvasRenderingContext2D,
+  cx: number,
+  by: number,
+  scarf: ScarfId | null,
+  gear: GearId | null,
+) {
+  if (gear) {
+    drawBagStrap(x, cx, by, gear);
+  }
   if (scarf) {
     drawScarfFront(x, cx, by, scarf);
   }
-
-  // The satchel, with three cards sticking out.
-  x.fillStyle = '#b4552f';
-  roundedRect(x, cx - 96, by - 80, 62, 52, 10);
-  x.fill();
-  x.fillStyle = '#6e2e17';
-  roundedRect(x, cx - 92, by - 78, 54, 16, 7);
-  x.fill();
-  for (const [index, [color, degrees]] of (
-    [
-      ['#e2603a', -8],
-      ['#3a86c8', 4],
-      ['#5b9c4e', 14],
-    ] as const
-  ).entries()) {
-    x.save();
-    x.translate(cx - 80 + index * 15, by - 56);
-    x.rotate((degrees * Math.PI) / 180);
-    x.fillStyle = '#fbf6ea';
-    x.fillRect(-12, -30, 24, 40);
-    x.fillStyle = color;
-    x.fillRect(-9, -27, 18, 24);
-    x.restore();
+  if (gear) {
+    drawWornBag(x, cx, by, gear);
   }
-  x.fillStyle = '#b4552f';
-  roundedRect(x, cx - 96, by - 68, 62, 40, 10);
-  x.fill();
-  x.fillStyle = '#9a4326';
-  x.fillRect(cx - 96, by - 68, 62, 5);
-  x.fillStyle = '#f3c14b';
-  ellipse(x, cx - 65, by - 50, 5, 5);
 }
 
 const drawers = new Map<string, typeof drawPip>();
@@ -446,12 +421,13 @@ export function pipAs(
   species: AvatarSpecies,
   scarf: ScarfId | null = STARTER_LOOK.scarf,
   hat: HatId | null = STARTER_LOOK.hat,
+  gear: GearId | null = STARTER_LOOK.gear,
 ): typeof drawPip {
-  const key = `${species}/${scarf ?? 'none'}/${hat ?? 'none'}`;
+  const key = `${species}/${scarf ?? 'none'}/${hat ?? 'none'}/${gear ?? 'none'}`;
   let drawer = drawers.get(key);
   if (!drawer) {
     drawer = (drawing, width, height, eyes = 'open') =>
-      drawPip(drawing, width, height, eyes, species, scarf, hat);
+      drawPip(drawing, width, height, eyes, species, scarf, hat, gear);
     drawers.set(key, drawer);
   }
   return drawer;

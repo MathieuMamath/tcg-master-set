@@ -4,6 +4,7 @@ import {
   ARCADE,
   ARCADE_MACHINES,
   ARCADE_WALLS,
+  BAG_SELLER_X,
   BEDROOM,
   BEDROOM_FURNITURE,
   BEDROOM_WALLS,
@@ -31,6 +32,8 @@ import {
   SHOP_COUNTERS,
   SHOP_WALLS,
   SIDE_PLACES,
+  STORE,
+  STORE_FURNITURE,
   speakerAlong,
   TOWN,
   TOWN_BUILDINGS,
@@ -61,6 +64,25 @@ describe.each(Object.values(SIDE_PLACES))('the $id', (place) => {
     for (const exit of place.exits) {
       expect(SIDE_PLACES[exit.to].exits.some(({ to }) => to === place.id)).toBe(true);
     }
+  });
+});
+
+describe('the Grand Galleries', () => {
+  test('each entrance of the front leads into its own side of the same hall, and back out', () => {
+    const { doorX, endDoorX } = DOWNTOWN_SPOTS.store;
+    const first = exitAlong(DOWNTOWN, doorX);
+    const end = exitAlong(DOWNTOWN, endDoorX);
+    expect(first?.to).toBe('store');
+    expect(end?.to).toBe('store');
+    expect(first?.arrival.x).toBeLessThan(0);
+    expect(end?.arrival.x).toBeGreaterThan(0);
+    expect(exitAlong(STORE, STORE.bounds.minX)?.arrival.x).toBe(doorX);
+    expect(exitAlong(STORE, STORE.bounds.maxX)?.arrival.x).toBe(endDoorX);
+  });
+
+  test('its mirror and its seller stand clear of both doors', () => {
+    expect(interactionAlong(STORE, STORE_FURNITURE.mirror.x)).toBe('storeMirror');
+    expect(interactionAlong(STORE, BAG_SELLER_X)).toBe('bagSeller');
   });
 });
 
@@ -172,7 +194,14 @@ describe('downtown', () => {
 
     expect(interactionAlong(DOWNTOWN, bureau.doorX)).toBe('brutus');
     expect(speakerAlong(DOWNTOWN, bureau.doorX)?.x).toBe(bureau.brutusX);
-    expect(DOWNTOWN.exits.map(({ to }) => to)).toEqual(['ramen', 'boutique', 'hatter', 'dojo']);
+    expect(DOWNTOWN.exits.map(({ to }) => to)).toEqual([
+      'ramen',
+      'boutique',
+      'hatter',
+      'dojo',
+      'store',
+      'store',
+    ]);
     expect(busStop.x + busStop.width / 2).toBeLessThan(bureau.x - bureau.width / 2);
     for (const tower of DOWNTOWN_TOWERS) {
       expect(Math.abs(tower.x - bureau.x)).toBeGreaterThan((tower.width + bureau.width) / 2 - 0.6);

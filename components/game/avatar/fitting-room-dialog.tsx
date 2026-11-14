@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import {
   type BoutiqueLine,
+  type GearId,
   type HatId,
   ITEMS,
   type ItemId,
@@ -18,8 +19,8 @@ import { moveThroughChoicesOnScreen, openDialog } from '../menu-focus';
 import { CanvasArt } from '../shifts/shift';
 
 // The slots a shop sells, and where it lets the player try them on.
-export type ShopSlot = 'scarf' | 'hat';
-export type FittingShop = 'boutique' | 'hatter';
+export type ShopSlot = 'scarf' | 'hat' | 'gear';
+export type FittingShop = 'boutique' | 'hatter' | 'store';
 
 type Props = {
   shop: FittingShop;
@@ -28,12 +29,13 @@ type Props = {
   // What is worn, and the items bought.
   scarf: ScarfId | null;
   hat: HatId | null;
+  gear: GearId | null;
   ownedItems: readonly ItemId[];
   coins: number;
   // What the server decided after a purchase: the coins left, and the items owned and worn.
   onBought: (
     wallet: Wallet,
-    look: { scarf: ScarfId | null; hat: HatId | null; ownedItems: ItemId[] },
+    look: { scarf: ScarfId | null; hat: HatId | null; gear: GearId | null; ownedItems: ItemId[] },
   ) => void;
   onWorn: (slot: ShopSlot, item: ItemId) => void;
   onClose: () => void;
@@ -51,6 +53,7 @@ export function FittingRoomDialog({
   species,
   scarf,
   hat,
+  gear,
   ownedItems,
   coins,
   onBought,
@@ -61,7 +64,7 @@ export function FittingRoomDialog({
   const tItems = useTranslations('Items');
   const dialog = useRef<HTMLDialogElement>(null);
   const choices: ItemId[] = itemsIn(slot);
-  const worn: ItemId | null = slot === 'scarf' ? scarf : hat;
+  const worn: ItemId | null = slot === 'scarf' ? scarf : slot === 'hat' ? hat : gear;
   const [tried, setTried] = useState<ItemId>(worn ?? choices[0]);
   const [note, setNote] = useState<Note | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -75,6 +78,7 @@ export function FittingRoomDialog({
       species,
       slot === 'scarf' ? (item as ScarfId) : scarf,
       slot === 'hat' ? (item as HatId) : hat,
+      slot === 'gear' ? (item as GearId) : gear,
     );
 
   useEffect(() => {

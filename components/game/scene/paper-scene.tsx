@@ -32,6 +32,7 @@ import { Ramen } from './ramen';
 import { Shop } from './shop';
 import { LightVeil, type SkyClock, SkyClockContext } from './sky';
 import type { MovementInput, SceneSigns, SpeakerTops, Travel } from './stage';
+import { Store } from './store';
 import { Town } from './town';
 import {
   COVER_MILLISECONDS,
@@ -137,6 +138,7 @@ export function PaperScene({
     dojo: signs.dojo,
     boutique: signs.boutique,
     hatter: signs.hatter,
+    store: signs.store,
   };
   const [visit, setVisit] = useState<{
     number: number;
@@ -268,6 +270,7 @@ export function PaperScene({
             {visit.place === 'dojo' && <Dojo speakerTops={speakerTops} />}
             {visit.place === 'boutique' && <Boutique speakerTops={speakerTops} />}
             {visit.place === 'hatter' && <Hatter speakerTops={speakerTops} />}
+            {visit.place === 'store' && <Store signs={signs} speakerTops={speakerTops} />}
             <Pip
               input={input}
               room={SIDE_PLACES[visit.place]}

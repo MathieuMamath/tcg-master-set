@@ -105,7 +105,11 @@
     "enterHatter": "Go into the hat shop",
     "leaveHatter": "Leave",
     "hatter": "Talk (Sir Moustache)",
-    "hatterMirror": "Try on hats"
+    "hatterMirror": "Try on hats",
+    "enterStore": "Go into the Grand Galleries",
+    "leaveStore": "Leave",
+    "bagSeller": "Talk (Mme Poche)",
+    "storeMirror": "Try on bags"
   },
   "Shopkeeper": {
     "names": {
@@ -598,7 +602,9 @@
     "dojo": "Dojo Kaito",
     "post": "Village Post",
     "boutique": "Maison Éventail",
-    "hatter": "Moustache Hatters"
+    "hatter": "Moustache Hatters",
+    "store": "The Grand Galleries",
+    "bagShop": "Poche & Co."
   },
   "Hails": {
     "latest": "A mega welcome!",
@@ -622,7 +628,8 @@
     "photographer": "A photo of the sky?",
     "archivist": "Need the archives?",
     "boutiqueSeller": "A touch of elegance?",
-    "hatter": "A hat, old chap?"
+    "hatter": "A hat, old chap?",
+    "bagSeller": "Need a bag?"
   },
   "Bus": {
     "title": "Bus map",
@@ -822,6 +829,14 @@
       "lines": {
         "greeting": "Ah, welcome, welcome! A gentleman without a hat is a sentence without a full stop. From the beanie to the top hat, I have everything you need: do go and see yourself in the mirror."
       }
+    },
+    "bagSeller": {
+      "name": "Mme Poche",
+      "title": "the kangaroo of bags",
+      "mirror": "Try them on in the mirror",
+      "lines": {
+        "greeting": "Welcome to the Grand Galleries! I was the first to open my counter, and the other sellers are coming soon. Bags? I have a pouchful: do go and try them on in front of the mirror."
+      }
     }
   },
   "Stats": {
@@ -932,7 +947,8 @@
       "ramen": "Ramen Yuzu",
       "dojo": "The dojo",
       "boutique": "Maison Éventail",
-      "hatter": "The hat shop"
+      "hatter": "The hat shop",
+      "store": "The Grand Galleries"
     },
     "log": {
       "title": "Log coverage",
@@ -1115,7 +1131,8 @@
       "avatarSpecies": "A wardrobe has arrived in your bedroom! Open it to change animal: fox, turtle, dog, cat, rabbit, bear, wolf, gorilla, red panda or penguin, with your scarf and satchel.",
       "boutique": "Maison Éventail opens in the big city! Mlle Éventail, a very chic peahen, sells four luxury scarves: try them on, buy them and wear them in her fitting room.",
       "mirrorAndWardrobe": "A tall mirror now stands in your bedroom: that’s where you change animal. Your wardrobe is for getting dressed, with the scarves you bought.",
-      "hatter": "Moustache Hatters opens in the big city! Sir Moustache, a most distinguished old walrus, sells six hats, from the pompom beanie to the top hat: try them on in his mirror. Your wardrobe keeps your hats too: change them, or go bareheaded, whenever you like."
+      "hatter": "Moustache Hatters opens in the big city! Sir Moustache, a most distinguished old walrus, sells six hats, from the pompom beanie to the top hat: try them on in his mirror. Your wardrobe keeps your hats too: change them, or go bareheaded, whenever you like.",
+      "departmentStore": "The Grand Galleries open at the far end of the big city’s street! Mme Poche, a kangaroo, keeps the first counter and sells four bags, from the canvas messenger to the gilded bag. More sellers will move in soon."
     }
   },
   "Shift": {
@@ -1743,6 +1760,11 @@
       "alreadyOwned": "You already have it.",
       "notForSale": "Not for sale.",
       "unavailable": "The mirror misted up: please try again."
+    },
+    "store": {
+      "title": "The Grand Galleries’ mirror",
+      "hint": "Try the bags on in front of the mirror. Those you already have go on at once.",
+      "close": "Step away from the mirror"
     }
   },
   "Mirror": {
@@ -1769,14 +1791,16 @@
     "hint": "Choose what you want to wear.",
     "shelves": {
       "scarf": "Scarves",
-      "hat": "Hats"
+      "hat": "Hats",
+      "gear": "Gear"
     },
     "noHat": "No hat",
     "worn": "Worn",
     "close": "Close",
     "more": {
       "scarf": "More scarves await you at Maison Éventail, in the big city.",
-      "hat": "More hats await you at Sir Moustache’s, in the big city."
+      "hat": "More hats await you at Sir Moustache’s, in the big city.",
+      "gear": "More bags await you at the Grand Galleries, in the big city."
     },
     "failed": "The wardrobe is stuck: your change wasn’t kept. Please try again."
   },
@@ -1792,6 +1816,10 @@
     "boater": "The boater",
     "bowler": "The bowler hat",
     "topHat": "The top hat",
-    "satchel": "The satchel"
+    "satchel": "The satchel",
+    "canvasBag": "The canvas messenger",
+    "denimBag": "The denim bag",
+    "schoolBag": "The red school bag",
+    "goldBag": "The gilded bag"
   }
 }
