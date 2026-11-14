@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.114](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.113...v0.1.114) (2026-11-14)
+
+### Bug Fixes
+
+* **shop:** steady the booster quantity controls ([#117](https://github.com/MathieuMamath/tcg-master-set/issues/117)) ([f84f716](https://github.com/MathieuMamath/tcg-master-set/commit/f84f716a7f0de9958a3896136fadfbfe8f3fd566)), references [#116](https://github.com/MathieuMamath/tcg-master-set/issues/116) [#116](https://github.com/MathieuMamath/tcg-master-set/issues/116) [#115](https://github.com/MathieuMamath/tcg-master-set/issues/115)
+
 ## [0.1.113](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.112...v0.1.113) (2026-11-13)
 
 ### Features
