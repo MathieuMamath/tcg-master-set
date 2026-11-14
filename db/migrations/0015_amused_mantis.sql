@@ -1,0 +1,1 @@
+ALTER TABLE "coupons" ADD COLUMN "deactivated_at" timestamp with time zone;

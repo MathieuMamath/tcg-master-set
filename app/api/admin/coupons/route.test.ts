@@ -1,17 +1,30 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
-import { createCoupon, listCoupons } from '@/coupons/admin';
-import { GET, POST } from './route';
+import { createCoupon, listCoupons, setCouponActive } from '@/coupons/admin';
+import { GET, PATCH, POST } from './route';
 
 vi.mock('@/auth/session', () => ({ getPlayer: vi.fn() }));
 vi.mock('@/auth/roles', () => ({ isAdmin: vi.fn() }));
-vi.mock('@/coupons/admin', () => ({ createCoupon: vi.fn(), listCoupons: vi.fn() }));
+vi.mock('@/coupons/admin', () => ({
+  createCoupon: vi.fn(),
+  listCoupons: vi.fn(),
+  setCouponActive: vi.fn(),
+}));
 
 function create(body: unknown) {
   return POST(
     new Request('http://localhost/api/admin/coupons', {
       method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  );
+}
+
+function toggle(body: unknown) {
+  return PATCH(
+    new Request('http://localhost/api/admin/coupons', {
+      method: 'PATCH',
       body: JSON.stringify(body),
     }),
   );
@@ -57,4 +70,23 @@ test('refuses anyone but an admin', async () => {
   vi.mocked(getPlayer).mockResolvedValue(null);
   expect((await GET()).status).toBe(401);
   expect(createCoupon).not.toHaveBeenCalled();
+});
+
+test('turns a coupon off or back on for an admin', async () => {
+  vi.mocked(setCouponActive).mockResolvedValue(true);
+
+  const response = await toggle({ couponId: 3, isActive: false });
+
+  expect(response.status).toBe(200);
+  expect(setCouponActive).toHaveBeenCalledWith('admin-1', 3, false);
+  expect((await toggle({ couponId: 'three', isActive: false })).status).toBe(400);
+});
+
+test('lets no one but an admin turn a coupon off', async () => {
+  vi.mocked(setCouponActive).mockReset();
+  vi.mocked(isAdmin).mockResolvedValue(false);
+  expect((await toggle({ couponId: 3, isActive: false })).status).toBe(403);
+  vi.mocked(getPlayer).mockResolvedValue(null);
+  expect((await toggle({ couponId: 3, isActive: false })).status).toBe(401);
+  expect(setCouponActive).not.toHaveBeenCalled();
 });

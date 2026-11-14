@@ -59,7 +59,7 @@ export function SettingsMenu({ sets, onRedeemed, onShowNews, onClose }: Props) {
         setResult({ kind: 'done', text: tCoupon('redeemed', { gifts: gifts.join(' + ') }) });
         setCode('');
       } else {
-        const status = ['unknown', 'expired', 'alreadyUsed'].includes(answer.status)
+        const status = ['unknown', 'expired', 'deactivated', 'alreadyUsed'].includes(answer.status)
           ? answer.status
           : 'unknown';
         setResult({ kind: 'error', text: tCoupon(status as 'unknown') });

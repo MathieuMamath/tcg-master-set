@@ -17,9 +17,9 @@ export type CouponRedemption =
       boosters: number;
       wallet: Wallet;
     }
-  | { status: 'unknown' | 'expired' | 'alreadyUsed' };
+  | { status: 'unknown' | 'expired' | 'deactivated' | 'alreadyUsed' };
 
-// A player types a coupon's code in the settings: the server finds it, checks it hasn't expired
+// A player types a coupon's code in the settings: the server finds it, checks it is still on and hasn't expired
 // and that this player hasn't used it yet, and pays it, all in one transaction, so that it can
 // never be used twice.
 export async function redeemCoupon(
@@ -35,6 +35,9 @@ export async function redeemCoupon(
     const [coupon] = await transaction.select().from(coupons).where(eq(coupons.code, code));
     if (!coupon) {
       return { status: 'unknown' as const };
+    }
+    if (coupon.deactivatedAt !== null) {
+      return { status: 'deactivated' as const };
     }
     if (isCouponExpired(coupon.expiresAt, now)) {
       return { status: 'expired' as const };

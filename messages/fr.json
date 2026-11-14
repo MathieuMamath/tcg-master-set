@@ -986,6 +986,13 @@
       "expires": "Expire le {date}",
       "expired": "Expiré depuis le {date}",
       "redemptions": "{count, plural, =0 {Jamais utilisé} one {Utilisé # fois} other {Utilisé # fois}}",
+      "deactivate": "Désactiver",
+      "reactivate": "Réactiver",
+      "deactivateLabel": "Désactiver le coupon {code}",
+      "reactivateLabel": "Réactiver le coupon {code}",
+      "deactivatedStamp": "Désactivé",
+      "deactivated": "Le coupon {code} est désactivé : plus personne ne peut l’utiliser.",
+      "reactivated": "Le coupon {code} fonctionne de nouveau.",
       "errors": {
         "code": "Le code doit faire de 3 à 24 caractères : lettres, chiffres ou tirets.",
         "coins": "Le nombre de pièces n’est pas valable.",
@@ -1007,6 +1014,7 @@
       "unknown": "Ce code ne correspond à aucun coupon.",
       "expired": "Ce coupon a expiré.",
       "alreadyUsed": "Tu as déjà utilisé ce coupon.",
+      "deactivated": "Ce coupon n’est plus valable.",
       "unavailable": "Impossible d’utiliser le coupon pour le moment."
     }
   },

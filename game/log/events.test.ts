@@ -23,6 +23,8 @@ test('lists every type of the catalogue once', () => {
     'booster.abandoned': true,
     'player.slept': true,
     'coupon.created': true,
+    'coupon.deactivated': true,
+    'coupon.reactivated': true,
     'coupon.redeemed': true,
   };
 

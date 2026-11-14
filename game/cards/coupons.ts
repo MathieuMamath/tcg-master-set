@@ -94,3 +94,19 @@ export function parseCouponDraft(
 export function isCouponExpired(expiresAt: Date | null, now: Date): boolean {
   return expiresAt !== null && expiresAt <= now;
 }
+
+// An admin's request to turn a coupon off or back on, checked for its shape.
+export function parseCouponActivation(
+  value: unknown,
+): { couponId: number; isActive: boolean } | null {
+  if (typeof value !== 'object' || value === null) {
+    return null;
+  }
+  const { couponId, isActive } = value as Record<string, unknown>;
+  return typeof couponId === 'number' &&
+    Number.isInteger(couponId) &&
+    couponId > 0 &&
+    typeof isActive === 'boolean'
+    ? { couponId, isActive }
+    : null;
+}

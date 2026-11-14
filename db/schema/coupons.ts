@@ -11,7 +11,9 @@ import {
 import { users } from './auth';
 
 // Coupons made by admins on Mlle Trotte's floor: each gives coins, boosters of a set, or both, to
-// every player who types its code in the settings, once each, until it expires if it does.
+// every player who types its code in the settings, once each, until it expires if it does, or
+// until an admin deactivates it. A deactivated coupon is kept, with its uses, and can be turned
+// back on.
 export const coupons = pgTable(
   'coupons',
   {
@@ -24,6 +26,8 @@ export const coupons = pgTable(
     // Null for a coupon that never expires.
     expiresAt: timestamp('expires_at', { withTimezone: true }),
     createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+    // Null while the coupon can be used.
+    deactivatedAt: timestamp('deactivated_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

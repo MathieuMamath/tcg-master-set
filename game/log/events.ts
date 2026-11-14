@@ -75,6 +75,9 @@ export type GameEventDetails = {
     boosters: number;
     expiresAt: string | null;
   };
+  // An admin turned a coupon off on Mlle Trotte's floor, or back on.
+  'coupon.deactivated': { couponId: number; code: string };
+  'coupon.reactivated': { couponId: number; code: string };
   // A player used a coupon from the settings, and what it gave them.
   'coupon.redeemed': {
     couponId: number;
@@ -113,6 +116,8 @@ export const GAME_EVENT_TYPES = [
   'booster.abandoned',
   'player.slept',
   'coupon.created',
+  'coupon.deactivated',
+  'coupon.reactivated',
   'coupon.redeemed',
 ] as const satisfies readonly GameEventType[];
 
