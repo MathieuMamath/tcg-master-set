@@ -268,6 +268,137 @@ body {
   animation: ui-shine 2600ms linear infinite;
 }
 
+/* The foil of holo and reverse cards. Where the light falls, from 0 to 100 across and down the
+   card, and how much the player is turning it, from 0 to 1: set by the pointer on a card in hand,
+   or drifting by themselves on a card at rest. */
+@property --foil-x {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 50;
+}
+
+@property --foil-y {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 50;
+}
+
+@property --foil-on {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes ui-foil-drift {
+  0% {
+    --foil-x: 15;
+    --foil-y: 20;
+  }
+  50% {
+    --foil-x: 85;
+    --foil-y: 55;
+  }
+  100% {
+    --foil-x: 30;
+    --foil-y: 90;
+  }
+}
+
+.ui-foil-idle {
+  animation: ui-foil-drift 7s ease-in-out infinite alternate;
+}
+
+.ui-foil {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  mask-repeat: no-repeat;
+  mix-blend-mode: color-dodge;
+  /* Darkened before the dodge, so that the foil shows its colours on pale cards rather than
+     washing them white. */
+  filter: brightness(0.5) contrast(1.7) saturate(1.9);
+  opacity: calc(0.6 + var(--foil-on) * 0.3);
+  /* A rainbow that slides as the card turns, over a scatter of glitter that shifts more slowly. */
+  background-image:
+    repeating-linear-gradient(
+      115deg,
+      #ff7773 0%,
+      #ffed5f 5%,
+      #a8ff5f 10%,
+      #83fff7 15%,
+      #7894ff 20%,
+      #d875ff 25%,
+      #ff7773 30%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 11 -7 0 0 0 11 -7 0 0 0 11 -7 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23s)'/%3E%3C/svg%3E");
+  background-size:
+    300% 300%,
+    180px 180px;
+  background-position:
+    calc(var(--foil-x) * 1%) calc(var(--foil-y) * 1%),
+    calc(var(--foil-x) * 0.4px) calc(var(--foil-y) * 0.4px);
+}
+
+/* The illustration's window, where a holo's foil lies and a reverse's stops: about the same place
+   on every card. */
+.ui-foil-holo {
+  mask-image: linear-gradient(#000 0 0);
+  mask-size: 84% 38%;
+  mask-position: 50% 18%;
+  /* Over the illustration itself, so light enough for its own colours to show through. */
+  filter: brightness(0.65) contrast(1.3) saturate(1.3);
+  opacity: calc(0.28 + var(--foil-on) * 0.22);
+}
+
+.ui-foil-reverse {
+  background-image:
+    repeating-linear-gradient(-45deg, transparent 0 7px, rgb(255 255 255 / 30%) 7px 9px),
+    repeating-linear-gradient(
+      70deg,
+      #ff9a8f 0%,
+      #fff38a 6%,
+      #8fffd2 12%,
+      #8fb4ff 18%,
+      #f09bff 24%,
+      #ff9a8f 30%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 11 -7 0 0 0 11 -7 0 0 0 11 -7 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23s)'/%3E%3C/svg%3E");
+  background-size:
+    100% 100%,
+    300% 300%,
+    180px 180px;
+  background-position:
+    calc(var(--foil-x) * 0.3px) 0,
+    calc(var(--foil-x) * 1%) calc(var(--foil-y) * 1%),
+    calc(var(--foil-x) * 0.4px) calc(var(--foil-y) * 0.4px);
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-size:
+    100% 100%,
+    84% 38%;
+  mask-position:
+    0 0,
+    50% 18%;
+  mask-composite: exclude;
+  opacity: calc(0.45 + var(--foil-on) * 0.3);
+}
+
+/* The light itself, a soft spot following the pointer over the whole card. */
+.ui-foil-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at calc(var(--foil-x) * 1%) calc(var(--foil-y) * 1%),
+    rgb(255 255 255 / 60%),
+    rgb(255 255 255 / 15%) 25%,
+    transparent 55%
+  );
+  mix-blend-mode: overlay;
+  opacity: calc(0.3 + var(--foil-on) * 0.55);
+}
+
 @keyframes ui-binder-open {
   to {
     opacity: 0;
@@ -878,6 +1009,7 @@ him, the bus rumbling, and dots that wait. */
   .ui-binder-turn,
   .ui-card-flip,
   .ui-shine,
+  .ui-foil-idle,
   .ui-god-pack-glow,
   .ui-god-pack-banner,
   .ui-pop-in,
