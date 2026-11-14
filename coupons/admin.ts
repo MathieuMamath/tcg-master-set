@@ -1,4 +1,4 @@
-import { count, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq, isNotNull, isNull } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { couponRedemptions, coupons } from '@/db/schema';
 import type { CouponDraft } from '@/game/cards/coupons';
@@ -15,6 +15,8 @@ export type CouponSummary = {
   boosters: number;
   expiresAt: string | null;
   createdAt: string;
+  // When an admin turned it off, or null while it can be used.
+  deactivatedAt: string | null;
   redemptions: number;
 };
 
@@ -28,6 +30,7 @@ export async function listCoupons(): Promise<CouponSummary[]> {
       boosters: coupons.boosters,
       expiresAt: coupons.expiresAt,
       createdAt: coupons.createdAt,
+      deactivatedAt: coupons.deactivatedAt,
       redemptions: count(couponRedemptions.userId),
     })
     .from(coupons)
@@ -38,6 +41,7 @@ export async function listCoupons(): Promise<CouponSummary[]> {
     ...row,
     expiresAt: row.expiresAt ? row.expiresAt.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
+    deactivatedAt: row.deactivatedAt ? row.deactivatedAt.toISOString() : null,
     redemptions: Number(row.redemptions),
   }));
 }
@@ -61,6 +65,37 @@ export async function createCoupon(adminId: string, draft: CouponDraft): Promise
       boosters: draft.boosters,
       expiresAt: draft.expiresAt ? draft.expiresAt.toISOString() : null,
     });
+    return true;
+  });
+}
+
+// Turns a coupon off, or back on, keeping it and its uses. Returns false when there is no such
+// coupon, or when it already was as asked, so that each change is recorded once.
+export async function setCouponActive(
+  adminId: string,
+  couponId: number,
+  isActive: boolean,
+): Promise<boolean> {
+  return getDb().transaction(async (transaction) => {
+    const [changed] = await transaction
+      .update(coupons)
+      .set({ deactivatedAt: isActive ? null : new Date() })
+      .where(
+        and(
+          eq(coupons.id, couponId),
+          isActive ? isNotNull(coupons.deactivatedAt) : isNull(coupons.deactivatedAt),
+        ),
+      )
+      .returning({ id: coupons.id, code: coupons.code });
+    if (!changed) {
+      return false;
+    }
+    await recordEvent(
+      transaction,
+      adminId,
+      isActive ? 'coupon.reactivated' : 'coupon.deactivated',
+      { couponId: changed.id, code: changed.code },
+    );
     return true;
   });
 }

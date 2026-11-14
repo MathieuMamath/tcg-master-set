@@ -1,7 +1,7 @@
 import { isAdmin } from '@/auth/roles';
 import { getPlayer } from '@/auth/session';
-import { createCoupon, listCoupons } from '@/coupons/admin';
-import { parseCouponDraft } from '@/game/cards/coupons';
+import { createCoupon, listCoupons, setCouponActive } from '@/coupons/admin';
+import { parseCouponActivation, parseCouponDraft } from '@/game/cards/coupons';
 
 // Mlle Trotte's register, for admins only, checked on every request: Brutus at the door is only a
 // picture of this rule.
@@ -50,6 +50,24 @@ export async function POST(request: Request) {
     if (!(await createCoupon(checked.player.id, parsed.draft))) {
       return Response.json({ error: 'taken' }, { status: 409 });
     }
+    return Response.json({ coupons: await listCoupons() });
+  } catch (error) {
+    return unavailable(error);
+  }
+}
+
+// Turns a coupon off, or back on. It stays in the register with its uses either way.
+export async function PATCH(request: Request) {
+  const parsed = parseCouponActivation(await request.json().catch(() => null));
+  try {
+    const checked = await admin();
+    if (checked.error) {
+      return checked.error;
+    }
+    if (!parsed) {
+      return Response.json({ error: 'invalid' }, { status: 400 });
+    }
+    await setCouponActive(checked.player.id, parsed.couponId, parsed.isActive);
     return Response.json({ coupons: await listCoupons() });
   } catch (error) {
     return unavailable(error);

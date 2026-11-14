@@ -37,6 +37,8 @@ export function CouponRegister({ sets, onClose }: Props) {
   const [expiresOn, setExpiresOn] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ kind: 'error' | 'done'; text: string } | null>(null);
+  // The coupon being turned off or on, while the server answers.
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -97,6 +99,35 @@ export function CouponRegister({ sets, onClose }: Props) {
       setMessage({ kind: 'error', text: t('errors.unavailable') });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Turns a coupon off or back on. The server records it and sends the register back.
+  const setActive = async (coupon: CouponSummary, isActive: boolean) => {
+    if (togglingId !== null) {
+      return;
+    }
+    setTogglingId(coupon.id);
+    setMessage(null);
+    try {
+      const response = await fetch('/api/admin/coupons', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ couponId: coupon.id, isActive }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const body = await response.json();
+      setLoad({ status: 'ready', coupons: body.coupons });
+      setMessage({
+        kind: 'done',
+        text: t(isActive ? 'reactivated' : 'deactivated', { code: coupon.code }),
+      });
+    } catch {
+      setMessage({ kind: 'error', text: t('errors.unavailable') });
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -218,15 +249,25 @@ export function CouponRegister({ sets, onClose }: Props) {
           {load.coupons.map((coupon) => {
             const expiresAt = coupon.expiresAt ? new Date(coupon.expiresAt) : null;
             const isExpired = expiresAt !== null && expiresAt.getTime() <= now;
+            const isDeactivated = coupon.deactivatedAt !== null;
             return (
               <li
                 key={coupon.id}
-                className={`grid gap-1 rounded-sm bg-ui-paper px-3 py-2 shadow-[2px_3px_0_var(--ui-shadow)] sm:grid-cols-[minmax(0,1fr)_auto] ${
-                  isExpired ? 'opacity-60' : ''
-                }`}
+                className="grid gap-2 rounded-sm bg-ui-paper px-3 py-2 shadow-[2px_3px_0_var(--ui-shadow)] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center"
               >
-                <span>
-                  <span className="font-digits text-lg font-bold">{coupon.code}</span>
+                <span className={isExpired || isDeactivated ? 'opacity-60' : ''}>
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`font-digits text-lg font-bold ${isDeactivated ? 'line-through' : ''}`}
+                    >
+                      {coupon.code}
+                    </span>
+                    {isDeactivated && (
+                      <span className="-rotate-3 border-2 border-ui-stamp px-1.5 font-display text-xs text-ui-stamp">
+                        {t('deactivatedStamp')}
+                      </span>
+                    )}
+                  </span>
                   <span className="block text-sm">{rewardText(coupon)}</span>
                   <span className="block text-sm text-ui-ink/60">
                     {expiresAt === null
@@ -240,9 +281,26 @@ export function CouponRegister({ sets, onClose }: Props) {
                           })}
                   </span>
                 </span>
-                <span className="self-center font-digits font-bold sm:text-right">
+                <span
+                  className={`font-digits font-bold sm:text-right ${
+                    isExpired || isDeactivated ? 'opacity-60' : ''
+                  }`}
+                >
                   {t('redemptions', { count: coupon.redemptions })}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setActive(coupon, isDeactivated)}
+                  aria-disabled={togglingId !== null}
+                  aria-label={t(isDeactivated ? 'reactivateLabel' : 'deactivateLabel', {
+                    code: coupon.code,
+                  })}
+                  className={`${BUTTON_CLASS} justify-self-start text-sm sm:justify-self-end ${
+                    isDeactivated ? '' : 'text-ui-stamp'
+                  }`}
+                >
+                  {t(isDeactivated ? 'reactivate' : 'deactivate')}
+                </button>
               </li>
             );
           })}

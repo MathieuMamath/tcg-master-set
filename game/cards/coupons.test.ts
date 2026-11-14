@@ -4,6 +4,7 @@ import {
   generateCouponCode,
   isCouponExpired,
   normalizeCouponCode,
+  parseCouponActivation,
   parseCouponDraft,
 } from './coupons';
 
@@ -95,5 +96,31 @@ describe('isCouponExpired', () => {
     expect(isCouponExpired(null, NOW)).toBe(false);
     expect(isCouponExpired(new Date('2026-11-07T00:00:00Z'), NOW)).toBe(false);
     expect(isCouponExpired(new Date('2026-11-06T11:59:59Z'), NOW)).toBe(true);
+  });
+});
+
+describe('parseCouponActivation', () => {
+  it('takes a coupon id and whether to turn it on', () => {
+    expect(parseCouponActivation({ couponId: 4, isActive: false })).toEqual({
+      couponId: 4,
+      isActive: false,
+    });
+    expect(parseCouponActivation({ couponId: 4, isActive: true })).toEqual({
+      couponId: 4,
+      isActive: true,
+    });
+  });
+
+  it('refuses anything else', () => {
+    for (const value of [
+      null,
+      'off',
+      { couponId: '4', isActive: false },
+      { couponId: 0, isActive: false },
+      { couponId: 1.5, isActive: true },
+      { couponId: 4, isActive: 'no' },
+    ]) {
+      expect(parseCouponActivation(value)).toBeNull();
+    }
   });
 });

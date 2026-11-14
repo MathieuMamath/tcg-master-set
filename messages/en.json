@@ -986,6 +986,13 @@
       "expires": "Expires on {date}",
       "expired": "Expired on {date}",
       "redemptions": "{count, plural, =0 {Never used} one {Used once} other {Used # times}}",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "deactivateLabel": "Deactivate the coupon {code}",
+      "reactivateLabel": "Reactivate the coupon {code}",
+      "deactivatedStamp": "Deactivated",
+      "deactivated": "The coupon {code} is deactivated: nobody can use it any more.",
+      "reactivated": "The coupon {code} works again.",
       "errors": {
         "code": "The code must be 3 to 24 letters, digits or dashes.",
         "coins": "The number of coins isn’t valid.",
@@ -1007,6 +1014,7 @@
       "unknown": "This code doesn’t match any coupon.",
       "expired": "This coupon has expired.",
       "alreadyUsed": "You’ve already used this coupon.",
+      "deactivated": "This coupon is no longer valid.",
       "unavailable": "The coupon can’t be used right now."
     }
   },
