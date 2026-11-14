@@ -91,11 +91,11 @@ function Pocket({ slot, count, onOpen }: { slot: BinderSlot; count: number; onOp
       onClick={onOpen}
       aria-label={t('viewCard', { name: slot.card.name, count })}
       className={`${POCKET_CLASS} block w-full cursor-pointer outline-offset-2 ${
-        cardFoil(slot.variant) ? 'ui-foil-idle' : ''
+        cardFoil(slot.variant, slot.card.isFullArt) ? 'ui-foil-idle' : ''
       }`}
     >
       <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="low" />
-      <CardFoil foil={cardFoil(slot.variant)} />
+      <CardFoil foil={cardFoil(slot.variant, slot.card.isFullArt)} />
       {/* The light on the pocket's plastic sleeve. */}
       <span
         aria-hidden="true"
@@ -149,7 +149,7 @@ function CardDetail({
   return (
     <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-ui-ink/85 p-4">
       <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
-        <TiltCard variant={slot.variant}>
+        <TiltCard variant={slot.variant} isFullArt={slot.card.isFullArt}>
           <CardPicture name={slot.card.name} imageUrl={slot.card.imageUrl} quality="max" />
         </TiltCard>
       </div>

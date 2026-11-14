@@ -12,6 +12,8 @@ export type BinderCard = {
   rarity: string | null;
   imageUrl: string | null;
   variants: readonly string[];
+  // Whether its illustration covers the whole card, for its foil.
+  isFullArt?: boolean;
 };
 
 export type BinderSlot = {

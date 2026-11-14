@@ -2,6 +2,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { cardSetTranslations, cards, cardTranslations, cardVariants } from '@/db/schema';
 import type { DrawnCard, PoolCard } from '@/game/cards/booster';
+import { isFullArtRarity } from '@/game/cards/foil';
 import { cardTier, type PullTier } from '@/game/cards/pull-tier';
 
 export type OpenedCard = {
@@ -12,6 +13,8 @@ export type OpenedCard = {
   imageUrl: string | null;
   // From the rarity in English, since `rarity` above is translated for display.
   tier: PullTier;
+  // Whether its illustration covers the whole card, for its foil.
+  isFullArt: boolean;
 };
 
 // A card as the player discovers it: either it fills an empty pocket of the binder, or it's a
@@ -85,6 +88,7 @@ export async function loadOpenedCards(
         // Older cards often only have a scan in one of the languages.
         imageUrl: translation?.imageUrl ?? forCard.find((row) => row.imageUrl)?.imageUrl ?? null,
         tier: cardTier(rarities.find(({ id }) => id === cardId)?.rarity ?? null),
+        isFullArt: isFullArtRarity(rarities.find(({ id }) => id === cardId)?.rarity ?? null),
       };
     }),
   };

@@ -358,7 +358,7 @@ function Reveal({
           <PullRays tier={tier} className="top-1/2 left-1/2 size-[170vmin] -translate-1/2" />
         )}
         <div className="ui-card-flip relative size-full">
-          <TiltCard variant={current?.variant ?? 'normal'}>
+          <TiltCard variant={current?.variant ?? 'normal'} isFullArt={current?.isFullArt}>
             {current ? (
               <>
                 <CardPicture name={current.name} imageUrl={current.imageUrl} quality="high" />
@@ -428,7 +428,7 @@ function EnlargedCard({ card, onClose }: { card: RevealedCard; onClose: () => vo
   return (
     <div className="fixed inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ui-ink p-4">
       <div className={`ui-pop-in ${ENLARGED_CARD_CLASS}`}>
-        <TiltCard variant={card.variant}>
+        <TiltCard variant={card.variant} isFullArt={card.isFullArt}>
           <CardPicture name={card.name} imageUrl={card.imageUrl} quality="max" />
           {card.isNew && <NewMark />}
         </TiltCard>
@@ -500,7 +500,7 @@ function Summary({
               }`}
             >
               <CardPicture name={card.name} imageUrl={card.imageUrl} quality="low" />
-              <CardFoil foil={cardFoil(card.variant)} />
+              <CardFoil foil={cardFoil(card.variant, card.isFullArt)} />
               {card.isNew && <NewMark />}
             </button>
           </li>

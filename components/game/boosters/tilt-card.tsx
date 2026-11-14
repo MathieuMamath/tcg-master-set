@@ -9,10 +9,18 @@ type Light = { x: number; y: number } | null;
 
 // A card held up: it leans away from the pointer, and a holo's or a reverse's foil catches the
 // light where the pointer is. At rest, the foil's light drifts by itself.
-export function TiltCard({ variant, children }: { variant: string; children: ReactNode }) {
+export function TiltCard({
+  variant,
+  isFullArt = false,
+  children,
+}: {
+  variant: string;
+  isFullArt?: boolean;
+  children: ReactNode;
+}) {
   const [{ rotateX, rotateY }, setTilt] = useState(FLAT_TILT);
   const [light, setLight] = useState<Light>(null);
-  const foil = cardFoil(variant);
+  const foil = cardFoil(variant, isFullArt);
   const flatten = () => {
     setTilt(FLAT_TILT);
     setLight(null);
