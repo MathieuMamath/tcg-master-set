@@ -1077,7 +1077,8 @@
       "boosterControlsFix": "Buying boosters is steady again: + and − count one per click and only race when held, and Enter on a booster goes to its quantity, where Enter buys.",
       "holoFoil": "Holo and reverse holo cards finally shine: a rainbow foil with glitter, on the illustration for holos and around it for reverses, that follows your mouse as you tilt the card.",
       "packVolume": "Booster packs look full now: their foil bulges with the cards inside, pinches at the seals and catches the light.",
-      "pullEffectsSetting": "Opening effects give the cards away? Turn them off in the settings: your packs then open without the lights climbing up to their best card."
+      "pullEffectsSetting": "Opening effects give the cards away? Turn them off in the settings: your packs then open without the lights climbing up to their best card.",
+      "binderCardView": "A card enlarged in the binder now has the screen to itself: the set’s logo and the button to close the binder no longer cover it."
     }
   },
   "Shift": {
