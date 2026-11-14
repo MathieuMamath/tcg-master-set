@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.116](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.115...v0.1.116) (2026-11-14)
+
+### Features
+
+* **binder:** give holo and reverse cards a foil that catches the light ([#119](https://github.com/MathieuMamath/tcg-master-set/issues/119)) ([1f82992](https://github.com/MathieuMamath/tcg-master-set/commit/1f82992a43e468e00d025e92fccedec69f07afc3))
+
 ## [0.1.115](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.114...v0.1.115) (2026-11-14)
 
 ### Features
