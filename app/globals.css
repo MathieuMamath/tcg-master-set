@@ -498,6 +498,64 @@ body {
     rgb(0 0 0 / 20%);
 }
 
+/* A sealed pack swollen by the cards inside: its foil curves away at both sides and catches a long
+   highlight where it bulges, and it is pinched flat where the crimped seals hold it, top and
+   bottom. Laid over the printed paper. */
+.ui-pack-volume {
+  background:
+    radial-gradient(ellipse 34% 14% at 0% 13%, rgb(0 0 0 / 55%), transparent),
+    radial-gradient(ellipse 34% 14% at 100% 13%, rgb(0 0 0 / 55%), transparent),
+    radial-gradient(ellipse 34% 12% at 0% 93%, rgb(0 0 0 / 55%), transparent),
+    radial-gradient(ellipse 34% 12% at 100% 93%, rgb(0 0 0 / 55%), transparent),
+    linear-gradient(
+      180deg,
+      rgb(0 0 0 / 30%) 11%,
+      rgb(0 0 0 / 0%) 17%,
+      rgb(0 0 0 / 0%) 88%,
+      rgb(0 0 0 / 32%) 93.5%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 42%) 0%,
+      rgb(0 0 0 / 8%) 9%,
+      rgb(255 255 255 / 0%) 18%,
+      rgb(255 255 255 / 45%) 29%,
+      rgb(255 255 255 / 10%) 39%,
+      rgb(0 0 0 / 0%) 62%,
+      rgb(0 0 0 / 14%) 84%,
+      rgb(0 0 0 / 46%) 100%
+    );
+  mix-blend-mode: overlay;
+}
+
+/* The film's gloss: a crisp diagonal glint and a few creases fanning out from the seals. */
+.ui-pack-gloss {
+  background:
+    linear-gradient(
+      118deg,
+      transparent 22%,
+      rgb(255 255 255 / 0%) 34%,
+      rgb(255 255 255 / 28%) 40%,
+      rgb(255 255 255 / 0%) 47%,
+      transparent 60%
+    ),
+    repeating-linear-gradient(
+      100deg,
+      transparent 0 9%,
+      rgb(255 255 255 / 9%) 9% 9.6%,
+      transparent 9.6% 17%
+    )
+    top / 100% 22% no-repeat,
+    repeating-linear-gradient(
+      80deg,
+      transparent 0 11%,
+      rgb(255 255 255 / 8%) 11% 11.6%,
+      transparent 11.6% 19%
+    )
+    bottom / 100% 16% no-repeat;
+  mix-blend-mode: screen;
+}
+
 /* The grain of printed paper, over a drawing made in CSS. */
 .ui-paper-grain {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");

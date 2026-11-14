@@ -1069,7 +1069,8 @@
       "quickQuantity": "Acheter beaucoup de boosters va plus vite : choisis ×5, ×10, ×20 ou Max d’une touche, tape le nombre voulu, ou reste appuyé sur + ou − pour compter vite.",
       "enterToBuy": "Acheter chez Mamie Noisette, ou à la Tanière, va plus vite au clavier : choisis avec les flèches, appuie sur Entrée pour acheter, et passe directement au suivant.",
       "boosterControlsFix": "Acheter des boosters est de nouveau fiable : + et − comptent un par clic et ne s’emballent que si tu restes appuyé, et Entrée sur un booster mène à sa quantité, où Entrée achète.",
-      "holoFoil": "Les cartes holo et reverse brillent enfin : un reflet arc-en-ciel pailleté, sur l’illustration pour les holo et tout autour pour les reverse, qui suit ta souris quand tu inclines la carte."
+      "holoFoil": "Les cartes holo et reverse brillent enfin : un reflet arc-en-ciel pailleté, sur l’illustration pour les holo et tout autour pour les reverse, qui suit ta souris quand tu inclines la carte.",
+      "packVolume": "Les boosters ont l’air bien remplis : leur film se bombe sous les cartes, se pince aux soudures et accroche la lumière."
     }
   },
   "Shift": {
