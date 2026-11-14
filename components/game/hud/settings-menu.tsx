@@ -5,6 +5,7 @@ import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { authClient } from '@/auth/client';
 import type { PlayableSet } from '@/game/cards/card-sets';
 import type { Wallet } from '@/game/cards/shop-dialogue';
+import type { PlayerSettings } from '@/game/ui/settings';
 import { useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { moveThroughChoices, openDialog } from '../menu-focus';
@@ -14,6 +15,9 @@ const LANGUAGE_NAMES: Record<Locale, string> = { en: 'English', fr: 'Français' 
 
 type Props = {
   sets: readonly PlayableSet[];
+  settings: PlayerSettings;
+  // Shows a change at once; the server keeps it for the next visits.
+  onSettingsChange: (settings: PlayerSettings) => void;
   // A coupon used here gives coins or boosters, shown at once in the game's counters.
   onRedeemed: (wallet: Wallet) => void;
   // Opens the "What's new?" sheet with every note.
@@ -21,13 +25,42 @@ type Props = {
   onClose: () => void;
 };
 
-export function SettingsMenu({ sets, onRedeemed, onShowNews, onClose }: Props) {
+export function SettingsMenu({
+  sets,
+  settings,
+  onSettingsChange,
+  onRedeemed,
+  onShowNews,
+  onClose,
+}: Props) {
   const t = useTranslations('Settings');
   const tCoupon = useTranslations('Coupons.redeem');
   const tNews = useTranslations('News');
   const [code, setCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [result, setResult] = useState<{ kind: 'done' | 'error'; text: string } | null>(null);
+  const [isSettingFailed, setIsSettingFailed] = useState(false);
+
+  // Shown at once, then saved on the server, and put back if the server couldn't keep it.
+  const changeSettings = async (change: Partial<PlayerSettings>) => {
+    const previous = settings;
+    onSettingsChange({ ...settings, ...change });
+    setIsSettingFailed(false);
+    try {
+      const response = await fetch('/api/player/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(change),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      onSettingsChange((await response.json()).settings);
+    } catch {
+      onSettingsChange(previous);
+      setIsSettingFailed(true);
+    }
+  };
 
   // The server alone checks the code and pays: this only shows what it answered.
   const redeem = async (event: FormEvent) => {
@@ -126,6 +159,41 @@ export function SettingsMenu({ sets, onRedeemed, onShowNews, onClose }: Props) {
               ))}
             </div>
           </fieldset>
+          <div className="mt-4 border-t-2 border-dashed border-ui-accent-dark/40 pt-3">
+            <span id="pull-effects-label" className="font-semibold">
+              {t('pullEffects')}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.pullEffects}
+              aria-labelledby="pull-effects-label"
+              aria-describedby="pull-effects-hint"
+              onClick={() => changeSettings({ pullEffects: !settings.pullEffects })}
+              className="mt-2 flex w-full cursor-pointer items-center justify-between gap-3 rounded-full border-2 border-ui-ink/15 bg-ui-ink/5 py-1 pr-1 pl-4 font-semibold outline-offset-2 focus-visible:outline-2"
+            >
+              <span>{t(settings.pullEffects ? 'pullEffectsOn' : 'pullEffectsOff')}</span>
+              <span
+                aria-hidden="true"
+                className={`relative h-7 w-12 shrink-0 rounded-full border-2 border-ui-ink transition-colors ${
+                  settings.pullEffects ? 'bg-ui-accent' : 'bg-ui-paper'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 size-5 rounded-full border-2 border-ui-ink bg-ui-paper transition-[left] ${
+                    settings.pullEffects ? 'left-[1.35rem]' : 'left-0.5'
+                  }`}
+                />
+              </span>
+            </button>
+            <p id="pull-effects-hint" className="mt-1 text-sm text-ui-ink/65">
+              {isSettingFailed ? (
+                <span className="text-ui-danger">{t('settingFailed')}</span>
+              ) : (
+                t('pullEffectsHint')
+              )}
+            </p>
+          </div>
           <form
             onSubmit={redeem}
             className="mt-4 border-t-2 border-dashed border-ui-accent-dark/40 pt-3"

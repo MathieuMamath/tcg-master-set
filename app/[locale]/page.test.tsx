@@ -25,6 +25,7 @@ vi.mock('@/player/progress', () => ({
     activity: { done: [], isBonusClaimed: false },
     isAdmin: false,
     clockOffset: 0,
+    settings: { pullEffects: true },
   }),
 }));
 
@@ -49,6 +50,7 @@ function renderHome(locale: Locale, messages: typeof en) {
           isKittenHunted: false,
           isAdmin: false,
           clockOffset: 0,
+          settings: { pullEffects: true },
         }}
       />
     </NextIntlClientProvider>,

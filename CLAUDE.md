@@ -60,6 +60,8 @@ Production runs the `Dockerfile` and never migrates on its own: a migration is a
 
 `player_cards` deliberately has no foreign key to `cards`, because `pnpm cards:import` replaces a set's card rows.
 
+`player_settings` keeps a player's own preferences from the settings menu, `PUT /api/player/settings` changing them after `parseSettingsChange` in `game/ui/settings.ts`; a missing row means the defaults.
+
 `player_spots` keeps where the character stands, its place, how far along the floor and which way it faces, saved from the browser at each change of place and when the page is left, and checked by `parseSpot` in `game/world/spot.ts`. A spot gives no advantage, so it isn't checked for how the player got there. A spot that a change of the places has made invalid is ignored, and the player starts in the bedroom.
 
 ## Cards
@@ -78,7 +80,7 @@ Opening a booster pays for its duplicates in the same transaction, from the valu
 
 Special versions catch the light, by `cardFoil` in `game/cards/foil.ts`, drawn by `components/game/boosters/card-foil.tsx`: as on the real cards, a holo's rainbow foil with glitter covers only its illustration's window, or the whole card when its illustration fills it, as for an ex or an illustration rare, known from its rarity in English by `isFullArtRarity`, and a reverse's covers everything but the window, the other special versions getting a passing shine. `TiltCard` moves the foil's light with the pointer; at rest, and on small cards, it drifts by itself, still for players who ask for less motion.
 
-Once cut, the pack climbs through light effects up to its best card, from a `PullTier` in `game/cards/pull-tier.ts`. The server gives each card its tier from the rarity in English. A new rarity needs a tier there, or it gets the plain opening.
+Once cut, the pack climbs through light effects up to its best card, from a `PullTier` in `game/cards/pull-tier.ts`. The server gives each card its tier from the rarity in English. A new rarity needs a tier there, or it gets the plain opening. Players who find that this gives the cards away can turn the opening effects off in the settings, kept in `player_settings` by `player/settings.ts` and read with the rest of the progress: the pack then opens plainly, a god pack is only told in the summary, and no great card is announced ahead, each card still shining as it is revealed.
 
 A card's `rarity` column is in English, because game rules compare it. Translated rarities are for display only.
 
