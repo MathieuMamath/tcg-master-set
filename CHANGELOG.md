@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.2.2](https://github.com/MathieuMamath/tcg-master-set/compare/v0.2.1...v0.2.2) (2026-11-14)
+
+### Features
+
+* **city:** open a luxury boutique downtown, selling scarves to wear ([#126](https://github.com/MathieuMamath/tcg-master-set/issues/126)) ([544414a](https://github.com/MathieuMamath/tcg-master-set/commit/544414a929c1de36c789ffc6885e5e2838cd2eaa))
+
 ## [0.2.1](https://github.com/MathieuMamath/tcg-master-set/compare/v0.2.0...v0.2.1) (2026-11-14)
 
 ### Features
