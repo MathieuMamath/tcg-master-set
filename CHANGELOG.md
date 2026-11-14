@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.1.117](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.116...v0.1.117) (2026-11-14)
+
+### Features
+
+* **boosters:** give booster packs the volume of a full sealed pack ([#120](https://github.com/MathieuMamath/tcg-master-set/issues/120)) ([6fea944](https://github.com/MathieuMamath/tcg-master-set/commit/6fea9445091d2a47cc16473a45b73102e3964762))
+
 ## [0.1.116](https://github.com/MathieuMamath/tcg-master-set/compare/v0.1.115...v0.1.116) (2026-11-14)
 
 ### Features
