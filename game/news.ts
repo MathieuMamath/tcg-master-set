@@ -46,6 +46,7 @@ export const NEWS: readonly NewsItem[] = [
   { id: 29, key: 'paperMenus', date: '2026-11-13', kind: 'feature' },
   { id: 30, key: 'quickQuantity', date: '2026-11-14', kind: 'feature' },
   { id: 31, key: 'enterToBuy', date: '2026-11-14', kind: 'feature' },
+  { id: 32, key: 'boosterControlsFix', date: '2026-11-14', kind: 'fix' },
 ];
 
 // A player who never saw the sheet only gets the latest notes, rather than the whole history.

@@ -54,6 +54,9 @@ function Total({ coins, isCompact = false }: { coins: number; isCompact?: boolea
   );
 }
 
+// The quantity field, which Enter on a booster in the grid goes to.
+const QUANTITY_FIELD_ID = 'shop-quantity';
+
 // When the grid and the details stand side by side, as on a desktop: Tailwind's `md`.
 const SIDE_BY_SIDE = '(min-width: 48rem)';
 
@@ -241,20 +244,29 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
                     return;
                   }
                   event.preventDefault();
-                  // Beside the details, the key buys at once and the keyboard stays in the
-                  // grid, to go on to the next item. On a phone, it opens the details first.
-                  if (window.matchMedia(SIDE_BY_SIDE).matches) {
-                    const item = items.find((candidate) => candidate.set.id === set.id);
-                    if (!isSelected) {
-                      choose(set.id);
-                    }
-                    if (item) {
-                      void buyItem(item, isSelected ? quantity : 1);
-                    }
+                  if (!isSelected) {
+                    choose(set.id);
+                  }
+                  setIsShowingDetails(true);
+                  // A booster goes on to how many to buy, typed then bought with Enter.
+                  if (kind === 'booster') {
+                    requestAnimationFrame(() => {
+                      const field = document.getElementById(QUANTITY_FIELD_ID);
+                      if (field instanceof HTMLInputElement) {
+                        field.focus();
+                        field.select();
+                      }
+                    });
                     return;
                   }
-                  choose(set.id);
-                  setIsShowingDetails(true);
+                  // A binder is only ever bought alone: beside the details, the key buys it at
+                  // once and the keyboard stays in the grid, to go on to the next. On a phone,
+                  // it opens the details first.
+                  const item = items.find((candidate) => candidate.set.id === set.id);
+                  if (window.matchMedia(SIDE_BY_SIDE).matches && item) {
+                    void buyItem(item, 1);
+                    return;
+                  }
                   requestAnimationFrame(() => buyButton.current?.focus());
                 }}
                 className={`relative flex cursor-pointer flex-col items-center gap-1.5 rounded-xs bg-[#efe6d2] px-2 pt-2.5 pb-2 text-center shadow-[2px_3px_0_var(--ui-shadow)] transition-transform odd:-rotate-[0.6deg] even:rotate-[0.6deg] hover:-translate-y-0.5 ${
@@ -337,7 +349,21 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
           )}
           <div className="mt-auto grid gap-3 pt-2">
             {kind === 'booster' ? (
-              <QuantityPicker quantity={quantity} most={mostAtOnce} onChange={setQuantity}>
+              <QuantityPicker
+                quantity={quantity}
+                most={mostAtOnce}
+                onChange={setQuantity}
+                fieldId={QUANTITY_FIELD_ID}
+                // Enter in the field buys, and the keyboard goes back to the grid.
+                onSubmit={() => {
+                  void buy();
+                  if (window.matchMedia(SIDE_BY_SIDE).matches) {
+                    tiles()
+                      .find((tile) => tile.getAttribute('aria-selected') === 'true')
+                      ?.focus();
+                  }
+                }}
+              >
                 <Total coins={total} isCompact />
               </QuantityPicker>
             ) : (
@@ -357,10 +383,12 @@ export function ShopWindow({ kind, seller, items, coins, price, onBuy, onBack }:
               }`}
             >
               {t('window.buy')}
-              {/* The grid's own shortcut, for a keyboard beside a mouse on a wide screen. */}
+              {/* The binders' grid shortcut, for a keyboard beside a mouse on a wide screen. */}
               <span
                 aria-hidden="true"
-                className="ml-2 hidden rounded-md border border-ui-ink/30 border-b-3 bg-ui-paper px-1.5 align-middle font-digits text-xs font-bold text-ui-ink md:pointer-fine:inline-block"
+                className={`ml-2 hidden rounded-md border border-ui-ink/30 border-b-3 bg-ui-paper px-1.5 align-middle font-digits text-xs font-bold text-ui-ink ${
+                  kind === 'binder' ? 'md:pointer-fine:inline-block' : ''
+                }`}
               >
                 {t('window.enterKey')}
               </span>
