@@ -16,7 +16,8 @@ export type Speaker =
   | 'ronron'
   | 'kitten'
   | 'boutiqueSeller'
-  | 'hatter';
+  | 'hatter'
+  | 'bagSeller';
 
 type Props = {
   speaker: Speaker;

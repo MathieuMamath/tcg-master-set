@@ -97,10 +97,10 @@ export function TravelScreen({ phase, placeName, mode, facing: runFacing, tip, b
   const t = useTranslations('Travel');
   const calm = useCalm();
   const isClosed = phase === 'covering' || phase === 'covered';
-  const { species, scarf, hat } = useWornLook();
+  const { species, scarf, hat, gear } = useWornLook();
   const pip = useMemo(
-    () => cutOut(240, 300, pipAs(species, scarf, hat), 10, 21),
-    [species, scarf, hat],
+    () => cutOut(240, 300, pipAs(species, scarf, hat, gear), 10, 21),
+    [species, scarf, hat, gear],
   );
   const bus = useMemo(() => cutOut(560, 250, drawBus(busLine), 9, 68), [busLine]);
   const isElevator = mode === 'elevatorUp' || mode === 'elevatorDown';

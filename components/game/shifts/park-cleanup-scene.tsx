@@ -235,7 +235,7 @@ function Path({ state, litter }: { state: CleanupState; litter: readonly Litter[
         style={{ left: `${PIP_X}%`, aspectRatio: '240 / 300' }}
       >
         <CanvasArt
-          draw={pipAs(look.species, look.scarf, look.hat)}
+          draw={pipAs(look.species, look.scarf, look.hat, look.gear)}
           width={240}
           height={300}
           className="size-full"

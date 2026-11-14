@@ -29,7 +29,12 @@ export const ITEMS = {
   boater: { slot: 'hat', price: 3500 },
   bowler: { slot: 'hat', price: 4500 },
   topHat: { slot: 'hat', price: 6000 },
+  // Mme Poche's bags, at the department store downtown, from the simplest to the finest.
   satchel: { slot: 'gear', price: 0 },
+  canvasBag: { slot: 'gear', price: 2000 },
+  denimBag: { slot: 'gear', price: 3000 },
+  schoolBag: { slot: 'gear', price: 4000 },
+  goldBag: { slot: 'gear', price: 6000 },
 } as const satisfies Record<string, ItemDefinition>;
 
 export type ItemId = keyof typeof ITEMS;

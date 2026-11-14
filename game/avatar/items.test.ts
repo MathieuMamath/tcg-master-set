@@ -30,9 +30,10 @@ describe('the item catalogue', () => {
     }
   });
 
-  it('sells four scarves at the boutique, and six hats at the hatter', () => {
+  it('sells four scarves, six hats and four bags', () => {
     expect(itemsIn('scarf').filter((id) => ITEMS[id].price > 0)).toHaveLength(4);
     expect(itemsIn('hat')).toHaveLength(6);
+    expect(itemsIn('gear').filter((id) => ITEMS[id].price > 0)).toHaveLength(4);
     for (const hat of itemsIn('hat')) {
       expect(ITEMS[hat].price).toBeGreaterThan(0);
     }

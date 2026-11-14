@@ -62,7 +62,7 @@ Every rule has its test beside it, as `<name>.test.ts`. Helpers shared by severa
 | `components/game/art/` | The drawings, made by code on canvases: `core.ts` for the shared tools, then one file per place with its characters, such as `dojo.ts`. |
 | `components/game/scene/` | The paper diorama in Three.js: `paper-scene.tsx` sets it up and moves between places, `stage.tsx` holds what every place is built from, then one file per place, plus `sky.tsx`, `outdoors.tsx`, `pip.tsx` and the travel screen. |
 | `components/game/hud/` | What lies over the scene: the top bar, the prompts and speech bubbles, the settings, the activity tracker, the news sheet, the controls legend, the joystick and the sleep screen. |
-| `components/game/avatar/` | The animal the player walks about as, shared through `avatar-context.tsx`, the bedroom's mirror to change it, its wardrobe to put on a scarf, and the shops' fitting room to try, buy and wear scarves and hats. |
+| `components/game/avatar/` | The animal the player walks about as, shared through `avatar-context.tsx`, the bedroom's mirror to change it, its wardrobe to put on a scarf, and the shops' fitting room to try, buy and wear scarves, hats and bags. |
 | `components/game/shop/` | The sellers: conversations, shop windows and portraits. |
 | `components/game/boosters/` | The booster bag, the opening and its effects, and the binder. |
 | `components/game/quests/` | The quests' dialogs and games, one per quest outside the shifts. |

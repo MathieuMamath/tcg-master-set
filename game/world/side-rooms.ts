@@ -15,7 +15,8 @@ export type SidePlaceId =
   | 'ramen'
   | 'dojo'
   | 'boutique'
-  | 'hatter';
+  | 'hatter'
+  | 'store';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -36,6 +37,8 @@ export const DOOR_INTERACTIONS = [
   'leaveBoutique',
   'enterHatter',
   'leaveHatter',
+  'enterStore',
+  'leaveStore',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -194,7 +197,7 @@ export const PARK_SPOTS = {
 
 // Downtown, behind the village, reached by bus: a wide modern pavement under towers so tall that
 // they rise out of sight, with smaller houses between them. The bus stop is on the far left.
-export const DOWNTOWN_ENDS = { left: -12, right: 40 };
+export const DOWNTOWN_ENDS = { left: -12, right: 60 };
 export const DOWNTOWN_SPOTS = {
   busStop: { x: -9.4, width: 3.6, signX: -10.9 },
   // The administrative office's tower, its door in the middle, and Brutus guarding it on its right: the
@@ -210,6 +213,9 @@ export const DOWNTOWN_SPOTS = {
   boutique: { x: 6.2, width: 4.8, height: 4.6, doorX: 7.2 },
   // Sir Moustache's hat shop, between Flash and the ramen shop.
   hatter: { x: 16.6, width: 4.4, height: 4.6, doorX: 17.6 },
+  // The Grand Galleries, a shopping centre as wide as a block at the far end of the street past the
+  // dojo, with an entrance at each end of its front, both into the same hall.
+  store: { x: 50, width: 14, height: 6.4, doorX: 44.4, endDoorX: 55.6 },
 } as const;
 // The towers along the pavement, and a farther row behind them, from left to right.
 export const DOWNTOWN_TOWERS = [
@@ -228,6 +234,10 @@ export const DOWNTOWN_BACK_TOWERS = [
   { x: 25.8, width: 4.2, height: 12.5, look: 'cylinder' },
   { x: 31.6, width: 3.8, height: 11, look: 'curtain' },
   { x: 37.2, width: 4.2, height: 13.5, look: 'diagrid' },
+  { x: 42.8, width: 4, height: 12, look: 'ribbon' },
+  { x: 48.6, width: 4.4, height: 13, look: 'cylinder' },
+  { x: 54.4, width: 4.2, height: 12.5, look: 'curtain' },
+  { x: 59.4, width: 4, height: 11, look: 'diagrid' },
 ] as const;
 
 // Where Mme Ronron's kitten can hide, a different one each day: behind something drawn in the
@@ -347,6 +357,26 @@ export const BOUTIQUE_SELLER_X = BOUTIQUE_FURNITURE.counter.x;
 const BOUTIQUE_BOUNDS = {
   minX: BOUTIQUE_WALLS.left + CHARACTER_HALF_WIDTH,
   maxX: BOUTIQUE_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+
+// The Grand Galleries, inside: a great hall with a door in each wall, one for each entrance of its
+// front, and a row of shopfronts along its back wall, each seller standing in front of their own:
+// Mme Poche before her bag shop, the cheval mirror beside her, then two shops shuttered until
+// their sellers come.
+export const STORE_WALLS = { left: -9, right: 9 };
+export const STORE_FURNITURE = {
+  bagShop: { x: -4.8, width: 4.2 },
+  mirror: { x: -3.4, width: 1.2 },
+  closedShops: [
+    { x: 0.4, width: 4.2 },
+    { x: 5.2, width: 4.2 },
+  ],
+} as const;
+export const BAG_SELLER_X = STORE_FURNITURE.bagShop.x - 1;
+
+const STORE_BOUNDS = {
+  minX: STORE_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: STORE_WALLS.right - CHARACTER_HALF_WIDTH,
 };
 
 // Sir Moustache's hat shop, inside: the tall mirror against the left wall, the stands of hats, his
@@ -698,6 +728,21 @@ export const DOWNTOWN: SideRoom = {
       to: 'dojo',
       arrival: { x: DOJO_BOUNDS.minX, facing: 1 },
     },
+    // The two entrances of the Grand Galleries, each into its own side of the same hall.
+    {
+      interaction: 'enterStore',
+      minX: DOWNTOWN_SPOTS.store.doorX - DOOR_REACH,
+      maxX: DOWNTOWN_SPOTS.store.doorX + DOOR_REACH,
+      to: 'store',
+      arrival: { x: STORE_BOUNDS.minX, facing: 1 },
+    },
+    {
+      interaction: 'enterStore',
+      minX: DOWNTOWN_SPOTS.store.endDoorX - DOOR_REACH,
+      maxX: DOWNTOWN_SPOTS.store.endDoorX + DOOR_REACH,
+      to: 'store',
+      arrival: { x: STORE_BOUNDS.maxX, facing: -1 },
+    },
   ],
 };
 
@@ -801,6 +846,42 @@ export const COUPONS: SideRoom = {
   exits: [],
 };
 
+export const STORE: SideRoom = {
+  id: 'store',
+  bounds: STORE_BOUNDS,
+  start: STORE_BOUNDS.maxX,
+  interactions: [
+    {
+      interaction: 'storeMirror',
+      minX: STORE_FURNITURE.mirror.x - STORE_FURNITURE.mirror.width / 2 - 0.1,
+      maxX: STORE_FURNITURE.mirror.x + STORE_FURNITURE.mirror.width / 2 + 0.1,
+    },
+    {
+      interaction: 'bagSeller',
+      minX: BAG_SELLER_X - 1.1,
+      maxX: BAG_SELLER_X + 0.9,
+      speaker: { x: BAG_SELLER_X },
+    },
+  ],
+  // Each door leads out to the entrance of the front on its own side.
+  exits: [
+    {
+      interaction: 'leaveStore',
+      minX: STORE_BOUNDS.minX,
+      maxX: STORE_BOUNDS.minX + DOOR_REACH,
+      to: 'downtown',
+      arrival: { x: DOWNTOWN_SPOTS.store.doorX, facing: -1 },
+    },
+    {
+      interaction: 'leaveStore',
+      minX: STORE_BOUNDS.maxX - DOOR_REACH,
+      maxX: STORE_BOUNDS.maxX,
+      to: 'downtown',
+      arrival: { x: DOWNTOWN_SPOTS.store.endDoorX, facing: 1 },
+    },
+  ],
+};
+
 export const HATTER: SideRoom = {
   id: 'hatter',
   bounds: HATTER_BOUNDS,
@@ -872,6 +953,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   dojo: DOJO,
   boutique: BOUTIQUE,
   hatter: HATTER,
+  store: STORE,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

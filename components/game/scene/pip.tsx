@@ -78,8 +78,8 @@ export function Pip({
   look: WornLook;
 }) {
   const pip = useMemo(
-    () => blinker(240, 300, pipAs(look.species, look.scarf, look.hat), 10, 21),
-    [look.species, look.scarf, look.hat],
+    () => blinker(240, 300, pipAs(look.species, look.scarf, look.hat, look.gear), 10, 21),
+    [look.species, look.scarf, look.hat, look.gear],
   );
   const pipMaterial = useRef<MeshBasicMaterial>(null);
   useBlink(pipMaterial, pip);

@@ -71,6 +71,10 @@ export type SceneSigns = {
   boutique: string;
   // On the brass sign over Sir Moustache's hat shop, downtown.
   hatter: string;
+  // On the department store's front, downtown.
+  store: string;
+  // On the sign of Mme Poche's bag shop, inside it.
+  bagShop: string;
 };
 
 // A long pause in the tab must not teleport the character.
@@ -326,14 +330,14 @@ export function Furniture({
 type RoomTextures = { wall: Texture; floor: Texture; door: Texture };
 
 // A room as a box of card open towards the camera: wallpaper behind, a floor below, side walls of
-// thick cardboard, and the door painted flat on one of them.
+// thick cardboard, and the door painted flat on one of them, or on both.
 export function RoomShell({
   walls,
   doorSide,
   textures,
 }: {
   walls: { left: number; right: number };
-  doorSide: 'left' | 'right';
+  doorSide: 'left' | 'right' | 'both';
   textures: RoomTextures;
 }) {
   const edges = useMemo(
@@ -345,7 +349,7 @@ export function RoomShell({
   );
   const width = walls.right - walls.left;
   const centerX = (walls.left + walls.right) / 2;
-  const doorSign = doorSide === 'right' ? 1 : -1;
+  const doorSigns = doorSide === 'both' ? [-1, 1] : [doorSide === 'right' ? 1 : -1];
   return (
     <>
       <mesh position={[centerX, WALL_HEIGHT / 2, WALL_Z]}>
@@ -376,17 +380,20 @@ export function RoomShell({
           ))}
         </mesh>
       ))}
-      <mesh
-        position={[
-          (doorSide === 'right' ? walls.right : walls.left) - doorSign * 0.01,
-          DOOR_HEIGHT / 2,
-          DOOR_Z,
-        ]}
-        rotation={[0, -doorSign * (Math.PI / 2), 0]}
-      >
-        <planeGeometry args={[DOOR_WIDTH, DOOR_HEIGHT]} />
-        <meshBasicMaterial map={textures.door} />
-      </mesh>
+      {doorSigns.map((doorSign) => (
+        <mesh
+          key={doorSign}
+          position={[
+            (doorSign > 0 ? walls.right : walls.left) - doorSign * 0.01,
+            DOOR_HEIGHT / 2,
+            DOOR_Z,
+          ]}
+          rotation={[0, -doorSign * (Math.PI / 2), 0]}
+        >
+          <planeGeometry args={[DOOR_WIDTH, DOOR_HEIGHT]} />
+          <meshBasicMaterial map={textures.door} />
+        </mesh>
+      ))}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[centerX, 0, WALL_Z + ROOM_DEPTH / 2]}>
         <planeGeometry args={[width, ROOM_DEPTH]} />
         <meshBasicMaterial map={textures.floor} />

@@ -31,6 +31,7 @@ import { drawPostman, POSTMAN_FACE, POSTMAN_SIZE } from '../art/post';
 import { BERENICE_FACE, BERENICE_SIZE, drawBerenice } from '../art/raffle';
 import { drawRamenChef, RAMEN_CHEF_FACE, RAMEN_CHEF_SIZE } from '../art/ramen';
 import { drawKitten, drawRonron, KITTEN_SIZE, RONRON_FACE, RONRON_SIZE } from '../art/ronron';
+import { drawKangaroo, KANGAROO_FACE, KANGAROO_SIZE } from '../art/store';
 
 const PORTRAIT_SIZE = 208;
 
@@ -52,7 +53,8 @@ export type Character =
   | 'kitten'
   | 'photographer'
   | 'boutiqueSeller'
-  | 'hatter';
+  | 'hatter'
+  | 'bagSeller';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -94,6 +96,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'kitten') {
     return { draw: drawKitten, size: KITTEN_SIZE, face: { x: 100, y: 100, size: 150 } };
+  }
+  if (stock === 'bagSeller') {
+    return { draw: drawKangaroo, size: KANGAROO_SIZE, face: KANGAROO_FACE };
   }
   if (stock === 'hatter') {
     return { draw: drawWalrus, size: WALRUS_SIZE, face: WALRUS_FACE };
