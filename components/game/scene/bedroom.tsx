@@ -9,13 +9,14 @@ import {
   drawPlanks,
   drawShadowBlob,
   drawWallpaper,
+  drawWardrobe,
 } from '../art/bedroom';
 import { cutOut } from '../art/core';
 import { SkyWindow } from './sky';
 import { doorTexture, Furniture, RoomShell, texture, WINDOW } from './stage';
 
-// The bedroom: the bed against the left wall, the desk under the window, the bookcase and a plant,
-// and the door out in the right wall.
+// The bedroom: the bed against the left wall, the wardrobe beside it, the desk under the window, the
+// bookcase and a plant, and the door out in the right wall.
 export function Bedroom() {
   const textures = useMemo(
     () => ({
@@ -26,10 +27,11 @@ export function Bedroom() {
       plant: texture(cutOut(240, 330, drawBigPlant, 9, 45)),
       desk: texture(cutOut(230, 128, drawDesk, 9, 43)),
       chair: texture(cutOut(95, 150, drawChair, 8, 44)),
+      wardrobe: texture(cutOut(170, 280, drawWardrobe, 9, 47)),
     }),
     [],
   );
-  const { bed, desk, chair, bookcase, plant } = BEDROOM_FURNITURE;
+  const { bed, desk, chair, bookcase, plant, wardrobe } = BEDROOM_FURNITURE;
   return (
     <>
       <RoomShell walls={BEDROOM_WALLS} doorSide="right" textures={textures.room} />
@@ -42,6 +44,13 @@ export function Bedroom() {
         shadow={textures.shadow}
       />
       <Furniture map={textures.plant} x={plant.x} z={-1.05} height={3.1} shadow={textures.shadow} />
+      <Furniture
+        map={textures.wardrobe}
+        x={wardrobe.x}
+        z={-1.3}
+        height={2.7}
+        shadow={textures.shadow}
+      />
       <Furniture map={textures.bed} x={bed.x} z={-0.7} height={1.5} shadow={textures.shadow} />
       <Furniture map={textures.desk} x={desk.x} z={-1.15} height={1.42} shadow={textures.shadow} />
       <Furniture map={textures.chair} x={chair.x} z={-0.45} height={1.4} shadow={textures.shadow} />

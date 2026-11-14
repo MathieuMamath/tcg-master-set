@@ -26,6 +26,7 @@ vi.mock('@/player/progress', () => ({
     isAdmin: false,
     clockOffset: 0,
     settings: { pullEffects: true },
+    species: 'fox',
   }),
 }));
 
@@ -51,6 +52,7 @@ function renderHome(locale: Locale, messages: typeof en) {
           isAdmin: false,
           clockOffset: 0,
           settings: { pullEffects: true },
+          species: 'fox',
         }}
       />
     </NextIntlClientProvider>,

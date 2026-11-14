@@ -74,6 +74,7 @@
     "hulotte": "Talk (Mme Hulotte)",
     "brutus": "Talk (Brutus)",
     "bed": "Sleep until morning",
+    "wardrobe": "Open the wardrobe",
     "notSleepy": "You’re not sleepy yet",
     "sleeping": "Zzz… Good night, {name}.",
     "wakingUp": "The sun is rising!",
@@ -1079,7 +1080,8 @@
       "packVolume": "Booster packs look full now: their foil bulges with the cards inside, pinches at the seals and catches the light.",
       "pullEffectsSetting": "Opening effects give the cards away? Turn them off in the settings: your packs then open without the lights climbing up to their best card.",
       "binderCardView": "A card enlarged in the binder now has the screen to itself: the set’s logo and the button to close the binder no longer cover it.",
-      "version02": "The game moves on to version 0.2! Thank you for playing and testing version 0.1. New things are on their way in this series."
+      "version02": "The game moves on to version 0.2! Thank you for playing and testing version 0.1. New things are on their way in this series.",
+      "avatarSpecies": "A wardrobe has arrived in your bedroom! Open it to change animal: fox, turtle, dog, cat, rabbit, bear, wolf, gorilla, red panda or penguin, with your scarf and satchel."
     }
   },
   "Shift": {
@@ -1682,5 +1684,24 @@
     "error": "Oh, a gust of wind blew my pieces away… Come back in a moment.",
     "close": "Close",
     "stop": "Stop"
+  },
+  "Wardrobe": {
+    "title": "The wardrobe",
+    "hint": "Choose the animal you want to be. Your scarf and satchel come along, whatever you pick.",
+    "worn": "Worn",
+    "close": "Close",
+    "failed": "The wardrobe is stuck: your change wasn’t kept. Please try again.",
+    "species": {
+      "fox": "Fox",
+      "turtle": "Turtle",
+      "dog": "Dog",
+      "cat": "Cat",
+      "rabbit": "Rabbit",
+      "bear": "Bear",
+      "wolf": "Wolf",
+      "gorilla": "Gorilla",
+      "redPanda": "Red panda",
+      "penguin": "Penguin"
+    }
   }
 }

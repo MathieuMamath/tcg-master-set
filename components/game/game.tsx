@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
+import type { AvatarSpecies } from '@/game/avatar/species';
 import type { PlayableSet } from '@/game/cards/card-sets';
 import { boosterCount, totalBoosters, type Wallet } from '@/game/cards/shop-dialogue';
 import type { DailyActivity } from '@/game/quests/activity';
@@ -29,6 +30,8 @@ import type { BasketballResult } from '@/player/quests/basketball';
 import type { DalgonaResult } from '@/player/quests/dalgona';
 import type { FishingCatch } from '@/player/quests/fishing';
 import type { RaffleDraw } from '@/player/quests/raffle';
+import { AvatarContext } from './avatar/avatar-context';
+import { WardrobeDialog } from './avatar/wardrobe-dialog';
 import { BinderView } from './boosters/binder-view';
 import { BoosterBag } from './boosters/booster-bag';
 import { BoosterOpening } from './boosters/booster-opening';
@@ -132,6 +135,9 @@ export function Game({ player, sets, progress }: Props) {
   // The game's clock, moved on by the player's sleeps, and the night's sleep while it lasts.
   const [clockOffset, setClockOffset] = useState(progress.clockOffset);
   const [settings, setSettings] = useState(progress.settings);
+  const [species, setSpecies] = useState(progress.species);
+  const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
+  const [hasWardrobeFailed, setHasWardrobeFailed] = useState(false);
   const clock = useGameClock(clockOffset);
   // The scene only loads in the browser, so it can read the weather before the first check.
   const skyClock = useMemo(
@@ -218,6 +224,7 @@ export function Game({ player, sets, progress }: Props) {
     isRaffling ||
     isBusMapOpen ||
     isElevatorOpen ||
+    isWardrobeOpen ||
     sleep !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
@@ -269,6 +276,9 @@ export function Game({ player, sets, progress }: Props) {
       setIsElevatorOpen(true);
     } else if (interaction === 'bed') {
       goToBed();
+    } else if (interaction === 'wardrobe') {
+      setHasWardrobeFailed(false);
+      setIsWardrobeOpen(true);
     } else if (interaction === 'search') {
       kitten.searchHere();
     } else if (interaction) {
@@ -606,466 +616,496 @@ export function Game({ player, sets, progress }: Props) {
     setIsSettingsOpen(true);
   };
 
+  // Puts the new animal on at once, and takes it back if the server couldn't keep it.
+  const wear = async (next: AvatarSpecies) => {
+    const before = species;
+    setSpecies(next);
+    setHasWardrobeFailed(false);
+    try {
+      const response = await fetch('/api/player/avatar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ species: next }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+    } catch {
+      setSpecies(before);
+      setHasWardrobeFailed(true);
+    }
+  };
+
   return (
     <PlayerNameContext value={player.username}>
-      <div className="absolute inset-0">
-        <PaperScene
-          input={input}
-          bubble={bubble}
-          webglUnavailable={t('webglUnavailable')}
-          signs={{
-            shop: tTown('shop'),
-            bookshop: tTown('bookshop'),
-            arcade: tTown('arcade'),
-            busStop: tBus('stops.mainStreet'),
-            busLine: tBus('line'),
-            parkStop: tBus('stops.park'),
-            downtownStop: tBus('stops.downtown'),
-            dalgona: tTown('dalgona'),
-            post: tTown('post'),
-            raffle: tTown('raffle'),
-            bureau: tTown('bureau'),
-            latest: tShopkeeper('names.latest'),
-            thisYear: tShopkeeper('names.thisYear'),
-            older: tShopkeeper('names.older'),
-            ramen: tTown('ramen'),
-            dojo: tTown('dojo'),
-          }}
-          stains={quest?.stains ?? []}
-          isLeaCalm={cleanedOn === questDay(new Date())}
-          onInteractionChange={setInteraction}
-          onScrub={scrub}
-          startSpot={progress.spot}
-          spot={spot}
-          onPlaceChange={changePlace}
-          skyClock={skyClock}
-        >
-          {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
-        </PaperScene>
-        <TopBar
-          username={player.username}
-          coins={wallet.coins}
-          boosters={boosterTotal}
-          activity={activity}
-          clock={clock}
-          clockOffset={clockOffset}
-          onOpenBag={openBag}
-          onOpenBinder={openBinder}
-          onOpenSettings={openSettings}
-          onOpenActivity={openActivity}
-        />
-        {!isDialogOpen && (
-          <InteractionPrompts
-            interaction={interaction}
-            username={player.username}
-            papySaying={isPapySaying ? proverb : null}
-            canSleep={clock?.canSleep ?? false}
-            searchNote={kitten.searchNote}
+      <AvatarContext value={species}>
+        <div className="absolute inset-0">
+          <PaperScene
+            input={input}
             bubble={bubble}
-            onInteract={interact}
-          />
-        )}
-        {/* The game's version, tucked in a corner so that testers can say which one they play. */}
-        <p className="pointer-events-none absolute bottom-1 left-2 font-digits text-[0.65rem] text-ui-ink/45 select-none">
-          {t('version', { version: process.env.APP_VERSION ?? '' })}
-        </p>
-        {!isTalking &&
-          memoryCards === null &&
-          !isFishing &&
-          !isPlayingBasketball &&
-          dalgonaShape === null &&
-          !isRaffling && (
-            <>
-              <ControlsLegend />
-              <Joystick
-                onChange={(direction) => {
-                  input.current.joystick = direction;
-                }}
-              />
-              <button
-                type="button"
-                aria-hidden="true"
-                tabIndex={-1}
-                onPointerDown={() => {
-                  input.current.wantsDash = true;
-                }}
-                className="absolute right-8 bottom-20 hidden size-20 touch-none select-none items-center justify-center rounded-full border border-current/30 bg-current/10 font-game font-semibold pointer-coarse:flex"
-              >
-                {t('dash')}
-              </button>
-            </>
-          )}
-        {isBinderOpen && (
-          <BinderView
-            sets={sets.filter(({ id }) => binders.includes(id))}
-            collection={collection}
-            onClose={() => setIsBinderOpen(false)}
-          />
-        )}
-        {opening && (
-          <BoosterOpening
-            opening={opening}
-            pullEffects={settings.pullEffects}
-            onCut={cutBooster}
-            onClose={closeOpening}
-          />
-        )}
-        {isBagOpen && (
-          <BoosterBag
-            boosters={ownedBoosters}
-            binders={binders}
-            onPick={pickBooster}
-            onClose={() => setIsBagOpen(false)}
-          />
-        )}
-        {isSettingsOpen && (
-          <SettingsMenu
-            sets={sets}
-            settings={settings}
-            onSettingsChange={setSettings}
-            onRedeemed={(updated) => setWallet(updated)}
-            onShowNews={() => {
-              setIsSettingsOpen(false);
-              showAllNews();
+            webglUnavailable={t('webglUnavailable')}
+            signs={{
+              shop: tTown('shop'),
+              bookshop: tTown('bookshop'),
+              arcade: tTown('arcade'),
+              busStop: tBus('stops.mainStreet'),
+              busLine: tBus('line'),
+              parkStop: tBus('stops.park'),
+              downtownStop: tBus('stops.downtown'),
+              dalgona: tTown('dalgona'),
+              post: tTown('post'),
+              raffle: tTown('raffle'),
+              bureau: tTown('bureau'),
+              latest: tShopkeeper('names.latest'),
+              thisYear: tShopkeeper('names.thisYear'),
+              older: tShopkeeper('names.older'),
+              ramen: tTown('ramen'),
+              dojo: tTown('dojo'),
             }}
-            onClose={() => setIsSettingsOpen(false)}
-          />
-        )}
-        {newsShown && <NewsSheet items={newsShown} onClose={closeNews} />}
-        {isActivityOpen && (
-          <ActivityDialog
+            stains={quest?.stains ?? []}
+            isLeaCalm={cleanedOn === questDay(new Date())}
+            onInteractionChange={setInteraction}
+            onScrub={scrub}
+            startSpot={progress.spot}
+            spot={spot}
+            onPlaceChange={changePlace}
+            skyClock={skyClock}
+          >
+            {clock && <WeatherLayer clock={clock} isOutside={OUTSIDE.has(place)} />}
+          </PaperScene>
+          <TopBar
+            username={player.username}
+            coins={wallet.coins}
+            boosters={boosterTotal}
             activity={activity}
-            onClaim={claimDailyBonus}
-            onClose={() => setIsActivityOpen(false)}
+            clock={clock}
+            clockOffset={clockOffset}
+            onOpenBag={openBag}
+            onOpenBinder={openBinder}
+            onOpenSettings={openSettings}
+            onOpenActivity={openActivity}
           />
-        )}
-        {quest && !isTalking && (
-          <QuestBanner
-            startedAt={quest.startedAt}
-            stainsLeft={quest.stains.length}
-            onTimeUp={timeUp}
-          />
-        )}
-        {talkingTo === 'grandma' && (
-          <QuestDialog
-            giver="grandma"
-            line={questLine}
-            onAccept={quest ? null : startQuest}
-            onClose={() => {
-              setTalkingTo(null);
-              if (!quest) {
-                setQuestLine((line) =>
+          {!isDialogOpen && (
+            <InteractionPrompts
+              interaction={interaction}
+              username={player.username}
+              papySaying={isPapySaying ? proverb : null}
+              canSleep={clock?.canSleep ?? false}
+              searchNote={kitten.searchNote}
+              bubble={bubble}
+              onInteract={interact}
+            />
+          )}
+          {/* The game's version, tucked in a corner so that testers can say which one they play. */}
+          <p className="pointer-events-none absolute bottom-1 left-2 font-digits text-[0.65rem] text-ui-ink/45 select-none">
+            {t('version', { version: process.env.APP_VERSION ?? '' })}
+          </p>
+          {!isTalking &&
+            memoryCards === null &&
+            !isFishing &&
+            !isPlayingBasketball &&
+            dalgonaShape === null &&
+            !isRaffling && (
+              <>
+                <ControlsLegend />
+                <Joystick
+                  onChange={(direction) => {
+                    input.current.joystick = direction;
+                  }}
+                />
+                <button
+                  type="button"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  onPointerDown={() => {
+                    input.current.wantsDash = true;
+                  }}
+                  className="absolute right-8 bottom-20 hidden size-20 touch-none select-none items-center justify-center rounded-full border border-current/30 bg-current/10 font-game font-semibold pointer-coarse:flex"
+                >
+                  {t('dash')}
+                </button>
+              </>
+            )}
+          {isBinderOpen && (
+            <BinderView
+              sets={sets.filter(({ id }) => binders.includes(id))}
+              collection={collection}
+              onClose={() => setIsBinderOpen(false)}
+            />
+          )}
+          {opening && (
+            <BoosterOpening
+              opening={opening}
+              pullEffects={settings.pullEffects}
+              onCut={cutBooster}
+              onClose={closeOpening}
+            />
+          )}
+          {isBagOpen && (
+            <BoosterBag
+              boosters={ownedBoosters}
+              binders={binders}
+              onPick={pickBooster}
+              onClose={() => setIsBagOpen(false)}
+            />
+          )}
+          {isSettingsOpen && (
+            <SettingsMenu
+              sets={sets}
+              settings={settings}
+              onSettingsChange={setSettings}
+              onRedeemed={(updated) => setWallet(updated)}
+              onShowNews={() => {
+                setIsSettingsOpen(false);
+                showAllNews();
+              }}
+              onClose={() => setIsSettingsOpen(false)}
+            />
+          )}
+          {newsShown && <NewsSheet items={newsShown} onClose={closeNews} />}
+          {isActivityOpen && (
+            <ActivityDialog
+              activity={activity}
+              onClaim={claimDailyBonus}
+              onClose={() => setIsActivityOpen(false)}
+            />
+          )}
+          {quest && !isTalking && (
+            <QuestBanner
+              startedAt={quest.startedAt}
+              stainsLeft={quest.stains.length}
+              onTimeUp={timeUp}
+            />
+          )}
+          {talkingTo === 'grandma' && (
+            <QuestDialog
+              giver="grandma"
+              line={questLine}
+              onAccept={quest ? null : startQuest}
+              onClose={() => {
+                setTalkingTo(null);
+                if (!quest) {
+                  setQuestLine((line) =>
+                    line === 'rewarded' || line === 'failed' ? 'greeting' : line,
+                  );
+                }
+              }}
+            />
+          )}
+          {talkingTo === 'grandpa' && (
+            <QuestDialog
+              giver="grandpa"
+              // His memory game, once won for the day, leaves only his skipping stones to offer.
+              line={isMemoryWon ? 'alreadyDone' : grandpaLine}
+              onAccept={startMemoryGame}
+              extra={{
+                label: tStones('jobs.stones'),
+                // Papy's skipping stones are a shift of their own, with him as its host, opened
+                // straight onto the game.
+                onPress: () => setTalkingTo('grandpaStones'),
+              }}
+              onClose={() => {
+                setTalkingTo(null);
+                setGrandpaLine((line) =>
                   line === 'rewarded' || line === 'failed' ? 'greeting' : line,
                 );
-              }
-            }}
-          />
-        )}
-        {talkingTo === 'grandpa' && (
-          <QuestDialog
-            giver="grandpa"
-            // His memory game, once won for the day, leaves only his skipping stones to offer.
-            line={isMemoryWon ? 'alreadyDone' : grandpaLine}
-            onAccept={startMemoryGame}
-            extra={{
-              label: tStones('jobs.stones'),
-              // Papy's skipping stones are a shift of their own, with him as its host, opened
-              // straight onto the game.
-              onPress: () => setTalkingTo('grandpaStones'),
-            }}
-            onClose={() => {
-              setTalkingTo(null);
-              setGrandpaLine((line) =>
-                line === 'rewarded' || line === 'failed' ? 'greeting' : line,
-              );
-            }}
-          />
-        )}
-        {memoryCards && !isTalking && (
-          <MemoryDialog
-            cards={memoryCards}
-            onEnd={endMemoryGame}
-            onGiveUp={() => setMemoryCards(null)}
-          />
-        )}
-        {isPuzzling && (
-          <PuzzleDialog
-            onFinished={(updated) => {
-              setWallet(updated);
-              showSaveNotice();
-            }}
-            onClose={() => setIsPuzzling(false)}
-          />
-        )}
-        {isQuizzing && (
-          <QuizDialog
-            onFinished={(updated) => {
-              setWallet(updated);
-              showSaveNotice();
-            }}
-            onClose={() => setIsQuizzing(false)}
-          />
-        )}
-        {isWatering && (
-          <WateringDialog
-            onWatered={(updated) => {
-              setWallet(updated);
-              showSaveNotice();
-            }}
-            onClose={() => setIsWatering(false)}
-          />
-        )}
-        {isPlayingBasketball && (
-          <BasketballDialog
-            sets={sets}
-            highScore={highScore}
-            isRewardTaken={basketballRewardedOn === questDay(new Date())}
-            onFinish={finishBasketball}
-            onClose={() => setIsPlayingBasketball(false)}
-          />
-        )}
-        {talkingTo === 'boy' && (
-          <QuestDialog
-            giver="boy"
-            line={boyLine}
-            onAccept={startFishing}
-            onClose={() => {
-              setTalkingTo(null);
-              setBoyLine((line) =>
-                line === 'rewarded' || line === 'rewardedShiny' || line === 'failed'
-                  ? 'greeting'
-                  : line,
-              );
-            }}
-          />
-        )}
-        {isFishing && !isTalking && (
-          <FishingDialog sets={sets} onReelIn={reelIn} onEnd={endFishing} />
-        )}
-        {talkingTo === 'gaspard' && (
-          <QuestDialog
-            giver="gaspard"
-            line={gaspardLine}
-            onAccept={startDalgona}
-            onClose={() => {
-              setTalkingTo(null);
-              setGaspardLine((line) =>
-                line === 'rewarded' || line === 'failed' ? 'greeting' : line,
-              );
-            }}
-          />
-        )}
-        {talkingTo === 'berenice' && (
-          <QuestDialog
-            giver="berenice"
-            line={bereniceLine}
-            onAccept={startRaffle}
-            extra={{
-              label: tBalloons('jobs.balloons'),
-              // Her Pop'Balloons is a shift of its own, with her as its host, opened straight onto
-              // the game.
-              onPress: () => setTalkingTo('bereniceBalloons'),
-            }}
-            onClose={() => {
-              setTalkingTo(null);
-              setBereniceLine((line) =>
-                line === 'rewarded' || line === 'rewardedShiny' || line === 'lost'
-                  ? 'alreadyDone'
-                  : line,
-              );
-            }}
-          />
-        )}
-        {isRaffling && !isTalking && <RaffleDialog onDraw={drawRaffle} onEnd={endRaffle} />}
-        {talkingTo === 'brutus' && (
-          // Brutus asks admins which floor they are going to, and turns everyone else away. The
-          // server checks the role again for everything in the office that matters.
-          <NpcDialog
-            speaker="brutus"
-            line={progress.isAdmin ? 'welcome' : 'refused'}
-            actions={
-              progress.isAdmin
-                ? OFFICE_FLOORS.filter(({ floor }) => floor > 0).map((floor) => ({
-                    label: tSpeakers(
-                      floor.place === 'coupons' ? 'brutus.coupons' : 'brutus.office',
-                    ),
-                    onPress: () => goToFloor(floor),
-                  }))
-                : []
-            }
-            onClose={() => setTalkingTo(null)}
-          />
-        )}
-        {talkingTo === 'painter' && (
-          // Pinceau's puzzle, once a day: done, he only says thank you.
-          <NpcDialog
-            speaker="painter"
-            line={activity.done.includes('painterPuzzle') ? 'done' : 'greeting'}
-            action={
-              activity.done.includes('painterPuzzle')
-                ? undefined
-                : { label: tSpeakers('painter.puzzle'), onPress: () => setIsPuzzling(true) }
-            }
-            onClose={() => setTalkingTo(null)}
-          />
-        )}
-        {talkingTo === 'ronron' && (
-          <NpcDialog
-            speaker="ronron"
-            line={
-              activity.done.includes('ronronKitten')
-                ? 'thanks'
-                : kitten.kittenSpot
-                  ? `hints.${kitten.kittenSpot}`
-                  : 'worried'
-            }
-            onClose={() => setTalkingTo(null)}
-          />
-        )}
-        {kitten.isKittenFound && (
-          <NpcDialog speaker="kitten" line="found" onClose={kitten.closeKittenFound} />
-        )}
-        {talkingTo === 'archivist' && (
-          // Bastien hands over the full card statistics as a file. The server checks the role again.
-          <NpcDialog
-            speaker="archivist"
-            line="greeting"
-            action={{ label: tSpeakers('archivist.export'), onPress: downloadCardStats }}
-            onClose={() => setTalkingTo(null)}
-          />
-        )}
-        {talkingTo === 'hulotte' && (
-          <NpcDialog
-            speaker="hulotte"
-            line="greeting"
-            action={{ label: tSpeakers('hulotte.reports'), onPress: () => setIsStatsOpen(true) }}
-            onClose={() => setTalkingTo(null)}
-          />
-        )}
-        {isStatsOpen && !isTalking && (
-          <StatsDialog sets={sets} onClose={() => setIsStatsOpen(false)} />
-        )}
-        {talkingTo === 'trotte' && (
-          <NpcDialog
-            speaker="trotte"
-            line="greeting"
-            action={{
-              label: tSpeakers('trotte.register'),
-              onPress: () => setIsCouponRegisterOpen(true),
-            }}
-            onClose={() => setTalkingTo(null)}
-          />
-        )}
-        {isCouponRegisterOpen && !isTalking && (
-          <CouponRegister sets={sets} onClose={() => setIsCouponRegisterOpen(false)} />
-        )}
-        {(talkingTo === 'ramenChef' ||
-          talkingTo === 'dojoMaster' ||
-          talkingTo === 'gardener' ||
-          talkingTo === 'postman' ||
-          talkingTo === 'photographer' ||
-          talkingTo === 'grandpaStones' ||
-          talkingTo === 'bereniceBalloons') && (
-          <ShiftDialog
-            host={
-              talkingTo === 'grandpaStones'
-                ? 'grandpa'
-                : talkingTo === 'bereniceBalloons'
-                  ? 'berenice'
-                  : talkingTo
-            }
-            startJob={
-              talkingTo === 'grandpaStones'
-                ? 'stones'
-                : talkingTo === 'bereniceBalloons'
-                  ? 'balloons'
-                  : undefined
-            }
-            extra={
-              talkingTo === 'gardener'
-                ? {
-                    label: tGarden('jobs.watering'),
-                    doneLine: activity.done.includes('gardenWatering')
-                      ? tGarden('watering.alreadyDone', { name: player.username })
-                      : null,
-                    // Pépin's flower beds are a chore of their own, once a day.
-                    onPress: () => {
-                      setTalkingTo(null);
-                      setIsWatering(true);
-                    },
-                  }
-                : undefined
-            }
-            onShiftEnd={(updated, hasPaid) => {
-              setWallet(updated);
-              if (hasPaid) {
-                showSaveNotice();
-              }
-            }}
-            onClose={() => setTalkingTo(null)}
-          />
-        )}
-        {dalgonaShape && !isTalking && (
-          <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
-        )}
-        {talkingTo &&
-          talkingTo !== 'grandma' &&
-          talkingTo !== 'grandpa' &&
-          talkingTo !== 'boy' &&
-          talkingTo !== 'gaspard' &&
-          talkingTo !== 'berenice' &&
-          talkingTo !== 'brutus' &&
-          talkingTo !== 'hulotte' &&
-          talkingTo !== 'archivist' &&
-          talkingTo !== 'trotte' &&
-          talkingTo !== 'painter' &&
-          talkingTo !== 'ronron' &&
-          talkingTo !== 'ramenChef' &&
-          talkingTo !== 'dojoMaster' &&
-          talkingTo !== 'gardener' &&
-          talkingTo !== 'postman' &&
-          talkingTo !== 'photographer' &&
-          talkingTo !== 'grandpaStones' &&
-          talkingTo !== 'bereniceBalloons' && (
-            <SellerConversation
-              stock={talkingTo}
-              sets={sets}
-              binders={binders}
-              wallet={wallet}
-              isQuizDone={activity.done.includes('bookshopQuiz')}
-              onStartQuiz={() => {
-                setTalkingTo(null);
-                setIsQuizzing(true);
               }}
-              onWallet={setWallet}
-              onBinders={setBinders}
-              showSaveNotice={showSaveNotice}
+            />
+          )}
+          {memoryCards && !isTalking && (
+            <MemoryDialog
+              cards={memoryCards}
+              onEnd={endMemoryGame}
+              onGiveUp={() => setMemoryCards(null)}
+            />
+          )}
+          {isPuzzling && (
+            <PuzzleDialog
+              onFinished={(updated) => {
+                setWallet(updated);
+                showSaveNotice();
+              }}
+              onClose={() => setIsPuzzling(false)}
+            />
+          )}
+          {isQuizzing && (
+            <QuizDialog
+              onFinished={(updated) => {
+                setWallet(updated);
+                showSaveNotice();
+              }}
+              onClose={() => setIsQuizzing(false)}
+            />
+          )}
+          {isWatering && (
+            <WateringDialog
+              onWatered={(updated) => {
+                setWallet(updated);
+                showSaveNotice();
+              }}
+              onClose={() => setIsWatering(false)}
+            />
+          )}
+          {isPlayingBasketball && (
+            <BasketballDialog
+              sets={sets}
+              highScore={highScore}
+              isRewardTaken={basketballRewardedOn === questDay(new Date())}
+              onFinish={finishBasketball}
+              onClose={() => setIsPlayingBasketball(false)}
+            />
+          )}
+          {talkingTo === 'boy' && (
+            <QuestDialog
+              giver="boy"
+              line={boyLine}
+              onAccept={startFishing}
+              onClose={() => {
+                setTalkingTo(null);
+                setBoyLine((line) =>
+                  line === 'rewarded' || line === 'rewardedShiny' || line === 'failed'
+                    ? 'greeting'
+                    : line,
+                );
+              }}
+            />
+          )}
+          {isFishing && !isTalking && (
+            <FishingDialog sets={sets} onReelIn={reelIn} onEnd={endFishing} />
+          )}
+          {talkingTo === 'gaspard' && (
+            <QuestDialog
+              giver="gaspard"
+              line={gaspardLine}
+              onAccept={startDalgona}
+              onClose={() => {
+                setTalkingTo(null);
+                setGaspardLine((line) =>
+                  line === 'rewarded' || line === 'failed' ? 'greeting' : line,
+                );
+              }}
+            />
+          )}
+          {talkingTo === 'berenice' && (
+            <QuestDialog
+              giver="berenice"
+              line={bereniceLine}
+              onAccept={startRaffle}
+              extra={{
+                label: tBalloons('jobs.balloons'),
+                // Her Pop'Balloons is a shift of its own, with her as its host, opened straight onto
+                // the game.
+                onPress: () => setTalkingTo('bereniceBalloons'),
+              }}
+              onClose={() => {
+                setTalkingTo(null);
+                setBereniceLine((line) =>
+                  line === 'rewarded' || line === 'rewardedShiny' || line === 'lost'
+                    ? 'alreadyDone'
+                    : line,
+                );
+              }}
+            />
+          )}
+          {isRaffling && !isTalking && <RaffleDialog onDraw={drawRaffle} onEnd={endRaffle} />}
+          {talkingTo === 'brutus' && (
+            // Brutus asks admins which floor they are going to, and turns everyone else away. The
+            // server checks the role again for everything in the office that matters.
+            <NpcDialog
+              speaker="brutus"
+              line={progress.isAdmin ? 'welcome' : 'refused'}
+              actions={
+                progress.isAdmin
+                  ? OFFICE_FLOORS.filter(({ floor }) => floor > 0).map((floor) => ({
+                      label: tSpeakers(
+                        floor.place === 'coupons' ? 'brutus.coupons' : 'brutus.office',
+                      ),
+                      onPress: () => goToFloor(floor),
+                    }))
+                  : []
+              }
               onClose={() => setTalkingTo(null)}
             />
           )}
-        {isElevatorOpen && (
-          <ElevatorPanel
-            here={place}
-            onChoose={(floor) => {
-              goToFloor(floor);
-              setIsElevatorOpen(false);
-            }}
-            onClose={() => setIsElevatorOpen(false)}
-          />
-        )}
-        {isBusMapOpen && stopAt(place) && (
-          <BusMap
-            here={stopAt(place)?.id ?? 'mainStreet'}
-            onTravel={({ place: to, arrivalX }) => {
-              input.current.travelTo = { to, arrival: { x: arrivalX, facing: 1 } };
-              setIsBusMapOpen(false);
-            }}
-            onClose={() => setIsBusMapOpen(false)}
-          />
-        )}
-        <SaveNotice isSaving={isSaving} />
-        <SleepScreen sleep={sleep} name={player.username} />
-      </div>
+          {talkingTo === 'painter' && (
+            // Pinceau's puzzle, once a day: done, he only says thank you.
+            <NpcDialog
+              speaker="painter"
+              line={activity.done.includes('painterPuzzle') ? 'done' : 'greeting'}
+              action={
+                activity.done.includes('painterPuzzle')
+                  ? undefined
+                  : { label: tSpeakers('painter.puzzle'), onPress: () => setIsPuzzling(true) }
+              }
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
+          {talkingTo === 'ronron' && (
+            <NpcDialog
+              speaker="ronron"
+              line={
+                activity.done.includes('ronronKitten')
+                  ? 'thanks'
+                  : kitten.kittenSpot
+                    ? `hints.${kitten.kittenSpot}`
+                    : 'worried'
+              }
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
+          {kitten.isKittenFound && (
+            <NpcDialog speaker="kitten" line="found" onClose={kitten.closeKittenFound} />
+          )}
+          {talkingTo === 'archivist' && (
+            // Bastien hands over the full card statistics as a file. The server checks the role again.
+            <NpcDialog
+              speaker="archivist"
+              line="greeting"
+              action={{ label: tSpeakers('archivist.export'), onPress: downloadCardStats }}
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
+          {talkingTo === 'hulotte' && (
+            <NpcDialog
+              speaker="hulotte"
+              line="greeting"
+              action={{ label: tSpeakers('hulotte.reports'), onPress: () => setIsStatsOpen(true) }}
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
+          {isStatsOpen && !isTalking && (
+            <StatsDialog sets={sets} onClose={() => setIsStatsOpen(false)} />
+          )}
+          {talkingTo === 'trotte' && (
+            <NpcDialog
+              speaker="trotte"
+              line="greeting"
+              action={{
+                label: tSpeakers('trotte.register'),
+                onPress: () => setIsCouponRegisterOpen(true),
+              }}
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
+          {isCouponRegisterOpen && !isTalking && (
+            <CouponRegister sets={sets} onClose={() => setIsCouponRegisterOpen(false)} />
+          )}
+          {(talkingTo === 'ramenChef' ||
+            talkingTo === 'dojoMaster' ||
+            talkingTo === 'gardener' ||
+            talkingTo === 'postman' ||
+            talkingTo === 'photographer' ||
+            talkingTo === 'grandpaStones' ||
+            talkingTo === 'bereniceBalloons') && (
+            <ShiftDialog
+              host={
+                talkingTo === 'grandpaStones'
+                  ? 'grandpa'
+                  : talkingTo === 'bereniceBalloons'
+                    ? 'berenice'
+                    : talkingTo
+              }
+              startJob={
+                talkingTo === 'grandpaStones'
+                  ? 'stones'
+                  : talkingTo === 'bereniceBalloons'
+                    ? 'balloons'
+                    : undefined
+              }
+              extra={
+                talkingTo === 'gardener'
+                  ? {
+                      label: tGarden('jobs.watering'),
+                      doneLine: activity.done.includes('gardenWatering')
+                        ? tGarden('watering.alreadyDone', { name: player.username })
+                        : null,
+                      // Pépin's flower beds are a chore of their own, once a day.
+                      onPress: () => {
+                        setTalkingTo(null);
+                        setIsWatering(true);
+                      },
+                    }
+                  : undefined
+              }
+              onShiftEnd={(updated, hasPaid) => {
+                setWallet(updated);
+                if (hasPaid) {
+                  showSaveNotice();
+                }
+              }}
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
+          {dalgonaShape && !isTalking && (
+            <DalgonaDialog shape={dalgonaShape} onFinish={finishDalgona} onEnd={endDalgona} />
+          )}
+          {talkingTo &&
+            talkingTo !== 'grandma' &&
+            talkingTo !== 'grandpa' &&
+            talkingTo !== 'boy' &&
+            talkingTo !== 'gaspard' &&
+            talkingTo !== 'berenice' &&
+            talkingTo !== 'brutus' &&
+            talkingTo !== 'hulotte' &&
+            talkingTo !== 'archivist' &&
+            talkingTo !== 'trotte' &&
+            talkingTo !== 'painter' &&
+            talkingTo !== 'ronron' &&
+            talkingTo !== 'ramenChef' &&
+            talkingTo !== 'dojoMaster' &&
+            talkingTo !== 'gardener' &&
+            talkingTo !== 'postman' &&
+            talkingTo !== 'photographer' &&
+            talkingTo !== 'grandpaStones' &&
+            talkingTo !== 'bereniceBalloons' && (
+              <SellerConversation
+                stock={talkingTo}
+                sets={sets}
+                binders={binders}
+                wallet={wallet}
+                isQuizDone={activity.done.includes('bookshopQuiz')}
+                onStartQuiz={() => {
+                  setTalkingTo(null);
+                  setIsQuizzing(true);
+                }}
+                onWallet={setWallet}
+                onBinders={setBinders}
+                showSaveNotice={showSaveNotice}
+                onClose={() => setTalkingTo(null)}
+              />
+            )}
+          {isElevatorOpen && (
+            <ElevatorPanel
+              here={place}
+              onChoose={(floor) => {
+                goToFloor(floor);
+                setIsElevatorOpen(false);
+              }}
+              onClose={() => setIsElevatorOpen(false)}
+            />
+          )}
+          {isBusMapOpen && stopAt(place) && (
+            <BusMap
+              here={stopAt(place)?.id ?? 'mainStreet'}
+              onTravel={({ place: to, arrivalX }) => {
+                input.current.travelTo = { to, arrival: { x: arrivalX, facing: 1 } };
+                setIsBusMapOpen(false);
+              }}
+              onClose={() => setIsBusMapOpen(false)}
+            />
+          )}
+          <SaveNotice isSaving={isSaving} />
+          {isWardrobeOpen && (
+            <WardrobeDialog
+              species={species}
+              hasFailed={hasWardrobeFailed}
+              onWear={wear}
+              onClose={() => setIsWardrobeOpen(false)}
+            />
+          )}
+          <SleepScreen sleep={sleep} name={player.username} />
+        </div>
+      </AvatarContext>
     </PlayerNameContext>
   );
 }

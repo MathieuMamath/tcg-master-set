@@ -74,6 +74,7 @@
     "hulotte": "Parler (Mme Hulotte)",
     "brutus": "Parler (Brutus)",
     "bed": "Dormir jusqu’au matin",
+    "wardrobe": "Ouvrir l’armoire",
     "notSleepy": "Tu n’as pas encore sommeil",
     "sleeping": "Zzz… Bonne nuit, {name}.",
     "wakingUp": "Le jour se lève !",
@@ -1079,7 +1080,8 @@
       "packVolume": "Les boosters ont l’air bien remplis : leur film se bombe sous les cartes, se pince aux soudures et accroche la lumière.",
       "pullEffectsSetting": "Les effets d’ouverture te gâchent la surprise ? Désactive-les dans les réglages : tes boosters s’ouvriront sans les lumières qui montent jusqu’à leur meilleure carte.",
       "binderCardView": "Une carte agrandie dans le classeur a maintenant l’écran pour elle seule : le logo de la série et le bouton pour fermer le classeur ne la cachent plus.",
-      "version02": "Le jeu passe en version 0.2 ! Merci d’avoir joué et testé la version 0.1. Des nouveautés arrivent dans cette série."
+      "version02": "Le jeu passe en version 0.2 ! Merci d’avoir joué et testé la version 0.1. Des nouveautés arrivent dans cette série.",
+      "avatarSpecies": "Une armoire est arrivée dans ta chambre ! Ouvre-la pour changer d’animal : renard, tortue, chien, chat, lapin, ours, loup, gorille, panda roux ou pingouin, avec ton écharpe et ta sacoche."
     }
   },
   "Shift": {
@@ -1686,5 +1688,24 @@
     "error": "Oh, un coup de vent a emporté mes morceaux… Repasse dans un instant.",
     "close": "Fermer",
     "stop": "Arrêter"
+  },
+  "Wardrobe": {
+    "title": "L’armoire",
+    "hint": "Choisis l’animal que tu veux être. Ton écharpe et ta sacoche te suivent, quel que soit ton choix.",
+    "worn": "Porté",
+    "close": "Fermer",
+    "failed": "L’armoire est coincée : ton changement n’a pas été gardé. Réessaie.",
+    "species": {
+      "fox": "Renard",
+      "turtle": "Tortue",
+      "dog": "Chien",
+      "cat": "Chat",
+      "rabbit": "Lapin",
+      "bear": "Ours",
+      "wolf": "Loup",
+      "gorilla": "Gorille",
+      "redPanda": "Panda roux",
+      "penguin": "Pingouin"
+    }
   }
 }

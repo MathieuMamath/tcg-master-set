@@ -70,11 +70,12 @@ export type SideRoom = {
 const CHARACTER_HALF_WIDTH = 0.75;
 const DOOR_REACH = 0.6;
 
-// The bed stands right against the left wall, and the door is in the right one.
+// The bed stands right against the left wall, the wardrobe beside it, and the door is in the right one.
 export const BEDROOM_WALLS = { left: -5.5, right: 6.5 };
 // Where each piece of furniture stands, by its middle, and how wide it is.
 export const BEDROOM_FURNITURE = {
   bed: { x: -3.9, width: 3.2 },
+  wardrobe: { x: -1.35, width: 1.5 },
   desk: { x: 0.9, width: 2.3 },
   chair: { x: 1.35, width: 0.95 },
   bookcase: { x: 3.95, width: 1.7 },
@@ -354,13 +355,20 @@ const BEDROOM_BOUNDS = {
 export const BEDROOM: SideRoom = {
   id: 'bedroom',
   bounds: BEDROOM_BOUNDS,
-  start: -1.2,
-  // The binders are kept on the bookcase, and Pip sleeps in the bed against the left wall.
+  // In front of the desk, clear of the wardrobe and the bookcase.
+  start: 0.3,
+  // The binders are kept on the bookcase, Pip sleeps in the bed against the left wall and changes
+  // look at the wardrobe beside it.
   interactions: [
     {
       interaction: 'bed',
       minX: BEDROOM_BOUNDS.minX,
       maxX: BEDROOM_FURNITURE.bed.x + BEDROOM_FURNITURE.bed.width / 2,
+    },
+    {
+      interaction: 'wardrobe',
+      minX: BEDROOM_FURNITURE.wardrobe.x - BEDROOM_FURNITURE.wardrobe.width / 2,
+      maxX: BEDROOM_FURNITURE.wardrobe.x + BEDROOM_FURNITURE.wardrobe.width / 2,
     },
     {
       interaction: 'binder',

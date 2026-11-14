@@ -196,6 +196,56 @@ export function drawBookcase(drawing: CanvasRenderingContext2D, width: number, h
   x.fillRect(width - 28, height - 14, 18, 14);
 }
 
+// The wardrobe where Pip changes look: two doors, a mirror on the left one, and the end of a
+// scarf caught in the gap between them.
+export function drawWardrobe(drawing: CanvasRenderingContext2D, width: number, height: number) {
+  const x = drawing;
+  const crown = 22;
+  const middle = width / 2;
+  const doorTop = crown + 8;
+  const doorHeight = height - crown - 42;
+  // The crown along the top.
+  x.fillStyle = WOOD_DARK;
+  roundedRect(x, 0, 0, width, crown, 8);
+  x.fill();
+  // The body and its two doors.
+  x.fillStyle = WOOD;
+  roundedRect(x, 6, crown - 4, width - 12, height - crown - 10, 8);
+  x.fill();
+  x.fillStyle = WOOD_LIGHT;
+  for (const left of [16, middle + 3]) {
+    roundedRect(x, left, doorTop, middle - 19, doorHeight, 6);
+    x.fill();
+  }
+  // The mirror on the left door.
+  const mirrorX = 16 + (middle - 19) / 2;
+  x.fillStyle = '#cfe3ea';
+  ellipse(x, mirrorX, doorTop + doorHeight * 0.42, 22, 52);
+  x.fillStyle = 'rgb(255 255 255 / 55%)';
+  x.beginPath();
+  x.ellipse(mirrorX - 7, doorTop + doorHeight * 0.34, 6, 24, -0.25, 0, Math.PI * 2);
+  x.fill();
+  // The knobs.
+  x.fillStyle = '#f3c14b';
+  ellipse(x, middle - 9, height * 0.52, 5, 5);
+  ellipse(x, middle + 9, height * 0.52, 5, 5);
+  // A striped scarf caught in the doors.
+  x.fillStyle = '#e2603a';
+  x.beginPath();
+  x.moveTo(middle - 4, height * 0.6);
+  x.quadraticCurveTo(middle + 14, height * 0.7, middle + 4, height * 0.82);
+  x.lineTo(middle + 16, height * 0.83);
+  x.quadraticCurveTo(middle + 24, height * 0.7, middle + 4, height * 0.58);
+  x.closePath();
+  x.fill();
+  x.fillStyle = '#f3c14b';
+  x.fillRect(middle + 3, height * 0.8, 14, 5);
+  // Feet.
+  x.fillStyle = WOOD_DARK;
+  x.fillRect(12, height - 14, 18, 14);
+  x.fillRect(width - 30, height - 14, 18, 14);
+}
+
 // A tall house plant with broad leaves, in a terracotta pot.
 export function drawBigPlant(drawing: CanvasRenderingContext2D, width: number, height: number) {
   const x = drawing;
