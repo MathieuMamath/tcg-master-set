@@ -26,6 +26,7 @@ export const SPEAKERS = [
   'painter',
   'ronron',
   'photographer',
+  'boutiqueSeller',
 ] as const;
 
 export type Report =

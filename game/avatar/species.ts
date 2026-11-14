@@ -22,7 +22,7 @@ export function isAvatarSpecies(value: unknown): value is AvatarSpecies {
   return AVATAR_SPECIES.some((species) => species === value);
 }
 
-// A change sent from the wardrobe, checked for its shape. Every animal is free for now, so any
+// A change sent from the mirror, checked for its shape. Every animal is free for now, so any
 // known one can be worn.
 export function parseAvatarChange(value: unknown): AvatarSpecies | null {
   if (typeof value !== 'object' || value === null) {

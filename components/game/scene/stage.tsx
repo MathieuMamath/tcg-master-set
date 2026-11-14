@@ -67,6 +67,8 @@ export type SceneSigns = {
   // On the boards over Ramen Yuzu's and the dojo's doors, downtown.
   ramen: string;
   dojo: string;
+  // On the gold sign over Maison Éventail, downtown.
+  boutique: string;
 };
 
 // A long pause in the tab must not teleport the character.

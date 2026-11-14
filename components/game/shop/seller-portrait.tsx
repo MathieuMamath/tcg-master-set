@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { QuestGiver } from '@/game/world/world';
 import { drawHedgehog, HEDGEHOG_FACE, HEDGEHOG_SIZE } from '../art/bookshop';
+import { drawPeahen, PEAHEN_FACE, PEAHEN_SIZE } from '../art/boutique';
 import { drawRaccoon, RACCOON_FACE, RACCOON_SIZE, SELLERS } from '../art/card-den';
 import { drawGaspard, GASPARD_FACE, GASPARD_SIZE } from '../art/dalgona';
 import { DOJO_MASTER_FACE, DOJO_MASTER_SIZE, drawDojoMaster } from '../art/dojo';
@@ -48,7 +49,8 @@ export type Character =
   | 'painter'
   | 'ronron'
   | 'kitten'
-  | 'photographer';
+  | 'photographer'
+  | 'boutiqueSeller';
 
 // Each character's whole drawing, and where the face is in it.
 function sellerDrawing(stock: Character) {
@@ -90,6 +92,9 @@ function sellerDrawing(stock: Character) {
   }
   if (stock === 'kitten') {
     return { draw: drawKitten, size: KITTEN_SIZE, face: { x: 100, y: 100, size: 150 } };
+  }
+  if (stock === 'boutiqueSeller') {
+    return { draw: drawPeahen, size: PEAHEN_SIZE, face: PEAHEN_FACE };
   }
   if (stock === 'photographer') {
     return { draw: drawPhotographer, size: PHOTOGRAPHER_SIZE, face: PHOTOGRAPHER_FACE };

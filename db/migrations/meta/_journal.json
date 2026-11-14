@@ -127,6 +127,13 @@
       "when": 1794659115209,
       "tag": "0017_chemical_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794662834987,
+      "tag": "0018_bizarre_odin",
+      "breakpoints": true
     }
   ]
 }

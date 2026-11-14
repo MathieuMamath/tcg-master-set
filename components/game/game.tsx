@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Player } from '@/auth/session';
 import type { MemoryCard } from '@/cards/memory-cards';
+import type { ScarfId } from '@/game/avatar/items';
 import type { AvatarSpecies } from '@/game/avatar/species';
 import type { PlayableSet } from '@/game/cards/card-sets';
 import { boosterCount, totalBoosters, type Wallet } from '@/game/cards/shop-dialogue';
@@ -31,6 +32,8 @@ import type { DalgonaResult } from '@/player/quests/dalgona';
 import type { FishingCatch } from '@/player/quests/fishing';
 import type { RaffleDraw } from '@/player/quests/raffle';
 import { AvatarContext } from './avatar/avatar-context';
+import { FittingRoomDialog } from './avatar/fitting-room-dialog';
+import { MirrorDialog } from './avatar/mirror-dialog';
 import { WardrobeDialog } from './avatar/wardrobe-dialog';
 import { BinderView } from './boosters/binder-view';
 import { BoosterBag } from './boosters/booster-bag';
@@ -136,8 +139,14 @@ export function Game({ player, sets, progress }: Props) {
   const [clockOffset, setClockOffset] = useState(progress.clockOffset);
   const [settings, setSettings] = useState(progress.settings);
   const [species, setSpecies] = useState(progress.species);
+  const [scarf, setScarf] = useState(progress.scarf);
+  const [ownedItems, setOwnedItems] = useState(progress.ownedItems);
+  const wornLook = useMemo(() => ({ species, scarf }), [species, scarf]);
+  const [isMirrorOpen, setIsMirrorOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
-  const [hasWardrobeFailed, setHasWardrobeFailed] = useState(false);
+  // Whether the mirror's or the wardrobe's last change could not be saved.
+  const [hasLookFailed, setHasLookFailed] = useState(false);
+  const [isFittingRoomOpen, setIsFittingRoomOpen] = useState(false);
   const clock = useGameClock(clockOffset);
   // The scene only loads in the browser, so it can read the weather before the first check.
   const skyClock = useMemo(
@@ -225,6 +234,8 @@ export function Game({ player, sets, progress }: Props) {
     isBusMapOpen ||
     isElevatorOpen ||
     isWardrobeOpen ||
+    isMirrorOpen ||
+    isFittingRoomOpen ||
     sleep !== null;
   const ownedBoosters = sets
     .map((set) => ({ ...set, count: boosterCount(wallet, set.id) }))
@@ -277,8 +288,13 @@ export function Game({ player, sets, progress }: Props) {
     } else if (interaction === 'bed') {
       goToBed();
     } else if (interaction === 'wardrobe') {
-      setHasWardrobeFailed(false);
+      setHasLookFailed(false);
       setIsWardrobeOpen(true);
+    } else if (interaction === 'mirror') {
+      setHasLookFailed(false);
+      setIsMirrorOpen(true);
+    } else if (interaction === 'fittingRoom') {
+      setIsFittingRoomOpen(true);
     } else if (interaction === 'search') {
       kitten.searchHere();
     } else if (interaction) {
@@ -616,29 +632,37 @@ export function Game({ player, sets, progress }: Props) {
     setIsSettingsOpen(true);
   };
 
-  // Puts the new animal on at once, and takes it back if the server couldn't keep it.
-  const wear = async (next: AvatarSpecies) => {
-    const before = species;
-    setSpecies(next);
-    setHasWardrobeFailed(false);
+  // Puts the new animal or scarf on at once, and takes it back if the server couldn't keep it.
+  const changeLook = async (path: string, body: object, undo: () => void) => {
+    setHasLookFailed(false);
     try {
-      const response = await fetch('/api/player/avatar', {
+      const response = await fetch(path, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ species: next }),
+        body: JSON.stringify(body),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch {
-      setSpecies(before);
-      setHasWardrobeFailed(true);
+      undo();
+      setHasLookFailed(true);
     }
+  };
+  const wearAnimal = (next: AvatarSpecies) => {
+    const before = species;
+    setSpecies(next);
+    changeLook('/api/player/avatar', { species: next }, () => setSpecies(before));
+  };
+  const wearScarf = (next: ScarfId) => {
+    const before = scarf;
+    setScarf(next);
+    changeLook('/api/player/look', { slot: 'scarf', item: next }, () => setScarf(before));
   };
 
   return (
     <PlayerNameContext value={player.username}>
-      <AvatarContext value={species}>
+      <AvatarContext value={wornLook}>
         <div className="absolute inset-0">
           <PaperScene
             input={input}
@@ -661,6 +685,7 @@ export function Game({ player, sets, progress }: Props) {
               older: tShopkeeper('names.older'),
               ramen: tTown('ramen'),
               dojo: tTown('dojo'),
+              boutique: tTown('boutique'),
             }}
             stains={quest?.stains ?? []}
             isLeaCalm={cleanedOn === questDay(new Date())}
@@ -987,6 +1012,18 @@ export function Game({ player, sets, progress }: Props) {
               onClose={() => setTalkingTo(null)}
             />
           )}
+          {talkingTo === 'boutiqueSeller' && (
+            // Mlle Éventail sends the player to her fitting room, where scarves are tried and bought.
+            <NpcDialog
+              speaker="boutiqueSeller"
+              line="greeting"
+              action={{
+                label: tSpeakers('boutiqueSeller.fittingRoom'),
+                onPress: () => setIsFittingRoomOpen(true),
+              }}
+              onClose={() => setTalkingTo(null)}
+            />
+          )}
           {isCouponRegisterOpen && !isTalking && (
             <CouponRegister sets={sets} onClose={() => setIsCouponRegisterOpen(false)} />
           )}
@@ -1049,6 +1086,7 @@ export function Game({ player, sets, progress }: Props) {
             talkingTo !== 'hulotte' &&
             talkingTo !== 'archivist' &&
             talkingTo !== 'trotte' &&
+            talkingTo !== 'boutiqueSeller' &&
             talkingTo !== 'painter' &&
             talkingTo !== 'ronron' &&
             talkingTo !== 'ramenChef' &&
@@ -1095,11 +1133,38 @@ export function Game({ player, sets, progress }: Props) {
             />
           )}
           <SaveNotice isSaving={isSaving} />
+          {isFittingRoomOpen && !isTalking && (
+            <FittingRoomDialog
+              species={species}
+              scarf={scarf}
+              ownedItems={ownedItems}
+              coins={wallet.coins}
+              onBought={(updated, look) => {
+                setWallet(updated);
+                setScarf(look.scarf);
+                setOwnedItems(look.ownedItems);
+                showSaveNotice();
+              }}
+              onWorn={setScarf}
+              onClose={() => setIsFittingRoomOpen(false)}
+            />
+          )}
+          {isMirrorOpen && (
+            <MirrorDialog
+              species={species}
+              scarf={scarf}
+              hasFailed={hasLookFailed}
+              onWear={wearAnimal}
+              onClose={() => setIsMirrorOpen(false)}
+            />
+          )}
           {isWardrobeOpen && (
             <WardrobeDialog
               species={species}
-              hasFailed={hasWardrobeFailed}
-              onWear={wear}
+              scarf={scarf}
+              ownedItems={ownedItems}
+              hasFailed={hasLookFailed}
+              onWear={wearScarf}
               onClose={() => setIsWardrobeOpen(false)}
             />
           )}

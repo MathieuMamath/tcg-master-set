@@ -28,6 +28,8 @@ export function isTalk(interaction: Interaction): interaction is Extract<Talk, I
     interaction !== 'elevator' &&
     interaction !== 'bed' &&
     interaction !== 'wardrobe' &&
+    interaction !== 'mirror' &&
+    interaction !== 'fittingRoom' &&
     interaction !== 'search'
   );
 }

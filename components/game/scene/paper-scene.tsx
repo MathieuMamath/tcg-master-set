@@ -14,11 +14,12 @@ import {
 import type { Facing } from '@/game/world/side-walk';
 import type { PlayerSpot } from '@/game/world/spot';
 import type { Interaction } from '@/game/world/world';
-import { useAvatarSpecies } from '../avatar/avatar-context';
+import { useWornLook } from '../avatar/avatar-context';
 import { usePlayerName } from '../player-name';
 import { Arcade } from './arcade';
 import { Bedroom } from './bedroom';
 import { Bookshop } from './bookshop';
+import { Boutique } from './boutique';
 import { Bureau } from './bureau';
 import { Coupons } from './coupons';
 import { Dojo } from './dojo';
@@ -118,7 +119,7 @@ export function PaperScene({
   const tTravel = useTranslations('Travel');
   const playerName = usePlayerName();
   // Read here, outside the canvas, which doesn't pass the game's contexts on.
-  const species = useAvatarSpecies();
+  const look = useWornLook();
   // Each place by the name on its sign, or else its own.
   const placeNames: Record<SidePlaceId, string> = {
     bedroom: tTravel('places.bedroom', { name: playerName }),
@@ -133,6 +134,7 @@ export function PaperScene({
     coupons: tTravel('places.coupons'),
     ramen: signs.ramen,
     dojo: signs.dojo,
+    boutique: signs.boutique,
   };
   const [visit, setVisit] = useState<{
     number: number;
@@ -262,6 +264,7 @@ export function PaperScene({
             {visit.place === 'coupons' && <Coupons speakerTops={speakerTops} />}
             {visit.place === 'ramen' && <Ramen speakerTops={speakerTops} />}
             {visit.place === 'dojo' && <Dojo speakerTops={speakerTops} />}
+            {visit.place === 'boutique' && <Boutique speakerTops={speakerTops} />}
             <Pip
               input={input}
               room={SIDE_PLACES[visit.place]}
@@ -273,7 +276,7 @@ export function PaperScene({
               onInteractionChange={onInteractionChange}
               onExit={goThrough}
               onScrub={onScrub}
-              species={species}
+              look={look}
             />
           </group>
           {OUTSIDE_PLACES.has(visit.place) && <LightVeil />}

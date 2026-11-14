@@ -27,6 +27,10 @@ vi.mock('@/player/progress', () => ({
     clockOffset: 0,
     settings: { pullEffects: true },
     species: 'fox',
+    scarf: 'blueStripes',
+    hat: null,
+    gear: 'satchel',
+    ownedItems: [],
   }),
 }));
 
@@ -53,6 +57,10 @@ function renderHome(locale: Locale, messages: typeof en) {
           clockOffset: 0,
           settings: { pullEffects: true },
           species: 'fox',
+          scarf: 'blueStripes',
+          hat: null,
+          gear: 'satchel',
+          ownedItems: [],
         }}
       />
     </NextIntlClientProvider>,

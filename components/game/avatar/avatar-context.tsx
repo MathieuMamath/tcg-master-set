@@ -1,11 +1,17 @@
 'use client';
 
 import { createContext, useContext } from 'react';
+import { type ScarfId, STARTER_LOOK } from '@/game/avatar/items';
 import { type AvatarSpecies, DEFAULT_SPECIES } from '@/game/avatar/species';
 
-// The animal the player walks about as, for everything that draws Pip.
-export const AvatarContext = createContext<AvatarSpecies>(DEFAULT_SPECIES);
+export type WornLook = { species: AvatarSpecies; scarf: ScarfId | null };
 
-export function useAvatarSpecies(): AvatarSpecies {
+// The animal the player walks about as and the scarf they wear, for everything that draws Pip.
+export const AvatarContext = createContext<WornLook>({
+  species: DEFAULT_SPECIES,
+  scarf: STARTER_LOOK.scarf,
+});
+
+export function useWornLook(): WornLook {
   return useContext(AvatarContext);
 }

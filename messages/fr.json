@@ -96,7 +96,12 @@
       "nothing": "Rien ici… Mistigri est ailleurs.",
       "unavailable": "Impossible de fouiller pour l’instant."
     },
-    "archivist": "Parler (Bastien)"
+    "archivist": "Parler (Bastien)",
+    "enterBoutique": "Entrer à la Maison Éventail",
+    "leaveBoutique": "Sortir",
+    "boutiqueSeller": "Parler (Mlle Éventail)",
+    "fittingRoom": "Entrer en cabine",
+    "mirror": "Se regarder dans le miroir"
   },
   "Shopkeeper": {
     "names": {
@@ -587,7 +592,8 @@
     "bureau": "Bureau administratif",
     "ramen": "Ramen Yuzu",
     "dojo": "Dojo Kaito",
-    "post": "Poste du village"
+    "post": "Poste du village",
+    "boutique": "Maison Éventail"
   },
   "Hails": {
     "latest": "Méga bienvenue !",
@@ -609,7 +615,8 @@
     "painter": "Tu as l’œil, toi ?",
     "ronron": "Tu n’as pas vu mon petit ?",
     "photographer": "Une photo du ciel ?",
-    "archivist": "Besoin des archives ?"
+    "archivist": "Besoin des archives ?",
+    "boutiqueSeller": "Un brin d’élégance ?"
   },
   "Bus": {
     "title": "Plan du bus",
@@ -793,6 +800,14 @@
         "greeting": "Bonjour ! Ici, je garde toutes les archives des boosters. Je peux t’imprimer les statistiques complètes des cartes : chaque version de chaque série, combien de fois elle est sortie, et combien de fois elle aurait dû sortir."
       },
       "export": "Exporter les statistiques des cartes"
+    },
+    "boutiqueSeller": {
+      "name": "Mlle Éventail",
+      "title": "la paonne de la Maison Éventail",
+      "fittingRoom": "Essayer en cabine",
+      "lines": {
+        "greeting": "Bienvenue à la Maison Éventail. Chacune de nos écharpes est tissée à la main, une pièce d’exception. On ne choisit pas une écharpe sans se voir dans le miroir : passez donc en cabine pour les essayer."
+      }
     }
   },
   "Stats": {
@@ -901,7 +916,8 @@
       "bureau": "Le bureau administratif",
       "coupons": "L’étage des coupons",
       "ramen": "Ramen Yuzu",
-      "dojo": "Le dojo"
+      "dojo": "Le dojo",
+      "boutique": "La Maison Éventail"
     },
     "log": {
       "title": "Couverture du journal",
@@ -1081,7 +1097,9 @@
       "pullEffectsSetting": "Les effets d’ouverture te gâchent la surprise ? Désactive-les dans les réglages : tes boosters s’ouvriront sans les lumières qui montent jusqu’à leur meilleure carte.",
       "binderCardView": "Une carte agrandie dans le classeur a maintenant l’écran pour elle seule : le logo de la série et le bouton pour fermer le classeur ne la cachent plus.",
       "version02": "Le jeu passe en version 0.2 ! Merci d’avoir joué et testé la version 0.1. Des nouveautés arrivent dans cette série.",
-      "avatarSpecies": "Une armoire est arrivée dans ta chambre ! Ouvre-la pour changer d’animal : renard, tortue, chien, chat, lapin, ours, loup, gorille, panda roux ou pingouin, avec ton écharpe et ta sacoche."
+      "avatarSpecies": "Une armoire est arrivée dans ta chambre ! Ouvre-la pour changer d’animal : renard, tortue, chien, chat, lapin, ours, loup, gorille, panda roux ou pingouin, avec ton écharpe et ta sacoche.",
+      "boutique": "La Maison Éventail ouvre dans la grande ville ! Mlle Éventail, une paonne très chic, vend quatre écharpes de luxe : à essayer, acheter et porter dans sa cabine d’essayage.",
+      "mirrorAndWardrobe": "Un grand miroir trône désormais dans ta chambre : c’est là que tu changes d’animal. Ton armoire, elle, te sert à t’habiller avec les écharpes que tu as achetées."
     }
   },
   "Shift": {
@@ -1689,12 +1707,38 @@
     "close": "Fermer",
     "stop": "Arrêter"
   },
-  "Wardrobe": {
-    "title": "L’armoire",
+  "FittingRoom": {
+    "title": "La cabine d’essayage",
+    "hint": "Essaie les écharpes devant le miroir. Celles que tu as déjà s’enfilent tout de suite.",
+    "wearing": "Tu la portes",
+    "wear": "La porter",
+    "buy": "L’acheter · {price, number} pièces",
+    "price": "{price, number} pièces",
+    "worn": "Portée",
+    "owned": "À toi",
+    "close": "Sortir de la cabine",
+    "notes": {
+      "thanks": "Elle est à toi, et tu la portes déjà !",
+      "worn": "C’est fait, tu la portes.",
+      "notEnoughCoins": "Il te manque des pièces pour celle-ci.",
+      "alreadyOwned": "Tu l’as déjà.",
+      "notForSale": "Celle-ci n’est pas à vendre.",
+      "unavailable": "La cabine est coincée : réessaie."
+    },
+    "scarves": {
+      "blueStripes": "L’écharpe bleue",
+      "tartan": "Le tartan",
+      "pompomKnit": "Le tricot à pompons",
+      "polkaBow": "Le nœud à pois",
+      "starryNight": "La nuit étoilée"
+    }
+  },
+  "Mirror": {
+    "title": "Le miroir",
     "hint": "Choisis l’animal que tu veux être. Ton écharpe et ta sacoche te suivent, quel que soit ton choix.",
     "worn": "Porté",
     "close": "Fermer",
-    "failed": "L’armoire est coincée : ton changement n’a pas été gardé. Réessaie.",
+    "failed": "Le miroir est voilé : ton changement n’a pas été gardé. Réessaie.",
     "species": {
       "fox": "Renard",
       "turtle": "Tortue",
@@ -1707,5 +1751,13 @@
       "redPanda": "Panda roux",
       "penguin": "Pingouin"
     }
+  },
+  "Wardrobe": {
+    "title": "L’armoire",
+    "hint": "Choisis l’écharpe que tu veux porter.",
+    "worn": "Portée",
+    "close": "Fermer",
+    "more": "D’autres écharpes t’attendent à la Maison Éventail, dans la grande ville.",
+    "failed": "L’armoire est coincée : ton changement n’a pas été gardé. Réessaie."
   }
 }

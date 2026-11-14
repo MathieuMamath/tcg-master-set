@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { isAdmin } from '@/auth/roles';
 import { getDb } from '@/db/client';
 import { playerCards, playerClocks, playerQuests, playerSpots } from '@/db/schema';
+import type { ItemId, WornItems } from '@/game/avatar/items';
 import type { AvatarSpecies } from '@/game/avatar/species';
 import { type Collection, slotKey } from '@/game/cards/binder';
 import type { SetId } from '@/game/cards/card-sets';
@@ -18,7 +19,7 @@ import { canSleep, isValidOffset, minuteOfDay, offsetAfterSleep } from '@/game/w
 import { ADMIN_PLACES } from '@/game/world/side-rooms';
 import { type PlayerSpot, parseSpot } from '@/game/world/spot';
 import { loadDailyActivity } from './activity';
-import { loadAvatar } from './avatar';
+import { loadLook } from './avatar';
 import { recordEvent } from './events';
 import { loadBasketballHighScore } from './quests/basketball';
 import { loadSettings } from './settings';
@@ -49,6 +50,11 @@ export type PlayerProgress = {
   settings: PlayerSettings;
   // The animal the player walks about as, chosen at the wardrobe.
   species: AvatarSpecies;
+  // What is worn in each slot, and the items bought at the boutique.
+  scarf: WornItems['scarf'];
+  hat: WornItems['hat'];
+  gear: WornItems['gear'];
+  ownedItems: ItemId[];
 };
 
 // The day a quest last paid its reward.
@@ -122,7 +128,7 @@ export async function loadPlayerProgress(userId: string): Promise<PlayerProgress
     isAdmin: await isAdmin(userId),
     clockOffset: await loadClockOffset(getDb(), userId),
     settings: await loadSettings(getDb(), userId),
-    species: await loadAvatar(getDb(), userId),
+    ...(await loadLook(getDb(), userId)),
   };
 }
 

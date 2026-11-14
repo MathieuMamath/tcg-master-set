@@ -13,7 +13,8 @@ export type SidePlaceId =
   | 'bureau'
   | 'coupons'
   | 'ramen'
-  | 'dojo';
+  | 'dojo'
+  | 'boutique';
 
 export const DOOR_INTERACTIONS = [
   'leaveHome',
@@ -30,6 +31,8 @@ export const DOOR_INTERACTIONS = [
   'leaveRamen',
   'enterDojo',
   'leaveDojo',
+  'enterBoutique',
+  'leaveBoutique',
 ] as const;
 
 export type DoorInteraction = (typeof DOOR_INTERACTIONS)[number];
@@ -70,12 +73,14 @@ export type SideRoom = {
 const CHARACTER_HALF_WIDTH = 0.75;
 const DOOR_REACH = 0.6;
 
-// The bed stands right against the left wall, the wardrobe beside it, and the door is in the right one.
+// The bed stands right against the left wall, the wardrobe beside it, a standing mirror between the
+// desk and the bookcase, and the door is in the right one.
 export const BEDROOM_WALLS = { left: -5.5, right: 6.5 };
 // Where each piece of furniture stands, by its middle, and how wide it is.
 export const BEDROOM_FURNITURE = {
   bed: { x: -3.9, width: 3.2 },
   wardrobe: { x: -1.35, width: 1.5 },
+  mirror: { x: 2.45, width: 0.8 },
   desk: { x: 0.9, width: 2.3 },
   chair: { x: 1.35, width: 0.95 },
   bookcase: { x: 3.95, width: 1.7 },
@@ -198,11 +203,12 @@ export const DOWNTOWN_SPOTS = {
   dojo: { x: 34, width: 6, height: 5.2, doorX: 34 },
   // Flash, his camera at the ready, photographing the sky between the bureau and the ramen shop.
   photographer: { x: 10.6 },
+  // Maison Éventail, the luxury boutique, a low shop front between the bureau and Flash.
+  boutique: { x: 6.2, width: 4.8, height: 4.6, doorX: 7.2 },
 } as const;
 // The towers along the pavement, and a farther row behind them, from left to right.
 export const DOWNTOWN_TOWERS = [
   { x: -4.6, width: 4.4, height: 13, look: 'curtain' },
-  { x: 6.4, width: 4.6, height: 12, look: 'setback' },
   { x: 11.8, width: 5, height: 15, look: 'ribbon' },
   { x: 16.6, width: 3.8, height: 13.5, look: 'diagrid' },
   { x: 28.2, width: 4.4, height: 14, look: 'setback' },
@@ -324,6 +330,21 @@ const DOJO_BOUNDS = {
   maxX: DOJO_WALLS.right - CHARACTER_HALF_WIDTH,
 };
 
+// Maison Éventail, inside: the fitting room against the left wall, the rack of scarves, Mlle
+// Éventail behind her glass counter, and the door in the right wall.
+export const BOUTIQUE_WALLS = { left: -5.5, right: 5.5 };
+export const BOUTIQUE_FURNITURE = {
+  fittingRoom: { x: -4.2, width: 2 },
+  rack: { x: -1.3, width: 2.4 },
+  counter: { x: 1.8, width: 2.8 },
+} as const;
+export const BOUTIQUE_SELLER_X = BOUTIQUE_FURNITURE.counter.x;
+
+const BOUTIQUE_BOUNDS = {
+  minX: BOUTIQUE_WALLS.left + CHARACTER_HALF_WIDTH,
+  maxX: BOUTIQUE_WALLS.right - CHARACTER_HALF_WIDTH,
+};
+
 // The places only admins may be in, whose spot is neither saved nor restored for anyone else.
 export const ADMIN_PLACES: ReadonlySet<SidePlaceId> = new Set(['bureau', 'coupons']);
 
@@ -358,7 +379,7 @@ export const BEDROOM: SideRoom = {
   // In front of the desk, clear of the wardrobe and the bookcase.
   start: 0.3,
   // The binders are kept on the bookcase, Pip sleeps in the bed against the left wall and changes
-  // look at the wardrobe beside it.
+  // into clothes at the wardrobe beside it, and into another animal at the mirror.
   interactions: [
     {
       interaction: 'bed',
@@ -369,6 +390,12 @@ export const BEDROOM: SideRoom = {
       interaction: 'wardrobe',
       minX: BEDROOM_FURNITURE.wardrobe.x - BEDROOM_FURNITURE.wardrobe.width / 2,
       maxX: BEDROOM_FURNITURE.wardrobe.x + BEDROOM_FURNITURE.wardrobe.width / 2,
+    },
+    {
+      interaction: 'mirror',
+      minX: BEDROOM_FURNITURE.mirror.x - BEDROOM_FURNITURE.mirror.width / 2,
+      // Short of the bookcase, where the binders open.
+      maxX: BEDROOM_FURNITURE.mirror.x + 0.3,
     },
     {
       interaction: 'binder',
@@ -632,6 +659,13 @@ export const DOWNTOWN: SideRoom = {
       arrival: { x: RAMEN_BOUNDS.maxX, facing: -1 },
     },
     {
+      interaction: 'enterBoutique',
+      minX: DOWNTOWN_SPOTS.boutique.doorX - DOOR_REACH,
+      maxX: DOWNTOWN_SPOTS.boutique.doorX + DOOR_REACH,
+      to: 'boutique',
+      arrival: { x: BOUTIQUE_BOUNDS.maxX, facing: -1 },
+    },
+    {
       interaction: 'enterDojo',
       minX: DOWNTOWN_SPOTS.dojo.doorX - DOOR_REACH,
       maxX: DOWNTOWN_SPOTS.dojo.doorX + DOOR_REACH,
@@ -741,6 +775,34 @@ export const COUPONS: SideRoom = {
   exits: [],
 };
 
+export const BOUTIQUE: SideRoom = {
+  id: 'boutique',
+  bounds: BOUTIQUE_BOUNDS,
+  start: BOUTIQUE_BOUNDS.maxX,
+  interactions: [
+    {
+      interaction: 'fittingRoom',
+      minX: BOUTIQUE_BOUNDS.minX,
+      maxX: BOUTIQUE_FURNITURE.fittingRoom.x + BOUTIQUE_FURNITURE.fittingRoom.width / 2,
+    },
+    {
+      interaction: 'boutiqueSeller',
+      minX: BOUTIQUE_SELLER_X - 1.4,
+      maxX: BOUTIQUE_SELLER_X + 1.4,
+      speaker: { x: BOUTIQUE_SELLER_X },
+    },
+  ],
+  exits: [
+    {
+      interaction: 'leaveBoutique',
+      minX: BOUTIQUE_BOUNDS.maxX - DOOR_REACH,
+      maxX: BOUTIQUE_BOUNDS.maxX,
+      to: 'downtown',
+      arrival: { x: DOWNTOWN_SPOTS.boutique.doorX, facing: 1 },
+    },
+  ],
+};
+
 export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   bedroom: BEDROOM,
   town: TOWN,
@@ -754,6 +816,7 @@ export const SIDE_PLACES: Record<SidePlaceId, SideRoom> = {
   coupons: COUPONS,
   ramen: RAMEN,
   dojo: DOJO,
+  boutique: BOUTIQUE,
 };
 
 export function exitAlong(room: SideRoom, x: number): SideExit | null {

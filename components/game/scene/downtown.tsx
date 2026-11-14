@@ -1,4 +1,4 @@
-// The big city's street, its towers, and Ramen Yuzu and the dojo between them.
+// The big city's street, its towers, and Maison Éventail, Ramen Yuzu and the dojo between them.
 
 import { type RefObject, useMemo } from 'react';
 import {
@@ -8,6 +8,7 @@ import {
   DOWNTOWN_TOWERS,
 } from '@/game/world/side-rooms';
 import { drawCorrugatedEdge, drawShadowBlob } from '../art/bedroom';
+import { drawBoutiqueFront } from '../art/boutique';
 import { drawBusShelter } from '../art/bus';
 import { cutOut } from '../art/core';
 import { drawDojo } from '../art/dojo';
@@ -123,6 +124,21 @@ export function Downtown({
       ),
     [fontsReady, signs.ramen, ramen.width, ramen.height],
   );
+  const { boutique } = DOWNTOWN_SPOTS;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
+  const boutiqueFront = useMemo(
+    () =>
+      texture(
+        cutOut(
+          Math.round(boutique.width * PIXELS_PER_UNIT),
+          Math.round(boutique.height * PIXELS_PER_UNIT),
+          drawBoutiqueFront(signs.boutique),
+          9,
+          238,
+        ),
+      ),
+    [fontsReady, signs.boutique, boutique.width, boutique.height],
+  );
   const { dojo } = DOWNTOWN_SPOTS;
   // biome-ignore lint/correctness/useExhaustiveDependencies: fontsReady exists to draw the texts again.
   const dojoFront = useMemo(
@@ -208,6 +224,14 @@ export function Downtown({
         x={ramen.x}
         z={DOWNTOWN_TOWERS_Z + 0.2}
         height={ramen.height}
+        shadow={textures.shadow}
+      />
+      {/* Maison Éventail, between the bureau and Flash. */}
+      <Furniture
+        map={boutiqueFront}
+        x={boutique.x}
+        z={DOWNTOWN_TOWERS_Z + 0.2}
+        height={boutique.height}
         shadow={textures.shadow}
       />
       {/* The dojo, past the last tower. */}

@@ -90,6 +90,11 @@ describe('the bedroom', () => {
     expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.wardrobe.x)).toBe('wardrobe');
   });
 
+  test('the mirror is looked into in front of it, clear of the bookcase', () => {
+    expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.mirror.x)).toBe('mirror');
+    expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.bookcase.x)).toBe('binder');
+  });
+
   test('Pip goes to bed in front of it, and nowhere else', () => {
     expect(interactionAlong(BEDROOM, BEDROOM_FURNITURE.bed.x)).toBe('bed');
     expect(interactionAlong(BEDROOM, BEDROOM.start)).toBeNull();
@@ -167,7 +172,7 @@ describe('downtown', () => {
 
     expect(interactionAlong(DOWNTOWN, bureau.doorX)).toBe('brutus');
     expect(speakerAlong(DOWNTOWN, bureau.doorX)?.x).toBe(bureau.brutusX);
-    expect(DOWNTOWN.exits.map(({ to }) => to)).toEqual(['ramen', 'dojo']);
+    expect(DOWNTOWN.exits.map(({ to }) => to)).toEqual(['ramen', 'boutique', 'dojo']);
     expect(busStop.x + busStop.width / 2).toBeLessThan(bureau.x - bureau.width / 2);
     for (const tower of DOWNTOWN_TOWERS) {
       expect(Math.abs(tower.x - bureau.x)).toBeGreaterThan((tower.width + bureau.width) / 2 - 0.6);
