@@ -1,6 +1,6 @@
 import { and, count, countDistinct, eq, gte, max, type SQL, sql } from 'drizzle-orm';
 import { getDb } from '@/db/client';
-import { gameEvents } from '@/db/schema';
+import { gameEvents, playerAvatars, users } from '@/db/schema';
 import { GAME_EVENT_TYPES, type GameEventType } from '@/game/log/events';
 import {
   type BalanceSummary,
@@ -75,6 +75,15 @@ export type GameStats = {
     abandoned: number;
     sleeps: number;
   };
+  // What players wear: the items bought in the period, by item, and the animals chosen in it; and
+  // what every player wears today, in aggregate, the starter look counting for those who never
+  // changed it.
+  looks: {
+    bought: { itemId: string; slot: string; count: number; coins: number }[];
+    speciesChanges: { species: string; count: number }[];
+    wornSpecies: { species: string; players: number }[];
+    worn: { slot: string; itemId: string | null; players: number }[];
+  };
   // The period in steps, for the charts: hours today, days, or weeks since the start.
   series: { unit: BucketUnit; points: SeriesPoint[] };
   // Every type of the catalogue, with how many in the period and when one was last recorded, so
@@ -103,7 +112,10 @@ type DetailField =
   | 'locale'
   | 'seconds'
   | 'speaker'
-  | 'stock';
+  | 'stock'
+  | 'itemId'
+  | 'slot'
+  | 'species';
 
 const detail = (field: DetailField) => sql`${gameEvents.details}->>${sql.raw(`'${field}'`)}`;
 const detailNumber = (field: DetailField) => sql<number>`coalesce(sum((${detail(field)})::int), 0)`;
@@ -144,6 +156,7 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
   const spent: CoinFlow[] = [
     { source: 'boosters', coins: await sumOf('booster.bought', 'coins') },
     { source: 'binders', coins: await sumOf('binder.bought', 'coins') },
+    { source: 'items', coins: await sumOf('item.bought', 'coins') },
   ];
 
   // Each player's coins after their last gain or spending in the period, only to be summed up.
@@ -276,6 +289,48 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
     countsBy('binder.viewed', 'setId'),
   ]);
 
+  // What players wear. The items bought and the animals chosen in the period come from the log;
+  // what is worn today, from every player's look, the starter one for those without a row.
+  const boughtItems = await database
+    .select({
+      itemId: detail('itemId'),
+      slot: detail('slot'),
+      total: count(),
+      coins: detailNumber('coins'),
+    })
+    .from(gameEvents)
+    .where(inPeriod(ofType('item.bought')))
+    .groupBy(detail('itemId'), detail('slot'));
+  const speciesChanges = await countsBy('avatar.changed', 'species');
+  const wornColumn = (column: 'species' | 'scarf' | 'hat' | 'gear', starter: string | null) =>
+    starter === null
+      ? sql<string | null>`${playerAvatars[column]}`
+      : sql<string>`coalesce(${playerAvatars[column]}, ${starter})`;
+  // A player without a row wears the starter look; a row's empty slot stays empty.
+  const wornBy = async (column: 'species' | 'scarf' | 'hat' | 'gear', starter: string | null) => {
+    const value = sql<
+      string | null
+    >`case when ${playerAvatars.userId} is null then ${starter} else ${wornColumn(column, null)} end`;
+    return (
+      await database
+        .select({ value, total: count() })
+        .from(users)
+        .leftJoin(playerAvatars, eq(playerAvatars.userId, users.id))
+        .groupBy(sql`1`)
+    ).map(({ value: worn, total }) => ({
+      value: worn === null ? null : String(worn),
+      players: Number(total),
+    }));
+  };
+  const [wornSpecies, wornScarves, wornHats, wornGear] = await Promise.all([
+    wornBy('species', 'fox'),
+    wornBy('scarf', 'blueStripes'),
+    wornBy('hat', null),
+    wornBy('gear', 'satchel'),
+  ]);
+  const byPlayers = (first: { players: number }, second: { players: number }) =>
+    second.players - first.players;
+
   // Everything charted over time, in one pass, step by step.
   const buckets = statsBuckets(period, now);
   const step = sql.raw(`'${buckets.unit}'`);
@@ -289,7 +344,7 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
         when ${gameEvents.type} = 'booster.opened' then (${detail('duplicateCoins')})::int
         else 0 end), 0)`,
       spent: sql<number>`coalesce(sum(case
-        when ${gameEvents.type} in ('booster.bought', 'binder.bought') then ${coins}
+        when ${gameEvents.type} in ('booster.bought', 'binder.bought', 'item.bought') then ${coins}
         else 0 end), 0)`,
       bought: sql<number>`coalesce(sum(case
         when ${gameEvents.type} = 'booster.bought' then (${detail('quantity')})::int
@@ -372,6 +427,28 @@ export async function loadGameStats(period: StatsPeriod, now = new Date()): Prom
       binderViews: binderViews.map(({ value, count: total }) => ({ setId: value, count: total })),
       abandoned: await countOf('booster.abandoned'),
       sleeps: await countOf('player.slept'),
+    },
+    looks: {
+      bought: boughtItems
+        .map(({ itemId, slot, total, coins: paid }) => ({
+          itemId: String(itemId),
+          slot: String(slot),
+          count: Number(total),
+          coins: Number(paid),
+        }))
+        .sort((first, second) => second.count - first.count),
+      speciesChanges: speciesChanges.map(({ value, count: total }) => ({
+        species: value,
+        count: total,
+      })),
+      wornSpecies: wornSpecies
+        .map(({ value, players }) => ({ species: String(value), players }))
+        .sort(byPlayers),
+      worn: [
+        ...wornHats.map((row) => ({ slot: 'hat', itemId: row.value, players: row.players })),
+        ...wornScarves.map((row) => ({ slot: 'scarf', itemId: row.value, players: row.players })),
+        ...wornGear.map((row) => ({ slot: 'gear', itemId: row.value, players: row.players })),
+      ].sort(byPlayers),
     },
     series: { unit: buckets.unit, points },
     events: GAME_EVENT_TYPES.map((type) => {

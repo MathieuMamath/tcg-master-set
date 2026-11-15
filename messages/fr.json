@@ -856,7 +856,8 @@
       "quests": "Quêtes",
       "players": "Joueurs",
       "cards": "Cartes",
-      "log": "Journal"
+      "log": "Journal",
+      "looks": "Garde-robe"
     },
     "loading": "Mme Hulotte feuillette ses dossiers…",
     "error": "Les rapports n’ont pas pu être chargés.",
@@ -878,7 +879,8 @@
       "daily-bonus": "Récompense du jour",
       "duplicates": "Doublons",
       "boosters": "Boosters",
-      "binders": "Classeurs"
+      "binders": "Classeurs",
+      "items": "Objets"
     },
     "boosters": {
       "bought": "Achetés",
@@ -983,6 +985,22 @@
       "binderViews": "Classeurs consultés",
       "talks": "Discussions avec les personnages",
       "sleeps": "{count, plural, =0 {Aucune nuit de sommeil} one {# nuit de sommeil} other {# nuits de sommeil}} sur la période."
+    },
+    "looks": {
+      "bought": "Objets achetés",
+      "coins": "Pièces dépensées en objets",
+      "speciesChanges": "Changements d’animal",
+      "boughtByItem": "Objets achetés, par objet",
+      "chosenSpecies": "Animaux choisis au miroir",
+      "wornToday": "Portés aujourd’hui",
+      "wornHint": "Ce que portent tous les joueurs en ce moment, quelle que soit la période choisie. Ceux qui n’ont jamais rien changé comptent avec la tenue de départ.",
+      "wornSpecies": "Animaux",
+      "worn": {
+        "hat": "Chapeaux",
+        "scarf": "Écharpes",
+        "gear": "Équipements"
+      },
+      "none": "Sans chapeau"
     }
   },
   "Clock": {
