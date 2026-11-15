@@ -2,6 +2,8 @@
 
 import { useFormatter, useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { isItemId } from '@/game/avatar/items';
+import { isAvatarSpecies } from '@/game/avatar/species';
 import type { PlayableSet } from '@/game/cards/card-sets';
 import { STATS_PERIODS, type StatsPeriod } from '@/game/log/stats';
 import { DAILY_QUESTS } from '@/game/quests/activity';
@@ -11,7 +13,7 @@ import { moveThroughChoices } from '../menu-focus';
 import { CardDropPanel } from './stats-cards';
 import { TimeChart } from './stats-charts';
 
-const TABS = ['economy', 'boosters', 'quests', 'players', 'cards', 'log'] as const;
+const TABS = ['economy', 'boosters', 'quests', 'looks', 'players', 'cards', 'log'] as const;
 type Tab = (typeof TABS)[number];
 
 // The outcomes the statistics know how to name. Anything else shows as recorded.
@@ -126,6 +128,8 @@ export function StatsDialog({ sets, onClose }: Props) {
   const tQuest = useTranslations('Quest');
   const tShopkeeper = useTranslations('Shopkeeper');
   const tSpeakers = useTranslations('Speakers');
+  const tItems = useTranslations('Items');
+  const tMirror = useTranslations('Mirror');
   const tRoot = useTranslations();
   const format = useFormatter();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -165,10 +169,16 @@ export function StatsDialog({ sets, onClose }: Props) {
     source === 'daily-bonus' ||
     source === 'duplicates' ||
     source === 'boosters' ||
-    source === 'binders'
+    source === 'binders' ||
+    source === 'items'
       ? t(`sources.${source}`)
       : questName(source);
   const setName = (setId: string) => sets.find(({ id }) => id === setId)?.name ?? setId;
+  // An item or an animal by its name in the game, or as recorded when the game no longer has it.
+  const itemName = (itemId: string | null) =>
+    itemId === null ? t('looks.none') : isItemId(itemId) ? tItems(itemId) : itemId;
+  const speciesName = (species: string) =>
+    isAvatarSpecies(species) ? tMirror(`species.${species}`) : species;
   const outcomeName = (outcome: string) =>
     KNOWN_OUTCOMES.has(outcome) ? t(`outcomes.${outcome}` as 'outcomes.won') : outcome;
   const speakerName = (speaker: string) => {
@@ -546,6 +556,78 @@ export function StatsDialog({ sets, onClose }: Props) {
                         ))}
                       </ul>
                     )}
+                  </Section>
+                </>
+              )}
+              {!hasFailed && stats && tab === 'looks' && (
+                <>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <Tile
+                      label={t('looks.bought')}
+                      value={format.number(
+                        stats.looks.bought.reduce((total, { count }) => total + count, 0),
+                      )}
+                    />
+                    <Tile
+                      label={t('looks.coins')}
+                      value={format.number(
+                        stats.looks.bought.reduce((total, { coins }) => total + coins, 0),
+                      )}
+                      tone="loss"
+                    />
+                    <Tile
+                      label={t('looks.speciesChanges')}
+                      value={format.number(
+                        stats.looks.speciesChanges.reduce((total, { count }) => total + count, 0),
+                      )}
+                    />
+                  </div>
+                  <Section title={t('looks.boughtByItem')}>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.looks.bought.map(({ itemId, count }) => ({
+                        label: itemName(itemId),
+                        value: count,
+                      }))}
+                    />
+                  </Section>
+                  <Section title={t('looks.chosenSpecies')}>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.looks.speciesChanges.map(({ species, count }) => ({
+                        label: speciesName(species),
+                        value: count,
+                      }))}
+                    />
+                  </Section>
+                  <Section title={t('looks.wornToday')}>
+                    <p className="mb-2 text-sm text-[#9aa7ba]">{t('looks.wornHint')}</p>
+                    <h4 className="mb-1 text-sm font-semibold text-[#9aa7ba]">
+                      {t('looks.wornSpecies')}
+                    </h4>
+                    <Bars
+                      empty={t('empty')}
+                      rows={stats.looks.wornSpecies.map(({ species, players }) => ({
+                        label: speciesName(species),
+                        value: players,
+                      }))}
+                    />
+                    {(['hat', 'scarf', 'gear'] as const).map((slot) => (
+                      <div key={slot} className="mt-3">
+                        <h4 className="mb-1 text-sm font-semibold text-[#9aa7ba]">
+                          {t(`looks.worn.${slot}`)}
+                        </h4>
+                        <Bars
+                          empty={t('empty')}
+                          rows={stats.looks.worn
+                            .filter((row) => row.slot === slot)
+                            .map(({ itemId, players }) => ({
+                              label: itemName(itemId),
+                              value: players,
+                            }))}
+                        />
+                      </div>
+                    ))}
                   </Section>
                 </>
               )}

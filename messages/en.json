@@ -856,7 +856,8 @@
       "quests": "Quests",
       "players": "Players",
       "cards": "Cards",
-      "log": "Log"
+      "log": "Log",
+      "looks": "Wardrobe"
     },
     "loading": "Mme Hulotte is leafing through her folders…",
     "error": "The reports couldn’t be loaded.",
@@ -878,7 +879,8 @@
       "daily-bonus": "Daily reward",
       "duplicates": "Duplicates",
       "boosters": "Boosters",
-      "binders": "Binders"
+      "binders": "Binders",
+      "items": "Items"
     },
     "boosters": {
       "bought": "Bought",
@@ -983,6 +985,22 @@
       "binderViews": "Binders looked at",
       "talks": "Conversations with characters",
       "sleeps": "{count, plural, =0 {No night slept} one {# night slept} other {# nights slept}} in the period."
+    },
+    "looks": {
+      "bought": "Items bought",
+      "coins": "Coins spent on items",
+      "speciesChanges": "Animal changes",
+      "boughtByItem": "Items bought, by item",
+      "chosenSpecies": "Animals chosen at the mirror",
+      "wornToday": "Worn today",
+      "wornHint": "What every player wears right now, whatever the period chosen. Players who never changed anything count with the starter look.",
+      "wornSpecies": "Animals",
+      "worn": {
+        "hat": "Hats",
+        "scarf": "Scarves",
+        "gear": "Gear"
+      },
+      "none": "No hat"
     }
   },
   "Clock": {
