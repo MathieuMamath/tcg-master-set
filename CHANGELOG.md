@@ -4,6 +4,12 @@ Every release of TCG Master Set, derived automatically from [Conventional Commit
 
 While the version is below `1.0.0`, the bump is shifted down one level: a breaking change is a minor, a feature is a patch.
 
+## [0.2.5](https://github.com/MathieuMamath/tcg-master-set/compare/v0.2.4...v0.2.5) (2026-11-15)
+
+### Features
+
+* **accounts:** show what players wear and buy in the reports ([#129](https://github.com/MathieuMamath/tcg-master-set/issues/129)) ([00893ff](https://github.com/MathieuMamath/tcg-master-set/commit/00893ffbac30f0a1f480e9e73a61f70dd301496d))
+
 ## [0.2.4](https://github.com/MathieuMamath/tcg-master-set/compare/v0.2.3...v0.2.4) (2026-11-14)
 
 ### Features
